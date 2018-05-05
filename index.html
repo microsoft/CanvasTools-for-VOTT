@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="css/index.css" />
+        <link rel="stylesheet" href="css/selectiontool.css" />
+        <link rel="stylesheet" href="css/regiontool.css" />
+    </head>
+    <body>
+        <div id="selectionzone">
+            <svg id="selectionOverlay"></svg>
+        </div>
+    </body>
+    <script src="./js/systemjs/system.js"></script>
+    <script>
+        SystemJS.import("./js/regiontool.js").then(function(module){
+            /* var ct = module.CanvasTools;
+            var sz = document.getElementById("selectionOverlay");
+            var rm = new ct.Region.RegionsManager(sz); */
+        });
+
+        Promise.all([
+            SystemJS.import("./js/regiontool.js"),
+            SystemJS.import('./js/selectiontool.js')
+        ]).then(function(modules) {
+            var rt = modules[0].CanvasTools.Region;
+            var ct = modules[1].CanvasTools.Selection;
+
+            var sz = document.getElementById("selectionOverlay");
+            var selector, rm;
+            
+            selector = new ct.AreaSelector(sz, 
+                function(){
+                    //console.log("Rock the party!");
+                }, 
+                function(x1, y1, x2, y2){
+                    //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
+                    rm.addRegion({x:x1, y:y1}, {x:x2, y:y2});
+                }
+            );
+            rm = new rt.RegionsManager(sz, 
+                function() {
+                    selector.disable();
+                },
+                function() {
+                    selector.enable();
+                })
+            ;
+
+            window.areaSelector = selector;     
+            window.regionsManager = rm;         
+        });
+
+        /* SystemJS.import('./js/selectiontool.js').then(function(module) {
+            var ct = module.CanvasTools;
+
+            var sz = document.getElementById("selectionOverlay");
+            var selector = new ct.Selection.AreaSelector(sz, 
+                function(){
+                    console.log("Rock the party!");
+                }, 
+                function(x1, y1, x2, y2){
+                    console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
+                }
+            );
+
+            var rm = new ct.Region.RegionsManager(sz);
+
+            window.areaSelector = selector;            
+        }) */
+    </script>
+</html>
