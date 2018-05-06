@@ -7,7 +7,7 @@ export namespace CanvasTools.Selection {
     class CrossElement implements base.IPoint2D, base.IHideable, base.IResizable {
         private hl: Snap.Element;
         private vl: Snap.Element;
-        public cross: Snap.Element;
+        public crossGroup: Snap.Element;
         public x: number;
         public y: number;
 
@@ -19,10 +19,10 @@ export namespace CanvasTools.Selection {
             let verticalLine: Snap.Element = paper.line(0, 0, 0, height);
             let horizontalLine: Snap.Element = paper.line(0, 0, width, 0);
 
-            this.cross = paper.g();
-            this.cross.addClass("crossStyle");
-            this.cross.add(verticalLine);
-            this.cross.add(horizontalLine);
+            this.crossGroup = paper.g();
+            this.crossGroup.addClass("crossStyle");
+            this.crossGroup.add(verticalLine);
+            this.crossGroup.add(horizontalLine);
 
             this.hl = horizontalLine;
             this.vl = verticalLine;
@@ -88,7 +88,7 @@ export namespace CanvasTools.Selection {
         public hide() {
             let self = this;
             window.requestAnimationFrame(function(){
-                self.cross.attr({
+                self.crossGroup.attr({
                     visibility: 'hidden'
                 });
             }) 
@@ -97,7 +97,7 @@ export namespace CanvasTools.Selection {
         public show() {
             let self = this;
             window.requestAnimationFrame(function(){
-                self.cross.attr({
+                self.crossGroup.attr({
                     visibility: 'visible'
                 });
             }) 
@@ -217,8 +217,8 @@ export namespace CanvasTools.Selection {
             this.crossB = this.createCross();
 
             this.areaSelectorLayer.add(this.overlay.rect);
-            this.areaSelectorLayer.add(this.crossA.cross);
-            this.areaSelectorLayer.add(this.crossB.cross);
+            this.areaSelectorLayer.add(this.crossA.crossGroup);
+            this.areaSelectorLayer.add(this.crossB.crossGroup);
         }
 
         private createOverlay(): RectElement {

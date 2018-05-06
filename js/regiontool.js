@@ -7,20 +7,37 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
         var Region;
         (function (Region) {
             class AncorsRect {
-                constructor(host, paper, x, y, width, height, onResize, boundRect = null) {
+                get width() {
+                    return this.rect.width;
+                }
+                set width(width) {
+                    this.resize(width, this.rect.height);
+                }
+                get height() {
+                    return this.rect.height;
+                }
+                ;
+                set height(height) {
+                    this.resize(this.rect.width, height);
+                }
+                constructor(paper, x, y, rect, boundRect = null, onResize, onManipulationBegin, onManipulationEnd) {
                     this.x = x;
                     this.y = y;
-                    this.width = width;
-                    this.height = height;
+                    this.rect = rect;
                     this.onResizeCallback = onResize;
-                    this.host = host;
                     this.boundRect = boundRect;
+                    if (onManipulationBegin !== undefined) {
+                        this.onManipulationBegin = onManipulationBegin;
+                    }
+                    if (onManipulationEnd !== undefined) {
+                        this.onManipulationEnd = onManipulationEnd;
+                    }
                     this.build(paper);
                     this.subscribeToEvents();
                 }
                 build(paper) {
-                    this.rect = paper.g();
-                    this.rect.addClass("ancorsLayer");
+                    this.ancorsGroup = paper.g();
+                    this.ancorsGroup.addClass("ancorsLayer");
                     this.ancors = {
                         TL: this.createAncor(paper),
                         TR: this.createAncor(paper),
@@ -30,11 +47,11 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.ghostAncor = this.createAncor(paper, 7);
                     this.ghostAncor.addClass("ghost");
                     this.rearrangeAncors();
-                    this.rect.add(this.ancors.TL);
-                    this.rect.add(this.ancors.TR);
-                    this.rect.add(this.ancors.BR);
-                    this.rect.add(this.ancors.BL);
-                    this.rect.add(this.ghostAncor);
+                    this.ancorsGroup.add(this.ancors.TL);
+                    this.ancorsGroup.add(this.ancors.TR);
+                    this.ancorsGroup.add(this.ancors.BR);
+                    this.ancorsGroup.add(this.ancors.BL);
+                    this.ancorsGroup.add(this.ghostAncor);
                 }
                 createAncor(paper, r = 3) {
                     let a = paper.circle(0, 0, r);
@@ -47,8 +64,8 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.rearrangeAncors();
                 }
                 resize(width, height) {
-                    this.width = width;
-                    this.height = height;
+                    this.rect.width = width;
+                    this.rect.height = height;
                     this.rearrangeAncors();
                 }
                 rearrangeAncors() {
@@ -106,28 +123,39 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 }
                 ancorDragMove(dx, dy, x, y) {
                     let p1, p2;
+                    let x1, y1, x2, y2;
                     switch (this.activeAncor) {
                         case "TL": {
-                            p1 = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
-                            p2 = new base.Point2D(this.x + this.width, this.y + this.height);
+                            x1 = this.dragOrigin.x + dx;
+                            y1 = this.dragOrigin.y + dy;
+                            x2 = this.x + this.width;
+                            y2 = this.y + this.height;
                             break;
                         }
                         case "TR": {
-                            p1 = new base.Point2D(this.x, this.dragOrigin.y + dy);
-                            p2 = new base.Point2D(this.dragOrigin.x + dx, this.y + this.height);
+                            x1 = this.x;
+                            y1 = this.dragOrigin.y + dy;
+                            x2 = this.dragOrigin.x + dx;
+                            y2 = this.y + this.height;
                             break;
                         }
                         case "BL": {
-                            p1 = new base.Point2D(this.dragOrigin.x + dx, this.y);
-                            p2 = new base.Point2D(this.x + this.width, this.dragOrigin.y + dy);
+                            x1 = this.dragOrigin.x + dx;
+                            y1 = this.y;
+                            x2 = this.x + this.width;
+                            y2 = this.dragOrigin.y + dy;
                             break;
                         }
                         case "BR": {
-                            p1 = new base.Point2D(this.x, this.y);
-                            p2 = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
+                            x1 = this.x;
+                            y1 = this.y;
+                            x2 = this.dragOrigin.x + dx;
+                            y2 = this.dragOrigin.y + dy;
                             break;
                         }
                     }
+                    p1 = new base.Point2D(x1, y1);
+                    p2 = new base.Point2D(x2, y2);
                     if (this.boundRect !== null) {
                         p1 = p1.boundToRect(this.boundRect);
                         p2 = p2.boundToRect(this.boundRect);
@@ -152,7 +180,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.subscribeAncorToEvents(this.ancors.BR, "BR");
                     self.ghostAncor.mouseover(function (e) {
                         self.ghostAncor.drag(self.ancorDragMove.bind(self), self.ancorDragBegin.bind(self), self.ancorDragEnd.bind(self));
-                        self.host.onDragBegin();
+                        self.onManipulationBegin();
                     });
                     self.ghostAncor.mouseout(function (e) {
                         self.ghostAncor.undrag();
@@ -161,7 +189,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                                 display: "none"
                             });
                         });
-                        self.host.onDragEnd();
+                        self.onManipulationEnd();
                     });
                     self.ghostAncor.node.addEventListener("pointerdown", function (e) {
                         self.ghostAncor.node.setPointerCapture(e.pointerId);
@@ -187,30 +215,47 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 }
             }
             class RegionElement {
-                constructor(host, paper, r, boundRect = null) {
+                constructor(paper, rect, boundRect = null, onManipulationBegin, onManipulationEnd) {
                     this.isSelected = false;
-                    this.host = host;
                     this.x = 0;
                     this.y = 0;
-                    this.width = r.width;
-                    this.height = r.height;
+                    this.rect = rect;
                     if (boundRect !== null) {
                         this.boundRects = {
                             host: boundRect,
-                            self: new base.Rect(boundRect.width - r.width, boundRect.height - r.height)
+                            self: new base.Rect(boundRect.width - rect.width, boundRect.height - rect.height)
                         };
                     }
-                    this.build(host, paper, r.width, r.height);
+                    if (onManipulationBegin !== undefined) {
+                        this.onManipulationBegin = onManipulationBegin;
+                    }
+                    if (onManipulationEnd !== undefined) {
+                        this.onManipulationEnd = onManipulationEnd;
+                    }
+                    this.buildOn(paper);
                     this.subscribeToEvents();
                 }
-                build(host, paper, width, height) {
-                    this.rect = paper.g();
-                    this.rect.addClass("regionStyle");
-                    this.regionRect = paper.rect(0, 0, width, height);
-                    this.rect.add(this.regionRect);
-                    this.ancors = new AncorsRect(host, paper, this.x, this.y, this.width, this.height, this.onInternalResize.bind(this), this.boundRects.host);
-                    this.rect.add(this.ancors.rect);
+                get width() {
+                    return this.rect.width;
+                }
+                set width(width) {
+                    this.resize(width, this.rect.height);
+                }
+                get height() {
+                    return this.rect.height;
+                }
+                ;
+                set height(height) {
+                    this.resize(this.rect.width, height);
+                }
+                buildOn(paper) {
+                    this.regionGroup = paper.g();
+                    this.regionGroup.addClass("regionStyle");
+                    this.regionRect = paper.rect(0, 0, this.width, this.height);
                     this.regionRect.addClass("regionRectStyle");
+                    this.ancors = new AncorsRect(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalResize.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+                    this.regionGroup.add(this.regionRect);
+                    this.regionGroup.add(this.ancors.ancorsGroup);
                 }
                 onInternalResize(x, y, width, height) {
                     this.move(new base.Point2D(x, y));
@@ -229,8 +274,8 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     });
                 }
                 resize(width, height) {
-                    this.width = width;
-                    this.height = height;
+                    this.rect.width = width;
+                    this.rect.height = height;
                     this.boundRects.self.width = this.boundRects.host.width - width;
                     this.boundRects.self.height = this.boundRects.host.height - height;
                     let self = this;
@@ -245,7 +290,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 hide() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.regionRect.attr({
+                        self.regionGroup.attr({
                             visibility: 'hidden'
                         });
                     });
@@ -253,18 +298,18 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 show() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.regionRect.attr({
+                        self.regionGroup.attr({
                             visibility: 'visible'
                         });
                     });
                 }
                 select() {
                     this.isSelected = true;
-                    this.rect.addClass("selected");
+                    this.regionGroup.addClass("selected");
                 }
                 unselect() {
                     this.isSelected = false;
-                    this.rect.removeClass("selected");
+                    this.regionGroup.removeClass("selected");
                 }
                 rectDragBegin() {
                     this.dragOrigin = new base.Point2D(this.x, this.y);
@@ -293,11 +338,11 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     }, this);
                     self.regionRect.mouseover(function (e) {
                         self.regionRect.drag(self.rectDragMove.bind(self), self.rectDragBegin.bind(self), self.rectDragEnd.bind(self));
-                        self.host.onDragBegin();
+                        self.onManipulationBegin();
                     });
                     self.regionRect.mouseout(function (e) {
                         self.regionRect.undrag();
-                        self.host.onDragEnd();
+                        self.onManipulationEnd();
                     });
                     self.regionRect.node.addEventListener("pointerdown", function (e) {
                         self.regionRect.node.setPointerCapture(e.pointerId);
@@ -314,23 +359,17 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
                     this.regionManagerLayer = this.paper.g();
                     this.regionManagerLayer.addClass("regionManager");
-                    this.onManipulationBeginCallback = onManipulationBegin;
-                    this.onManipulationEndCallback = onManipulationEnd;
+                    this.onManipulationBegin = onManipulationBegin;
+                    this.onManipulationEnd = onManipulationEnd;
                 }
                 addRegion(pointA, pointB) {
                     let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
                     let y = (pointA.y < pointB.y) ? pointA.y : pointB.y;
                     let w = Math.abs(pointA.x - pointB.x);
                     let h = Math.abs(pointA.y - pointB.y);
-                    let region = new RegionElement(this, this.paper, new base.Rect(w, h), this.paperRect);
+                    let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, this.onManipulationBegin, this.onManipulationEnd);
                     region.move(new base.Point2D(x, y));
-                    this.regionManagerLayer.add(region.rect);
-                }
-                onDragBegin() {
-                    this.onManipulationBeginCallback();
-                }
-                onDragEnd() {
-                    this.onManipulationEndCallback();
+                    this.regionManagerLayer.add(region.regionGroup);
                 }
             }
             Region.RegionsManager = RegionsManager;
