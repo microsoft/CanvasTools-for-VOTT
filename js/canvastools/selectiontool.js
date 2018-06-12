@@ -1,4 +1,4 @@
-define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
+define(["require", "exports", "./basetool.js", "./../snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
@@ -13,10 +13,10 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 build(paper, width, height, x, y) {
                     let verticalLine = paper.line(0, 0, 0, height);
                     let horizontalLine = paper.line(0, 0, width, 0);
-                    this.cross = paper.g();
-                    this.cross.addClass("crossStyle");
-                    this.cross.add(verticalLine);
-                    this.cross.add(horizontalLine);
+                    this.crossGroup = paper.g();
+                    this.crossGroup.addClass("crossStyle");
+                    this.crossGroup.add(verticalLine);
+                    this.crossGroup.add(horizontalLine);
                     this.hl = horizontalLine;
                     this.vl = verticalLine;
                     this.x = x;
@@ -66,7 +66,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 hide() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.cross.attr({
+                        self.crossGroup.attr({
                             visibility: 'hidden'
                         });
                     });
@@ -74,7 +74,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 show() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.cross.attr({
+                        self.crossGroup.attr({
                             visibility: 'visible'
                         });
                     });
@@ -155,8 +155,8 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.crossA = this.createCross();
                     this.crossB = this.createCross();
                     this.areaSelectorLayer.add(this.overlay.rect);
-                    this.areaSelectorLayer.add(this.crossA.cross);
-                    this.areaSelectorLayer.add(this.crossB.cross);
+                    this.areaSelectorLayer.add(this.crossA.crossGroup);
+                    this.areaSelectorLayer.add(this.crossB.crossGroup);
                 }
                 createOverlay() {
                     let r = new RectElement(this.paper, this.paperRect);

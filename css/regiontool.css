@@ -1,24 +1,63 @@
+/*
+.regionStyle
+--> .tagsLayer
+    --> .primaryTagRectStyle
+        .primaryTagTextBGStyle
+        .primaryTagTextStyle    
+        //.tagStyle [n]
+--> .dragLayer
+    --> .dragRectStyle
+--> .regionRectStyle
+--> .ancorsLayer
+    --> .ancorStyle [4]
+        .ancorStyle.ghost
+
+*/
+
 .regionRectStyle {
-    fill: rgba(25, 119, 96, 0.1);
-    stroke-width: 2;
-    stroke:rgba(24, 218, 170, 0.5);
-    stroke-dasharray: 2 3;
+    fill: transparent; 
+    stroke-width: 0;
+    pointer-events: all;
 }
 
-.regionRectStyle:hover {
-    fill: rgba(100, 165, 154, 0.2);
-    stroke: rgb(24, 218, 169);
+.dragRectStyle {
+    fill: transparent; 
+    stroke-width: 0;
+    pointer-events: all;
 }
 
-.regionStyle.selected > .regionRectStyle {
-    fill: rgba(100, 165, 154, 0.4);
+.primaryTagRectStyle {
+    fill: rgba(68, 68, 68, 0.3);
     stroke-width: 2;
+    stroke:rgba(92, 92, 92, 0.5);
+    stroke-dasharray: 2 6;
+    stroke-linecap: round;
+}
+
+.regionStyle:hover .primaryTagRectStyle {
+    fill: rgba(138, 138, 138, 0.3);
+    stroke: rgb(92, 92, 92);
+}
+
+.regionStyle.selected .primaryTagRectStyle {
+    fill: rgba(138, 138, 138, 0.5);
+    stroke: rgb(92, 92, 92);
     stroke-dasharray: none;
-    stroke: rgb(7, 189, 143);
+}
+
+.primaryTagTextStyle {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 9pt;
+    fill: #fff;
+}
+
+.primaryTagTextBGStyle {
+    stroke-width: 0;
+    fill: rgba(0, 0, 0, 0.5);
 }
 
 .ancorStyle {
-    stroke-width: 1;
+    stroke-width: 2;
     stroke: #ccc;
     fill: #333;
 }
@@ -29,12 +68,16 @@
 }
 
 .ancorStyle.ghost:hover {
-    fill:rgba(7, 189, 143, 0.5);
+    fill: rgba(255,255,255,0.5);
 }
 
 .ancorStyle:hover {
     stroke: rgb(25, 119, 96);
     fill:rgb(7, 189, 143);
+}
+
+.regionStyle:hover .ancorStyle {
+    stroke: #fff;
 }
 
 .regionStyle.selected .ancorStyle {

@@ -1,4 +1,4 @@
-define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
+define(["require", "exports", "./basetool.js", "./../snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
@@ -6,7 +6,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
     (function (CanvasTools) {
         var Region;
         (function (Region) {
-            class AncorsRect {
+            class AncorsElement {
                 get width() {
                     return this.rect.width;
                 }
@@ -20,11 +20,11 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                 set height(height) {
                     this.resize(this.rect.width, height);
                 }
-                constructor(paper, x, y, rect, boundRect = null, onResize, onManipulationBegin, onManipulationEnd) {
+                constructor(paper, x, y, rect, boundRect = null, onChange, onManipulationBegin, onManipulationEnd) {
                     this.x = x;
                     this.y = y;
                     this.rect = rect;
-                    this.onResizeCallback = onResize;
+                    this.onChange = onChange;
                     this.boundRect = boundRect;
                     if (onManipulationBegin !== undefined) {
                         this.onManipulationBegin = onManipulationBegin;
@@ -32,10 +32,10 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     if (onManipulationEnd !== undefined) {
                         this.onManipulationEnd = onManipulationEnd;
                     }
-                    this.build(paper);
+                    this.buildOn(paper);
                     this.subscribeToEvents();
                 }
-                build(paper) {
+                buildOn(paper) {
                     this.ancorsGroup = paper.g();
                     this.ancorsGroup.addClass("ancorsLayer");
                     this.ancors = {
@@ -83,7 +83,7 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     let width = Math.abs(p1.x - p2.x);
                     let height = Math.abs(p1.y - p2.y);
                     this.flipActiveAncor(p1.x - p2.x > 0, p1.y - p2.y > 0);
-                    this.onResizeCallback(x, y, width, height);
+                    this.onChange(x, y, width, height);
                 }
                 flipActiveAncor(w, h) {
                     let ac = "";
@@ -213,6 +213,59 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                         });
                     });
                 }
+                hide() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.ancorsGroup.attr({
+                            visibility: 'hidden'
+                        });
+                    });
+                }
+                show() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.ancorsGroup.attr({
+                            visibility: 'visible'
+                        });
+                    });
+                }
+            }
+            class TagsElement {
+                get width() {
+                    return this.rect.width;
+                }
+                set width(width) {
+                    this.resize(width, this.rect.height);
+                }
+                get height() {
+                    return this.rect.height;
+                }
+                ;
+                set height(height) {
+                    this.resize(this.rect.width, height);
+                }
+                constructor() {
+                }
+                resize(width, height) {
+                    this.rect.width = width;
+                    this.rect.height = height;
+                }
+                hide() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.tagsGroup.attr({
+                            visibility: 'hidden'
+                        });
+                    });
+                }
+                show() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.tagsGroup.attr({
+                            visibility: 'visible'
+                        });
+                    });
+                }
             }
             class RegionElement {
                 constructor(paper, rect, boundRect = null, onManipulationBegin, onManipulationEnd) {
@@ -253,11 +306,11 @@ define(["require", "exports", "./basetool.js", "./snapsvg/snap.svg.js"], functio
                     this.regionGroup.addClass("regionStyle");
                     this.regionRect = paper.rect(0, 0, this.width, this.height);
                     this.regionRect.addClass("regionRectStyle");
-                    this.ancors = new AncorsRect(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalResize.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+                    this.ancors = new AncorsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
                     this.regionGroup.add(this.regionRect);
                     this.regionGroup.add(this.ancors.ancorsGroup);
                 }
-                onInternalResize(x, y, width, height) {
+                onInternalChange(x, y, width, height) {
                     this.move(new base.Point2D(x, y));
                     this.resize(width, height);
                 }

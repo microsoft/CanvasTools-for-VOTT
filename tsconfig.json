@@ -5,9 +5,10 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "outFile": "js/canvastools/canvastools.js"
     },
     "include": [     
-        "js/*.ts"
+        "js/canvastools/*.ts"
     ]
 }
