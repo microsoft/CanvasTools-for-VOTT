@@ -482,11 +482,11 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 }
                 subscribeToEvents() {
                     let self = this;
-                    self.dragRect.node.addEventListener("pointerover", function (e) {
+                    self.dragRect.mouseover(function (e) {
                         self.dragRect.drag(self.rectDragMove.bind(self), self.rectDragBegin.bind(self), self.rectDragEnd.bind(self));
                         self.onManipulationBegin();
                     });
-                    self.dragRect.node.addEventListener("pointerout", function (e) {
+                    self.dragRect.mouseout(function (e) {
                         self.dragRect.undrag();
                         self.onManipulationEnd();
                     });
@@ -495,6 +495,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     });
                     self.dragRect.node.addEventListener("pointerup", function (e) {
                         self.dragRect.node.releasePointerCapture(e.pointerId);
+                    });
+                    self.dragRect.click(function (e) {
+                        self.onChange(self.x, self.y, self.rect.width, self.rect.height, true);
                     });
                 }
             }
@@ -533,8 +536,8 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
                     this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleId, this.styleSheet);
                     this.regionGroup.add(this.tags.tagsGroup);
-                    this.regionGroup.add(this.drag.dragGroup);
                     this.regionGroup.add(this.regionRect);
+                    this.regionGroup.add(this.drag.dragGroup);
                     this.regionGroup.add(this.anchors.ancorsGroup);
                 }
                 s8() {
@@ -555,9 +558,17 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         }
                     }
                 }
-                onInternalChange(x, y, width, height) {
+                onInternalChange(x, y, width, height, clicked = false) {
                     this.move(new base.Point2D(x, y));
                     this.resize(width, height);
+                    if (clicked) {
+                        if (this.isSelected) {
+                            this.unselect();
+                        }
+                        else {
+                            this.select();
+                        }
+                    }
                 }
                 move(p) {
                     let self = this;
@@ -615,20 +626,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 }
                 subscribeToEvents() {
                     let self = this;
-                    self.regionRect.mouseover(function (e) {
-                        self.onManipulationBegin();
-                    });
-                    self.regionRect.mouseout(function (e) {
-                        self.onManipulationEnd();
-                    });
-                    self.regionRect.node.addEventListener("click", function (e) {
-                        if (self.isSelected) {
-                            self.unselect();
-                        }
-                        else {
-                            self.select();
-                        }
-                    }, true);
+                    function transferEvent(target, type, event) {
+                        var e = new PointerEvent(type, event);
+                        target.dispatchEvent(e);
+                    }
                 }
             }
             class RegionsManager {

@@ -589,12 +589,12 @@ export namespace CanvasTools.Region {
         private subscribeToEvents() {
             let self = this;
 
-            self.dragRect.node.addEventListener("pointerover", function(e){
+            self.dragRect.mouseover(function(e){
                 self.dragRect.drag(self.rectDragMove.bind(self), self.rectDragBegin.bind(self), self.rectDragEnd.bind(self));
                 self.onManipulationBegin();
             })
 
-            self.dragRect.node.addEventListener("pointerout", function(e){
+            self.dragRect.mouseout(function(e){
                 self.dragRect.undrag();
                 self.onManipulationEnd();
             });
@@ -605,6 +605,10 @@ export namespace CanvasTools.Region {
 
             self.dragRect.node.addEventListener("pointerup", function(e){
                 self.dragRect.node.releasePointerCapture(e.pointerId);
+            });
+
+            self.dragRect.click(function(e){
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, true);
             });
         }
     }
@@ -665,7 +669,6 @@ export namespace CanvasTools.Region {
             this.styleSheet = this.insertStyleSheet();
 
             this.buildOn(paper);
-            this.subscribeToEvents();
         }
 
         private buildOn(paper: Snap.Paper){
@@ -681,8 +684,8 @@ export namespace CanvasTools.Region {
             this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleId, this.styleSheet);
 
             this.regionGroup.add(this.tags.tagsGroup);
-            this.regionGroup.add(this.drag.dragGroup); 
-            this.regionGroup.add(this.regionRect);            
+            this.regionGroup.add(this.regionRect);  
+            this.regionGroup.add(this.drag.dragGroup);                      
             this.regionGroup.add(this.anchors.ancorsGroup);            
         }
 
@@ -710,9 +713,17 @@ export namespace CanvasTools.Region {
             }
         }
 
-        private onInternalChange(x: number, y:number, width: number, height:number) {
+        private onInternalChange(x: number, y:number, width: number, height:number, clicked: boolean = false) {
             this.move(new base.Point2D(x, y));
             this.resize(width, height);
+
+            if (clicked) {
+                if (this.isSelected) {
+                    this.unselect();                    
+                } else {
+                    this.select();                    
+                }
+            }
         }
 
         public move(p: base.IPoint2D) {           
@@ -777,27 +788,6 @@ export namespace CanvasTools.Region {
         public unselect() {
             this.isSelected = false;
             this.regionGroup.removeClass("selected");
-        }
-
-        private subscribeToEvents() {
-            let self = this;
-
-            self.regionRect.mouseover(function(e){
-                self.onManipulationBegin();
-            })
-
-            self.regionRect.mouseout(function(e){
-                self.onManipulationEnd();
-            });
-
-            self.regionRect.node.addEventListener("click", function(e){
-                if (self.isSelected) {
-                    self.unselect();                    
-                } else {
-                    self.select();                    
-                }
-                
-            }, true);            
         }
     }
 
