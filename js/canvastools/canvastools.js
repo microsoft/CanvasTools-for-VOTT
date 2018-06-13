@@ -524,21 +524,18 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.styleId = `region_${this.s8()}_style`;
                     this.styleSheet = this.insertStyleSheet();
                     this.buildOn(paper);
-                    this.subscribeToEvents();
                 }
                 buildOn(paper) {
                     this.regionGroup = paper.g();
                     this.regionGroup.addClass("regionStyle");
                     this.regionGroup.addClass(this.styleId);
-                    this.regionRect = paper.rect(0, 0, this.rect.width, this.rect.height);
-                    this.regionRect.addClass("regionRectStyle");
                     this.anchors = new AnchorsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
                     this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
                     this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleId, this.styleSheet);
                     this.regionGroup.add(this.tags.tagsGroup);
-                    this.regionGroup.add(this.regionRect);
                     this.regionGroup.add(this.drag.dragGroup);
                     this.regionGroup.add(this.anchors.ancorsGroup);
+                    this.UI = new Array(this.tags, this.drag, this.anchors);
                 }
                 s8() {
                     return Math.floor((1 + Math.random()) * 0x100000000)
@@ -575,13 +572,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.x = p.x;
                     this.y = p.y;
                     window.requestAnimationFrame(function () {
-                        self.regionRect.attr({
-                            x: p.x,
-                            y: p.y
+                        self.UI.forEach((element) => {
+                            element.move(p);
                         });
-                        self.drag.move(p);
-                        self.anchors.move(p);
-                        self.tags.move(p);
                     });
                 }
                 resize(width, height) {
@@ -591,13 +584,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.boundRects.self.height = this.boundRects.host.height - height;
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.regionRect.attr({
-                            width: width,
-                            height: height
+                        self.UI.forEach((element) => {
+                            element.resize(width, height);
                         });
-                        self.drag.resize(width, height);
-                        self.anchors.resize(width, height);
-                        self.tags.resize(width, height);
                     });
                 }
                 hide() {
@@ -623,13 +612,6 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 unselect() {
                     this.isSelected = false;
                     this.regionGroup.removeClass("selected");
-                }
-                subscribeToEvents() {
-                    let self = this;
-                    function transferEvent(target, type, event) {
-                        var e = new PointerEvent(type, event);
-                        target.dispatchEvent(e);
-                    }
                 }
             }
             class RegionsManager {

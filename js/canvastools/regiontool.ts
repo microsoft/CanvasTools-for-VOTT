@@ -626,10 +626,10 @@ export namespace CanvasTools.Region {
 
         // Region components
         public regionGroup: Snap.Element;
-        private regionRect: Snap.Element;
         private drag: DragElement;
         private anchors: AnchorsElement;
         private tags: TagsElement;
+        private UI: Array<base.IRegionPart>;
 
         // Region data
         private tagsDescriptor: base.TagsDescriptor;
@@ -667,7 +667,7 @@ export namespace CanvasTools.Region {
 
             this.styleId = `region_${ this.s8()}_style`;
             this.styleSheet = this.insertStyleSheet();
-
+        
             this.buildOn(paper);
         }
 
@@ -676,17 +676,15 @@ export namespace CanvasTools.Region {
             this.regionGroup.addClass("regionStyle");
             this.regionGroup.addClass(this.styleId);
 
-            this.regionRect = paper.rect(0, 0, this.rect.width, this.rect.height);
-            this.regionRect.addClass("regionRectStyle");
-            
             this.anchors = new AnchorsElement(paper, this.x, this.y, this.rect,this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
             this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
             this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleId, this.styleSheet);
 
             this.regionGroup.add(this.tags.tagsGroup);
-            this.regionGroup.add(this.regionRect);  
             this.regionGroup.add(this.drag.dragGroup);                      
-            this.regionGroup.add(this.anchors.ancorsGroup);            
+            this.regionGroup.add(this.anchors.ancorsGroup);        
+            
+            this.UI = new Array<base.IRegionPart>(this.tags, this.drag, this.anchors);
         }
 
         // Helper function to generate random id;
@@ -731,13 +729,9 @@ export namespace CanvasTools.Region {
             this.x = p.x;
             this.y = p.y;
             window.requestAnimationFrame(function(){
-                self.regionRect.attr({
-                    x: p.x,
-                    y: p.y
+                self.UI.forEach((element) => {
+                    element.move(p);
                 });
-                self.drag.move(p);
-                self.anchors.move(p);
-                self.tags.move(p);
             })  
         }
 
@@ -750,13 +744,9 @@ export namespace CanvasTools.Region {
 
             let self = this;
             window.requestAnimationFrame(function(){
-                self.regionRect.attr({
-                    width: width,
-                    height: height
+                self.UI.forEach((element) => {
+                    element.resize(width, height);
                 });
-                self.drag.resize(width, height);
-                self.anchors.resize(width, height);
-                self.tags.resize(width, height);
             }) 
         }
 

@@ -7,19 +7,11 @@
         //.tagStyle [n]
 --> .dragLayer
     --> .dragRectStyle
---> .regionRectStyle
 --> .ancorsLayer
     --> .ancorStyle [4]
         .ancorStyle.ghost
 
 */
-
-.regionRectStyle {
-    fill: transparent; 
-    stroke-width: 0;
-    pointer-events: all;
-}
-
 .dragRectStyle {
     fill: transparent; 
     stroke-width: 0;
