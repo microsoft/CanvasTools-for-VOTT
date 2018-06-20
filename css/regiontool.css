@@ -48,22 +48,22 @@
     fill: rgba(0, 0, 0, 0.5);
 }
 
-.ancorStyle {
+.anchorStyle {
     stroke-width: 2;
     stroke: #ccc;
     fill: #333;
 }
 
-.ancorStyle.ghost, .ancorStyle.ghost:hover{
+.anchorStyle.ghost, .anchorStyle.ghost:hover{
     stroke-width: 0;
     fill: rgba(255, 0, 0, 0);
 }
 
-.ancorStyle.ghost:hover {
+.anchorStyle.ghost:hover {
     fill: rgba(255,255,255,0.5);
 }
 
-.ancorStyle:hover {
+.anchorStyle:hover {
     stroke: rgb(25, 119, 96);
     fill:rgb(7, 189, 143);
 }

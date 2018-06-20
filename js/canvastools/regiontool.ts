@@ -29,9 +29,9 @@ export namespace CanvasTools.Region {
         private boundRect: base.IRect;
 
         // Ancors composition
-        public ancorsGroup:Snap.Element;
-        private ancors: {TL: Snap.Element, TR: Snap.Element, BR:Snap.Element, BL: Snap.Element};
-        private ghostAncor: Snap.Element;
+        public anchorsGroup:Snap.Element;
+        private anchors: {TL: Snap.Element, TR: Snap.Element, BR:Snap.Element, BL: Snap.Element};
+        private ghostAnchor: Snap.Element;
 
         // Change Notifier
         private onChange: Function;
@@ -62,51 +62,51 @@ export namespace CanvasTools.Region {
         }
 
         private buildOn(paper:Snap.Paper){
-            this.ancorsGroup = paper.g();
-            this.ancorsGroup.addClass("ancorsLayer");
-            this.ancors = {
-                TL: this.createAncor(paper),
-                TR: this.createAncor(paper),
-                BL: this.createAncor(paper),
-                BR: this.createAncor(paper)
+            this.anchorsGroup = paper.g();
+            this.anchorsGroup.addClass("ancorsLayer");
+            this.anchors = {
+                TL: this.createAnchor(paper),
+                TR: this.createAnchor(paper),
+                BL: this.createAnchor(paper),
+                BR: this.createAnchor(paper)
             };
-            this.ghostAncor = this.createAncor(paper, 7);
-            this.ghostAncor.addClass("ghost");
+            this.ghostAnchor = this.createAnchor(paper, 7);
+            this.ghostAnchor.addClass("ghost");
 
-            this.rearrangeAncors();   
+            this.rearrangeAnchors();   
             
-            this.ancorsGroup.add(this.ancors.TL);
-            this.ancorsGroup.add(this.ancors.TR);
-            this.ancorsGroup.add(this.ancors.BR);
-            this.ancorsGroup.add(this.ancors.BL);
-            this.ancorsGroup.add(this.ghostAncor);
+            this.anchorsGroup.add(this.anchors.TL);
+            this.anchorsGroup.add(this.anchors.TR);
+            this.anchorsGroup.add(this.anchors.BR);
+            this.anchorsGroup.add(this.anchors.BL);
+            this.anchorsGroup.add(this.ghostAnchor);
         }
 
-        private createAncor(paper: Snap.Paper, r:number = 3): Snap.Element {
+        private createAnchor(paper: Snap.Paper, r:number = 3): Snap.Element {
             let a = paper.circle(0, 0, r);
-            a.addClass("ancorStyle");
+            a.addClass("anchorStyle");
             return a;
         }
 
         public move(p: base.IPoint2D) {
             this.x = p.x;
             this.y = p.y;
-            this.rearrangeAncors();
+            this.rearrangeAnchors();
         }
 
         public resize(width: number, height: number) {
             this.rect.width = width;
             this.rect.height = height;
-            this.rearrangeAncors();
+            this.rearrangeAnchors();
         }
 
-        private rearrangeAncors() {
+        private rearrangeAnchors() {
             let self = this;
             window.requestAnimationFrame(function(){
-                self.ancors.TL.attr({ cx: self.x, cy: self.y });
-                self.ancors.TR.attr({ cx: self.x + self.rect.width, cy: self.y});
-                self.ancors.BR.attr({ cx: self.x + self.rect.width, cy: self.y + self.rect.height});
-                self.ancors.BL.attr({ cx: self.x, cy: self.y + self.rect.height});
+                self.anchors.TL.attr({ cx: self.x, cy: self.y });
+                self.anchors.TR.attr({ cx: self.x + self.rect.width, cy: self.y});
+                self.anchors.BR.attr({ cx: self.x + self.rect.width, cy: self.y + self.rect.height});
+                self.anchors.BL.attr({ cx: self.x, cy: self.y + self.rect.height});
             });
         }
 
@@ -115,31 +115,32 @@ export namespace CanvasTools.Region {
             let y = (p1.y < p2.y) ? p1.y : p2.y;
             let width = Math.abs(p1.x - p2.x);
             let height = Math.abs(p1.y - p2.y);
-            this.flipActiveAncor(p1.x - p2.x > 0, p1.y - p2.y > 0);
+            this.flipActiveAnchor(p1.x - p2.x > 0, p1.y - p2.y > 0);
             
             this.onChange(x, y, width, height);
         }
 
-        private flipActiveAncor(w:boolean, h:boolean) {
+        private activeAnchor: string;
+        private flipActiveAnchor(w:boolean, h:boolean) {
             let ac:string = "";
-            if (this.activeAncor !== "") {
-                ac += (this.activeAncor[0] == "T") ? (h? "B": "T") : (h? "T" : "B");
-                ac += (this.activeAncor[1] == "L") ? (w? "R": "L") : (w? "L" : "R");
+            if (this.activeAnchor !== "") {
+                ac += (this.activeAnchor[0] == "T") ? (h? "B": "T") : (h? "T" : "B");
+                ac += (this.activeAnchor[1] == "L") ? (w? "R": "L") : (w? "L" : "R");
             }
-            this.activeAncor = ac;
+            this.activeAnchor = ac;
         }
         
         private dragOrigin: base.Point2D;
-        private activeAncor: string;
+        
 
-        private ancorDragBegin() {
+        private anchorDragBegin() {
             
         }
 
         private getDragOriginPoint() {
             let x: number, y: number;
             
-            switch (this.activeAncor) {
+            switch (this.activeAnchor) {
                 case "TL": {
                     x = this.x;
                     y = this.y;
@@ -164,12 +165,12 @@ export namespace CanvasTools.Region {
             return new base.Point2D(x, y);
         }
         
-        private ancorDragMove(dx:number, dy:number, x: number, y: number) {
+        private anchorDragMove(dx:number, dy:number, x: number, y: number) {
             // Calculation depends on active ancor!!
             let p1, p2;
             let x1, y1, x2, y2;
 
-            switch (this.activeAncor) {
+            switch (this.activeAnchor) {
                 case "TL": {
                     x1 = this.dragOrigin.x + dx;
                     y1 = this.dragOrigin.y + dy;
@@ -210,40 +211,40 @@ export namespace CanvasTools.Region {
 
             let self = this;
             window.requestAnimationFrame(function(){
-                self.ghostAncor.attr({ cx: self.dragOrigin.x + dx, cy: self.dragOrigin.y + dy });
+                self.ghostAnchor.attr({ cx: self.dragOrigin.x + dx, cy: self.dragOrigin.y + dy });
             });
 
             this.rearrangeCoord(p1, p2);
         };
 
-        private ancorDragEnd() {
+        private anchorDragEnd() {
             //this.dragOrigin = null;
-            this.ghostAncor.attr({
+            this.ghostAnchor.attr({
                 display: "none"
             })
         }
 
         private subscribeToEvents() {
             let self = this;
-            this.subscribeAncorToEvents(this.ancors.TL, "TL");
-            this.subscribeAncorToEvents(this.ancors.TR, "TR");
-            this.subscribeAncorToEvents(this.ancors.BL, "BL");
-            this.subscribeAncorToEvents(this.ancors.BR, "BR");
+            this.subscribeAnchorToEvents(this.anchors.TL, "TL");
+            this.subscribeAnchorToEvents(this.anchors.TR, "TR");
+            this.subscribeAnchorToEvents(this.anchors.BL, "BL");
+            this.subscribeAnchorToEvents(this.anchors.BR, "BR");
 
-            self.ghostAncor.mouseover(function(e){
-                self.ghostAncor.drag(
-                    self.ancorDragMove.bind(self),
-                    self.ancorDragBegin.bind(self),
-                    self.ancorDragEnd.bind(self)
+            self.ghostAnchor.mouseover(function(e){
+                self.ghostAnchor.drag(
+                    self.anchorDragMove.bind(self),
+                    self.anchorDragBegin.bind(self),
+                    self.anchorDragEnd.bind(self)
                 );                
 
                 self.onManipulationBegin();
             });
 
-            self.ghostAncor.mouseout(function(e){
-                self.ghostAncor.undrag();
+            self.ghostAnchor.mouseout(function(e){
+                self.ghostAnchor.undrag();
                 window.requestAnimationFrame(function(){
-                    self.ghostAncor.attr({
+                    self.ghostAnchor.attr({
                         display: "none"
                     })
                 });
@@ -251,25 +252,25 @@ export namespace CanvasTools.Region {
                 self.onManipulationEnd();
             });
 
-            self.ghostAncor.node.addEventListener("pointerdown", function(e){
-                self.ghostAncor.node.setPointerCapture(e.pointerId);
+            self.ghostAnchor.node.addEventListener("pointerdown", function(e){
+                self.ghostAnchor.node.setPointerCapture(e.pointerId);
             });
 
-            self.ghostAncor.node.addEventListener("pointerup", function(e){
-                self.ghostAncor.node.releasePointerCapture(e.pointerId);
+            self.ghostAnchor.node.addEventListener("pointerup", function(e){
+                self.ghostAnchor.node.releasePointerCapture(e.pointerId);
             });
         }
 
-        private subscribeAncorToEvents(ancor:Snap.Element, active:string) {
+        private subscribeAnchorToEvents(ancor:Snap.Element, active:string) {
             let self = this;
             ancor.mouseover(function(e){
-                self.activeAncor = active;
+                self.activeAnchor = active;
                 // Set drag origin point to current ancor
                 let p = self.getDragOriginPoint();    
                 self.dragOrigin = p;
                 // Move ghost ancor to current ancor position
                 window.requestAnimationFrame(function(){
-                    self.ghostAncor.attr({ 
+                    self.ghostAnchor.attr({ 
                         cx: p.x, 
                         cy: p.y,
                         display: 'block' });
@@ -282,7 +283,7 @@ export namespace CanvasTools.Region {
         public hide() {
             let self = this;
             window.requestAnimationFrame(function(){
-                self.ancorsGroup.attr({
+                self.anchorsGroup.attr({
                     visibility: 'hidden'
                 });
             }) 
@@ -292,7 +293,7 @@ export namespace CanvasTools.Region {
         public show() {
             let self = this;
             window.requestAnimationFrame(function(){
-                self.ancorsGroup.attr({
+                self.anchorsGroup.attr({
                     visibility: 'visible'
                 });
             }) 
@@ -682,7 +683,7 @@ export namespace CanvasTools.Region {
 
             this.regionGroup.add(this.tags.tagsGroup);
             this.regionGroup.add(this.drag.dragGroup);                      
-            this.regionGroup.add(this.anchors.ancorsGroup);        
+            this.regionGroup.add(this.anchors.anchorsGroup);        
             
             this.UI = new Array<base.IRegionPart>(this.tags, this.drag, this.anchors);
         }
