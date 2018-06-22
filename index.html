@@ -7,7 +7,21 @@
     </head>
     <body>
         <div id="selectionzone">
-            <svg id="selectionOverlay"></svg>
+            <svg id="selectionOverlay">
+                    <defs>
+                            <filter id="black-glow">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
+                                <feOffset dx="0" dy="0" result="offsetblur"/>
+                                <feComponentTransfer>
+                                    <feFuncA type="linear" slope="0.8"/>
+                                </feComponentTransfer>
+                                <feMerge> 
+                                    <feMergeNode/>
+                                    <feMergeNode in="SourceGraphic"/> 
+                                </feMerge>
+                            </filter>
+                        </defs>
+            </svg>
         </div>
     </body>
     <script src="./js/systemjs/system.js"></script>

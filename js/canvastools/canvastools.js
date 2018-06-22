@@ -89,45 +89,45 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.subscribeToEvents();
                 }
                 buildOn(paper) {
-                    this.ancorsGroup = paper.g();
-                    this.ancorsGroup.addClass("ancorsLayer");
-                    this.ancors = {
-                        TL: this.createAncor(paper),
-                        TR: this.createAncor(paper),
-                        BL: this.createAncor(paper),
-                        BR: this.createAncor(paper)
+                    this.anchorsGroup = paper.g();
+                    this.anchorsGroup.addClass("ancorsLayer");
+                    this.anchors = {
+                        TL: this.createAnchor(paper),
+                        TR: this.createAnchor(paper),
+                        BL: this.createAnchor(paper),
+                        BR: this.createAnchor(paper)
                     };
-                    this.ghostAncor = this.createAncor(paper, 7);
-                    this.ghostAncor.addClass("ghost");
-                    this.rearrangeAncors();
-                    this.ancorsGroup.add(this.ancors.TL);
-                    this.ancorsGroup.add(this.ancors.TR);
-                    this.ancorsGroup.add(this.ancors.BR);
-                    this.ancorsGroup.add(this.ancors.BL);
-                    this.ancorsGroup.add(this.ghostAncor);
+                    this.ghostAnchor = this.createAnchor(paper, 7);
+                    this.ghostAnchor.addClass("ghost");
+                    this.rearrangeAnchors();
+                    this.anchorsGroup.add(this.anchors.TL);
+                    this.anchorsGroup.add(this.anchors.TR);
+                    this.anchorsGroup.add(this.anchors.BR);
+                    this.anchorsGroup.add(this.anchors.BL);
+                    this.anchorsGroup.add(this.ghostAnchor);
                 }
-                createAncor(paper, r = 3) {
+                createAnchor(paper, r = 3) {
                     let a = paper.circle(0, 0, r);
-                    a.addClass("ancorStyle");
+                    a.addClass("anchorStyle");
                     return a;
                 }
                 move(p) {
                     this.x = p.x;
                     this.y = p.y;
-                    this.rearrangeAncors();
+                    this.rearrangeAnchors();
                 }
                 resize(width, height) {
                     this.rect.width = width;
                     this.rect.height = height;
-                    this.rearrangeAncors();
+                    this.rearrangeAnchors();
                 }
-                rearrangeAncors() {
+                rearrangeAnchors() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.ancors.TL.attr({ cx: self.x, cy: self.y });
-                        self.ancors.TR.attr({ cx: self.x + self.rect.width, cy: self.y });
-                        self.ancors.BR.attr({ cx: self.x + self.rect.width, cy: self.y + self.rect.height });
-                        self.ancors.BL.attr({ cx: self.x, cy: self.y + self.rect.height });
+                        self.anchors.TL.attr({ cx: self.x, cy: self.y });
+                        self.anchors.TR.attr({ cx: self.x + self.rect.width, cy: self.y });
+                        self.anchors.BR.attr({ cx: self.x + self.rect.width, cy: self.y + self.rect.height });
+                        self.anchors.BL.attr({ cx: self.x, cy: self.y + self.rect.height });
                     });
                 }
                 rearrangeCoord(p1, p2) {
@@ -135,22 +135,22 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     let y = (p1.y < p2.y) ? p1.y : p2.y;
                     let width = Math.abs(p1.x - p2.x);
                     let height = Math.abs(p1.y - p2.y);
-                    this.flipActiveAncor(p1.x - p2.x > 0, p1.y - p2.y > 0);
-                    this.onChange(x, y, width, height);
+                    this.flipActiveAnchor(p1.x - p2.x > 0, p1.y - p2.y > 0);
+                    this.onChange(x, y, width, height, true);
                 }
-                flipActiveAncor(w, h) {
+                flipActiveAnchor(w, h) {
                     let ac = "";
-                    if (this.activeAncor !== "") {
-                        ac += (this.activeAncor[0] == "T") ? (h ? "B" : "T") : (h ? "T" : "B");
-                        ac += (this.activeAncor[1] == "L") ? (w ? "R" : "L") : (w ? "L" : "R");
+                    if (this.activeAnchor !== "") {
+                        ac += (this.activeAnchor[0] == "T") ? (h ? "B" : "T") : (h ? "T" : "B");
+                        ac += (this.activeAnchor[1] == "L") ? (w ? "R" : "L") : (w ? "L" : "R");
                     }
-                    this.activeAncor = ac;
+                    this.activeAnchor = ac;
                 }
-                ancorDragBegin() {
+                anchorDragBegin() {
                 }
                 getDragOriginPoint() {
                     let x, y;
-                    switch (this.activeAncor) {
+                    switch (this.activeAnchor) {
                         case "TL": {
                             x = this.x;
                             y = this.y;
@@ -174,10 +174,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     }
                     return new base.Point2D(x, y);
                 }
-                ancorDragMove(dx, dy, x, y) {
+                anchorDragMove(dx, dy, x, y) {
                     let p1, p2;
                     let x1, y1, x2, y2;
-                    switch (this.activeAncor) {
+                    switch (this.activeAnchor) {
                         case "TL": {
                             x1 = this.dragOrigin.x + dx;
                             y1 = this.dragOrigin.y + dy;
@@ -215,50 +215,50 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     }
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.ghostAncor.attr({ cx: self.dragOrigin.x + dx, cy: self.dragOrigin.y + dy });
+                        self.ghostAnchor.attr({ cx: self.dragOrigin.x + dx, cy: self.dragOrigin.y + dy });
                     });
                     this.rearrangeCoord(p1, p2);
                 }
                 ;
-                ancorDragEnd() {
-                    this.ghostAncor.attr({
+                anchorDragEnd() {
+                    this.ghostAnchor.attr({
                         display: "none"
                     });
                 }
                 subscribeToEvents() {
                     let self = this;
-                    this.subscribeAncorToEvents(this.ancors.TL, "TL");
-                    this.subscribeAncorToEvents(this.ancors.TR, "TR");
-                    this.subscribeAncorToEvents(this.ancors.BL, "BL");
-                    this.subscribeAncorToEvents(this.ancors.BR, "BR");
-                    self.ghostAncor.mouseover(function (e) {
-                        self.ghostAncor.drag(self.ancorDragMove.bind(self), self.ancorDragBegin.bind(self), self.ancorDragEnd.bind(self));
+                    this.subscribeAnchorToEvents(this.anchors.TL, "TL");
+                    this.subscribeAnchorToEvents(this.anchors.TR, "TR");
+                    this.subscribeAnchorToEvents(this.anchors.BL, "BL");
+                    this.subscribeAnchorToEvents(this.anchors.BR, "BR");
+                    self.ghostAnchor.mouseover(function (e) {
+                        self.ghostAnchor.drag(self.anchorDragMove.bind(self), self.anchorDragBegin.bind(self), self.anchorDragEnd.bind(self));
                         self.onManipulationBegin();
                     });
-                    self.ghostAncor.mouseout(function (e) {
-                        self.ghostAncor.undrag();
+                    self.ghostAnchor.mouseout(function (e) {
+                        self.ghostAnchor.undrag();
                         window.requestAnimationFrame(function () {
-                            self.ghostAncor.attr({
+                            self.ghostAnchor.attr({
                                 display: "none"
                             });
                         });
                         self.onManipulationEnd();
                     });
-                    self.ghostAncor.node.addEventListener("pointerdown", function (e) {
-                        self.ghostAncor.node.setPointerCapture(e.pointerId);
+                    self.ghostAnchor.node.addEventListener("pointerdown", function (e) {
+                        self.ghostAnchor.node.setPointerCapture(e.pointerId);
                     });
-                    self.ghostAncor.node.addEventListener("pointerup", function (e) {
-                        self.ghostAncor.node.releasePointerCapture(e.pointerId);
+                    self.ghostAnchor.node.addEventListener("pointerup", function (e) {
+                        self.ghostAnchor.node.releasePointerCapture(e.pointerId);
                     });
                 }
-                subscribeAncorToEvents(ancor, active) {
+                subscribeAnchorToEvents(ancor, active) {
                     let self = this;
                     ancor.mouseover(function (e) {
-                        self.activeAncor = active;
+                        self.activeAnchor = active;
                         let p = self.getDragOriginPoint();
                         self.dragOrigin = p;
                         window.requestAnimationFrame(function () {
-                            self.ghostAncor.attr({
+                            self.ghostAnchor.attr({
                                 cx: p.x,
                                 cy: p.y,
                                 display: 'block'
@@ -269,7 +269,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 hide() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.ancorsGroup.attr({
+                        self.anchorsGroup.attr({
                             visibility: 'hidden'
                         });
                     });
@@ -277,7 +277,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 show() {
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.ancorsGroup.attr({
+                        self.anchorsGroup.attr({
                             visibility: 'visible'
                         });
                     });
@@ -501,6 +501,120 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     });
                 }
             }
+            class MenuElement {
+                constructor(paper, x, y, rect, boundRect = null, onManipulationBegin, onManipulationEnd) {
+                    this.mw = 30;
+                    this.mh = 60;
+                    this.dh = 20;
+                    this.dw = 5;
+                    this.rect = rect;
+                    this.x = x;
+                    this.y = y;
+                    this.boundRect = boundRect;
+                    if (onManipulationBegin !== undefined) {
+                        this.onManipulationBegin = onManipulationBegin;
+                    }
+                    if (onManipulationEnd !== undefined) {
+                        this.onManipulationEnd = onManipulationEnd;
+                    }
+                    this.buildOn(paper);
+                }
+                buildOn(paper) {
+                    this.menuGroup = paper.g();
+                    this.menuGroup.addClass("menuLayer");
+                    this.rearrangeMenuPosition();
+                    this.menuRect = paper.rect(this.mx, this.my, this.mw, this.mh);
+                    this.menuRect.addClass("menuRectStyle");
+                    this.menuGroup.add(this.menuRect);
+                    this.menuRect.mouseover((e) => {
+                        this.onManipulationBegin();
+                    });
+                    this.menuRect.mouseout((e) => {
+                        this.onManipulationEnd();
+                    });
+                }
+                addAction(action, icon, actor) {
+                }
+                rearrangeMenuPosition() {
+                    if (this.mh <= this.rect.height - this.dh) {
+                        this.my = this.y + this.rect.height / 2 - this.mh / 2;
+                        if (this.x + this.rect.width + this.mw / 2 + this.dw < this.boundRect.width) {
+                            this.mx = this.x + this.rect.width - this.mw / 2;
+                        }
+                        else if (this.x - this.mw / 2 - this.dw > 0) {
+                            this.mx = this.x - this.mw / 2;
+                        }
+                        else {
+                            this.mx = this.x + this.rect.width - this.mw - this.dw;
+                        }
+                    }
+                    else {
+                        this.my = this.y;
+                        if (this.x + this.rect.width + this.mw + 2 * this.dw < this.boundRect.width) {
+                            this.mx = this.x + this.rect.width + this.dw;
+                        }
+                        else if (this.x - this.mw - 2 * this.dw > 0) {
+                            this.mx = this.x - this.mw - this.dw;
+                        }
+                        else {
+                            this.mx = this.x + this.rect.width - this.mw - this.dw;
+                        }
+                    }
+                }
+                attachTo(region) {
+                    this.x = region.x;
+                    this.y = region.y;
+                    this.rect = region.rect;
+                    this.rearrangeMenuPosition();
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.menuRect.attr({
+                            x: self.mx,
+                            y: self.my
+                        });
+                    });
+                }
+                move(p) {
+                    let self = this;
+                    this.x = p.x;
+                    this.y = p.y;
+                    this.rearrangeMenuPosition();
+                    window.requestAnimationFrame(function () {
+                        self.menuRect.attr({
+                            x: self.mx,
+                            y: self.my
+                        });
+                    });
+                }
+                resize(width, height) {
+                    let self = this;
+                    this.rect.width = width;
+                    this.rect.height = height;
+                    this.rearrangeMenuPosition();
+                    window.requestAnimationFrame(function () {
+                        self.menuRect.attr({
+                            x: self.mx,
+                            y: self.my
+                        });
+                    });
+                }
+                hide() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.menuGroup.attr({
+                            visibility: 'hidden'
+                        });
+                    });
+                }
+                show() {
+                    let self = this;
+                    window.requestAnimationFrame(function () {
+                        self.menuGroup.attr({
+                            visibility: 'visible'
+                        });
+                    });
+                }
+            }
             class RegionElement {
                 constructor(paper, rect, boundRect = null, tagsDescriptor, onManipulationBegin, onManipulationEnd) {
                     this.isSelected = false;
@@ -516,25 +630,30 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         };
                     }
                     if (onManipulationBegin !== undefined) {
-                        this.onManipulationBegin = onManipulationBegin;
+                        this.onManipulationBegin = () => {
+                            onManipulationBegin(this);
+                        };
                     }
                     if (onManipulationEnd !== undefined) {
-                        this.onManipulationEnd = onManipulationEnd;
+                        this.onManipulationEnd = () => {
+                            onManipulationEnd(this);
+                        };
                     }
-                    this.styleId = `region_${this.s8()}_style`;
+                    this.regionID = this.s8();
+                    this.styleID = `region_${this.regionID}_style`;
                     this.styleSheet = this.insertStyleSheet();
                     this.buildOn(paper);
                 }
                 buildOn(paper) {
                     this.regionGroup = paper.g();
                     this.regionGroup.addClass("regionStyle");
-                    this.regionGroup.addClass(this.styleId);
+                    this.regionGroup.addClass(this.styleID);
                     this.anchors = new AnchorsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
                     this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-                    this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleId, this.styleSheet);
+                    this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleID, this.styleSheet);
                     this.regionGroup.add(this.tags.tagsGroup);
                     this.regionGroup.add(this.drag.dragGroup);
-                    this.regionGroup.add(this.anchors.ancorsGroup);
+                    this.regionGroup.add(this.anchors.anchorsGroup);
                     this.UI = new Array(this.tags, this.drag, this.anchors);
                 }
                 s8() {
@@ -544,7 +663,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 }
                 insertStyleSheet() {
                     var style = document.createElement("style");
-                    style.setAttribute("id", this.styleId);
+                    style.setAttribute("id", this.styleID);
                     document.head.appendChild(style);
                     return style.sheet;
                 }
@@ -558,14 +677,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 onInternalChange(x, y, width, height, clicked = false) {
                     this.move(new base.Point2D(x, y));
                     this.resize(width, height);
-                    if (clicked) {
-                        if (this.isSelected) {
-                            this.unselect();
-                        }
-                        else {
-                            this.select();
-                        }
-                    }
+                    this.onChange(this, clicked);
                 }
                 move(p) {
                     let self = this;
@@ -624,18 +736,27 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.onManipulationBegin = onManipulationBegin;
                     this.onManipulationEnd = onManipulationEnd;
                     this.regions = new Array();
+                    this.menuLayer = this.paper.g();
+                    this.menuLayer.addClass("menuLayer");
+                    this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
+                    this.menuLayer.add(this.menu.menuGroup);
+                    this.menu.hide();
                 }
                 addRegion(pointA, pointB, tagsDescriptor) {
+                    this.menu.hide();
                     let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
                     let y = (pointA.y < pointB.y) ? pointA.y : pointB.y;
                     let w = Math.abs(pointA.x - pointB.x);
                     let h = Math.abs(pointA.y - pointB.y);
-                    let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, tagsDescriptor, this.onManipulationBegin, this.onManipulationEnd);
+                    let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, tagsDescriptor, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
                     region.move(new base.Point2D(x, y));
+                    region.onChange = this.onRegionUpdate.bind(this);
                     this.unselectRegions();
                     region.select();
                     this.regionManagerLayer.add(region.regionGroup);
                     this.regions.push(region);
+                    this.menu.attachTo(region);
+                    this.menu.show();
                 }
                 resize(width, height) {
                     let tw = width / this.paperRect.width;
@@ -647,10 +768,31 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         r.resize(r.rect.width * tw, r.rect.height * th);
                     }
                 }
-                unselectRegions() {
+                onManipulationBegin_local(region) {
+                    this.onManipulationBegin();
+                }
+                onManipulationEnd_local(region) {
+                    this.onManipulationEnd();
+                }
+                onRegionUpdate(region, clicked) {
+                    if (clicked) {
+                        this.menu.hide();
+                        this.unselectRegions(region);
+                        region.select();
+                        this.menu.attachTo(region);
+                        this.menu.show();
+                    }
+                    else {
+                        this.menu.hide();
+                        region.unselect();
+                    }
+                }
+                unselectRegions(except) {
                     for (var i = 0; i < this.regions.length; i++) {
                         let r = this.regions[i];
-                        r.unselect();
+                        if (r != except) {
+                            r.unselect();
+                        }
                     }
                 }
             }

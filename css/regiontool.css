@@ -10,7 +10,8 @@
 --> .ancorsLayer
     --> .ancorStyle [4]
         .ancorStyle.ghost
-
+--> .menuLayer
+    --> .menuRectStyle
 */
 .dragRectStyle {
     fill: transparent; 
@@ -74,4 +75,10 @@
 
 .regionStyle.selected .ancorStyle {
     stroke: rgb(7, 189, 143);
+}
+
+.menuRectStyle { 
+    stroke-width:0;
+    fill: rgba(64, 64, 64, 0.8);
+    filter: url(#black-glow); 
 }
