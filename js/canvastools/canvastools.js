@@ -92,13 +92,12 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.anchorsGroup = paper.g();
                     this.anchorsGroup.addClass("ancorsLayer");
                     this.anchors = {
-                        TL: this.createAnchor(paper),
-                        TR: this.createAnchor(paper),
-                        BL: this.createAnchor(paper),
-                        BR: this.createAnchor(paper)
+                        TL: this.createAnchor(paper, "TL"),
+                        TR: this.createAnchor(paper, "TR"),
+                        BL: this.createAnchor(paper, "BL"),
+                        BR: this.createAnchor(paper, "BR")
                     };
-                    this.ghostAnchor = this.createAnchor(paper, 7);
-                    this.ghostAnchor.addClass("ghost");
+                    this.ghostAnchor = this.createAnchor(paper, "ghost", 7);
                     this.rearrangeAnchors();
                     this.anchorsGroup.add(this.anchors.TL);
                     this.anchorsGroup.add(this.anchors.TR);
@@ -106,9 +105,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.anchorsGroup.add(this.anchors.BL);
                     this.anchorsGroup.add(this.ghostAnchor);
                 }
-                createAnchor(paper, r = 3) {
+                createAnchor(paper, style = "", r = 3) {
                     let a = paper.circle(0, 0, r);
                     a.addClass("anchorStyle");
+                    a.addClass(style);
                     return a;
                 }
                 move(p) {
@@ -144,7 +144,11 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         ac += (this.activeAnchor[0] == "T") ? (h ? "B" : "T") : (h ? "T" : "B");
                         ac += (this.activeAnchor[1] == "L") ? (w ? "R" : "L") : (w ? "L" : "R");
                     }
-                    this.activeAnchor = ac;
+                    if (this.activeAnchor != ac) {
+                        this.ghostAnchor.removeClass(this.activeAnchor);
+                        this.activeAnchor = ac;
+                        this.ghostAnchor.addClass(this.activeAnchor);
+                    }
                 }
                 anchorDragBegin() {
                 }
@@ -233,6 +237,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.subscribeAnchorToEvents(this.anchors.BR, "BR");
                     self.ghostAnchor.mouseover(function (e) {
                         self.ghostAnchor.drag(self.anchorDragMove.bind(self), self.anchorDragBegin.bind(self), self.anchorDragEnd.bind(self));
+                        self.ghostAnchor.addClass(self.activeAnchor);
                         self.onManipulationBegin();
                     });
                     self.ghostAnchor.mouseout(function (e) {
@@ -242,6 +247,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                                 display: "none"
                             });
                         });
+                        self.ghostAnchor.removeClass(self.activeAnchor);
                         self.onManipulationEnd();
                     });
                     self.ghostAnchor.node.addEventListener("pointerdown", function (e) {
@@ -503,7 +509,8 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
             }
             class MenuElement {
                 constructor(paper, x, y, rect, boundRect = null, onManipulationBegin, onManipulationEnd) {
-                    this.mw = 30;
+                    this.menuItemSize = 20;
+                    this.mw = this.menuItemSize + 10;
                     this.mh = 60;
                     this.dh = 20;
                     this.dw = 5;
@@ -525,21 +532,29 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.menuGroup = Snap(menuSVG).paper;
                     this.menuGroup.addClass("menuLayer");
                     this.rearrangeMenuPosition();
-                    this.menuRect = this.menuGroup.rect(this.mx, this.my, this.mw, this.mh);
+                    this.menuRect = this.menuGroup.rect(0, 0, this.mw, this.mh, 5, 5);
                     this.menuRect.addClass("menuRectStyle");
                     this.menuItemsGroup = this.menuGroup.g();
                     this.menuItemsGroup.addClass("menuItems");
                     this.menuItems = new Array();
                     this.menuGroup.add(this.menuRect);
                     this.menuGroup.add(this.menuItemsGroup);
-                    this.menuRect.mouseover((e) => {
+                    this.menuGroup.mouseover((e) => {
                         this.onManipulationBegin();
                     });
-                    this.menuRect.mouseout((e) => {
+                    this.menuGroup.mouseout((e) => {
                         this.onManipulationEnd();
                     });
                 }
                 addAction(action, icon, actor) {
+                    let item = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
+                    item.addClass("menuItem");
+                    item.addClass("menuItem-" + icon);
+                    item.click((e) => {
+                        actor(this.region);
+                    });
+                    this.menuItemsGroup.add(item);
+                    this.menuItems.push(item);
                 }
                 rearrangeMenuPosition() {
                     if (this.mh <= this.rect.height - this.dh) {
@@ -568,13 +583,14 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     }
                 }
                 attachTo(region) {
+                    this.region = region;
                     this.x = region.x;
                     this.y = region.y;
                     this.rect = region.rect;
                     this.rearrangeMenuPosition();
                     let self = this;
                     window.requestAnimationFrame(function () {
-                        self.menuRect.attr({
+                        self.menuGroup.attr({
                             x: self.mx,
                             y: self.my
                         });
@@ -745,6 +761,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.menuLayer = this.paper.g();
                     this.menuLayer.addClass("menuManager");
                     this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
+                    this.menu.addAction("delete", "trash", function (region) {
+                        console.log(region.regionID);
+                    });
                     this.menuLayer.add(this.menu.menuGroup);
                     this.menu.hide();
                 }

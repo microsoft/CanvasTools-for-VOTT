@@ -65,13 +65,12 @@ export namespace CanvasTools.Region {
             this.anchorsGroup = paper.g();
             this.anchorsGroup.addClass("ancorsLayer");
             this.anchors = {
-                TL: this.createAnchor(paper),
-                TR: this.createAnchor(paper),
-                BL: this.createAnchor(paper),
-                BR: this.createAnchor(paper)
+                TL: this.createAnchor(paper, "TL"),
+                TR: this.createAnchor(paper, "TR"),
+                BL: this.createAnchor(paper, "BL"),
+                BR: this.createAnchor(paper, "BR")
             };
-            this.ghostAnchor = this.createAnchor(paper, 7);
-            this.ghostAnchor.addClass("ghost");
+            this.ghostAnchor = this.createAnchor(paper, "ghost", 7);
 
             this.rearrangeAnchors();   
             
@@ -82,9 +81,10 @@ export namespace CanvasTools.Region {
             this.anchorsGroup.add(this.ghostAnchor);
         }
 
-        private createAnchor(paper: Snap.Paper, r:number = 3): Snap.Element {
-            let a = paper.circle(0, 0, r);
+        private createAnchor(paper: Snap.Paper, style: string = "", r:number = 3): Snap.Element {
+            let a = paper.circle(0, 0, r);            
             a.addClass("anchorStyle");
+            a.addClass(style);
             return a;
         }
 
@@ -127,7 +127,12 @@ export namespace CanvasTools.Region {
                 ac += (this.activeAnchor[0] == "T") ? (h? "B": "T") : (h? "T" : "B");
                 ac += (this.activeAnchor[1] == "L") ? (w? "R": "L") : (w? "L" : "R");
             }
-            this.activeAnchor = ac;
+
+            if (this.activeAnchor != ac) {
+                this.ghostAnchor.removeClass(this.activeAnchor);
+                this.activeAnchor = ac;
+                this.ghostAnchor.addClass(this.activeAnchor);
+            }
         }
         
         private dragOrigin: base.Point2D;
@@ -237,7 +242,7 @@ export namespace CanvasTools.Region {
                     self.anchorDragBegin.bind(self),
                     self.anchorDragEnd.bind(self)
                 );                
-
+                self.ghostAnchor.addClass(self.activeAnchor);
                 self.onManipulationBegin();
             });
 
@@ -248,7 +253,8 @@ export namespace CanvasTools.Region {
                         display: "none"
                     })
                 });
-                //self.activeAncor = "";
+
+                self.ghostAnchor.removeClass(self.activeAnchor);
                 self.onManipulationEnd();
             });
 
@@ -626,11 +632,14 @@ export namespace CanvasTools.Region {
     public x: number;
     public y: number;
 
+    // Menu Item Size
+    private menuItemSize:number = 20;
     // Menu position;
     private mx: number;
     private my: number;
-    private mw: number = 30;
+    private mw: number = this.menuItemSize + 10;
     private mh: number = 60;
+    
     // threshold for positioning menu inside/outside
     private dh: number = 20;
     // threshold for positioning menu left/right
@@ -651,6 +660,8 @@ export namespace CanvasTools.Region {
 
     // Snap Paper
     private paper: Snap.Paper;
+
+    private region: RegionElement;
 
     constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, boundRect:base.IRect = null, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
         this.paper = paper;
@@ -679,7 +690,7 @@ export namespace CanvasTools.Region {
                 
         this.rearrangeMenuPosition();
 
-        this.menuRect = this.menuGroup.rect(this.mx, this.my, this.mw, this.mh);
+        this.menuRect = this.menuGroup.rect(0, 0, this.mw, this.mh, 5, 5);
         this.menuRect.addClass("menuRectStyle");
 
         this.menuItemsGroup = this.menuGroup.g();
@@ -692,16 +703,24 @@ export namespace CanvasTools.Region {
         //this.menuGroup.add(this.menuRect);
         //this.menuGroup.add(this.menuItemsGroup);
 
-        this.menuRect.mouseover((e) => {
+        this.menuGroup.mouseover((e) => {
             this.onManipulationBegin();
         })
-        this.menuRect.mouseout((e) => {
+        this.menuGroup.mouseout((e) => {
             this.onManipulationEnd();
         })
     }
 
-    private addAction(action: string, icon:string, actor: Function) {
-        
+    public addAction(action: string, icon:string, actor: Function) {
+        let item = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
+        item.addClass("menuItem");
+        item.addClass("menuItem-" + icon);
+        item.click((e) => {
+            actor(this.region);
+        });
+
+        this.menuItemsGroup.add(item);
+        this.menuItems.push(item);
     }
 
     private rearrangeMenuPosition() {
@@ -740,6 +759,7 @@ export namespace CanvasTools.Region {
     }
 
     public attachTo(region: RegionElement) {
+        this.region = region;
         this.x = region.x;
         this.y = region.y;
         this.rect = region.rect;
@@ -747,7 +767,7 @@ export namespace CanvasTools.Region {
 
         let self = this;
         window.requestAnimationFrame(function(){
-            self.menuRect.attr({
+            self.menuGroup.attr({
                 x: self.mx,
                 y: self.my
             });
@@ -830,7 +850,7 @@ export namespace CanvasTools.Region {
         private isSelected:boolean = false;
 
         // Region styles
-        private regionID: string
+        public regionID: string
         private styleID: string;
         private styleSheet: CSSStyleSheet = null;
 
@@ -1024,6 +1044,10 @@ export namespace CanvasTools.Region {
             this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0,0), this.paperRect, 
                                         this.onManipulationBegin_local.bind(this), 
                                          this.onManipulationEnd_local.bind(this));
+
+            this.menu.addAction("delete", "trash", function(region: RegionElement) {
+                console.log(region.regionID);
+            })
             this.menuLayer.add(this.menu.menuGroup);
             this.menu.hide();
         }

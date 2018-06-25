@@ -17,6 +17,7 @@
     fill: transparent; 
     stroke-width: 0;
     pointer-events: all;
+    cursor: move;
 }
 
 .primaryTagRectStyle {
@@ -55,6 +56,14 @@
     fill: #333;
 }
 
+.anchorStyle.TL, .anchorStyle.BR {
+    cursor: nwse-resize;
+}
+
+.anchorStyle.TR, .anchorStyle.BL {
+    cursor: nesw-resize;
+}
+
 .anchorStyle.ghost, .anchorStyle.ghost:hover{
     stroke-width: 0;
     fill: rgba(255, 0, 0, 0);
@@ -85,4 +94,15 @@
     stroke-width:0;
     fill: rgba(64, 64, 64, 0.8);
     filter: url(#black-glow); 
+}
+
+.menuItem {
+    stroke-width: 1.5;
+    stroke: rgba(198, 198, 198, 0.2);
+    fill:  rgb(32, 32, 32);
+}
+
+.menuItem:hover {
+    stroke-width: 1.5;
+    stroke: rgba(198, 198, 198, 0.8);
 }
