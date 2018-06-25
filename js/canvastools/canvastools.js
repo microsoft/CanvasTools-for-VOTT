@@ -514,6 +514,12 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.mh = 60;
                     this.dh = 20;
                     this.dw = 5;
+                    this.pathCollection = {
+                        "delete": {
+                            path: "M 83.4 21.1 L 74.9 12.6 L 48 39.5 L 21.1 12.6 L 12.6 21.1 L 39.5 48 L 12.6 74.9 L 21.1 83.4 L 48 56.5 L 74.9 83.4 L 83.4 74.9 L 56.5 48 Z",
+                            iconSize: 96
+                        }
+                    };
                     this.paper = paper;
                     this.rect = rect;
                     this.x = x;
@@ -547,9 +553,19 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     });
                 }
                 addAction(action, icon, actor) {
-                    let item = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
-                    item.addClass("menuItem");
-                    item.addClass("menuItem-" + icon);
+                    let item = this.menuGroup.g();
+                    let itemBack = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
+                    itemBack.addClass("menuItemBack");
+                    let k = (this.menuItemSize - 4) / this.pathCollection.delete.iconSize;
+                    let itemIcon = this.menuGroup.path(this.pathCollection.delete.path);
+                    itemIcon.transform(`scale(0.2) translate(26 26)`);
+                    itemIcon.addClass("menuIcon");
+                    itemIcon.addClass("menuIcon-" + icon);
+                    let itemRect = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
+                    itemRect.addClass("menuItem");
+                    item.add(itemBack);
+                    item.add(itemIcon);
+                    item.add(itemRect);
                     item.click((e) => {
                         actor(this.region);
                     });
@@ -696,6 +712,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         }
                     }
                 }
+                removeStyles() {
+                    document.getElementById(this.styleID).remove();
+                }
                 onInternalChange(x, y, width, height, clicked = false) {
                     this.move(new base.Point2D(x, y));
                     this.resize(width, height);
@@ -761,8 +780,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.menuLayer = this.paper.g();
                     this.menuLayer.addClass("menuManager");
                     this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
-                    this.menu.addAction("delete", "trash", function (region) {
+                    this.menu.addAction("delete", "trash", (region) => {
                         console.log(region.regionID);
+                        this.deleteRegion(region);
+                        this.menu.hide();
                     });
                     this.menuLayer.add(this.menu.menuGroup);
                     this.menu.hide();
@@ -782,6 +803,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.regions.push(region);
                     this.menu.attachTo(region);
                     this.menu.show();
+                }
+                deleteRegion(region) {
+                    region.removeStyles();
+                    region.regionGroup.remove();
                 }
                 resize(width, height) {
                     let tw = width / this.paperRect.width;

@@ -96,13 +96,24 @@
     filter: url(#black-glow); 
 }
 
-.menuItem {
+.menuItemBack {
     stroke-width: 1.5;
     stroke: rgba(198, 198, 198, 0.2);
     fill:  rgb(32, 32, 32);
 }
 
-.menuItem:hover {
+.menuIcon {
+    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10pt;
+    fill: rgb(64, 64, 64);
+}
+
+.menuItem {
     stroke-width: 1.5;
+    stroke: rgba(198, 198, 198, 0.2);
+    fill:transparent;
+}
+
+.menuItem:hover {
     stroke: rgba(198, 198, 198, 0.8);
 }
