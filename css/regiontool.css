@@ -77,6 +77,10 @@
     stroke: rgb(7, 189, 143);
 }
 
+.menuLayer {
+    overflow: visible;
+}
+
 .menuRectStyle { 
     stroke-width:0;
     fill: rgba(64, 64, 64, 0.8);

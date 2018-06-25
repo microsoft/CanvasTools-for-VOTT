@@ -637,8 +637,10 @@ export namespace CanvasTools.Region {
     private dw: number = 5;
 
     // Menu group
-    public menuGroup: Snap.Element;
+    public menuGroup: Snap.Paper;
     public menuRect: Snap.Element;
+    public menuItemsGroup: Snap.Element;
+    public menuItems: Array<Snap.Element>;
 
     // Bounding box
     private boundRect: base.IRect;
@@ -647,7 +649,11 @@ export namespace CanvasTools.Region {
     public onManipulationBegin: onManipulationFunction;
     public onManipulationEnd: onManipulationFunction;
 
+    // Snap Paper
+    private paper: Snap.Paper;
+
     constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, boundRect:base.IRect = null, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
+        this.paper = paper;
         this.rect = rect;
         this.x = x;
         this.y = y;
@@ -661,19 +667,30 @@ export namespace CanvasTools.Region {
             this.onManipulationEnd = onManipulationEnd;
         }
 
-        this.buildOn(paper);
+        this.buildOn(this.paper);
     }
 
     private buildOn(paper:Snap.Paper){
-        this.menuGroup = paper.g();
-        this.menuGroup.addClass("menuLayer");    
-        
+        let menuSVG = this.paper.svg(this.mx, this.my, this.mw, this.mh, this.mx, this.my, this.mw, this.mh) as SVGGraphicsElement;
+
+        // Snap.Paper
+        this.menuGroup = Snap(menuSVG).paper;
+        this.menuGroup.addClass("menuLayer");
                 
         this.rearrangeMenuPosition();
 
-        this.menuRect = paper.rect(this.mx, this.my, this.mw, this.mh);
+        this.menuRect = this.menuGroup.rect(this.mx, this.my, this.mw, this.mh);
         this.menuRect.addClass("menuRectStyle");
+
+        this.menuItemsGroup = this.menuGroup.g();
+        this.menuItemsGroup.addClass("menuItems");
+
+        this.menuItems = new Array<Snap.Element>();
+
         this.menuGroup.add(this.menuRect);
+        this.menuGroup.add(this.menuItemsGroup);
+        //this.menuGroup.add(this.menuRect);
+        //this.menuGroup.add(this.menuItemsGroup);
 
         this.menuRect.mouseover((e) => {
             this.onManipulationBegin();
@@ -684,7 +701,7 @@ export namespace CanvasTools.Region {
     }
 
     private addAction(action: string, icon:string, actor: Function) {
-
+        
     }
 
     private rearrangeMenuPosition() {
@@ -745,7 +762,7 @@ export namespace CanvasTools.Region {
         this.rearrangeMenuPosition();
 
         window.requestAnimationFrame(function(){
-            self.menuRect.attr({
+            self.menuGroup.attr({
                 x: self.mx,
                 y: self.my
             });
@@ -760,7 +777,7 @@ export namespace CanvasTools.Region {
         this.rearrangeMenuPosition();
 
         window.requestAnimationFrame(function(){
-            self.menuRect.attr({
+            self.menuGroup.attr({
                 x: self.mx,
                 y: self.my
             });
@@ -1003,7 +1020,7 @@ export namespace CanvasTools.Region {
             this.regions = new Array<RegionElement>();
 
             this.menuLayer = this.paper.g();
-            this.menuLayer.addClass("menuLayer");
+            this.menuLayer.addClass("menuManager");
             this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0,0), this.paperRect, 
                                         this.onManipulationBegin_local.bind(this), 
                                          this.onManipulationEnd_local.bind(this));

@@ -507,6 +507,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.mh = 60;
                     this.dh = 20;
                     this.dw = 5;
+                    this.paper = paper;
                     this.rect = rect;
                     this.x = x;
                     this.y = y;
@@ -517,15 +518,20 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     if (onManipulationEnd !== undefined) {
                         this.onManipulationEnd = onManipulationEnd;
                     }
-                    this.buildOn(paper);
+                    this.buildOn(this.paper);
                 }
                 buildOn(paper) {
-                    this.menuGroup = paper.g();
+                    let menuSVG = this.paper.svg(this.mx, this.my, this.mw, this.mh, this.mx, this.my, this.mw, this.mh);
+                    this.menuGroup = Snap(menuSVG).paper;
                     this.menuGroup.addClass("menuLayer");
                     this.rearrangeMenuPosition();
-                    this.menuRect = paper.rect(this.mx, this.my, this.mw, this.mh);
+                    this.menuRect = this.menuGroup.rect(this.mx, this.my, this.mw, this.mh);
                     this.menuRect.addClass("menuRectStyle");
+                    this.menuItemsGroup = this.menuGroup.g();
+                    this.menuItemsGroup.addClass("menuItems");
+                    this.menuItems = new Array();
                     this.menuGroup.add(this.menuRect);
+                    this.menuGroup.add(this.menuItemsGroup);
                     this.menuRect.mouseover((e) => {
                         this.onManipulationBegin();
                     });
@@ -580,7 +586,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.y = p.y;
                     this.rearrangeMenuPosition();
                     window.requestAnimationFrame(function () {
-                        self.menuRect.attr({
+                        self.menuGroup.attr({
                             x: self.mx,
                             y: self.my
                         });
@@ -592,7 +598,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.rect.height = height;
                     this.rearrangeMenuPosition();
                     window.requestAnimationFrame(function () {
-                        self.menuRect.attr({
+                        self.menuGroup.attr({
                             x: self.mx,
                             y: self.my
                         });
@@ -737,7 +743,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.onManipulationEnd = onManipulationEnd;
                     this.regions = new Array();
                     this.menuLayer = this.paper.g();
-                    this.menuLayer.addClass("menuLayer");
+                    this.menuLayer.addClass("menuManager");
                     this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
                     this.menuLayer.add(this.menu.menuGroup);
                     this.menu.hide();
