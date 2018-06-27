@@ -2,6 +2,7 @@ export namespace CanvasTools.Base {
     export interface IRect {
         width: number;
         height: number;
+        copy(): IRect;
     }
 
     export interface IPoint2D {
@@ -39,6 +40,10 @@ export namespace CanvasTools.Base {
         public resize(width: number, height: number):void {
             this.width = width;
             this.height = height;
+        }
+
+        public copy(): Rect {
+            return new Rect(this.width, this.height);
         }
     }
 

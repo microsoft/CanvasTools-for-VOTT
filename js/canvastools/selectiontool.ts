@@ -105,7 +105,7 @@ export namespace CanvasTools.Selection {
 
     }
 
-    class RectElement implements base.IRect, base.IHideable, base.IResizable{
+    class RectElement implements base.IHideable, base.IResizable{
         public width: number;
         public height: number;
 
