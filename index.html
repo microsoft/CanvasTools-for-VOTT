@@ -39,7 +39,7 @@
                 var sz = document.getElementById("selectionOverlay");
                 var selector, rm;
 
-                
+                var regionId = 100;
                 
                 selector = new stools.AreaSelector(sz, 
                     function(){
@@ -51,7 +51,7 @@
                             (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                             Math.floor(Math.random() * 360.0));
                         var tags = new btools.TagsDescriptor(primaryTag);
-                        rm.addRegion({x:x1, y:y1}, {x:x2, y:y2}, tags);
+                        rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, null);
                     }
                 );
                 rm = new rtools.RegionsManager(sz, 
@@ -65,7 +65,8 @@
 
                 
                 window.areaSelector = selector;     
-                window.regionsManager = rm;    
+                window.regionsManager = rm;
+                window.btools = btools;    
             });
 
         }).catch(function(err){ 

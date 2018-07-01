@@ -370,22 +370,57 @@ export namespace CanvasTools.Region {
             this.primaryTagRect = paper.rect(0, 0, this.rect.width, this.rect.height);
             this.primaryTagRect.addClass("primaryTagRectStyle");
 
-            this.primaryTagText = paper.text(0, 0, this.tags.primary.name);
+            this.primaryTagText = paper.text(0, 0, "");
             this.primaryTagText.addClass("primaryTagTextStyle");
 
             let box = this.primaryTagText.getBBox();
             // bound to region???
-            this.primaryTagTextBG = paper.rect(0, 0, box.width + 10, box.height + 5);
+            this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
             this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
             
             this.tagsGroup.add(this.primaryTagRect);
             this.tagsGroup.add(this.primaryTagTextBG);
-            this.tagsGroup.add(this.primaryTagText);            
-            this.applyColors();
+            this.tagsGroup.add(this.primaryTagText); 
+            
+            this.updateTags(this.tags);
+                       
+        }
+
+        public updateTags(tags: base.TagsDescriptor){
+            this.tags = tags;
+
+            if (this.tags && this.tags.primary !== undefined) {
+                this.primaryTagText.node.innerHTML = this.tags.primary.name;
+
+                let box = this.primaryTagText.getBBox();
+                this.primaryTagTextBG.attr({
+                    width: box.width + 10,
+                    height: box.height + 5
+                });
+                this.primaryTagText.attr({
+                    x: this.x + 5,
+                    y: this.y + box.height
+                });
+            } else {
+                this.primaryTagText.node.innerHTML = "";
+                this.primaryTagTextBG.attr({
+                    width: 0,
+                    height: 0
+                });
+            }
+
+            this.clearColors();
+            this.applyColors(); 
+        }
+
+        private clearColors() {
+            while(this.styleSheet.cssRules.length > 0) {
+                this.styleSheet.deleteRule(0);
+            }
         }
 
         // Map colors to region
-        public applyColors() {
+        private applyColors() {
             // Map primary tag color
             if (this.tags && this.tags.primary !== undefined) {
                 let styleMap = [
@@ -879,6 +914,8 @@ export namespace CanvasTools.Region {
         // Region state        
         private isSelected:boolean = false;
 
+        // Region ID
+        public ID: string;
         // Region styles
         public regionID: string
         private styleID: string;
@@ -888,10 +925,11 @@ export namespace CanvasTools.Region {
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
 
-        constructor(paper: Snap.Paper, rect:base.IRect, boundRect:base.IRect = null, tagsDescriptor: base.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
+        constructor(paper: Snap.Paper, rect:base.IRect, boundRect:base.IRect = null, id: string, tagsDescriptor: base.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
             this.x = 0;
             this.y = 0;
             this.rect = rect;
+            this.ID = id;
             this.tagsDescriptor = tagsDescriptor;
 
             if (boundRect !== null) {
@@ -950,15 +988,6 @@ export namespace CanvasTools.Region {
             return style.sheet as CSSStyleSheet;
         }
 
-        public clearStyles() {
-            // clear style all rules for region
-            if (this.styleSheet != null) {
-                for (var i=0; i<this.styleSheet.cssRules.length; i++) {
-                    this.styleSheet.deleteRule (i);
-                }  
-            }
-        }
-
         public removeStyles() {
             document.getElementById(this.styleID).remove();
         }
@@ -976,6 +1005,10 @@ export namespace CanvasTools.Region {
             } */
 
             this.onChange(this, clicked);
+        }
+
+        public updateTags(tags: base.TagsDescriptor){
+            this.tags.updateTags(tags);
         }
 
         public move(p: base.IPoint2D) {           
@@ -1088,7 +1121,7 @@ export namespace CanvasTools.Region {
             this.menu.hide();
         }
 
-        public addRegion(pointA: base.IPoint2D, pointB: base.IPoint2D, tagsDescriptor: base.TagsDescriptor) {
+        public addRegion(id: string, pointA: base.IPoint2D, pointB: base.IPoint2D, tagsDescriptor: base.TagsDescriptor) {
             this.menu.hide();
 
             let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
@@ -1096,7 +1129,7 @@ export namespace CanvasTools.Region {
             let w = Math.abs(pointA.x - pointB.x);
             let h = Math.abs(pointA.y - pointB.y);
 
-            let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, tagsDescriptor, 
+            let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, id, tagsDescriptor, 
                 this.onManipulationBegin_local.bind(this), 
                 this.onManipulationEnd_local.bind(this));
             region.move(new base.Point2D(x, y));
@@ -1119,7 +1152,46 @@ export namespace CanvasTools.Region {
             
             // remove element
             region.regionGroup.remove();
+            this.regions = this.regions.filter((r) => {return r != region});
         }
+
+        public clearAll(){
+            for (let i = 0; i< this.regions.length; i++) {
+                let r = this.regions[i];
+                r.removeStyles();
+                r.regionGroup.remove();                
+            }
+            this.regions = [];
+        }
+
+        private lookupRegionByID(id:string): RegionElement {
+            let region:RegionElement = null;
+            let i = 0;
+            while (i < this.regions.length && region == null) {
+                if (this.regions[i].ID == id) {
+                    region = this.regions[i];
+                }
+                i++
+            }
+
+            return region;
+        }
+
+        public deleteRegionById(id: string) {
+            let region = this.lookupRegionByID(id);
+
+            if (region != null) {
+                this.deleteRegion(region);
+            }
+        }
+
+        public updateTagsById(id: string, tagsDescriptor:base.TagsDescriptor) {
+            let region = this.lookupRegionByID(id);
+
+            if (region != null) {
+                region.updateTags(tagsDescriptor);
+            }
+        }        
 
         public resize(width: number, height: number){
             let tw = width / this.paperRect.width;
