@@ -1091,6 +1091,10 @@ export namespace CanvasTools.Region {
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
 
+        public onRegionSelected: Function;
+        public onRegionMove: Function;
+        public onRegionDelete: Function;
+
         private regionManagerLayer:Snap.Element;
 
         constructor(svgHost: SVGSVGElement, onManipulationBegin: onManipulationFunction, onManipulationEnd: onManipulationFunction){
@@ -1153,6 +1157,10 @@ export namespace CanvasTools.Region {
             // remove element
             region.regionGroup.remove();
             this.regions = this.regions.filter((r) => {return r != region});
+
+            if ((typeof this.onRegionDelete) == "function") {
+                this.onRegionDelete(region.ID);
+            }
         }
 
         public clearAll(){
@@ -1162,6 +1170,7 @@ export namespace CanvasTools.Region {
                 r.regionGroup.remove();                
             }
             this.regions = [];
+            this.menu.hide();
         }
 
         private lookupRegionByID(id:string): RegionElement {
@@ -1193,6 +1202,15 @@ export namespace CanvasTools.Region {
             }
         }        
 
+        public selectRegionById(id: string) {
+            let region = this.lookupRegionByID(id);
+
+            if (region != null) {
+                this.unselectRegions(region);
+                region.select();
+            }
+        }
+
         public resize(width: number, height: number){
             let tw = width / this.paperRect.width;
             let th = height / this.paperRect.height;
@@ -1214,16 +1232,24 @@ export namespace CanvasTools.Region {
             this.onManipulationEnd();
         }
 
-        public onRegionUpdate(region: RegionElement, clicked: boolean) {
+        private onRegionUpdate(region: RegionElement, clicked: boolean) {
             if (clicked) {
                 this.menu.hide();
                 this.unselectRegions(region);
                 region.select();                    
                 this.menu.attachTo(region);
                 this.menu.show();
+
+                if ((typeof this.onRegionSelected) == "function") {
+                    this.onRegionSelected(region.ID);
+                }
             } else {
                 this.menu.hide();
                 region.unselect();
+            }
+
+            if ((typeof this.onRegionMove) == "function") {
+                this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
             }
         }
 

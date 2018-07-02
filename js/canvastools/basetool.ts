@@ -98,9 +98,9 @@ export namespace CanvasTools.Base {
         }
 
         static getHueFromColor(color: string): number {
-            var r = parseInt(color.substring(0,2),16)/255;
-            var g = parseInt(color.substring(2,4),16)/255;
-            var b = parseInt(color.substring(4,6),16)/255;
+            var r = parseInt(color.substring(1,3),16)/255;
+            var g = parseInt(color.substring(3,5),16)/255;
+            var b = parseInt(color.substring(5,7),16)/255;
 
             r /= 255, g /= 255, b /= 255;
             var max = Math.max(r, g, b), min = Math.min(r, g, b);

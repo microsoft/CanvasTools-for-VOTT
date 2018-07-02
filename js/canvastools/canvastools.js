@@ -54,9 +54,9 @@ define("basetool", ["require", "exports"], function (require, exports) {
                     return shadow;
                 }
                 static getHueFromColor(color) {
-                    var r = parseInt(color.substring(0, 2), 16) / 255;
-                    var g = parseInt(color.substring(2, 4), 16) / 255;
-                    var b = parseInt(color.substring(4, 6), 16) / 255;
+                    var r = parseInt(color.substring(1, 3), 16) / 255;
+                    var g = parseInt(color.substring(3, 5), 16) / 255;
+                    var b = parseInt(color.substring(5, 7), 16) / 255;
                     r /= 255, g /= 255, b /= 255;
                     var max = Math.max(r, g, b), min = Math.min(r, g, b);
                     var h, s, l = (max + min) / 2;
@@ -866,6 +866,19 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 deleteRegion(region) {
                     region.removeStyles();
                     region.regionGroup.remove();
+                    this.regions = this.regions.filter((r) => { return r != region; });
+                    if ((typeof this.onRegionDelete) == "function") {
+                        this.onRegionDelete(region.ID);
+                    }
+                }
+                clearAll() {
+                    for (let i = 0; i < this.regions.length; i++) {
+                        let r = this.regions[i];
+                        r.removeStyles();
+                        r.regionGroup.remove();
+                    }
+                    this.regions = [];
+                    this.menu.hide();
                 }
                 lookupRegionByID(id) {
                     let region = null;
@@ -888,6 +901,13 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     let region = this.lookupRegionByID(id);
                     if (region != null) {
                         region.updateTags(tagsDescriptor);
+                    }
+                }
+                selectRegionById(id) {
+                    let region = this.lookupRegionByID(id);
+                    if (region != null) {
+                        this.unselectRegions(region);
+                        region.select();
                     }
                 }
                 resize(width, height) {
@@ -913,10 +933,16 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         region.select();
                         this.menu.attachTo(region);
                         this.menu.show();
+                        if ((typeof this.onRegionSelected) == "function") {
+                            this.onRegionSelected(region.ID);
+                        }
                     }
                     else {
                         this.menu.hide();
                         region.unselect();
+                    }
+                    if ((typeof this.onRegionMove) == "function") {
+                        this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
                     }
                 }
                 unselectRegions(except) {
