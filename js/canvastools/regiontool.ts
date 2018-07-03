@@ -115,7 +115,7 @@ export namespace CanvasTools.Region {
 
             this.flipActiveAnchor(flipX, flipY);
             
-            this.onChange(x, y, width, height, false, true);
+            this.onChange(x, y, width, height, "moving");
         }
 
         private activeAnchor: string;
@@ -245,8 +245,6 @@ export namespace CanvasTools.Region {
             this.ghostAnchor.attr({
                 display: "none"
             })
-
-            this.onChange(this.x, this.y, this.rect.width, this.rect.height, true, false);
         }
 
         private subscribeToEvents() {
@@ -280,10 +278,14 @@ export namespace CanvasTools.Region {
 
             self.ghostAnchor.node.addEventListener("pointerdown", function(e){
                 self.ghostAnchor.node.setPointerCapture(e.pointerId);
+
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin");
             });
 
             self.ghostAnchor.node.addEventListener("pointerup", function(e){
                 self.ghostAnchor.node.releasePointerCapture(e.pointerId);
+
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingend");
             });
         }
 
@@ -619,7 +621,7 @@ export namespace CanvasTools.Region {
         private dragOrigin: base.Point2D;
 
         private rectDragBegin() {
-            this.dragOrigin = new base.Point2D(this.x, this.y);
+            this.dragOrigin = new base.Point2D(this.x, this.y);            
         }
         
         private rectDragMove(dx:number, dy:number) {
@@ -630,11 +632,12 @@ export namespace CanvasTools.Region {
                 p = p.boundToRect(this.boundRect);
             }
             //this.move(p);
-            this.onChange(p.x, p.y, this.rect.width, this.rect.height);
+            this.onChange(p.x, p.y, this.rect.width, this.rect.height, "moving");
         };
 
         private rectDragEnd() {
             this.dragOrigin = null;
+            this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingend");
         }
 
         private subscribeToEvents() {
@@ -651,13 +654,15 @@ export namespace CanvasTools.Region {
             });
 
             self.dragRect.node.addEventListener("pointerdown", function(e){
-                self.dragRect.node.setPointerCapture(e.pointerId);                
+                self.dragRect.node.setPointerCapture(e.pointerId);  
+                
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin");
             });
 
             self.dragRect.node.addEventListener("pointerup", function(e){
                 self.dragRect.node.releasePointerCapture(e.pointerId);
 
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, true);
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "clicked");
             });
         }
     }
@@ -888,6 +893,11 @@ export namespace CanvasTools.Region {
             });
         }) 
     }    
+
+    public showOnRegion(region:RegionElement) {
+        this.attachTo(region);
+        this.show();
+    }
 }
 
     class RegionElement implements base.IHideable, base.IResizable{
@@ -992,9 +1002,7 @@ export namespace CanvasTools.Region {
             document.getElementById(this.styleID).remove();
         }
 
-        private onInternalChange(x: number, y:number, width: number, height:number, clicked: boolean = false) {
-            let updated = this.x != x || this.y != y || this.rect.width != width || this.rect.height != height;
-
+        private onInternalChange(x: number, y:number, width: number, height:number, state:string) {
             this.move(new base.Point2D(x, y));
             this.resize(width, height);
 
@@ -1006,7 +1014,7 @@ export namespace CanvasTools.Region {
                 }
             } */
 
-            this.onChange(this, clicked, updated);
+            this.onChange(this, state);
         }
 
         public updateTags(tags: base.TagsDescriptor){
@@ -1149,8 +1157,7 @@ export namespace CanvasTools.Region {
             this.regionManagerLayer.add(region.regionGroup);
             this.regions.push(region);
 
-            this.menu.attachTo(region);
-            this.menu.show();
+            this.menu.showOnRegion(region); 
         }
 
         public deleteRegion(region:RegionElement){
@@ -1238,43 +1245,46 @@ export namespace CanvasTools.Region {
         }
 
 
-        private lastRegionManipulatedID: string = "";
-        private threshold: number = 500;
-        private timestamp: number = 0;
+        private justManipulated = false;
 
-        private onRegionUpdate(region: RegionElement, clicked: boolean, moving: boolean) {
-            let id = "";
-            if (moving) {
-                // select active region if not selected
-                region.unselect();
-                this.menu.hide();                
-                id = region.ID;
-                // notify on movements/resizing
+        private onRegionUpdate(region: RegionElement, state: string) {
+            // resize or drag begin
+            if (state == "movingbegin") {
+                this.unselectRegions(region);
+                this.menu.hide(); 
+                if ((typeof this.onRegionSelected) == "function") {
+                    this.onRegionSelected(region.ID);
+                }
+                this.justManipulated = false;
+            // resizing or dragging            
+            } else if (state == "moving") {
                 if ((typeof this.onRegionMove) == "function") {
                     this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
                 }   
-                this.lastRegionManipulatedID = region.ID;
-                this.timestamp = Date.now();
-            // no movements or resizing 
-            } else if (clicked) {
-                // right after moving or region was not selected
-                if ((this.lastRegionManipulatedID == region.ID && ((Date.now() - this.timestamp) < this.threshold))
-                    || !region.isSelected) {
+                this.justManipulated = true;
+            // resize or drag end
+            } else if (state == "movingend") {
+                if (this.justManipulated) {
+                    region.select();
+                    this.menu.showOnRegion(region); 
+                }                
+            } else if (state == "clicked" && !this.justManipulated) {
+                // select
+                if (!region.isSelected) {
                     this.unselectRegions(region);
-                    region.select(); 
-                    this.menu.attachTo(region);
-                    this.menu.show();
-                    id = region.ID;
+                    region.select();                    
+                    this.menu.showOnRegion(region); 
+                    if ((typeof this.onRegionSelected) == "function") {
+                        this.onRegionSelected(region.ID);
+                    }
+                // unselect
                 } else {
                     region.unselect();
                     this.menu.hide();
+                    if ((typeof this.onRegionSelected) == "function") {
+                        this.onRegionSelected("");
+                    }
                 }
-                this.lastRegionManipulatedID = "";
-                this.timestamp = 0;
-            }
-            // notify on selection status
-            if ((typeof this.onRegionSelected) == "function") {
-                this.onRegionSelected(id);
             }
         }
 
