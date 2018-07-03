@@ -912,7 +912,7 @@ export namespace CanvasTools.Region {
         private tagsDescriptor: base.TagsDescriptor;
 
         // Region state        
-        private isSelected:boolean = false;
+        public isSelected:boolean = false;
 
         // Region ID
         public ID: string;
@@ -993,6 +993,8 @@ export namespace CanvasTools.Region {
         }
 
         private onInternalChange(x: number, y:number, width: number, height:number, clicked: boolean = false) {
+            let updated = this.x != x || this.y != y || this.rect.width != width || this.rect.height != height;
+
             this.move(new base.Point2D(x, y));
             this.resize(width, height);
 
@@ -1004,7 +1006,7 @@ export namespace CanvasTools.Region {
                 }
             } */
 
-            this.onChange(this, clicked);
+            this.onChange(this, clicked, updated);
         }
 
         public updateTags(tags: base.TagsDescriptor){
@@ -1035,6 +1037,7 @@ export namespace CanvasTools.Region {
                     element.resize(width, height);
                 });
             }) 
+
         }
 
         // IHideable -> hide()
@@ -1216,13 +1219,15 @@ export namespace CanvasTools.Region {
             let th = height / this.paperRect.height;
 
             this.paperRect.resize(width, height);
+
+            this.menu.hide();
             
             // recalculate size/position for all regions;
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
                 r.move(new base.Point2D(r.x * tw, r.y * th));
                 r.resize(r.rect.width * tw, r.rect.height * th);
-            }            
+            }    
         }
 
         private onManipulationBegin_local(region: RegionElement) {
@@ -1232,8 +1237,8 @@ export namespace CanvasTools.Region {
             this.onManipulationEnd();
         }
 
-        private onRegionUpdate(region: RegionElement, clicked: boolean) {
-            if (clicked) {
+        private onRegionUpdate(region: RegionElement, clicked: boolean, updated: boolean) {
+            if (updated || (!region.isSelected && clicked)) {
                 this.menu.hide();
                 this.unselectRegions(region);
                 region.select();                    
@@ -1246,6 +1251,8 @@ export namespace CanvasTools.Region {
             } else {
                 this.menu.hide();
                 region.unselect();
+                // Notify nothing is selected
+                this.onRegionSelected("");
             }
 
             if ((typeof this.onRegionMove) == "function") {
