@@ -115,7 +115,7 @@ export namespace CanvasTools.Region {
 
             this.flipActiveAnchor(flipX, flipY);
             
-            this.onChange(x, y, width, height, true);
+            this.onChange(x, y, width, height, false, true);
         }
 
         private activeAnchor: string;
@@ -245,6 +245,8 @@ export namespace CanvasTools.Region {
             this.ghostAnchor.attr({
                 display: "none"
             })
+
+            this.onChange(this.x, this.y, this.rect.width, this.rect.height, true, false);
         }
 
         private subscribeToEvents() {
@@ -654,9 +656,7 @@ export namespace CanvasTools.Region {
 
             self.dragRect.node.addEventListener("pointerup", function(e){
                 self.dragRect.node.releasePointerCapture(e.pointerId);
-            });
 
-            self.dragRect.click(function(e){
                 self.onChange(self.x, self.y, self.rect.width, self.rect.height, true);
             });
         }
@@ -1237,26 +1237,44 @@ export namespace CanvasTools.Region {
             this.onManipulationEnd();
         }
 
-        private onRegionUpdate(region: RegionElement, clicked: boolean, updated: boolean) {
-            if (updated || (!region.isSelected && clicked)) {
-                this.menu.hide();
-                this.unselectRegions(region);
-                region.select();                    
-                this.menu.attachTo(region);
-                this.menu.show();
 
-                if ((typeof this.onRegionSelected) == "function") {
-                    this.onRegionSelected(region.ID);
-                }
-            } else {
-                this.menu.hide();
+        private lastRegionManipulatedID: string = "";
+        private threshold: number = 500;
+        private timestamp: number = 0;
+
+        private onRegionUpdate(region: RegionElement, clicked: boolean, moving: boolean) {
+            let id = "";
+            if (moving) {
+                // select active region if not selected
                 region.unselect();
-                // Notify nothing is selected
-                this.onRegionSelected("");
+                this.menu.hide();                
+                id = region.ID;
+                // notify on movements/resizing
+                if ((typeof this.onRegionMove) == "function") {
+                    this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
+                }   
+                this.lastRegionManipulatedID = region.ID;
+                this.timestamp = Date.now();
+            // no movements or resizing 
+            } else if (clicked) {
+                // right after moving or region was not selected
+                if ((this.lastRegionManipulatedID == region.ID && ((Date.now() - this.timestamp) < this.threshold))
+                    || !region.isSelected) {
+                    this.unselectRegions(region);
+                    region.select(); 
+                    this.menu.attachTo(region);
+                    this.menu.show();
+                    id = region.ID;
+                } else {
+                    region.unselect();
+                    this.menu.hide();
+                }
+                this.lastRegionManipulatedID = "";
+                this.timestamp = 0;
             }
-
-            if ((typeof this.onRegionMove) == "function") {
-                this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
+            // notify on selection status
+            if ((typeof this.onRegionSelected) == "function") {
+                this.onRegionSelected(id);
             }
         }
 

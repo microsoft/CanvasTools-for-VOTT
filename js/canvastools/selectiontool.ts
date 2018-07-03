@@ -364,6 +364,8 @@ export namespace CanvasTools.Selection {
                 this.moveCross(this.crossA, p);
                 this.moveCross(this.crossB, p);
             }
+
+            e.preventDefault();
         }
 
         private onKeyDown(e:KeyboardEvent) {
