@@ -1220,6 +1220,11 @@ export namespace CanvasTools.Region {
             if (region != null) {
                 this.unselectRegions(region);
                 region.select();
+
+                this.menu.showOnRegion(region);
+                if ((typeof this.onRegionSelected) == "function") {
+                    this.onRegionSelected(region.ID);
+                }
             }
         }
 
