@@ -1202,6 +1202,8 @@ export namespace CanvasTools.Region {
             if (region != null) {
                 this.deleteRegion(region);
             }
+            this.menu.hide();
+            this.onManipulationEnd();
         }
 
         public updateTagsById(id: string, tagsDescriptor:base.TagsDescriptor) {
