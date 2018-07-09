@@ -52,7 +52,7 @@
                             (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                             Math.floor(Math.random() * 360.0));
                         var tags = new btools.TagsDescriptor(primaryTag);
-                        rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, null);
+                        rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, tags);
                     }
                 );
                 rm = new rtools.RegionsManager(sz, 

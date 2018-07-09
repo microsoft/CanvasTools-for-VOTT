@@ -9,7 +9,7 @@ export namespace CanvasTools.Region {
     }
 
     interface onChangeFunction {
-        (x: number, y: number, width:number, height:number): void;
+        (x: number, y: number, width:number, height:number, eventType?: string): void;
     }
 
 
@@ -393,18 +393,38 @@ export namespace CanvasTools.Region {
         public updateTags(tags: base.TagsDescriptor){
             this.tags = tags;
 
+            this.redrawTagLabels();
+            this.clearColors();
+            this.applyColors(); 
+        }
+
+        private redrawTagLabels() {
             if (this.tags && this.tags.primary !== undefined) {
                 this.primaryTagText.node.innerHTML = this.tags.primary.name;
 
                 let box = this.primaryTagText.getBBox();
-                this.primaryTagTextBG.attr({
-                    width: box.width + 10,
-                    height: box.height + 5
-                });
-                this.primaryTagText.attr({
-                    x: this.x + 5,
-                    y: this.y + box.height
-                });
+                let showTextLabel = (box.width + 10 <= this.rect.width) && (box.height <= this.rect.height);
+                if (showTextLabel) {
+                    this.primaryTagTextBG.attr({
+                        width: box.width + 10,
+                        height: box.height + 5                    
+                    });
+                    this.primaryTagText.attr({
+                        x: this.x + 5,
+                        y: this.y + box.height,
+                        visibility: "visible"
+                    });
+                } else {
+                    this.primaryTagTextBG.attr({
+                        width: Math.min(10, this.rect.width),
+                        height: Math.min(10, this.rect.height)                    
+                    });
+                    this.primaryTagText.attr({
+                        x: this.x + 5,
+                        y: this.y + box.height,
+                        visibility: "hidden"
+                    });
+                }
             } else {
                 this.primaryTagText.node.innerHTML = "";
                 this.primaryTagTextBG.attr({
@@ -412,9 +432,6 @@ export namespace CanvasTools.Region {
                     height: 0
                 });
             }
-
-            this.clearColors();
-            this.applyColors(); 
         }
 
         private clearColors() {
@@ -498,6 +515,7 @@ export namespace CanvasTools.Region {
                 width: width,
                 height: height
             });
+            this.redrawTagLabels();
         }
 
         // IHideable -> hide()
@@ -624,15 +642,16 @@ export namespace CanvasTools.Region {
             this.dragOrigin = new base.Point2D(this.x, this.y);            
         }
         
-        private rectDragMove(dx:number, dy:number) {
-            let p:base.IPoint2D;
-            p = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
+        private rectDragMove(dx:number, dy:number) {            
+            if (dx != 0 && dy != 0) {
+                let p = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
 
-            if (this.boundRect !== null) {                
-                p = p.boundToRect(this.boundRect);
+                if (this.boundRect !== null) {                
+                    p = p.boundToRect(this.boundRect);
+                }
+                //this.move(p);            
+                this.onChange(p.x, p.y, this.rect.width, this.rect.height, "moving");
             }
-            //this.move(p);
-            this.onChange(p.x, p.y, this.rect.width, this.rect.height, "moving");
         };
 
         private rectDragEnd() {
@@ -655,14 +674,15 @@ export namespace CanvasTools.Region {
 
             self.dragRect.node.addEventListener("pointerdown", function(e){
                 self.dragRect.node.setPointerCapture(e.pointerId);  
-                
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin");
+                let multiselection = e.shiftKey;
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin", multiselection);
             });
 
             self.dragRect.node.addEventListener("pointerup", function(e){
                 self.dragRect.node.releasePointerCapture(e.pointerId);
 
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "clicked");
+                let multiselection = e.shiftKey;
+                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "clicked", multiselection);
             });
         }
     }
@@ -1002,19 +1022,10 @@ export namespace CanvasTools.Region {
             document.getElementById(this.styleID).remove();
         }
 
-        private onInternalChange(x: number, y:number, width: number, height:number, state:string) {
+        private onInternalChange(x: number, y:number, width: number, height:number, state:string, multiSelection: boolean = false) {
             this.move(new base.Point2D(x, y));
             this.resize(width, height);
-
-/*             if (clicked) {
-                if (this.isSelected) {
-                    this.unselect();                    
-                } else {
-                    this.select();                    
-                }
-            } */
-
-            this.onChange(this, state);
+            this.onChange(this, state, multiSelection);
         }
 
         public updateTags(tags: base.TagsDescriptor){
@@ -1113,17 +1124,21 @@ export namespace CanvasTools.Region {
             this.paper = Snap(svgHost);
             this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
-            this.regionManagerLayer = this.paper.g();
-            this.regionManagerLayer.addClass("regionManager");
-
+            this.regions = new Array<RegionElement>();
             this.onManipulationBegin = onManipulationBegin;
             this.onManipulationEnd = onManipulationEnd;
 
-            this.regions = new Array<RegionElement>();
+            this.buildOn(this.paper);
+            this.subscribeToEvents();
+        }
 
-            this.menuLayer = this.paper.g();
+        private buildOn(paper: Snap.Paper) {
+            this.regionManagerLayer = paper.g();
+            this.regionManagerLayer.addClass("regionManager");
+
+            this.menuLayer = paper.g();
             this.menuLayer.addClass("menuManager");
-            this.menu = new MenuElement(this.paper, 0, 0, new base.Rect(0,0), this.paperRect, 
+            this.menu = new MenuElement(paper, 0, 0, new base.Rect(0,0), this.paperRect, 
                                         this.onManipulationBegin_local.bind(this), 
                                          this.onManipulationEnd_local.bind(this));
 
@@ -1136,6 +1151,28 @@ export namespace CanvasTools.Region {
             this.menu.hide();
         }
 
+        private subscribeToEvents() {
+            window.addEventListener("keyup", (e) => {
+                switch (e.keyCode) {
+                    // tab
+                    case 9:
+                        this.selectNextRegion();
+                    break;
+
+                    // delete, backspace
+                    case 46: 
+                    case 8: 
+                        this.deleteSelectedRegions();
+                    break;
+
+                    // default
+                    default: return;
+                }
+                e.preventDefault();
+            });
+        }
+
+        // REGION CREATION
         public addRegion(id: string, pointA: base.IPoint2D, pointB: base.IPoint2D, tagsDescriptor: base.TagsDescriptor) {
             this.menu.hide();
 
@@ -1160,29 +1197,7 @@ export namespace CanvasTools.Region {
             this.menu.showOnRegion(region); 
         }
 
-        public deleteRegion(region:RegionElement){
-            // remove style
-            region.removeStyles();
-            
-            // remove element
-            region.regionGroup.remove();
-            this.regions = this.regions.filter((r) => {return r != region});
-
-            if ((typeof this.onRegionDelete) == "function") {
-                this.onRegionDelete(region.ID);
-            }
-        }
-
-        public clearAll(){
-            for (let i = 0; i< this.regions.length; i++) {
-                let r = this.regions[i];
-                r.removeStyles();
-                r.regionGroup.remove();                
-            }
-            this.regions = [];
-            this.menu.hide();
-        }
-
+        // REGIONS LOOKUP
         private lookupRegionByID(id:string): RegionElement {
             let region:RegionElement = null;
             let i = 0;
@@ -1196,6 +1211,43 @@ export namespace CanvasTools.Region {
             return region;
         }
 
+        private lookupSelectedRegions(): Array<RegionElement> {
+            let collection = Array<RegionElement>();
+
+            for (var i = 0; i < this.regions.length; i++) {
+                if (this.regions[i].isSelected) {
+                    collection.push(this.regions[i]);
+                }
+            }
+
+            return collection;
+        }
+
+        // REGIONS DELETE
+        private deleteRegion(region:RegionElement){
+            // remove style
+            region.removeStyles();
+            
+            // remove element
+            region.regionGroup.remove();
+            this.regions = this.regions.filter((r) => {return r != region});
+
+            if ((typeof this.onRegionDelete) == "function") {
+                this.onRegionDelete(region.ID);
+            }            
+        }
+
+        private deleteSelectedRegions() {
+            let collection = this.lookupSelectedRegions();
+            for (var i = 0; i < collection.length; i++) {
+                this.deleteRegion(collection[i]);
+            }       
+            
+            this.menu.hide();
+            this.selectNextRegion();
+            this.onManipulationEnd();
+        }
+
         public deleteRegionById(id: string) {
             let region = this.lookupRegionByID(id);
 
@@ -1206,17 +1258,35 @@ export namespace CanvasTools.Region {
             this.onManipulationEnd();
         }
 
+        public deleteAllRegions(){
+            for (let i = 0; i< this.regions.length; i++) {
+                let r = this.regions[i];
+                r.removeStyles();
+                r.regionGroup.remove();                
+            }
+            this.regions = [];
+            this.menu.hide();
+        }
+
+        // REGIONS TAGS UPDATE
         public updateTagsById(id: string, tagsDescriptor:base.TagsDescriptor) {
             let region = this.lookupRegionByID(id);
 
             if (region != null) {
                 region.updateTags(tagsDescriptor);
             }
-        }        
+        }
+        
+        public updateTagsForSelectedRegions(tagsDescriptor:base.TagsDescriptor) {
+            let regions = this.lookupSelectedRegions();
 
-        public selectRegionById(id: string) {
-            let region = this.lookupRegionByID(id);
+            regions.forEach(region => {
+                region.updateTags(tagsDescriptor);
+            });
+        }
 
+        // REGIONS SELECTION
+        private selectRegion(region: RegionElement) {
             if (region != null) {
                 this.unselectRegions(region);
                 region.select();
@@ -1228,6 +1298,36 @@ export namespace CanvasTools.Region {
             }
         }
 
+        public selectRegionById(id: string) {
+            let region = this.lookupRegionByID(id);
+            this.selectRegion(region);
+        }
+
+        private selectNextRegion() {
+            let region = null;
+            let i = 0;
+            let length = this.regions.length;
+
+            if (length == 1) {
+                region = this.regions[0];
+            }
+            else if (length > 1) {
+                while (i < length && region == null) {
+                    if (this.regions[i].isSelected) {
+                        region = (i == length - 1) ? this.regions[0] : this.regions[i + 1];
+                    }
+                    i++
+                }
+            } 
+
+            if (region == null && length > 0) {
+                region = this.regions[0];
+            }
+
+            this.selectRegion(region);
+        }
+
+        // MANAGER RESIZE
         public resize(width: number, height: number){
             let tw = width / this.paperRect.width;
             let th = height / this.paperRect.height;
@@ -1254,10 +1354,13 @@ export namespace CanvasTools.Region {
 
         private justManipulated = false;
 
-        private onRegionUpdate(region: RegionElement, state: string) {
+        private onRegionUpdate(region: RegionElement, state: string, multiSelection:boolean) {
+            console.log(state, multiSelection);
             // resize or drag begin
-            if (state == "movingbegin") {
-                this.unselectRegions(region);
+            if (state == "movingbegin") { 
+                if (!multiSelection) {              
+                    this.unselectRegions(region);
+                } 
                 this.menu.hide(); 
                 if ((typeof this.onRegionSelected) == "function") {
                     this.onRegionSelected(region.ID);
@@ -1278,7 +1381,9 @@ export namespace CanvasTools.Region {
             } else if (state == "clicked" && !this.justManipulated) {
                 // select
                 if (!region.isSelected) {
-                    this.unselectRegions(region);
+                    if (!multiSelection) {              
+                        this.unselectRegions(region);
+                    } 
                     region.select();                    
                     this.menu.showOnRegion(region); 
                     if ((typeof this.onRegionSelected) == "function") {
