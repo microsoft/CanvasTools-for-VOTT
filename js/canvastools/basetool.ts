@@ -91,6 +91,11 @@ export namespace CanvasTools.Base {
             return shadow;
         }
 
+        public get colorDark():string {
+            let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
+            return shadow;
+        }
+
         constructor(name: string, colorHue: number, id: string = "none"){
             this.name = name;
             this.colorHue = colorHue;

@@ -51,7 +51,10 @@
                         var primaryTag = new btools.Tag(
                             (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                             Math.floor(Math.random() * 360.0));
-                        var tags = new btools.TagsDescriptor(primaryTag);
+                        var secondaryTag = new btools.Tag(
+                            (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
+                            Math.floor(Math.random() * 360.0));
+                        var tags = new btools.TagsDescriptor(primaryTag, secondaryTag);
                         rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, tags);
                     }
                 );

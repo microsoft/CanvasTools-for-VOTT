@@ -53,6 +53,10 @@ define("basetool", ["require", "exports"], function (require, exports) {
                     let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
                     return shadow;
                 }
+                get colorDark() {
+                    let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
+                    return shadow;
+                }
                 static getHueFromColor(color) {
                     var r = parseInt(color.substring(1, 3), 16) / 255;
                     var g = parseInt(color.substring(3, 5), 16) / 255;
@@ -428,21 +432,21 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                                 stroke:${this.tags.primary.colorAccent};`
                             },
                             {
-                                rule: `.regionStyle.${this.styleId} .ancorStyle`,
-                                style: `stroke:${this.tags.primary.colorHighlight};
+                                rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                                style: `stroke:${this.tags.primary.colorDark};
                                 fill:${this.tags.primary.colorPure};`
                             },
                             {
-                                rule: `.regionStyle.${this.styleId}:hover .ancorStyle`,
+                                rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                                 style: `stroke:#fff;`
                             },
                             {
-                                rule: `.regionStyle.${this.styleId} .ancorStyle.ghost`,
+                                rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
                                 style: `fill:transparent;`
                             },
                             {
-                                rule: `.regionStyle.${this.styleId} .ancorStyle.ghost:hover`,
-                                style: `fill:${this.tags.primary.colorPure};`
+                                rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                                style: `fill:rgba(255,255,255,0.5);`
                             },
                             {
                                 rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,

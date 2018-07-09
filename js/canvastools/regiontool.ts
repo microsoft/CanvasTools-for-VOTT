@@ -461,21 +461,21 @@ export namespace CanvasTools.Region {
                                 stroke:${this.tags.primary.colorAccent};`
                     },
                     {
-                        rule: `.regionStyle.${this.styleId} .ancorStyle`,
-                        style: `stroke:${this.tags.primary.colorHighlight};
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${this.tags.primary.colorDark};
                                 fill:${this.tags.primary.colorPure};`
                     },
                     {
-                        rule: `.regionStyle.${this.styleId}:hover .ancorStyle`,
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                         style: `stroke:#fff;`
                     },
                     {
-                        rule: `.regionStyle.${this.styleId} .ancorStyle.ghost`,
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
                         style: `fill:transparent;`
                     },
                     {
-                        rule: `.regionStyle.${this.styleId} .ancorStyle.ghost:hover`,
-                        style: `fill:${this.tags.primary.colorPure};`
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                        style: `fill:rgba(255,255,255,0.5);`
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
