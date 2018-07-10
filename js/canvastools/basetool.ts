@@ -107,7 +107,6 @@ export namespace CanvasTools.Base {
             var g = parseInt(color.substring(3,5),16)/255;
             var b = parseInt(color.substring(5,7),16)/255;
 
-            r /= 255, g /= 255, b /= 255;
             var max = Math.max(r, g, b), min = Math.min(r, g, b);
             var h, s, l = (max + min) / 2;
 

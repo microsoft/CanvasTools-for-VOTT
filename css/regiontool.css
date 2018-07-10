@@ -4,7 +4,7 @@
     --> .primaryTagRectStyle
         .primaryTagTextBGStyle
         .primaryTagTextStyle    
-        //.tagStyle [n]
+        .secondaryTagStyle
 --> .dragLayer
     --> .dragRectStyle
 --> .ancorsLayer
@@ -37,6 +37,11 @@
 .primaryTagTextBGStyle {
     stroke-width: 0;
     fill: rgba(0, 0, 0, 0.5);
+}
+
+.secondaryTagStyle {
+    stroke-width: 0;
+    fill:#fff;
 }
 
 .regionStyle:hover .primaryTagRectStyle {

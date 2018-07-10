@@ -347,12 +347,16 @@ export namespace CanvasTools.Region {
         private primaryTagText: Snap.Element;
         private primaryTagTextBG: Snap.Element;
 
+        private secondaryTagsGroup: Snap.Element;
+        private secondaryTags: Array<Snap.Element>;
+
         // Tags
         public tags: base.TagsDescriptor;
 
         // Styling
         private styleId: string;
         private styleSheet: CSSStyleSheet = null;
+        private paper: Snap.Paper;
 
         constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, tags: base.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet){
             this.tags = tags;
@@ -363,6 +367,7 @@ export namespace CanvasTools.Region {
 
             this.styleId = styleId;
             this.styleSheet = styleSheet;
+            this.paper = paper;
 
             this.buildOn(paper);
         }
@@ -381,13 +386,17 @@ export namespace CanvasTools.Region {
             // bound to region???
             this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
             this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
+
+            this.secondaryTagsGroup = paper.g();
+            this.secondaryTagsGroup.addClass("secondatyTagsLayer");
+            this.secondaryTags = [];
             
             this.tagsGroup.add(this.primaryTagRect);
             this.tagsGroup.add(this.primaryTagTextBG);
             this.tagsGroup.add(this.primaryTagText); 
+            this.tagsGroup.add(this.secondaryTagsGroup); 
             
-            this.updateTags(this.tags);
-                       
+            this.updateTags(this.tags);                       
         }
 
         public updateTags(tags: base.TagsDescriptor){
@@ -399,39 +408,66 @@ export namespace CanvasTools.Region {
         }
 
         private redrawTagLabels() {
-            if (this.tags && this.tags.primary !== undefined) {
-                this.primaryTagText.node.innerHTML = this.tags.primary.name;
+            // Clear secondary tags -> redraw from scratch
+            for (let i = 0; i < this.secondaryTags.length; i++) {
+                this.secondaryTags[i].remove();
+            }
+            this.secondaryTags = [];
+            // If there are tags assigned
+            if (this.tags) {
+                if (this.tags.primary !== undefined) {
+                    // Primary Tag
+                    this.primaryTagText.node.innerHTML = this.tags.primary.name;
+                    let box = this.primaryTagText.getBBox();
+                    let showTextLabel = (box.width + 10 <= this.rect.width) && (box.height <= this.rect.height);
+                    if (showTextLabel) {
+                        this.primaryTagTextBG.attr({
+                            width: box.width + 10,
+                            height: box.height + 5                    
+                        });
+                        this.primaryTagText.attr({
+                            x: this.x + 5,
+                            y: this.y + box.height,
+                            visibility: "visible"
+                        });
+                    } else {
+                        this.primaryTagTextBG.attr({
+                            width: Math.min(10, this.rect.width),
+                            height: Math.min(10, this.rect.height)                    
+                        });
+                        this.primaryTagText.attr({
+                            x: this.x + 5,
+                            y: this.y + box.height,
+                            visibility: "hidden"
+                        });
+                    }                    
+                } 
+                // Secondary Tags
+                if (this.tags.secondary && this.tags.secondary.length > 0) {   
+                    let length = this.tags.secondary.length;             
+                    for (let i = 0; i < length; i++) {
+                        let stag = this.tags.secondary[i];
 
-                let box = this.primaryTagText.getBBox();
-                let showTextLabel = (box.width + 10 <= this.rect.width) && (box.height <= this.rect.height);
-                if (showTextLabel) {
-                    this.primaryTagTextBG.attr({
-                        width: box.width + 10,
-                        height: box.height + 5                    
-                    });
-                    this.primaryTagText.attr({
-                        x: this.x + 5,
-                        y: this.y + box.height,
-                        visibility: "visible"
-                    });
-                } else {
-                    this.primaryTagTextBG.attr({
-                        width: Math.min(10, this.rect.width),
-                        height: Math.min(10, this.rect.height)                    
-                    });
-                    this.primaryTagText.attr({
-                        x: this.x + 5,
-                        y: this.y + box.height,
-                        visibility: "hidden"
-                    });
+                        let r = 3;
+                        let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * 2 * r;
+                        let y = this.y - r - 5;                        
+
+                        let tagCircle = this.paper.circle(x, y, r);
+                        tagCircle.addClass("secondaryTagStyle");
+                        tagCircle.addClass(`secondaryTag-${stag.name}`);
+
+                        this.secondaryTagsGroup.add(tagCircle);
+                        this.secondaryTags.push(tagCircle);
+                    }
                 }
+            // Clear primary tag label
             } else {
                 this.primaryTagText.node.innerHTML = "";
                 this.primaryTagTextBG.attr({
                     width: 0,
                     height: 0
                 });
-            }
+            }          
         }
 
         private clearColors() {
@@ -483,10 +519,20 @@ export namespace CanvasTools.Region {
                     },
                 ];
 
-                for (var i = 0; i < styleMap.length; i++) {
+                for (let i = 0; i < styleMap.length; i++) {
                     let r = styleMap[i];
                     this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                 }
+
+                if (this.tags && this.tags.secondary.length > 0) {
+                    for (let i = 0; i < this.tags.secondary.length; i++) {
+                        let tag = this.tags.secondary[i];
+                        let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
+                            fill: ${tag.colorPure};
+                        }`;
+                        this.styleSheet.insertRule(rule, 0);
+                    }
+                }                
             }            
         }
 
@@ -505,6 +551,23 @@ export namespace CanvasTools.Region {
                 x: p.x + 1,
                 y: p.y + 1
             })  
+
+            // Secondary Tags
+            if (this.secondaryTags && this.secondaryTags.length > 0) {   
+                let length = this.secondaryTags.length;             
+                for (let i = 0; i < length; i++) {
+                    let stag = this.secondaryTags[i];
+
+                    let r = 3;
+                    let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * 2 * r;
+                    let y = this.y - r - 5;
+
+                    stag.attr({
+                       cx: x,
+                       cy: y 
+                    });
+                }
+            }
         }
 
         public resize(width: number, height: number){
