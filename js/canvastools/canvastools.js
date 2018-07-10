@@ -485,7 +485,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                             for (let i = 0; i < this.tags.secondary.length; i++) {
                                 let tag = this.tags.secondary[i];
                                 let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
-                            fill: ${tag.colorPure};
+                            fill: ${tag.colorAccent};
                         }`;
                                 this.styleSheet.insertRule(rule, 0);
                             }
@@ -940,6 +940,25 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                             case 8:
                                 this.deleteSelectedRegions();
                                 break;
+                            case 65:
+                            case 97:
+                                if (e.ctrlKey) {
+                                    return false;
+                                }
+                            default: return;
+                        }
+                        e.preventDefault();
+                    });
+                    window.addEventListener("keydown", (e) => {
+                        switch (e.keyCode) {
+                            case 65:
+                            case 97:
+                                if (e.ctrlKey) {
+                                    this.selectAllRegions();
+                                    e.preventDefault();
+                                    return false;
+                                }
+                                break;
                             default: return;
                         }
                         e.preventDefault();
@@ -1034,6 +1053,19 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         if ((typeof this.onRegionSelected) == "function") {
                             this.onRegionSelected(region.ID);
                         }
+                    }
+                }
+                selectAllRegions() {
+                    let r = null;
+                    for (let i = 0; i < this.regions.length; i++) {
+                        let r = this.regions[i];
+                        r.select();
+                        if ((typeof this.onRegionSelected) == "function") {
+                            this.onRegionSelected(r.ID);
+                        }
+                    }
+                    if (r != null) {
+                        this.menu.showOnRegion(r);
                     }
                 }
                 selectRegionById(id) {

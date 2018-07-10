@@ -33,6 +33,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 9pt;
     fill: #fff;
+    user-select: none;
 }
 
 .primaryTagTextBGStyle {

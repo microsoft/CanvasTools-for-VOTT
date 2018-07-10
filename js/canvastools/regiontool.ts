@@ -534,7 +534,7 @@ export namespace CanvasTools.Region {
                     for (let i = 0; i < this.tags.secondary.length; i++) {
                         let tag = this.tags.secondary[i];
                         let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
-                            fill: ${tag.colorPure};
+                            fill: ${tag.colorAccent};
                         }`;
                         this.styleSheet.insertRule(rule, 0);
                     }
@@ -1235,14 +1235,35 @@ export namespace CanvasTools.Region {
                     // tab
                     case 9:
                         this.selectNextRegion();
-                    break;
+                        break;
 
                     // delete, backspace
                     case 46: 
                     case 8: 
                         this.deleteSelectedRegions();
-                    break;
-
+                        break;
+                    // ctrl + A, ctrl + a
+                    case 65:
+                    case 97:
+                        if (e.ctrlKey) {
+                            return false;                          
+                        }
+                    // default
+                    default: return;
+                }
+                e.preventDefault();
+            });
+            window.addEventListener("keydown", (e) => {
+                switch (e.keyCode) {
+                    // ctrl + A, ctrl + a
+                    case 65:
+                    case 97:
+                        if (e.ctrlKey) {
+                            this.selectAllRegions();
+                            e.preventDefault();
+                            return false;                          
+                        }
+                        break;
                     // default
                     default: return;
                 }
@@ -1373,6 +1394,21 @@ export namespace CanvasTools.Region {
                 if ((typeof this.onRegionSelected) == "function") {
                     this.onRegionSelected(region.ID);
                 }
+            }
+        }
+
+        private selectAllRegions() {
+            let r = null;
+            for (let i = 0; i< this.regions.length; i++) {
+                let r = this.regions[i];
+                r.select(); 
+
+                if ((typeof this.onRegionSelected) == "function") {
+                    this.onRegionSelected(r.ID);
+                }         
+            }
+            if (r != null) {
+                this.menu.showOnRegion(r);
             }
         }
 
