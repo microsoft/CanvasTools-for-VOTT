@@ -463,7 +463,7 @@ export namespace CanvasTools.Region {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke:${this.tags.primary.colorDark};
-                                fill:${this.tags.primary.colorPure};`
+                                fill: ${this.tags.primary.colorPure}`
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
@@ -485,7 +485,7 @@ export namespace CanvasTools.Region {
 
                 for (var i = 0; i < styleMap.length; i++) {
                     let r = styleMap[i];
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`);
+                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                 }
             }            
         }
@@ -1355,7 +1355,6 @@ export namespace CanvasTools.Region {
         private justManipulated = false;
 
         private onRegionUpdate(region: RegionElement, state: string, multiSelection:boolean) {
-            console.log(state, multiSelection);
             // resize or drag begin
             if (state == "movingbegin") { 
                 if (!multiSelection) {              

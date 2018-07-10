@@ -72,7 +72,7 @@ export namespace CanvasTools.Base {
 
 
         public get colorPure():string {
-            let pure = `hsla(${this.colorHue.toString()}, 100%, 50%)`;
+            let pure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
             return pure;
         }
 
@@ -132,9 +132,9 @@ export namespace CanvasTools.Base {
         public primary: Tag;
         public secondary: Array<Tag>;
         
-        constructor(primary: Tag, ...secondary: Array<Tag>){
-            this.primary = primary;
-            this.secondary = secondary;
+        constructor(primaryTag: Tag, secondaryTags: Array<Tag> = []){
+            this.primary = primaryTag;
+            this.secondary = secondaryTags;
         }
     }
 }

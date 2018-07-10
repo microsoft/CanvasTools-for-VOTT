@@ -38,7 +38,7 @@ define("basetool", ["require", "exports"], function (require, exports) {
                     this.id = id;
                 }
                 get colorPure() {
-                    let pure = `hsla(${this.colorHue.toString()}, 100%, 50%)`;
+                    let pure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
                     return pure;
                 }
                 get colorAccent() {
@@ -88,9 +88,9 @@ define("basetool", ["require", "exports"], function (require, exports) {
             }
             Base.Tag = Tag;
             class TagsDescriptor {
-                constructor(primary, ...secondary) {
-                    this.primary = primary;
-                    this.secondary = secondary;
+                constructor(primaryTag, secondaryTags = []) {
+                    this.primary = primaryTag;
+                    this.secondary = secondaryTags;
                 }
             }
             Base.TagsDescriptor = TagsDescriptor;
@@ -434,7 +434,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                             {
                                 rule: `.regionStyle.${this.styleId} .anchorStyle`,
                                 style: `stroke:${this.tags.primary.colorDark};
-                                fill:${this.tags.primary.colorPure};`
+                                fill: ${this.tags.primary.colorPure}`
                             },
                             {
                                 rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
@@ -455,7 +455,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         ];
                         for (var i = 0; i < styleMap.length; i++) {
                             let r = styleMap[i];
-                            this.styleSheet.insertRule(`${r.rule}{${r.style}}`);
+                            this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                         }
                     }
                 }
@@ -1032,7 +1032,6 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.onManipulationEnd();
                 }
                 onRegionUpdate(region, state, multiSelection) {
-                    console.log(state, multiSelection);
                     if (state == "movingbegin") {
                         if (!multiSelection) {
                             this.unselectRegions(region);
@@ -1128,45 +1127,33 @@ define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap
                     }
                     this.x = np.x;
                     this.y = np.y;
-                    let self = this;
-                    window.requestAnimationFrame(function () {
-                        self.vl.attr({
-                            x1: np.x,
-                            x2: np.x,
-                            y2: rect.height
-                        });
-                        self.hl.attr({
-                            y1: np.y,
-                            x2: rect.width,
-                            y2: np.y
-                        });
+                    this.vl.attr({
+                        x1: np.x,
+                        x2: np.x,
+                        y2: rect.height
+                    });
+                    this.hl.attr({
+                        y1: np.y,
+                        x2: rect.width,
+                        y2: np.y
                     });
                 }
                 resize(width, height) {
-                    let self = this;
-                    window.requestAnimationFrame(function () {
-                        self.vl.attr({
-                            y2: height
-                        });
-                        self.hl.attr({
-                            x2: width,
-                        });
+                    this.vl.attr({
+                        y2: height
+                    });
+                    this.hl.attr({
+                        x2: width,
                     });
                 }
                 hide() {
-                    let self = this;
-                    window.requestAnimationFrame(function () {
-                        self.crossGroup.attr({
-                            visibility: 'hidden'
-                        });
+                    this.crossGroup.attr({
+                        visibility: 'hidden'
                     });
                 }
                 show() {
-                    let self = this;
-                    window.requestAnimationFrame(function () {
-                        self.crossGroup.attr({
-                            visibility: 'visible'
-                        });
+                    this.crossGroup.attr({
+                        visibility: 'visible'
                     });
                 }
             }

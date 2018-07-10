@@ -51,56 +51,38 @@ export namespace CanvasTools.Selection {
             this.x = np.x;
             this.y = np.y;  
             
-            let self = this;
-            window.requestAnimationFrame(function(){
-                // Move vertical line                
-                self.vl.attr({
-                        x1: np.x,
-                        x2: np.x,
-                        y2: rect.height
-                });
+            this.vl.attr({
+                x1: np.x,
+                x2: np.x,
+                y2: rect.height
+            });
 
-                // Move horizontal line
-                self.hl.attr({
-                        y1: np.y,
-                        x2: rect.width,
-                        y2: np.y
-                })
-            })         
+            this.hl.attr({
+                y1: np.y,
+                x2: rect.width,
+                y2: np.y
+            });         
         }
 
         public resize(width: number, height: number) {
-            let self = this;
-            
-            window.requestAnimationFrame(function(){
-                // Move vertical line                
-                self.vl.attr({
-                    y2: height
-                });
-
-                // Move horizontal line
-                self.hl.attr({
-                    x2: width,
-                })
-            }) 
+            this.vl.attr({
+                y2: height
+            });
+            this.hl.attr({
+                x2: width,
+            })
         }
 
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.crossGroup.attr({
-                    visibility: 'hidden'
-                });
-            }) 
+            this.crossGroup.attr({
+                visibility: 'hidden'
+            });
         }
 
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.crossGroup.attr({
-                    visibility: 'visible'
-                });
-            }) 
+            this.crossGroup.attr({
+                visibility: 'visible'
+            });
         }
 
     }
