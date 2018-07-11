@@ -1248,6 +1248,54 @@ export namespace CanvasTools.Region {
                         if (e.ctrlKey) {
                             return false;                          
                         }
+                    // ctrl + up
+                    case 38:
+                        if (e.ctrlKey) {
+                            if (!e.shiftKey && !e.altKey) {
+                                this.moveSelectedRegions(0, -5);
+                            } else if (e.shiftKey && !e.altKey) {
+                                this.resizeSelectedRegions(0, -5);
+                            } else if (e.altKey && !e.shiftKey) {
+                                this.resizeSelectedRegions(0, -5, true);
+                            }                     
+                        }
+                        break;
+                    // ctrl + down
+                    case 40:
+                        if (e.ctrlKey) {
+                            if (!e.shiftKey && !e.altKey) {
+                                this.moveSelectedRegions(0, 5);
+                            } else if (e.shiftKey && !e.altKey) {
+                                this.resizeSelectedRegions(0, 5);
+                            } else if (e.altKey && !e.shiftKey) {
+                                this.resizeSelectedRegions(0, 5, true);
+                            }  
+                        }
+                        break;
+                    // ctrl + left
+                    case 37:
+                        if (e.ctrlKey) {
+                            if (!e.shiftKey && !e.altKey) {
+                                this.moveSelectedRegions(-5, 0);
+                            } else if (e.shiftKey && !e.altKey) {
+                                this.resizeSelectedRegions(-5, 0);
+                            } else if (e.altKey && !e.shiftKey) {
+                                this.resizeSelectedRegions(-5, 0, true);
+                            } 
+                        }
+                        break;
+                    // ctrl + right
+                    case 39:
+                        if (e.ctrlKey) {
+                            if (!e.shiftKey && !e.altKey) {
+                                this.moveSelectedRegions(5, 0);
+                            } else if (e.shiftKey && !e.altKey) {
+                                this.resizeSelectedRegions(5, 0);
+                            } else if (e.altKey && !e.shiftKey) {
+                                this.resizeSelectedRegions(5, 0, true);
+                            } 
+                        }
+                        break;
                     // default
                     default: return;
                 }
@@ -1439,6 +1487,48 @@ export namespace CanvasTools.Region {
             }
 
             this.selectRegion(region);
+        }
+
+        // REGIONS MOVE/RESIZE
+        private reshapeRegion(region: RegionElement, dx: number, dy: number, dw: number, dh: number, inverse: boolean = false) {
+            let w: number;
+            let h: number;
+            let x: number;
+            let y: number;
+            if (!inverse) {
+                w = region.rect.width + Math.abs(dw);
+                h = region.rect.height + Math.abs(dh);
+                x = region.x + dx + (dw > 0 ? 0 : dw);
+                y = region.y + dy + (dh > 0 ? 0 : dh);
+            } else {
+                w = Math.max(0, region.rect.width - Math.abs(dw));
+                h = Math.max(0, region.rect.height - Math.abs(dh));
+
+                x = region.x + dx + (dw < 0 ? 0 : dw);
+                y = region.y + dy + (dh < 0 ? 0 : dh);
+            }
+            
+            let p1 = new base.Point2D(x, y).boundToRect(this.paperRect);
+            let p2 = new base.Point2D(x + w, y + h).boundToRect(this.paperRect);
+
+            region.move(p1);
+            region.resize(p2.x - p1.x, p2.y - p1.y);
+        }
+
+        private moveSelectedRegions(dx: number, dy: number) {
+            let regions = this.lookupSelectedRegions();
+            regions.forEach(r => {
+                this.reshapeRegion(r, dx, dy, 0, 0);
+            });
+            this.menu.showOnRegion(regions[0]);
+        }
+
+        private resizeSelectedRegions(dw: number, dh: number, inverse: boolean = false) {
+            let regions = this.lookupSelectedRegions();
+            regions.forEach(r => {
+                this.reshapeRegion(r, 0, 0, dw, dh, inverse);
+            });
+            this.menu.showOnRegion(regions[0]);
         }
 
         // MANAGER RESIZE
