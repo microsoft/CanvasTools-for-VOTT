@@ -101,10 +101,12 @@ export namespace CanvasTools.Region {
         }
 
         private rearrangeAnchors() {
-            this.anchors.TL.attr({ cx: this.x, cy: this.y });
-            this.anchors.TR.attr({ cx: this.x + this.rect.width, cy: this.y});
-            this.anchors.BR.attr({ cx: this.x + this.rect.width, cy: this.y + this.rect.height});
-            this.anchors.BL.attr({ cx: this.x, cy: this.y + this.rect.height});
+            window.requestAnimationFrame(() => {
+                this.anchors.TL.attr({ cx: this.x, cy: this.y });
+                this.anchors.TR.attr({ cx: this.x + this.rect.width, cy: this.y});
+                this.anchors.BR.attr({ cx: this.x + this.rect.width, cy: this.y + this.rect.height});
+                this.anchors.BL.attr({ cx: this.x, cy: this.y + this.rect.height});
+            });            
         }
 
         private rearrangeCoord(p1: base.IPoint2D, p2: base.IPoint2D, flipX: boolean, flipY: boolean) {
@@ -236,15 +238,19 @@ export namespace CanvasTools.Region {
             window.requestAnimationFrame(() => {
                 this.ghostAnchor.attr({ cx: x1, cy: y1 });
             });
+            
 
             this.rearrangeCoord(p1, p2, flipX, flipY);
         };
 
         private anchorDragEnd() {
             //this.dragOrigin = null;
-            this.ghostAnchor.attr({
-                display: "none"
-            })
+            window.requestAnimationFrame(() => {
+                this.ghostAnchor.attr({
+                    display: "none"
+                })
+            });
+            
         }
 
         private subscribeToEvents() {
@@ -260,19 +266,22 @@ export namespace CanvasTools.Region {
                     self.anchorDragBegin.bind(self),
                     self.anchorDragEnd.bind(self)
                 );                
-                self.ghostAnchor.addClass(self.activeAnchor);
+                window.requestAnimationFrame(() => {
+                    self.ghostAnchor.addClass(self.activeAnchor);
+                });                
                 self.onManipulationBegin();
             });
 
             self.ghostAnchor.mouseout(function(e){
                 self.ghostAnchor.undrag();
-                window.requestAnimationFrame(function(){
+
+                window.requestAnimationFrame(() => {
                     self.ghostAnchor.attr({
                         display: "none"
-                    })
+                    });
+                    self.ghostAnchor.removeClass(self.activeAnchor);
                 });
-
-                self.ghostAnchor.removeClass(self.activeAnchor);
+                
                 self.onManipulationEnd();
             });
 
@@ -298,34 +307,33 @@ export namespace CanvasTools.Region {
                 this.rectOrigin = this.rect.copy();
                 this.pointOrigin = new base.Point2D(this.x, this.y);
                 // Move ghost ancor to current ancor position
+
                 window.requestAnimationFrame(() => {
                     this.ghostAnchor.attr({ 
                         cx: p.x, 
                         cy: p.y,
-                        display: 'block' });
-                });                
-                
+                        display: 'block' });  
+                });
             });
         }
 
         // IHideable -> hide()
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.anchorsGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.anchorsGroup.attr({
                     visibility: 'hidden'
                 });
-            }) 
+            });
+            
         }
         
         // IHideable -> show()
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.anchorsGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.anchorsGroup.attr({
                     visibility: 'visible'
                 });
-            }) 
+            });            
         }
     }
 
@@ -340,6 +348,8 @@ export namespace CanvasTools.Region {
         // Region position
         public x: number;
         public y: number;
+
+        private textBox: Snap.BBox;
 
         // Elements
         public tagsGroup:Snap.Element;
@@ -381,8 +391,7 @@ export namespace CanvasTools.Region {
 
             this.primaryTagText = paper.text(0, 0, "");
             this.primaryTagText.addClass("primaryTagTextStyle");
-
-            let box = this.primaryTagText.getBBox();
+            
             // bound to region???
             this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
             this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
@@ -400,14 +409,19 @@ export namespace CanvasTools.Region {
         }
 
         public updateTags(tags: base.TagsDescriptor){
+            let keepPrimaryText = false; // redraw by default
+            if (this.tags && this.tags.primary && tags && tags.primary) {
+                keepPrimaryText = (tags.primary.name == this.tags.primary.name);
+            }
+            
             this.tags = tags;
 
-            this.redrawTagLabels();
+            this.redrawTagLabels(keepPrimaryText);
             this.clearColors();
             this.applyColors(); 
         }
 
-        private redrawTagLabels() {
+        private redrawTagLabels(keepPrimaryText: boolean = true) {
             // Clear secondary tags -> redraw from scratch
             for (let i = 0; i < this.secondaryTags.length; i++) {
                 this.secondaryTags[i].remove();
@@ -417,29 +431,37 @@ export namespace CanvasTools.Region {
             if (this.tags) {
                 if (this.tags.primary !== undefined) {
                     // Primary Tag
-                    this.primaryTagText.node.innerHTML = this.tags.primary.name;
-                    let box = this.primaryTagText.getBBox();
-                    let showTextLabel = (box.width + 10 <= this.rect.width) && (box.height <= this.rect.height);
+                    if (!keepPrimaryText || this.textBox == undefined) {
+                        this.primaryTagText.node.innerHTML = this.tags.primary.name;
+                        this.textBox = this.primaryTagText.getBBox();
+                    }
+                    let showTextLabel = (this.textBox.width + 10 <= this.rect.width) && (this.textBox.height <= this.rect.height);
                     if (showTextLabel) {
-                        this.primaryTagTextBG.attr({
-                            width: box.width + 10,
-                            height: box.height + 5                    
+
+                        window.requestAnimationFrame(() => {
+                            this.primaryTagTextBG.attr({
+                                width: this.textBox.width + 10,
+                                height: this.textBox.height + 5                    
+                            });
+                            this.primaryTagText.attr({
+                                x: this.x + 5,
+                                y: this.y + this.textBox.height,
+                                visibility: "visible"
+                            });
                         });
-                        this.primaryTagText.attr({
-                            x: this.x + 5,
-                            y: this.y + box.height,
-                            visibility: "visible"
-                        });
+                        
                     } else {
-                        this.primaryTagTextBG.attr({
-                            width: Math.min(10, this.rect.width),
-                            height: Math.min(10, this.rect.height)                    
-                        });
-                        this.primaryTagText.attr({
-                            x: this.x + 5,
-                            y: this.y + box.height,
-                            visibility: "hidden"
-                        });
+                        window.requestAnimationFrame(() => {
+                            this.primaryTagTextBG.attr({
+                                width: Math.min(10, this.rect.width),
+                                height: Math.min(10, this.rect.height)                    
+                            });
+                            this.primaryTagText.attr({
+                                x: this.x + 5,
+                                y: this.y + this.textBox.height,
+                                visibility: "hidden"
+                            });
+                        });                        
                     }                    
                 } 
                 // Secondary Tags
@@ -459,8 +481,11 @@ export namespace CanvasTools.Region {
                         let y = this.y - s - 5;
                         let tagel = this.paper.rect(x, y, s, s);
 
-                        tagel.addClass("secondaryTagStyle");
-                        tagel.addClass(`secondaryTag-${stag.name}`);
+                        window.requestAnimationFrame(() => {
+                            tagel.addClass("secondaryTagStyle");
+                            tagel.addClass(`secondaryTag-${stag.name}`);
+                        });
+                        
 
                         this.secondaryTagsGroup.add(tagel);
                         this.secondaryTags.push(tagel);
@@ -468,11 +493,13 @@ export namespace CanvasTools.Region {
                 }
             // Clear primary tag label
             } else {
-                this.primaryTagText.node.innerHTML = "";
-                this.primaryTagTextBG.attr({
-                    width: 0,
-                    height: 0
-                });
+                window.requestAnimationFrame(() => {
+                    this.primaryTagText.node.innerHTML = "";
+                    this.primaryTagTextBG.attr({
+                        width: 0,
+                        height: 0
+                    });
+                });                
             }          
         }
 
@@ -525,95 +552,89 @@ export namespace CanvasTools.Region {
                     },
                 ];
 
-                for (let i = 0; i < styleMap.length; i++) {
-                    let r = styleMap[i];
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
-                }
-
-                if (this.tags && this.tags.secondary.length > 0) {
-                    for (let i = 0; i < this.tags.secondary.length; i++) {
-                        let tag = this.tags.secondary[i];
-                        let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
-                            fill: ${tag.colorAccent};
-                        }`;
-                        this.styleSheet.insertRule(rule, 0);
+                window.requestAnimationFrame(() => {
+                    for (let i = 0; i < styleMap.length; i++) {
+                        let r = styleMap[i];
+                        this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                     }
-                }                
+    
+                    if (this.tags && this.tags.secondary.length > 0) {
+                        for (let i = 0; i < this.tags.secondary.length; i++) {
+                            let tag = this.tags.secondary[i];
+                            let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
+                                fill: ${tag.colorAccent};
+                            }`;
+                            this.styleSheet.insertRule(rule, 0);
+                        }
+                    } 
+                });                               
             }            
         }
 
         public move(p: base.IPoint2D) {           
             this.x = p.x;
             this.y = p.y;
-            this.primaryTagRect.attr({
-                x: p.x,
-                y: p.y
-            });
-            this.primaryTagText.attr({
-                x: p.x + 5,
-                y: p.y + this.primaryTagText.getBBox().height
-            });
-            this.primaryTagTextBG.attr({
-                x: p.x + 1,
-                y: p.y + 1
-            })  
+            window.requestAnimationFrame(() => {
+                this.primaryTagRect.attr({
+                    x: p.x,
+                    y: p.y
+                });
+                this.primaryTagText.attr({
+                    x: p.x + 5,
+                    y: p.y + this.textBox.height
+                });
+                this.primaryTagTextBG.attr({
+                    x: p.x + 1,
+                    y: p.y + 1
+                }) 
 
-            // Secondary Tags
-            if (this.secondaryTags && this.secondaryTags.length > 0) {   
-                let length = this.secondaryTags.length;             
-                for (let i = 0; i < length; i++) {
-                    let stag = this.secondaryTags[i];
+                // Secondary Tags
+                if (this.secondaryTags && this.secondaryTags.length > 0) {   
+                    let length = this.secondaryTags.length;             
+                    for (let i = 0; i < length; i++) {
+                        let stag = this.secondaryTags[i];
+                        let s = 6;
+                        let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * s - s / 2;
+                        let y = this.y - s - 5;
 
-                    /* let r = 3;
-                    let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * 2 * r;
-                    let y = this.y - r - 5;
-
-                    stag.attr({
-                       cx: x,
-                       cy: y 
-                    }); */
-
-                    let s = 6;
-                    let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * s - s / 2;
-                    let y = this.y - s - 5;
-
-                    stag.attr({
-                        x: x,
-                        y: y 
-                     });
+                        stag.attr({
+                            x: x,
+                            y: y 
+                        });
+                    }
                 }
-            }
+            });  
         }
 
         public resize(width: number, height: number){
             this.rect.width = width;
             this.rect.height = height;
 
-            this.primaryTagRect.attr({
-                width: width,
-                height: height
-            });
+            window.requestAnimationFrame(() => {
+                this.primaryTagRect.attr({
+                    width: width,
+                    height: height
+                });
+            })            
             this.redrawTagLabels();
         }
 
         // IHideable -> hide()
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.tagsGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.tagsGroup.attr({
                     visibility: 'hidden'
                 });
-            }) 
+            });            
         }
 
         // IHideable -> show()
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.tagsGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.tagsGroup.attr({
                     visibility: 'visible'
                 });
-            }) 
+            });            
         }
     } 
 
@@ -678,40 +699,43 @@ export namespace CanvasTools.Region {
         public move(p: base.IPoint2D) {           
             this.x = p.x;
             this.y = p.y;
-            this.dragRect.attr({
-                x: p.x,
-                y: p.y
-            });  
+            window.requestAnimationFrame(() => {
+                this.dragRect.attr({
+                    x: p.x,
+                    y: p.y
+                });  
+            });            
         }
 
         public resize(width: number, height: number){
             this.rect.width = width;
             this.rect.height = height;
 
-            this.dragRect.attr({
-                width: width,
-                height: height
-            });
+            window.requestAnimationFrame(() => {
+                this.dragRect.attr({
+                    width: width,
+                    height: height
+                });
+            });            
         }
 
         // IHideable -> hide()
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.dragRect.attr({
+            window.requestAnimationFrame(() => {
+                this.dragRect.attr({
                     visibility: 'hidden'
-                });
-            }) 
+                }); 
+            });
+            
         }
 
         // IHideable -> show()
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.dragRect.attr({
+            window.requestAnimationFrame(() => {
+                this.dragRect.attr({
                     visibility: 'visible'
                 });
-            }) 
+            });            
         }
 
         private dragOrigin: base.Point2D;
@@ -933,13 +957,12 @@ export namespace CanvasTools.Region {
         this.rect = region.rect;
         this.rearrangeMenuPosition();
 
-        let self = this;
-        window.requestAnimationFrame(function(){
-            self.menuGroup.attr({
-                x: self.mx,
-                y: self.my
-            });
-        })  
+        window.requestAnimationFrame(() => {
+            this.menuGroup.attr({
+                x: this.mx,
+                y: this.my
+            }); 
+        });        
     }
 
     public move(p: base.IPoint2D) {           
@@ -949,12 +972,12 @@ export namespace CanvasTools.Region {
 
         this.rearrangeMenuPosition();
 
-        window.requestAnimationFrame(function(){
-            self.menuGroup.attr({
-                x: self.mx,
-                y: self.my
-            });
-        })  
+        window.requestAnimationFrame(() => {
+            this.menuGroup.attr({
+                x: this.mx,
+                y: this.my
+            }); 
+        }); 
     }
 
     public resize(width: number, height: number){
@@ -964,32 +987,31 @@ export namespace CanvasTools.Region {
 
         this.rearrangeMenuPosition();
 
-        window.requestAnimationFrame(function(){
-            self.menuGroup.attr({
-                x: self.mx,
-                y: self.my
-            });
-        }) 
+        window.requestAnimationFrame(() => {
+            this.menuGroup.attr({
+                x: this.mx,
+                y: this.my
+            }); 
+        }); 
     }
 
     // IHideable -> hide()
     public hide() {
-        let self = this;
-        window.requestAnimationFrame(function(){
-            self.menuGroup.attr({
+        window.requestAnimationFrame(() => {
+            this.menuGroup.attr({
                 visibility: 'hidden'
             });
-        }) 
+        });
+        
     }
 
     // IHideable -> show()
     public show() {
-        let self = this;
-        window.requestAnimationFrame(function(){
-            self.menuGroup.attr({
+        window.requestAnimationFrame(() => {
+            this.menuGroup.attr({
                 visibility: 'visible'
             });
-        }) 
+        });        
     }    
 
     public showOnRegion(region:RegionElement) {
@@ -1101,8 +1123,12 @@ export namespace CanvasTools.Region {
         }
 
         private onInternalChange(x: number, y:number, width: number, height:number, state:string, multiSelection: boolean = false) {
-            this.move(new base.Point2D(x, y));
-            this.resize(width, height);
+            if (this.x != x || this.y != y) {
+                this.move(new base.Point2D(x, y));
+            }
+            if (this.rect.width != width || this.rect.height != height) {
+                this.resize(width, height);
+            }            
             this.onChange(this, state, multiSelection);
         }
 
@@ -1114,11 +1140,9 @@ export namespace CanvasTools.Region {
             let self = this;
             this.x = p.x;
             this.y = p.y;
-            window.requestAnimationFrame(function(){
-                self.UI.forEach((element) => {
-                    element.move(p);
-                });
-            })  
+            this.UI.forEach((element) => {
+                element.move(p);
+            });
         }
 
         public resize(width: number, height: number){
@@ -1128,33 +1152,27 @@ export namespace CanvasTools.Region {
             this.boundRects.self.width = this.boundRects.host.width - width;
             this.boundRects.self.height = this.boundRects.host.height - height;
 
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.UI.forEach((element) => {
-                    element.resize(width, height);
-                });
-            }) 
-
+            this.UI.forEach((element) => {
+                element.resize(width, height);
+            });
         }
 
         // IHideable -> hide()
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.regionGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.regionGroup.attr({
                     visibility: 'hidden'
                 });
-            }) 
+            });            
         }
 
         // IHideable -> show()
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.regionGroup.attr({
+            window.requestAnimationFrame(() => {
+                this.regionGroup.attr({
                     visibility: 'visible'
                 });
-            }) 
+            });            
         }
 
         public onChange: Function;
