@@ -1260,12 +1260,6 @@ export namespace CanvasTools.Region {
                     case 8: 
                         this.deleteSelectedRegions();
                         break;
-                    // ctrl + A, ctrl + a
-                    case 65:
-                    case 97:
-                        if (e.ctrlKey) {
-                            return false;                          
-                        }
                     // ctrl + up
                     case 38:
                         if (e.ctrlKey) {
@@ -1333,7 +1327,6 @@ export namespace CanvasTools.Region {
                     // default
                     default: return;
                 }
-                e.preventDefault();
             });
         }
 
