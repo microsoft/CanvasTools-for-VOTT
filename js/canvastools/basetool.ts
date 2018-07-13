@@ -70,30 +70,44 @@ export namespace CanvasTools.Base {
         public name: string;
         public id: string;
 
-
+         private __colorPure: string = "";
         public get colorPure():string {
-            let pure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
-            return pure;
+            if (this.__colorPure == "") {
+                this.__colorPure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
+            }            
+            return this.__colorPure;
         }
 
+        private __colorAccent: string = "";
         public get colorAccent():string {
-            let accent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
-            return accent;
+            if (this.__colorAccent == "") {
+                this.__colorAccent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
+            } 
+            return this.__colorAccent;
         }
 
+        private __colorHighlight: string = "";
         public get colorHighlight():string {
-            let highlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
-            return highlight;
+            if (this.__colorHighlight == "") {
+                this.__colorHighlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
+            } 
+            return this.__colorHighlight;
         }
 
+        private __colorShadow: string = "";
         public get colorShadow():string {
-            let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
-            return shadow;
+            if (this.__colorShadow == "") {
+                this.__colorShadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
+            } 
+            return this.__colorShadow;
         }
 
+        private __colorDark: string = "";
         public get colorDark():string {
-            let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
-            return shadow;
+            if (this.__colorDark == "") {
+                this.__colorDark = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
+            } 
+            return this.__colorDark;
         }
 
         constructor(name: string, colorHue: number, id: string = "none"){

@@ -33,29 +33,44 @@ define("basetool", ["require", "exports"], function (require, exports) {
             Base.Point2D = Point2D;
             class Tag {
                 constructor(name, colorHue, id = "none") {
+                    this.__colorPure = "";
+                    this.__colorAccent = "";
+                    this.__colorHighlight = "";
+                    this.__colorShadow = "";
+                    this.__colorDark = "";
                     this.name = name;
                     this.colorHue = colorHue;
                     this.id = id;
                 }
                 get colorPure() {
-                    let pure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
-                    return pure;
+                    if (this.__colorPure == "") {
+                        this.__colorPure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
+                    }
+                    return this.__colorPure;
                 }
                 get colorAccent() {
-                    let accent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
-                    return accent;
+                    if (this.__colorAccent == "") {
+                        this.__colorAccent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
+                    }
+                    return this.__colorAccent;
                 }
                 get colorHighlight() {
-                    let highlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
-                    return highlight;
+                    if (this.__colorHighlight == "") {
+                        this.__colorHighlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
+                    }
+                    return this.__colorHighlight;
                 }
                 get colorShadow() {
-                    let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
-                    return shadow;
+                    if (this.__colorShadow == "") {
+                        this.__colorShadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
+                    }
+                    return this.__colorShadow;
                 }
                 get colorDark() {
-                    let shadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
-                    return shadow;
+                    if (this.__colorDark == "") {
+                        this.__colorDark = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
+                    }
+                    return this.__colorDark;
                 }
                 static getHueFromColor(color) {
                     var r = parseInt(color.substring(1, 3), 16) / 255;
@@ -132,7 +147,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         BR: this.createAnchor(paper, "BR")
                     };
                     this.ghostAnchor = this.createAnchor(paper, "ghost", 7);
-                    this.rearrangeAnchors();
+                    this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
                     this.anchorsGroup.add(this.anchors.TL);
                     this.anchorsGroup.add(this.anchors.TR);
                     this.anchorsGroup.add(this.anchors.BR);
@@ -148,19 +163,19 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 move(p) {
                     this.x = p.x;
                     this.y = p.y;
-                    this.rearrangeAnchors();
+                    this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
                 }
                 resize(width, height) {
                     this.rect.width = width;
                     this.rect.height = height;
-                    this.rearrangeAnchors();
+                    this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
                 }
-                rearrangeAnchors() {
+                rearrangeAnchors(x1, y1, x2, y2) {
                     window.requestAnimationFrame(() => {
-                        this.anchors.TL.attr({ cx: this.x, cy: this.y });
-                        this.anchors.TR.attr({ cx: this.x + this.rect.width, cy: this.y });
-                        this.anchors.BR.attr({ cx: this.x + this.rect.width, cy: this.y + this.rect.height });
-                        this.anchors.BL.attr({ cx: this.x, cy: this.y + this.rect.height });
+                        this.anchors.TL.attr({ cx: x1, cy: y1 });
+                        this.anchors.TR.attr({ cx: x2, cy: y1 });
+                        this.anchors.BR.attr({ cx: x2, cy: y2 });
+                        this.anchors.BL.attr({ cx: x1, cy: y2 });
                     });
                 }
                 rearrangeCoord(p1, p2, flipX, flipY) {
@@ -514,6 +529,9 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 move(p) {
                     this.x = p.x;
                     this.y = p.y;
+                    let size = 6;
+                    let cx = this.x + 0.5 * this.rect.width;
+                    let cy = this.y - size - 5;
                     window.requestAnimationFrame(() => {
                         this.primaryTagRect.attr({
                             x: p.x,
@@ -531,12 +549,10 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                             let length = this.secondaryTags.length;
                             for (let i = 0; i < length; i++) {
                                 let stag = this.secondaryTags[i];
-                                let s = 6;
-                                let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * s - s / 2;
-                                let y = this.y - s - 5;
+                                let x = cx + (2 * i - length + 0.5) * size;
                                 stag.attr({
                                     x: x,
-                                    y: y
+                                    y: cy
                                 });
                             }
                         }
@@ -957,11 +973,6 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                             case 8:
                                 this.deleteSelectedRegions();
                                 break;
-                            case 65:
-                            case 97:
-                                if (e.ctrlKey) {
-                                    return false;
-                                }
                             case 38:
                                 if (e.ctrlKey) {
                                     if (!e.shiftKey && !e.altKey) {
@@ -1030,7 +1041,6 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                                 break;
                             default: return;
                         }
-                        e.preventDefault();
                     });
                 }
                 addRegion(id, pointA, pointB, tagsDescriptor) {

@@ -72,7 +72,7 @@ export namespace CanvasTools.Region {
             };
             this.ghostAnchor = this.createAnchor(paper, "ghost", 7);
 
-            this.rearrangeAnchors();   
+            this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);   
             
             this.anchorsGroup.add(this.anchors.TL);
             this.anchorsGroup.add(this.anchors.TR);
@@ -91,21 +91,21 @@ export namespace CanvasTools.Region {
         public move(p: base.IPoint2D) {
             this.x = p.x;
             this.y = p.y;
-            this.rearrangeAnchors();
+            this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
         }
 
         public resize(width: number, height: number) {
             this.rect.width = width;
             this.rect.height = height;
-            this.rearrangeAnchors();
+            this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
         }
 
-        private rearrangeAnchors() {
+        private rearrangeAnchors(x1: number, y1: number, x2: number, y2: number) {
             window.requestAnimationFrame(() => {
-                this.anchors.TL.attr({ cx: this.x, cy: this.y });
-                this.anchors.TR.attr({ cx: this.x + this.rect.width, cy: this.y});
-                this.anchors.BR.attr({ cx: this.x + this.rect.width, cy: this.y + this.rect.height});
-                this.anchors.BL.attr({ cx: this.x, cy: this.y + this.rect.height});
+                this.anchors.TL.attr({ cx: x1, cy: y1 });
+                this.anchors.TR.attr({ cx: x2, cy: y1});
+                this.anchors.BR.attr({ cx: x2, cy: y2});
+                this.anchors.BL.attr({ cx: x1, cy: y2});
             });            
         }
 
@@ -574,6 +574,11 @@ export namespace CanvasTools.Region {
         public move(p: base.IPoint2D) {           
             this.x = p.x;
             this.y = p.y;
+
+            let size = 6;
+            let cx = this.x + 0.5 * this.rect.width;
+            let cy = this.y - size - 5;
+
             window.requestAnimationFrame(() => {
                 this.primaryTagRect.attr({
                     x: p.x,
@@ -593,13 +598,11 @@ export namespace CanvasTools.Region {
                     let length = this.secondaryTags.length;             
                     for (let i = 0; i < length; i++) {
                         let stag = this.secondaryTags[i];
-                        let s = 6;
-                        let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * s - s / 2;
-                        let y = this.y - s - 5;
+                        let x = cx + (2 * i - length + 0.5) * size;
 
                         stag.attr({
                             x: x,
-                            y: y 
+                            y: cy 
                         });
                     }
                 }
