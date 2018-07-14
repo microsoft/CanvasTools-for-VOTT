@@ -378,7 +378,7 @@ export namespace CanvasTools.Region {
             this.styleId = styleId;
             this.styleSheet = styleSheet;
             this.paper = paper;
-
+            
             this.buildOn(paper);
         }
 
@@ -391,6 +391,7 @@ export namespace CanvasTools.Region {
 
             this.primaryTagText = paper.text(0, 0, "");
             this.primaryTagText.addClass("primaryTagTextStyle");
+            this.textBox = this.primaryTagText.getBBox();
             
             // bound to region???
             this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
