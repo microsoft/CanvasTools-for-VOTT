@@ -369,7 +369,7 @@ export namespace CanvasTools.Region {
         private paper: Snap.Paper;
 
         constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, tags: base.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet){
-            this.tags = tags;
+            //this.tags = tags;
             this.rect = rect;
             this.x = x;
             this.y = y;
@@ -379,10 +379,10 @@ export namespace CanvasTools.Region {
             this.styleSheet = styleSheet;
             this.paper = paper;
             
-            this.buildOn(paper);
+            this.buildOn(paper, tags);
         }
 
-        private buildOn(paper:Snap.Paper){
+        private buildOn(paper:Snap.Paper, tags: base.TagsDescriptor){
             this.tagsGroup = paper.g();
             this.tagsGroup.addClass("tagsLayer");    
             
@@ -406,10 +406,10 @@ export namespace CanvasTools.Region {
             this.tagsGroup.add(this.primaryTagText); 
             this.tagsGroup.add(this.secondaryTagsGroup); 
             
-            this.updateTags(this.tags);                       
+            this.updateTags(tags);                       
         }
 
-        public updateTags(tags: base.TagsDescriptor){
+        public updateTags(tags: base.TagsDescriptor){            
             let keepPrimaryText = false; // redraw by default
             if (this.tags && this.tags.primary && tags && tags.primary) {
                 keepPrimaryText = (tags.primary.name == this.tags.primary.name);
