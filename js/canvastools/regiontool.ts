@@ -28,7 +28,7 @@ export namespace CanvasTools.Region {
         // Bound rects
         private boundRect: base.IRect;
 
-        // Ancors composition
+        // Anchors composition
         public anchorsGroup:Snap.Element;
         private anchors: {TL: Snap.Element, TR: Snap.Element, BR:Snap.Element, BL: Snap.Element};
         private ghostAnchor: Snap.Element;
@@ -63,7 +63,7 @@ export namespace CanvasTools.Region {
 
         private buildOn(paper:Snap.Paper){
             this.anchorsGroup = paper.g();
-            this.anchorsGroup.addClass("ancorsLayer");
+            this.anchorsGroup.addClass("anchorsLayer");
             this.anchors = {
                 TL: this.createAnchor(paper, "TL"),
                 TR: this.createAnchor(paper, "TR"),
@@ -187,7 +187,7 @@ export namespace CanvasTools.Region {
         }
         
         private anchorDragMove(dx:number, dy:number, x: number, y: number) {
-            // Calculation depends on active ancor!!
+            // Calculation depends on active anchor!!
             let p1: base.Point2D, p2: base.Point2D;
             let x1: number, y1: number, x2: number, y2: number;
             let flipX:boolean = false;
@@ -298,15 +298,15 @@ export namespace CanvasTools.Region {
             });
         }
 
-        private subscribeAnchorToEvents(ancor:Snap.Element, active:string) {
-            ancor.mouseover((e) => {
+        private subscribeAnchorToEvents(anchor:Snap.Element, active:string) {
+            anchor.mouseover((e) => {
                 this.activeAnchor = active;
-                // Set drag origin point to current ancor
+                // Set drag origin point to current anchor
                 let p = this.getDragOriginPoint();    
                 this.dragOrigin = p;
                 this.rectOrigin = this.rect.copy();
                 this.pointOrigin = new base.Point2D(this.x, this.y);
-                // Move ghost ancor to current ancor position
+                // Move ghost anchor to current anchor position
 
                 window.requestAnimationFrame(() => {
                     this.ghostAnchor.attr({ 
@@ -1027,6 +1027,7 @@ export namespace CanvasTools.Region {
     class RegionElement implements base.IHideable, base.IResizable{
         // Region size
         public rect: base.IRect;
+        public area: number;
 
         // Region position
         public x: number;
@@ -1039,7 +1040,7 @@ export namespace CanvasTools.Region {
         public regionGroup: Snap.Element;
         private drag: DragElement;
         private anchors: AnchorsElement;
-        private tags: TagsElement;
+        public tags: TagsElement;
         private UI: Array<base.IRegionPart>;
 
         // Region data
@@ -1152,6 +1153,7 @@ export namespace CanvasTools.Region {
         public resize(width: number, height: number){
             this.rect.width = width;
             this.rect.height = height;
+            this.area = width * height;
 
             this.boundRects.self.width = this.boundRects.host.width - width;
             this.boundRects.self.height = this.boundRects.host.height - height;
@@ -1334,7 +1336,7 @@ export namespace CanvasTools.Region {
             });
         }
 
-        // REGION CREATION
+        // SETUP NEW REGION
         public addRegion(id: string, pointA: base.IPoint2D, pointB: base.IPoint2D, tagsDescriptor: base.TagsDescriptor) {
             this.menu.hide();
 
@@ -1357,6 +1359,83 @@ export namespace CanvasTools.Region {
             this.regions.push(region);
 
             this.menu.showOnRegion(region); 
+        }
+
+        // REGION CREATION
+        public drawRegion(x: number, y: number, rect: base.IRect, id: string, tagsDescriptor: base.TagsDescriptor) {
+            this.menu.hide();
+            let region = new RegionElement(this.paper, rect, this.paperRect, id, tagsDescriptor,
+                this.onManipulationBegin_local.bind(this), 
+                this.onManipulationEnd_local.bind(this));
+            region.area = rect.height * rect.width;
+            region.move(new base.Point2D(x, y));
+            region.onChange = this.onRegionUpdate.bind(this);
+            region.tags.updateTags(region.tags.tags);
+            this.regionManagerLayer.add(region.regionGroup);
+            this.regions.push(region);
+            // Need to do a check for invalid stacking from user generated or older saved json
+            if(this.regions.length > 1 && region.area > this.regions[this.regions.length - 2].area) {   
+                this.sortRegionsByArea();
+                this.redrawAllRegions();
+            }
+            this.menu.showOnRegion(region);  
+        }
+
+        // REDRAW ALL REGIONS (corrects z-order changes)
+        public redrawAllRegions() {
+            let sr = this.regions;
+            this.deleteAllRegions();
+            for(var i = 0; i < sr.length; i++) {
+                this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags.tags);
+                if(sr[i].isSelected) {
+                    this.selectRegionById(sr[i].ID);
+                }
+            }
+        }
+
+        // QUICKSORT REGIONS BY AREA DESCENDING
+        private sortRegionsByArea() {
+            function quickSort(arr: Array<RegionElement>, left: number, right: number){
+                var len = arr.length, 
+                pivot,
+                partitionIndex;
+             
+             
+               if(left < right){
+                 pivot = right;
+                 partitionIndex = partition(arr, pivot, left, right);
+                 
+                //sort left and right
+                quickSort(arr, left, partitionIndex - 1);
+                quickSort(arr, partitionIndex + 1, right);
+               }
+               return arr;
+             }
+
+             function partition(arr: Array<RegionElement>, pivot: number, left: number, right: number){
+                var pivotValue = arr[pivot].area,
+                    partitionIndex = left;
+             
+                for(var i = left; i < right; i++){
+                 if(arr[i].area > pivotValue){
+                   swap(arr, i, partitionIndex);
+                   partitionIndex++;
+                 }
+               }
+               swap(arr, right, partitionIndex);
+               return partitionIndex;
+             }
+
+             function swap(arr: Array<RegionElement>, i: number, j: number){
+                var temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+             }
+
+             let length = this.regions.length;
+             if(length > 1) {
+                quickSort(this.regions, 0, this.regions.length - 1);
+             }
         }
 
         // REGIONS LOOKUP
@@ -1595,6 +1674,8 @@ export namespace CanvasTools.Region {
                 if (this.justManipulated) {
                     region.select();
                     this.menu.showOnRegion(region); 
+                    this.sortRegionsByArea();
+                    this.redrawAllRegions();
                 }                
             } else if (state == "clicked" && !this.justManipulated) {
                 // select
