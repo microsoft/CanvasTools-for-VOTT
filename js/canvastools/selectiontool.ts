@@ -157,6 +157,7 @@ export namespace CanvasTools.Selection {
         private crossA: CrossElement;
         private crossB: CrossElement;
         private capturingState: boolean = false;
+        private exclusiveCapturingState: boolean = false;
         private areaSelectorLayer: Snap.Element;
 
         public onSelectionBeginCallback: Function;
@@ -360,9 +361,11 @@ export namespace CanvasTools.Selection {
         }
 
         private onKeyUp(e:KeyboardEvent) {
+            //Holding shift key enable square drawing mode
             if (!e.shiftKey) {
                 this.squareMode = false;
             }
+            //Holding Ctrl key to enable two point selection mode
             if (!e.ctrlKey && this.twoPointsMode) {
                 this.twoPointsMode = false;   
                 this.capturingState = false;
@@ -370,24 +373,45 @@ export namespace CanvasTools.Selection {
                 this.moveCross(this.crossA, this.crossB);
                 this.hideAll([this.crossB, this.selectionBox, this.overlay]);
             }
+
+            //Ctrl + N to add new region temporarily disabling all others
+            if(e.ctrlKey && e.keyCode == 78 && !this.exclusiveCapturingState) {
+                this.enableExclusiveMode();
+                this.twoPointsMode = false;
+            } 
+            //Escape to exit exclusive mode
+            if(e.keyCode == 27) {
+                this.disableExclusiveMode();
+            }
         }
 
         private subscribeToEvents() {
             let self = this;
 
             let listeners = [
-                {event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent},
-                {event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent},
-                {event: "pointerdown", listener: this.onPointerDown, base: this.baseParent},
-                {event: "pointerup", listener: this.onPointerUp, base: this.baseParent},
-                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent},
-                {event: "keydown", listener: this.onKeyDown, base: window},
-                {event: "keyup", listener: this.onKeyUp, base: window},
+                {event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent, bypass: false},
+                {event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false},
+                {event: "pointerdown", listener: this.onPointerDown, base: this.baseParent, bypass: false},
+                {event: "pointerup", listener: this.onPointerUp, base: this.baseParent, bypass: false},
+                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: false},
+                {event: "keydown", listener: this.onKeyDown, base: window, bypass: false},
+                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true},
             ];
 
             listeners.forEach(e => {
-                e.base.addEventListener(e.event, this.enablify(e.listener.bind(this)));            
+                e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));            
             });
+        }
+
+        private enableExclusiveMode() {
+            this.exclusiveCapturingState = true;
+            this.showAll([this.overlay]);
+            this.hideAll([this.selectionBox]);
+            this.enable();
+        }
+        private disableExclusiveMode() {
+            this.exclusiveCapturingState = false;
+            this.hideAll([this.overlay]);
         }
 
         private moveCross(cross:CrossElement, p:base.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
@@ -412,16 +436,18 @@ export namespace CanvasTools.Selection {
         }
 
         disable() {
-            this.isEnabled = false;
-            this.areaSelectorLayer.attr({
-                display: "none"
-            });
+            if(!this.exclusiveCapturingState) {
+                this.isEnabled = false;
+                this.areaSelectorLayer.attr({
+                    display: "none"
+                });
+            }
         }
 
-        enablify(f:Function) {
+        enablify(f:Function, bypass:boolean = false) {
             let self = this;
             return function(args:PointerEvent|KeyboardEvent) {
-                if (this.isEnabled) {
+                if (this.isEnabled || bypass) {
                     f(args);
                 }
             }.bind(self);
