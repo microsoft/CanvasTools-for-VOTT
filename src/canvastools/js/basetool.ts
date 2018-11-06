@@ -102,6 +102,14 @@ export namespace CanvasTools.Base {
             return this.__colorShadow;
         }
 
+        private __colorNoColor: string = "";
+        public get colorNoColor():string {
+            if (this.__colorNoColor == "") {
+                this.__colorNoColor = `rgba(0, 0, 0, 0.0)`;
+            } 
+            return this.__colorNoColor;
+        }
+
         private __colorDark: string = "";
         public get colorDark():string {
             if (this.__colorDark == "") {
