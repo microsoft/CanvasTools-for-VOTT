@@ -21,7 +21,7 @@ export namespace CanvasTools.Filter {
         buff.getContext("2d").putImageData(imageData, 0, 0);
 
         return new Promise<HTMLCanvasElement>((resolve, reject) => {
-            return buff;
+            return resolve(buff);
         });
     }
 
@@ -43,7 +43,7 @@ export namespace CanvasTools.Filter {
 
         public applyToCanvas(canvas: HTMLCanvasElement):Promise<HTMLCanvasElement> {
             let promise = new Promise<HTMLCanvasElement>((resolve, reject) => {
-                return canvas;
+                return resolve(canvas);
             })
 
             if (this.pipeline.length > 0) {

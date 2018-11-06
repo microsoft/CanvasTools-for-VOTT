@@ -71,17 +71,29 @@
                     function() {
                         selector.enable();
                     });
-                    
+
                 /* Upload background image for selection */
                 let imageCnvs = document.getElementById("sourceImageCnvs");
                 let imagePath = "./../images/background-cat.jpg";
                 let image = new Image();
                 image.addEventListener("load", (e) => {
-                    let canvas = imageCnvs; //document.createElement("canvas");
-                    let context = imageCnvs.getContext("2d");
-                    canvas.width = e.target.width;
-                    canvas.height = e.target.height;
-                    context.drawImage(e.target, 0, 0, canvas.width, canvas.height);
+                    // Create buffer
+                    let buffCnvs = document.createElement("canvas");
+                    let context = buffCnvs.getContext("2d");
+                    buffCnvs.width = e.target.width;
+                    buffCnvs.height = e.target.height;
+                    // Fill buffer
+                    context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
+
+                    let filter = new ftools.FilterPipeline();
+                    filter.addFilter(ftools.InvertFilter);
+                    filter.applyToCanvas(buffCnvs).then((bcnvs) => {
+                        // Copy buffer to the canvas on screen
+                        imageCnvs.width = bcnvs.width;
+                        imageCnvs.height = bcnvs.height;
+                        let imgContext = imageCnvs.getContext("2d");
+                        imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+                    });
                 });
                 image.src = imagePath;
 

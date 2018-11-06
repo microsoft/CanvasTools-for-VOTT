@@ -132,7 +132,7 @@ define("filtertool", ["require", "exports"], function (require, exports) {
                 }
                 buff.getContext("2d").putImageData(imageData, 0, 0);
                 return new Promise((resolve, reject) => {
-                    return buff;
+                    return resolve(buff);
                 });
             }
             Filter.InvertFilter = InvertFilter;
@@ -148,7 +148,7 @@ define("filtertool", ["require", "exports"], function (require, exports) {
                 }
                 applyToCanvas(canvas) {
                     let promise = new Promise((resolve, reject) => {
-                        return canvas;
+                        return resolve(canvas);
                     });
                     if (this.pipeline.length > 0) {
                         this.pipeline.forEach((filter) => {

@@ -132,7 +132,7 @@ define("filtertool", ["require", "exports"], function (require, exports) {
                 }
                 buff.getContext("2d").putImageData(imageData, 0, 0);
                 return new Promise((resolve, reject) => {
-                    return buff;
+                    return resolve(buff);
                 });
             }
             Filter.InvertFilter = InvertFilter;
@@ -148,7 +148,7 @@ define("filtertool", ["require", "exports"], function (require, exports) {
                 }
                 applyToCanvas(canvas) {
                     let promise = new Promise((resolve, reject) => {
-                        return canvas;
+                        return resolve(canvas);
                     });
                     if (this.pipeline.length > 0) {
                         this.pipeline.forEach((filter) => {
@@ -162,7 +162,7 @@ define("filtertool", ["require", "exports"], function (require, exports) {
         })(Filter = CanvasTools.Filter || (CanvasTools.Filter = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
+define("regiontool", ["require", "exports", "basetool", "../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
@@ -1391,7 +1391,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
         })(Region = CanvasTools.Region || (CanvasTools.Region = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
+define("selectiontool", ["require", "exports", "basetool", "../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
