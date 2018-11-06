@@ -22,6 +22,7 @@
                             </filter>
                         </defs>
             </svg>
+            <canvas id="sourceImageCnvs"></canvas>
         </div>
         <div>Some text</div>
     </body>
@@ -32,10 +33,12 @@
                 System.import('basetool'),
                 System.import('selectiontool'),
                 System.import('regiontool'),
+                System.import('filtertool')
             ]).then(function(modules){
                 var btools = modules[0].CanvasTools.Base;
-                var rtools = modules[2].CanvasTools.Region;
                 var stools = modules[1].CanvasTools.Selection;
+                var rtools = modules[2].CanvasTools.Region;                
+                var ftools = modules[3].CanvasTools.Filter;
 
                 var sz = document.getElementById("selectionOverlay");
                 var selector, rm;
@@ -67,8 +70,20 @@
                     },
                     function() {
                         selector.enable();
-                    })
-                ;
+                    });
+                    
+                /* Upload background image for selection */
+                let imageCnvs = document.getElementById("sourceImageCnvs");
+                let imagePath = "./../images/background-cat.jpg";
+                let image = new Image();
+                image.addEventListener("load", (e) => {
+                    let canvas = imageCnvs; //document.createElement("canvas");
+                    let context = imageCnvs.getContext("2d");
+                    canvas.width = e.target.width;
+                    canvas.height = e.target.height;
+                    context.drawImage(e.target, 0, 0, canvas.width, canvas.height);
+                });
+                image.src = imagePath;
 
                 
                 window.areaSelector = selector;     
