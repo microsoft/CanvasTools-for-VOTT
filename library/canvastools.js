@@ -139,7 +139,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 }
                 buildOn(paper) {
                     this.anchorsGroup = paper.g();
-                    this.anchorsGroup.addClass("ancorsLayer");
+                    this.anchorsGroup.addClass("anchorsLayer");
                     this.anchors = {
                         TL: this.createAnchor(paper, "TL"),
                         TR: this.createAnchor(paper, "TR"),
@@ -327,8 +327,8 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingend");
                     });
                 }
-                subscribeAnchorToEvents(ancor, active) {
-                    ancor.mouseover((e) => {
+                subscribeAnchorToEvents(anchor, active) {
+                    anchor.mouseover((e) => {
                         this.activeAnchor = active;
                         let p = this.getDragOriginPoint();
                         this.dragOrigin = p;
@@ -361,22 +361,22 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
             class TagsElement {
                 constructor(paper, x, y, rect, tags, styleId, styleSheet) {
                     this.styleSheet = null;
-                    this.tags = tags;
                     this.rect = rect;
                     this.x = x;
                     this.y = y;
                     this.styleId = styleId;
                     this.styleSheet = styleSheet;
                     this.paper = paper;
-                    this.buildOn(paper);
+                    this.buildOn(paper, tags);
                 }
-                buildOn(paper) {
+                buildOn(paper, tags) {
                     this.tagsGroup = paper.g();
                     this.tagsGroup.addClass("tagsLayer");
                     this.primaryTagRect = paper.rect(0, 0, this.rect.width, this.rect.height);
                     this.primaryTagRect.addClass("primaryTagRectStyle");
                     this.primaryTagText = paper.text(0, 0, "");
                     this.primaryTagText.addClass("primaryTagTextStyle");
+                    this.textBox = this.primaryTagText.getBBox();
                     this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
                     this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
                     this.secondaryTagsGroup = paper.g();
@@ -386,7 +386,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.tagsGroup.add(this.primaryTagTextBG);
                     this.tagsGroup.add(this.primaryTagText);
                     this.tagsGroup.add(this.secondaryTagsGroup);
-                    this.updateTags(this.tags);
+                    this.updateTags(tags);
                 }
                 updateTags(tags) {
                     let keepPrimaryText = false;
@@ -908,6 +908,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                 resize(width, height) {
                     this.rect.width = width;
                     this.rect.height = height;
+                    this.area = width * height;
                     this.boundRects.self.width = this.boundRects.host.width - width;
                     this.boundRects.self.height = this.boundRects.host.height - height;
                     this.UI.forEach((element) => {
@@ -1057,6 +1058,63 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                     this.regionManagerLayer.add(region.regionGroup);
                     this.regions.push(region);
                     this.menu.showOnRegion(region);
+                }
+                drawRegion(x, y, rect, id, tagsDescriptor) {
+                    this.menu.hide();
+                    let region = new RegionElement(this.paper, rect, this.paperRect, id, tagsDescriptor, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
+                    region.area = rect.height * rect.width;
+                    region.move(new base.Point2D(x, y));
+                    region.onChange = this.onRegionUpdate.bind(this);
+                    region.tags.updateTags(region.tags.tags);
+                    this.regionManagerLayer.add(region.regionGroup);
+                    this.regions.push(region);
+                    if (this.regions.length > 1 && region.area > this.regions[this.regions.length - 2].area) {
+                        this.sortRegionsByArea();
+                        this.redrawAllRegions();
+                    }
+                    this.menu.showOnRegion(region);
+                }
+                redrawAllRegions() {
+                    let sr = this.regions;
+                    this.deleteAllRegions();
+                    for (var i = 0; i < sr.length; i++) {
+                        this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags.tags);
+                        if (sr[i].isSelected) {
+                            this.selectRegionById(sr[i].ID);
+                        }
+                    }
+                }
+                sortRegionsByArea() {
+                    function quickSort(arr, left, right) {
+                        var len = arr.length, pivot, partitionIndex;
+                        if (left < right) {
+                            pivot = right;
+                            partitionIndex = partition(arr, pivot, left, right);
+                            quickSort(arr, left, partitionIndex - 1);
+                            quickSort(arr, partitionIndex + 1, right);
+                        }
+                        return arr;
+                    }
+                    function partition(arr, pivot, left, right) {
+                        var pivotValue = arr[pivot].area, partitionIndex = left;
+                        for (var i = left; i < right; i++) {
+                            if (arr[i].area > pivotValue) {
+                                swap(arr, i, partitionIndex);
+                                partitionIndex++;
+                            }
+                        }
+                        swap(arr, right, partitionIndex);
+                        return partitionIndex;
+                    }
+                    function swap(arr, i, j) {
+                        var temp = arr[i];
+                        arr[i] = arr[j];
+                        arr[j] = temp;
+                    }
+                    let length = this.regions.length;
+                    if (length > 1) {
+                        quickSort(this.regions, 0, this.regions.length - 1);
+                    }
                 }
                 lookupRegionByID(id) {
                     let region = null;
@@ -1245,6 +1303,8 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
                         if (this.justManipulated) {
                             region.select();
                             this.menu.showOnRegion(region);
+                            this.sortRegionsByArea();
+                            this.redrawAllRegions();
                         }
                     }
                     else if (state == "clicked" && !this.justManipulated) {
@@ -1399,6 +1459,7 @@ define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap
             class AreaSelector {
                 constructor(svgHost, onSelectionBegin, onSelectionEnd) {
                     this.capturingState = false;
+                    this.exclusiveCapturingState = false;
                     this.isEnabled = true;
                     this.squareMode = false;
                     this.twoPointsMode = false;
@@ -1570,21 +1631,38 @@ define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap
                         this.moveCross(this.crossA, this.crossB);
                         this.hideAll([this.crossB, this.selectionBox, this.overlay]);
                     }
+                    if (e.ctrlKey && e.keyCode == 78 && !this.exclusiveCapturingState) {
+                        this.enableExclusiveMode();
+                        this.twoPointsMode = false;
+                    }
+                    if (e.keyCode == 27) {
+                        this.disableExclusiveMode();
+                    }
                 }
                 subscribeToEvents() {
                     let self = this;
                     let listeners = [
-                        { event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent },
-                        { event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent },
-                        { event: "pointerdown", listener: this.onPointerDown, base: this.baseParent },
-                        { event: "pointerup", listener: this.onPointerUp, base: this.baseParent },
-                        { event: "pointermove", listener: this.onPointerMove, base: this.baseParent },
-                        { event: "keydown", listener: this.onKeyDown, base: window },
-                        { event: "keyup", listener: this.onKeyUp, base: window },
+                        { event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent, bypass: false },
+                        { event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false },
+                        { event: "pointerdown", listener: this.onPointerDown, base: this.baseParent, bypass: false },
+                        { event: "pointerup", listener: this.onPointerUp, base: this.baseParent, bypass: false },
+                        { event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: false },
+                        { event: "keydown", listener: this.onKeyDown, base: window, bypass: false },
+                        { event: "keyup", listener: this.onKeyUp, base: window, bypass: true },
                     ];
                     listeners.forEach(e => {
-                        e.base.addEventListener(e.event, this.enablify(e.listener.bind(this)));
+                        e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));
                     });
+                }
+                enableExclusiveMode() {
+                    this.exclusiveCapturingState = true;
+                    this.showAll([this.overlay]);
+                    this.hideAll([this.selectionBox]);
+                    this.enable();
+                }
+                disableExclusiveMode() {
+                    this.exclusiveCapturingState = false;
+                    this.hideAll([this.overlay]);
                 }
                 moveCross(cross, p, square = false, refCross = null) {
                     cross.move(p, this.paperRect, square, refCross);
@@ -1604,15 +1682,17 @@ define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap
                     });
                 }
                 disable() {
-                    this.isEnabled = false;
-                    this.areaSelectorLayer.attr({
-                        display: "none"
-                    });
+                    if (!this.exclusiveCapturingState) {
+                        this.isEnabled = false;
+                        this.areaSelectorLayer.attr({
+                            display: "none"
+                        });
+                    }
                 }
-                enablify(f) {
+                enablify(f, bypass = false) {
                     let self = this;
                     return function (args) {
-                        if (this.isEnabled) {
+                        if (this.isEnabled || bypass) {
                             f(args);
                         }
                     }.bind(self);

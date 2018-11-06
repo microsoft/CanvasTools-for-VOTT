@@ -6,9 +6,9 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outFile": "js/canvastools/canvastools.js"
+        "outFile": "library/canvastools.js"
     },
     "include": [     
-        "js/canvastools/*.ts"
+        "src/canvastools/*.ts"
     ]
 }
