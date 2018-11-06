@@ -6,6 +6,13 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
+
+        "moduleResolution": "node",
+        "baseUrl": "src",
+        "paths": {
+            "@snapsvg/*": ["snapsvg/*"],
+        },
+
         "outFile": "library/js/canvastools.js"
     },
     "include": [     
