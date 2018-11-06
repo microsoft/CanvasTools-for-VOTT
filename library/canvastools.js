@@ -111,7 +111,7 @@ define("basetool", ["require", "exports"], function (require, exports) {
         })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
+define("regiontool", ["require", "exports", "basetool", "./../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
@@ -1340,7 +1340,7 @@ define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.sv
         })(Region = CanvasTools.Region || (CanvasTools.Region = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
+define("selectiontool", ["require", "exports", "basetool", "./../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;

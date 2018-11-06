@@ -1,6 +1,6 @@
 /// <reference types="snapsvg" />
 import * as CT from "./basetool.js";
-import * as Snap from "./../../snapsvg/snap.svg.js";
+import * as Snap from "./../snapsvg/snap.svg";
 import base = CT.CanvasTools.Base;
 
 export namespace CanvasTools.Region { 
