@@ -111,7 +111,58 @@ define("basetool", ["require", "exports"], function (require, exports) {
         })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("regiontool", ["require", "exports", "basetool", "./../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
+define("filtertool", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Filter;
+        (function (Filter) {
+            function InvertFilter(canvas) {
+                var context = canvas.getContext('2d');
+                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                var buff = document.createElement("canvas");
+                buff.width = canvas.width;
+                buff.height = canvas.height;
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] = 255 - data[i];
+                    data[i + 1] = 255 - data[i + 1];
+                    data[i + 2] = 255 - data[i + 2];
+                }
+                buff.getContext("2d").putImageData(imageData, 0, 0);
+                return new Promise((resolve, reject) => {
+                    return buff;
+                });
+            }
+            Filter.InvertFilter = InvertFilter;
+            class FilterPipeline {
+                constructor() {
+                    this.pipeline = new Array();
+                }
+                addFilter(filter) {
+                    this.pipeline.push(filter);
+                }
+                clearPipeline() {
+                    this.pipeline = new Array();
+                }
+                applyToCanvas(canvas) {
+                    let promise = new Promise((resolve, reject) => {
+                        return canvas;
+                    });
+                    if (this.pipeline.length > 0) {
+                        this.pipeline.forEach((filter) => {
+                            promise = promise.then(filter);
+                        });
+                    }
+                    return promise;
+                }
+            }
+            Filter.FilterPipeline = FilterPipeline;
+        })(Filter = CanvasTools.Filter || (CanvasTools.Filter = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("regiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
@@ -1340,7 +1391,7 @@ define("regiontool", ["require", "exports", "basetool", "./../snapsvg/snap.svg"]
         })(Region = CanvasTools.Region || (CanvasTools.Region = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("selectiontool", ["require", "exports", "basetool", "./../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
+define("selectiontool", ["require", "exports", "basetool", "./../../snapsvg/snap.svg"], function (require, exports, CT, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base = CT.CanvasTools.Base;
