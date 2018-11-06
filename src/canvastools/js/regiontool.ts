@@ -1,6 +1,6 @@
 /// <reference types="snapsvg" />
 import * as CT from "./basetool";
-import * as Snap from "../../snapsvg/snap.svg";
+import * as Snap from "@snapsvg/snap.svg.js";
 import base = CT.CanvasTools.Base;
 
 export namespace CanvasTools.Region { 
@@ -337,6 +337,9 @@ export namespace CanvasTools.Region {
         }
     }
 
+    export type TagsUpdateOptions = {
+        showRegionBackground: boolean
+    };
     /*
      * TagsElement 
      * Used internally to draw labels and map colors for the region
@@ -367,8 +370,9 @@ export namespace CanvasTools.Region {
         private styleId: string;
         private styleSheet: CSSStyleSheet = null;
         private paper: Snap.Paper;
+        private tagsUpdateOptions: TagsUpdateOptions;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, tags: base.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet){
+        constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, tags: base.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
             //this.tags = tags;
             this.rect = rect;
             this.x = x;
@@ -379,6 +383,8 @@ export namespace CanvasTools.Region {
             this.styleSheet = styleSheet;
             this.paper = paper;
             
+            this.tagsUpdateOptions = tagsUpdateOptions;
+
             this.buildOn(paper, tags);
         }
 
@@ -406,10 +412,10 @@ export namespace CanvasTools.Region {
             this.tagsGroup.add(this.primaryTagText); 
             this.tagsGroup.add(this.secondaryTagsGroup); 
             
-            this.updateTags(tags);                       
+            this.updateTags(tags, this.tagsUpdateOptions);                       
         }
 
-        public updateTags(tags: base.TagsDescriptor){            
+        public updateTags(tags: base.TagsDescriptor, options?: TagsUpdateOptions){            
             let keepPrimaryText = false; // redraw by default
             if (this.tags && this.tags.primary && tags && tags.primary) {
                 keepPrimaryText = (tags.primary.name == this.tags.primary.name);
@@ -419,7 +425,9 @@ export namespace CanvasTools.Region {
 
             this.redrawTagLabels(keepPrimaryText);
             this.clearColors();
-            this.applyColors(); 
+
+            let showBackground = (options !== undefined) ? options.showRegionBackground : true;
+            this.applyColors(showBackground); 
         }
 
         private redrawTagLabels(keepPrimaryText: boolean = true) {
@@ -511,13 +519,13 @@ export namespace CanvasTools.Region {
         }
 
         // Map colors to region
-        private applyColors() {
+        private applyColors(showRegionBackground:boolean = true) {
             // Map primary tag color
             if (this.tags && this.tags.primary !== undefined) {
                 let styleMap = [
                     {
                         rule: `.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${this.tags.primary.colorShadow};
+                        style: `fill: ${showRegionBackground? this.tags.primary.colorShadow : this.tags.primary.colorNoColor};
                                 stroke:${this.tags.primary.colorAccent};`
                     },
                     {
@@ -1060,7 +1068,10 @@ export namespace CanvasTools.Region {
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
 
-        constructor(paper: Snap.Paper, rect:base.IRect, boundRect:base.IRect = null, id: string, tagsDescriptor: base.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
+        // Styling options
+        private tagsUpdateOptions: TagsUpdateOptions;
+
+        constructor(paper: Snap.Paper, rect:base.IRect, boundRect:base.IRect = null, id: string, tagsDescriptor: base.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
             this.x = 0;
             this.y = 0;
             this.rect = rect;
@@ -1088,6 +1099,7 @@ export namespace CanvasTools.Region {
             this.regionID = this.s8();
             this.styleID = `region_${ this.regionID }_style`;
             this.styleSheet = this.insertStyleSheet();
+            this.tagsUpdateOptions = tagsUpdateOptions;
         
             this.buildOn(paper);
         }
@@ -1099,7 +1111,7 @@ export namespace CanvasTools.Region {
 
             this.anchors = new AnchorsElement(paper, this.x, this.y, this.rect,this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
             this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleID, this.styleSheet);
+            this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleID, this.styleSheet, this.tagsUpdateOptions);
             
             this.regionGroup.add(this.tags.tagsGroup);
             this.regionGroup.add(this.drag.dragGroup);                      
@@ -1137,8 +1149,8 @@ export namespace CanvasTools.Region {
             this.onChange(this, state, multiSelection);
         }
 
-        public updateTags(tags: base.TagsDescriptor){
-            this.tags.updateTags(tags);
+        public updateTags(tags: base.TagsDescriptor, options?: TagsUpdateOptions){
+            this.tags.updateTags(tags, options);
         }
 
         public move(p: base.IPoint2D) {           
@@ -1220,6 +1232,10 @@ export namespace CanvasTools.Region {
         public onRegionDelete: Function;
 
         private regionManagerLayer:Snap.Element;
+
+        private tagsUpdateOptions: TagsUpdateOptions = {
+            showRegionBackground: true
+        };
 
         constructor(svgHost: SVGSVGElement, onManipulationBegin: onManipulationFunction, onManipulationEnd: onManipulationFunction){
             this.baseParent = svgHost;
@@ -1330,6 +1346,15 @@ export namespace CanvasTools.Region {
                             return false;                          
                         }
                         break;
+                        // ctrl + B, ctrl + b
+                        case 66:
+                        case 98:
+                        if (e.ctrlKey) {
+                            this.toggleBackground();
+                            e.preventDefault();
+                            return false;                          
+                        }
+                        break;
                     // default
                     default: return;
                 }
@@ -1347,7 +1372,8 @@ export namespace CanvasTools.Region {
 
             let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, id, tagsDescriptor, 
                 this.onManipulationBegin_local.bind(this), 
-                this.onManipulationEnd_local.bind(this));
+                this.onManipulationEnd_local.bind(this),
+                this.tagsUpdateOptions);
             region.move(new base.Point2D(x, y));
 
             region.onChange = this.onRegionUpdate.bind(this);
@@ -1366,11 +1392,12 @@ export namespace CanvasTools.Region {
             this.menu.hide();
             let region = new RegionElement(this.paper, rect, this.paperRect, id, tagsDescriptor,
                 this.onManipulationBegin_local.bind(this), 
-                this.onManipulationEnd_local.bind(this));
+                this.onManipulationEnd_local.bind(this),
+                this.tagsUpdateOptions);
             region.area = rect.height * rect.width;
             region.move(new base.Point2D(x, y));
             region.onChange = this.onRegionUpdate.bind(this);
-            region.tags.updateTags(region.tags.tags);
+            region.tags.updateTags(region.tags.tags, this.tagsUpdateOptions);
             this.regionManagerLayer.add(region.regionGroup);
             this.regions.push(region);
             // Need to do a check for invalid stacking from user generated or older saved json
@@ -1378,18 +1405,22 @@ export namespace CanvasTools.Region {
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
             }
-            this.menu.showOnRegion(region);  
+            //this.menu.showOnRegion(region);  
         }
 
         // REDRAW ALL REGIONS (corrects z-order changes)
         public redrawAllRegions() {
             let sr = this.regions;
             this.deleteAllRegions();
+            let selectedID: string = "";
             for(var i = 0; i < sr.length; i++) {
                 this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags.tags);
                 if(sr[i].isSelected) {
-                    this.selectRegionById(sr[i].ID);
+                    selectedID = sr[i].ID
                 }
+            }
+            if (selectedID !== "") {
+                this.selectRegionById(selectedID);
             }
         }
 
@@ -1514,7 +1545,7 @@ export namespace CanvasTools.Region {
             let region = this.lookupRegionByID(id);
 
             if (region != null) {
-                region.updateTags(tagsDescriptor);
+                region.updateTags(tagsDescriptor, this.tagsUpdateOptions);
             }
         }
         
@@ -1522,7 +1553,7 @@ export namespace CanvasTools.Region {
             let regions = this.lookupSelectedRegions();
 
             regions.forEach(region => {
-                region.updateTags(tagsDescriptor);
+                region.updateTags(tagsDescriptor, this.tagsUpdateOptions);
             });
         }
 
@@ -1706,6 +1737,15 @@ export namespace CanvasTools.Region {
                     r.unselect();
                 }
             } 
+        }
+
+        private showRegionBackground:boolean = true;
+        private toggleBackground() {
+            this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
+
+            this.regions.forEach((r) => {
+                r.tags.updateTags(r.tags.tags, this.tagsUpdateOptions);
+            });
         }
     }
 }
