@@ -1337,7 +1337,7 @@ export namespace CanvasTools.Region {
             });
             window.addEventListener("keydown", (e) => {
                 switch (e.keyCode) {
-                    // ctrl + A, ctrl + a
+                    // ctrl + A, ctrl + a, numpad 1
                     case 65:
                     case 97:
                         if (e.ctrlKey) {
@@ -1348,7 +1348,6 @@ export namespace CanvasTools.Region {
                         break;
                         // ctrl + B, ctrl + b
                         case 66:
-                        case 98:
                         if (e.ctrlKey) {
                             this.toggleBackground();
                             e.preventDefault();
