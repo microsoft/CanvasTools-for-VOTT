@@ -30,16 +30,14 @@
     <script>
         SystemJS.import("./js/canvastools.js").then(function(module){
             Promise.all([
-                System.import('CanvasTools.Base'),
-                System.import('selectiontool'),
-                System.import('filtertool'),
-                System.import('regiontool')
+                System.import('CanvasTools')
                 
             ]).then(function(modules){
-                var btools = modules[0].CanvasTools.Base;
-                var stools = modules[1].CanvasTools.Selection;
-                var ftools = modules[2].CanvasTools.Filter;
-                var rtools = modules[3].CanvasTools.Region;                
+                var ct = modules[0].CanvasTools;
+                var btools = ct.Base;
+                var stools = ct.Selection;
+                var ftools = ct.Filter;
+                var rtools = ct.Region;                
                 
                 var sz = document.getElementById("selectionOverlay");
                 var selector, rm;
