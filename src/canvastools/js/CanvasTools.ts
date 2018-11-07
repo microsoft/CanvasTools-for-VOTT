@@ -1,8 +1,8 @@
-export * from "@CTBase/CanvasTools.Base.Interfaces";
-import * as IBase from "@CTBase/CanvasTools.Base.Interfaces";
-import * as Point2D from "@CTBase/CanvasTools.Base.Point2D";
-import * as Rect from "@CTBase/CanvasTools.Base.Rect";
-import * as Tags from "@CTBase/CanvasTools.Base.Tags";
+export * from "@canvastools/Base/CanvasTools.Base.Interfaces";
+import * as IBase from "@canvastools/Base/CanvasTools.Base.Interfaces";
+import * as Point2D from "@canvastools/Base/CanvasTools.Base.Point2D";
+import * as Rect from "@canvastools/Base/CanvasTools.Base.Rect";
+import * as Tags from "@canvastools/Base/CanvasTools.Base.Tags";
 
 import * as SelectionTool from "@canvastools/CanvasTools.Selection";
 import * as RegionTool from "@canvastools/CanvasTools.Region";

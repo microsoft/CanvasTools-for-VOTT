@@ -1,11 +1,11 @@
 /// <reference types="snapsvg" />
-import * as CTBaseInterfaces from "@CTBase/CanvasTools.Base.Interfaces";
+import * as CTBaseInterfaces from "./Base/CanvasTools.Base.Interfaces";
 import IBase = CTBaseInterfaces.CanvasTools.Base.Interfaces;
-import * as CTBaseRect from "@CTBase/CanvasTools.Base.Rect";
+import * as CTBaseRect from "./Base/CanvasTools.Base.Rect";
 import Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
-import * as CTBasePoint from "@CTBase/CanvasTools.Base.Point2D";
+import * as CTBasePoint from "./Base/CanvasTools.Base.Point2D";
 import Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
-import * as CTBaseTag from "@canvastools/Base/CanvasTools.Base.Tags";
+import * as CTBaseTag from "./Base/CanvasTools.Base.Tags";
 import Tags = CTBaseTag.CanvasTools.Base.Tags;
 
 import * as Snap from "@snapsvg/snap.svg.js";

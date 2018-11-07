@@ -15,8 +15,7 @@
         "baseUrl": "src",
         "paths": {
             "@snapsvg/*": ["snapsvg/*"],
-            "@canvastools/*" : ["canvastools/js/*"],
-            "@CTBase/*": ["canvastools/js/Base/*"] 
+            "@canvastools/*" : ["canvastools/js/*"]
         },
 
         "outFile": "library/js/canvastools.js"
