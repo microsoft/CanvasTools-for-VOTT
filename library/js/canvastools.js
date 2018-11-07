@@ -1,3 +1,168 @@
+define("Base/CanvasTools.Base.Interfaces", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("Base/CanvasTools.Base.Point2D", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Base;
+        (function (Base) {
+            var Point;
+            (function (Point) {
+                class Point2D {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                    }
+                    boundToRect(r) {
+                        let newp = new Point2D(0, 0);
+                        newp.x = (this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x);
+                        newp.y = (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y);
+                        return newp;
+                    }
+                }
+                Point.Point2D = Point2D;
+            })(Point = Base.Point || (Base.Point = {}));
+        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("Base/CanvasTools.Base.Rect", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Base;
+        (function (Base) {
+            var Rect;
+            (function (Rect_1) {
+                class Rect {
+                    constructor(width, height) {
+                        this.resize(width, height);
+                    }
+                    resize(width, height) {
+                        this.width = width;
+                        this.height = height;
+                    }
+                    copy() {
+                        return new Rect(this.width, this.height);
+                    }
+                }
+                Rect_1.Rect = Rect;
+            })(Rect = Base.Rect || (Base.Rect = {}));
+        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("Base/CanvasTools.Base.Tags", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Base;
+        (function (Base) {
+            var Tags;
+            (function (Tags) {
+                class Tag {
+                    constructor(name, colorHue, id = "none") {
+                        this.__colorPure = "";
+                        this.__colorAccent = "";
+                        this.__colorHighlight = "";
+                        this.__colorShadow = "";
+                        this.__colorNoColor = "";
+                        this.__colorDark = "";
+                        this.name = name;
+                        this.colorHue = colorHue;
+                        this.id = id;
+                    }
+                    get colorPure() {
+                        if (this.__colorPure == "") {
+                            this.__colorPure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
+                        }
+                        return this.__colorPure;
+                    }
+                    get colorAccent() {
+                        if (this.__colorAccent == "") {
+                            this.__colorAccent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
+                        }
+                        return this.__colorAccent;
+                    }
+                    get colorHighlight() {
+                        if (this.__colorHighlight == "") {
+                            this.__colorHighlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
+                        }
+                        return this.__colorHighlight;
+                    }
+                    get colorShadow() {
+                        if (this.__colorShadow == "") {
+                            this.__colorShadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
+                        }
+                        return this.__colorShadow;
+                    }
+                    get colorNoColor() {
+                        if (this.__colorNoColor == "") {
+                            this.__colorNoColor = `rgba(0, 0, 0, 0.0)`;
+                        }
+                        return this.__colorNoColor;
+                    }
+                    get colorDark() {
+                        if (this.__colorDark == "") {
+                            this.__colorDark = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
+                        }
+                        return this.__colorDark;
+                    }
+                    static getHueFromColor(color) {
+                        var r = parseInt(color.substring(1, 3), 16) / 255;
+                        var g = parseInt(color.substring(3, 5), 16) / 255;
+                        var b = parseInt(color.substring(5, 7), 16) / 255;
+                        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+                        var h, s, l = (max + min) / 2;
+                        if (max == min) {
+                            h = s = 0;
+                        }
+                        else {
+                            var d = max - min;
+                            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                            switch (max) {
+                                case r:
+                                    h = (g - b) / d + (g < b ? 6 : 0);
+                                    break;
+                                case g:
+                                    h = (b - r) / d + 2;
+                                    break;
+                                case b:
+                                    h = (r - g) / d + 4;
+                                    break;
+                            }
+                            h /= 6;
+                        }
+                        return h;
+                    }
+                }
+                Tags.Tag = Tag;
+                class TagsDescriptor {
+                    constructor(primaryTag, secondaryTags = []) {
+                        this.primary = primaryTag;
+                        this.secondary = secondaryTags;
+                    }
+                }
+                Tags.TagsDescriptor = TagsDescriptor;
+            })(Tags = Base.Tags || (Base.Tags = {}));
+        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("CanvasTools.Base", ["require", "exports", "Base/CanvasTools.Base.Point2D", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Tags"], function (require, exports, Point2D, Rect, Tags) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        CanvasTools.Base = {
+            Point: Point2D.CanvasTools.Base.Point,
+            Rect: Rect.CanvasTools.Base.Rect,
+            Tags: Tags.CanvasTools.Base.Tags
+        };
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
 define("filtertool", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -68,155 +233,11 @@ define("filtertool", ["require", "exports"], function (require, exports) {
         })(Filter = CanvasTools.Filter || (CanvasTools.Filter = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("Base/CanvasTools.Base.Interfaces", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-});
-define("Base/CanvasTools.Base.Rect", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var CanvasTools;
-    (function (CanvasTools) {
-        var Base;
-        (function (Base) {
-            class Rect {
-                constructor(width, height) {
-                    this.resize(width, height);
-                }
-                resize(width, height) {
-                    this.width = width;
-                    this.height = height;
-                }
-                copy() {
-                    return new Rect(this.width, this.height);
-                }
-            }
-            Base.Rect = Rect;
-        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
-    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
-});
-define("Base/CanvasTools.Base.Point2D", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var CanvasTools;
-    (function (CanvasTools) {
-        var Base;
-        (function (Base) {
-            class Point2D {
-                constructor(x, y) {
-                    this.x = x;
-                    this.y = y;
-                }
-                boundToRect(r) {
-                    let newp = new Point2D(0, 0);
-                    newp.x = (this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x);
-                    newp.y = (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y);
-                    return newp;
-                }
-            }
-            Base.Point2D = Point2D;
-        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
-    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
-});
-define("Base/CanvasTools.Base.Tag", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var CanvasTools;
-    (function (CanvasTools) {
-        var Base;
-        (function (Base) {
-            class Tag {
-                constructor(name, colorHue, id = "none") {
-                    this.__colorPure = "";
-                    this.__colorAccent = "";
-                    this.__colorHighlight = "";
-                    this.__colorShadow = "";
-                    this.__colorNoColor = "";
-                    this.__colorDark = "";
-                    this.name = name;
-                    this.colorHue = colorHue;
-                    this.id = id;
-                }
-                get colorPure() {
-                    if (this.__colorPure == "") {
-                        this.__colorPure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
-                    }
-                    return this.__colorPure;
-                }
-                get colorAccent() {
-                    if (this.__colorAccent == "") {
-                        this.__colorAccent = `hsla(${this.colorHue.toString()}, 100%, 50%, 0.5)`;
-                    }
-                    return this.__colorAccent;
-                }
-                get colorHighlight() {
-                    if (this.__colorHighlight == "") {
-                        this.__colorHighlight = `hsla(${this.colorHue.toString()}, 80%, 40%, 0.3)`;
-                    }
-                    return this.__colorHighlight;
-                }
-                get colorShadow() {
-                    if (this.__colorShadow == "") {
-                        this.__colorShadow = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.2)`;
-                    }
-                    return this.__colorShadow;
-                }
-                get colorNoColor() {
-                    if (this.__colorNoColor == "") {
-                        this.__colorNoColor = `rgba(0, 0, 0, 0.0)`;
-                    }
-                    return this.__colorNoColor;
-                }
-                get colorDark() {
-                    if (this.__colorDark == "") {
-                        this.__colorDark = `hsla(${this.colorHue.toString()}, 50%, 30%, 0.8)`;
-                    }
-                    return this.__colorDark;
-                }
-                static getHueFromColor(color) {
-                    var r = parseInt(color.substring(1, 3), 16) / 255;
-                    var g = parseInt(color.substring(3, 5), 16) / 255;
-                    var b = parseInt(color.substring(5, 7), 16) / 255;
-                    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-                    var h, s, l = (max + min) / 2;
-                    if (max == min) {
-                        h = s = 0;
-                    }
-                    else {
-                        var d = max - min;
-                        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                        switch (max) {
-                            case r:
-                                h = (g - b) / d + (g < b ? 6 : 0);
-                                break;
-                            case g:
-                                h = (b - r) / d + 2;
-                                break;
-                            case b:
-                                h = (r - g) / d + 4;
-                                break;
-                        }
-                        h /= 6;
-                    }
-                    return h;
-                }
-            }
-            Base.Tag = Tag;
-            class TagsDescriptor {
-                constructor(primaryTag, secondaryTags = []) {
-                    this.primary = primaryTag;
-                    this.secondary = secondaryTags;
-                }
-            }
-            Base.TagsDescriptor = TagsDescriptor;
-        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
-    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
-});
 define("regiontool", ["require", "exports", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Point2D", "@snapsvg/snap.svg.js"], function (require, exports, CTBaseRect, CTBasePoint, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Rect = CTBaseRect.CanvasTools.Base.Rect;
-    var Point2D = CTBasePoint.CanvasTools.Base.Point2D;
+    var Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
+    var Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
     var CanvasTools;
     (function (CanvasTools) {
         var Region;
@@ -1467,8 +1488,8 @@ define("regiontool", ["require", "exports", "Base/CanvasTools.Base.Rect", "Base/
 define("selectiontool", ["require", "exports", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Point2D", "@snapsvg/snap.svg.js"], function (require, exports, CTBaseRect, CTBasePoint, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Rect = CTBaseRect.CanvasTools.Base.Rect;
-    var Point2D = CTBasePoint.CanvasTools.Base.Point2D;
+    var Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
+    var Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
     var CanvasTools;
     (function (CanvasTools) {
         var Selection;

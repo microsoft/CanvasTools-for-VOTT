@@ -30,7 +30,7 @@
     <script>
         SystemJS.import("./js/canvastools.js").then(function(module){
             Promise.all([
-                System.import('Base/CanvasTools.Base.Tag'),
+                System.import('CanvasTools.Base'),
                 System.import('selectiontool'),
                 System.import('filtertool'),
                 System.import('regiontool')
@@ -52,16 +52,16 @@
                     }, 
                     function(x1, y1, x2, y2){
                         //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
-                        var primaryTag = new btools.Tag(
+                        var primaryTag = new btools.Tags.Tag(
                             (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                             Math.floor(Math.random() * 360.0));
-                        var secondaryTag = new btools.Tag(
+                        var secondaryTag = new btools.Tags.Tag(
                             (Math.random() > 0.5) ? "Yes" : "No",
                             Math.floor(Math.random() * 360.0));
-                        var ternaryTag = new btools.Tag(
+                        var ternaryTag = new btools.Tags.Tag(
                             (Math.random() > 0.5) ? "one" : "two",
                             Math.floor(Math.random() * 360.0));
-                        var tags = new btools.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+                        var tags = new btools.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
                         rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, tags);
                     }
                 );

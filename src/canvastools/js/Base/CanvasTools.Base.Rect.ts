@@ -1,7 +1,7 @@
 import base = require("@canvastools/base/CanvasTools.Base.Interfaces");
-import IBase = base.CanvasTools.Base;
+import IBase = base.CanvasTools.Base.Interfaces;
 
-export module CanvasTools.Base {
+export module CanvasTools.Base.Rect {
     export class Rect implements IBase.IRect, IBase.IResizable {
         public width: number;
         public height: number;

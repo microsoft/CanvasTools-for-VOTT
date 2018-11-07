@@ -1,10 +1,10 @@
-export module CanvasTools.Base {
+export module CanvasTools.Base.Tags {
     export class Tag {
         public colorHue: number;
         public name: string;
         public id: string;
 
-         private __colorPure: string = "";
+        private __colorPure: string = "";
         public get colorPure():string {
             if (this.__colorPure == "") {
                 this.__colorPure = `hsl(${this.colorHue.toString()}, 100%, 50%)`;
