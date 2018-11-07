@@ -1,11 +1,18 @@
 /// <reference types="snapsvg" />
-import * as CT from "./basetool";
-import * as Snap from "@snapsvg/snap.svg.js";
-import base = CT.CanvasTools.Base;
+import CTBaseInterfaces = require("@CTBase/CanvasTools.Base.Interfaces");
+import IBase = CTBaseInterfaces.CanvasTools.Base;
+import CTBaseRect = require("@CTBase/CanvasTools.Base.Rect");
+import Rect = CTBaseRect.CanvasTools.Base.Rect;
+import CTBasePoint = require("@CTBase/CanvasTools.Base.Point2D");
+import Point2D = CTBasePoint.CanvasTools.Base.Point2D;
+import CTBaseTag = require("@CTBase/CanvasTools.Base.Tag");
+import Tags = CTBaseTag.CanvasTools.Base;
 
-export namespace CanvasTools.Region { 
+import * as Snap from "@snapsvg/snap.svg.js";
+
+export module CanvasTools.Region { 
     interface onManipulationFunction {
-        (UIElement?: base.IRegionPart): void;
+        (UIElement?: IBase.IRegionPart): void;
     }
 
     interface onChangeFunction {
@@ -17,16 +24,16 @@ export namespace CanvasTools.Region {
      * AnchorsElement 
      * Used internally to draw anchors to resize the region
     */
-    class AnchorsElement implements base.IRegionPart {
+    class AnchorsElement implements IBase.IRegionPart {
         // Region size
-        public rect: base.IRect;
+        public rect: IBase.IRect;
 
         // Region position
         public x: number;
         public y: number;
 
         // Bound rects
-        private boundRect: base.IRect;
+        private boundRect: IBase.IRect;
 
         // Anchors composition
         public anchorsGroup:Snap.Element;
@@ -40,7 +47,7 @@ export namespace CanvasTools.Region {
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, boundRect:base.IRect = null, onChange?: onChangeFunction, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction) {
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, boundRect:IBase.IRect = null, onChange?: onChangeFunction, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction) {
             this.x = x;
             this.y = y;
             this.rect = rect;
@@ -88,7 +95,7 @@ export namespace CanvasTools.Region {
             return a;
         }
 
-        public move(p: base.IPoint2D) {
+        public move(p: IBase.IPoint2D) {
             this.x = p.x;
             this.y = p.y;
             this.rearrangeAnchors(this.x, this.y, this.x + this.rect.width, this.y + this.rect.height);
@@ -109,7 +116,7 @@ export namespace CanvasTools.Region {
             });            
         }
 
-        private rearrangeCoord(p1: base.IPoint2D, p2: base.IPoint2D, flipX: boolean, flipY: boolean) {
+        private rearrangeCoord(p1: IBase.IPoint2D, p2: IBase.IPoint2D, flipX: boolean, flipY: boolean) {
             let x = (p1.x < p2.x) ? p1.x : p2.x;
             let y = (p1.y < p2.y) ? p1.y : p2.y;
             let width = Math.abs(p1.x - p2.x);
@@ -150,9 +157,9 @@ export namespace CanvasTools.Region {
             }
          }
         
-        private dragOrigin: base.Point2D;
-        private pointOrigin: base.Point2D;
-        private rectOrigin: base.IRect;
+        private dragOrigin: Point2D;
+        private pointOrigin: Point2D;
+        private rectOrigin: IBase.IRect;
 
         private anchorDragBegin() {
             this.originalAnchor = this.activeAnchor;
@@ -183,12 +190,12 @@ export namespace CanvasTools.Region {
                     break;
                 }
             }
-            return new base.Point2D(x, y);
+            return new Point2D(x, y);
         }
         
         private anchorDragMove(dx:number, dy:number, x: number, y: number) {
             // Calculation depends on active anchor!!
-            let p1: base.Point2D, p2: base.Point2D;
+            let p1: Point2D, p2: Point2D;
             let x1: number, y1: number, x2: number, y2: number;
             let flipX:boolean = false;
             let flipY:boolean = false;
@@ -227,8 +234,8 @@ export namespace CanvasTools.Region {
                 }
             }
 
-            p1 = new base.Point2D(x1, y1);
-            p2 = new base.Point2D(x2, y2);
+            p1 = new Point2D(x1, y1);
+            p2 = new Point2D(x2, y2);
 
             if (this.boundRect !== null) {
                 p1 = p1.boundToRect(this.boundRect);
@@ -305,7 +312,7 @@ export namespace CanvasTools.Region {
                 let p = this.getDragOriginPoint();    
                 this.dragOrigin = p;
                 this.rectOrigin = this.rect.copy();
-                this.pointOrigin = new base.Point2D(this.x, this.y);
+                this.pointOrigin = new Point2D(this.x, this.y);
                 // Move ghost anchor to current anchor position
 
                 window.requestAnimationFrame(() => {
@@ -344,9 +351,9 @@ export namespace CanvasTools.Region {
      * TagsElement 
      * Used internally to draw labels and map colors for the region
     */
-    class TagsElement  implements base.IRegionPart {
+    class TagsElement  implements IBase.IRegionPart {
         // Region size
-        public rect: base.IRect;
+        public rect: IBase.IRect;
 
         // Region position
         public x: number;
@@ -364,7 +371,7 @@ export namespace CanvasTools.Region {
         private secondaryTags: Array<Snap.Element>;
 
         // Tags
-        public tags: base.TagsDescriptor;
+        public tags: Tags.TagsDescriptor;
 
         // Styling
         private styleId: string;
@@ -372,7 +379,7 @@ export namespace CanvasTools.Region {
         private paper: Snap.Paper;
         private tagsUpdateOptions: TagsUpdateOptions;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, tags: base.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, tags: Tags.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
             //this.tags = tags;
             this.rect = rect;
             this.x = x;
@@ -388,7 +395,7 @@ export namespace CanvasTools.Region {
             this.buildOn(paper, tags);
         }
 
-        private buildOn(paper:Snap.Paper, tags: base.TagsDescriptor){
+        private buildOn(paper:Snap.Paper, tags: Tags.TagsDescriptor){
             this.tagsGroup = paper.g();
             this.tagsGroup.addClass("tagsLayer");    
             
@@ -415,7 +422,7 @@ export namespace CanvasTools.Region {
             this.updateTags(tags, this.tagsUpdateOptions);                       
         }
 
-        public updateTags(tags: base.TagsDescriptor, options?: TagsUpdateOptions){            
+        public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){            
             let keepPrimaryText = false; // redraw by default
             if (this.tags && this.tags.primary && tags && tags.primary) {
                 keepPrimaryText = (tags.primary.name == this.tags.primary.name);
@@ -580,7 +587,7 @@ export namespace CanvasTools.Region {
             }            
         }
 
-        public move(p: base.IPoint2D) {           
+        public move(p: IBase.IPoint2D) {           
             this.x = p.x;
             this.y = p.y;
 
@@ -654,9 +661,9 @@ export namespace CanvasTools.Region {
      * DragElement 
      * Used internally to drag the region
     */
-    class DragElement implements base.IRegionPart {
+    class DragElement implements IBase.IRegionPart {
         // Region size
-        public rect: base.IRect;
+        public rect: IBase.IRect;
 
         // Region position
         public x: number;
@@ -667,7 +674,7 @@ export namespace CanvasTools.Region {
         private dragRect: Snap.Element;
 
         // Bounding box
-        private boundRect: base.IRect;
+        private boundRect: IBase.IRect;
 
         // Change Notifier
         private onChange: Function;
@@ -676,7 +683,7 @@ export namespace CanvasTools.Region {
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, boundRect:base.IRect = null, onChange?: onChangeFunction, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, boundRect:IBase.IRect = null, onChange?: onChangeFunction, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
             this.rect = rect;
             this.x = x;
             this.y = y;
@@ -708,7 +715,7 @@ export namespace CanvasTools.Region {
             this.dragGroup.add(this.dragRect);
         }
 
-        public move(p: base.IPoint2D) {           
+        public move(p: IBase.IPoint2D) {           
             this.x = p.x;
             this.y = p.y;
             window.requestAnimationFrame(() => {
@@ -750,15 +757,15 @@ export namespace CanvasTools.Region {
             });            
         }
 
-        private dragOrigin: base.Point2D;
+        private dragOrigin: Point2D;
 
         private rectDragBegin() {
-            this.dragOrigin = new base.Point2D(this.x, this.y);            
+            this.dragOrigin = new Point2D(this.x, this.y);            
         }
         
         private rectDragMove(dx:number, dy:number) {            
             if (dx != 0 && dy != 0) {
-                let p = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
+                let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
 
                 if (this.boundRect !== null) {                
                     p = p.boundToRect(this.boundRect);
@@ -805,9 +812,9 @@ export namespace CanvasTools.Region {
      * MenuElement 
      * Used internally to show actions menu for the region
     */
-   class MenuElement implements base.IRegionPart {
+   class MenuElement implements IBase.IRegionPart {
     // Region size
-    public rect: base.IRect;
+    public rect: IBase.IRect;
 
     // Region position
     public x: number;
@@ -833,7 +840,7 @@ export namespace CanvasTools.Region {
     public menuItems: Array<Snap.Element>;
 
     // Bounding box
-    private boundRect: base.IRect;
+    private boundRect: IBase.IRect;
 
     // Manipulation notifiers
     public onManipulationBegin: onManipulationFunction;
@@ -844,7 +851,7 @@ export namespace CanvasTools.Region {
 
     private region: RegionElement;
 
-    constructor(paper:Snap.Paper, x: number, y: number, rect:base.IRect, boundRect:base.IRect = null, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
+    constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, boundRect:IBase.IRect = null, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction){
         this.paper = paper;
         this.rect = rect;
         this.x = x;
@@ -977,7 +984,7 @@ export namespace CanvasTools.Region {
         });        
     }
 
-    public move(p: base.IPoint2D) {           
+    public move(p: IBase.IPoint2D) {           
         let self = this;
         this.x = p.x;
         this.y = p.y;
@@ -1032,9 +1039,9 @@ export namespace CanvasTools.Region {
     }
 }
 
-    class RegionElement implements base.IHideable, base.IResizable{
+    class RegionElement implements IBase.IHideable, IBase.IResizable{
         // Region size
-        public rect: base.IRect;
+        public rect: IBase.IRect;
         public area: number;
 
         // Region position
@@ -1042,17 +1049,17 @@ export namespace CanvasTools.Region {
         public y: number;
 
         // Bound rects
-        private boundRects: {host: base.IRect, self: base.IRect };
+        private boundRects: {host: IBase.IRect, self: IBase.IRect };
 
         // Region components
         public regionGroup: Snap.Element;
         private drag: DragElement;
         private anchors: AnchorsElement;
         public tags: TagsElement;
-        private UI: Array<base.IRegionPart>;
+        private UI: Array<IBase.IRegionPart>;
 
         // Region data
-        private tagsDescriptor: base.TagsDescriptor;
+        private tagsDescriptor: Tags.TagsDescriptor;
 
         // Region state        
         public isSelected:boolean = false;
@@ -1071,7 +1078,7 @@ export namespace CanvasTools.Region {
         // Styling options
         private tagsUpdateOptions: TagsUpdateOptions;
 
-        constructor(paper: Snap.Paper, rect:base.IRect, boundRect:base.IRect = null, id: string, tagsDescriptor: base.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
+        constructor(paper: Snap.Paper, rect:IBase.IRect, boundRect:IBase.IRect = null, id: string, tagsDescriptor: Tags.TagsDescriptor, onManipulationBegin?: onManipulationFunction, onManipulationEnd?:onManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
             this.x = 0;
             this.y = 0;
             this.rect = rect;
@@ -1081,7 +1088,7 @@ export namespace CanvasTools.Region {
             if (boundRect !== null) {
                 this.boundRects = { 
                     host: boundRect, 
-                    self: new base.Rect(boundRect.width - rect.width, boundRect.height - rect.height)
+                    self: new Rect(boundRect.width - rect.width, boundRect.height - rect.height)
                 };
             }
 
@@ -1117,7 +1124,7 @@ export namespace CanvasTools.Region {
             this.regionGroup.add(this.drag.dragGroup);                      
             this.regionGroup.add(this.anchors.anchorsGroup);  
             
-            this.UI = new Array<base.IRegionPart>(this.tags, this.drag, this.anchors);
+            this.UI = new Array<IBase.IRegionPart>(this.tags, this.drag, this.anchors);
         }
 
         // Helper function to generate random id;
@@ -1141,7 +1148,7 @@ export namespace CanvasTools.Region {
 
         private onInternalChange(x: number, y:number, width: number, height:number, state:string, multiSelection: boolean = false) {
             if (this.x != x || this.y != y) {
-                this.move(new base.Point2D(x, y));
+                this.move(new Point2D(x, y));
             }
             if (this.rect.width != width || this.rect.height != height) {
                 this.resize(width, height);
@@ -1149,11 +1156,11 @@ export namespace CanvasTools.Region {
             this.onChange(this, state, multiSelection);
         }
 
-        public updateTags(tags: base.TagsDescriptor, options?: TagsUpdateOptions){
+        public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){
             this.tags.updateTags(tags, options);
         }
 
-        public move(p: base.IPoint2D) {           
+        public move(p: IBase.IPoint2D) {           
             let self = this;
             this.x = p.x;
             this.y = p.y;
@@ -1217,7 +1224,7 @@ export namespace CanvasTools.Region {
     export class RegionsManager {
         private baseParent:SVGSVGElement;
         private paper: Snap.Paper;
-        private paperRect: base.Rect;
+        private paperRect: Rect;
 
         private regions: Array<RegionElement>;    
         
@@ -1240,7 +1247,7 @@ export namespace CanvasTools.Region {
         constructor(svgHost: SVGSVGElement, onManipulationBegin: onManipulationFunction, onManipulationEnd: onManipulationFunction){
             this.baseParent = svgHost;
             this.paper = Snap(svgHost);
-            this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+            this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
             this.regions = new Array<RegionElement>();
             this.onManipulationBegin = onManipulationBegin;
@@ -1256,7 +1263,7 @@ export namespace CanvasTools.Region {
 
             this.menuLayer = paper.g();
             this.menuLayer.addClass("menuManager");
-            this.menu = new MenuElement(paper, 0, 0, new base.Rect(0,0), this.paperRect, 
+            this.menu = new MenuElement(paper, 0, 0, new Rect(0,0), this.paperRect, 
                                         this.onManipulationBegin_local.bind(this), 
                                          this.onManipulationEnd_local.bind(this));
 
@@ -1355,13 +1362,13 @@ export namespace CanvasTools.Region {
                         }
                         break;
                     // default
-                    default: return;
+                    default: return false;
                 }
             });
         }
 
         // SETUP NEW REGION
-        public addRegion(id: string, pointA: base.IPoint2D, pointB: base.IPoint2D, tagsDescriptor: base.TagsDescriptor) {
+        public addRegion(id: string, pointA: IBase.IPoint2D, pointB: IBase.IPoint2D, tagsDescriptor: Tags.TagsDescriptor) {
             this.menu.hide();
 
             let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
@@ -1369,11 +1376,11 @@ export namespace CanvasTools.Region {
             let w = Math.abs(pointA.x - pointB.x);
             let h = Math.abs(pointA.y - pointB.y);
 
-            let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, id, tagsDescriptor, 
+            let region = new RegionElement(this.paper, new Rect(w, h), this.paperRect, id, tagsDescriptor, 
                 this.onManipulationBegin_local.bind(this), 
                 this.onManipulationEnd_local.bind(this),
                 this.tagsUpdateOptions);
-            region.move(new base.Point2D(x, y));
+            region.move(new Point2D(x, y));
 
             region.onChange = this.onRegionUpdate.bind(this);
 
@@ -1387,14 +1394,14 @@ export namespace CanvasTools.Region {
         }
 
         // REGION CREATION
-        public drawRegion(x: number, y: number, rect: base.IRect, id: string, tagsDescriptor: base.TagsDescriptor) {
+        public drawRegion(x: number, y: number, rect: IBase.IRect, id: string, tagsDescriptor: Tags.TagsDescriptor) {
             this.menu.hide();
             let region = new RegionElement(this.paper, rect, this.paperRect, id, tagsDescriptor,
                 this.onManipulationBegin_local.bind(this), 
                 this.onManipulationEnd_local.bind(this),
                 this.tagsUpdateOptions);
             region.area = rect.height * rect.width;
-            region.move(new base.Point2D(x, y));
+            region.move(new Point2D(x, y));
             region.onChange = this.onRegionUpdate.bind(this);
             region.tags.updateTags(region.tags.tags, this.tagsUpdateOptions);
             this.regionManagerLayer.add(region.regionGroup);
@@ -1426,9 +1433,7 @@ export namespace CanvasTools.Region {
         // QUICKSORT REGIONS BY AREA DESCENDING
         private sortRegionsByArea() {
             function quickSort(arr: Array<RegionElement>, left: number, right: number){
-                var len = arr.length, 
-                pivot,
-                partitionIndex;
+                var pivot, partitionIndex;
              
              
                if(left < right){
@@ -1540,7 +1545,7 @@ export namespace CanvasTools.Region {
         }
 
         // REGIONS TAGS UPDATE
-        public updateTagsById(id: string, tagsDescriptor:base.TagsDescriptor) {
+        public updateTagsById(id: string, tagsDescriptor:Tags.TagsDescriptor) {
             let region = this.lookupRegionByID(id);
 
             if (region != null) {
@@ -1548,7 +1553,7 @@ export namespace CanvasTools.Region {
             }
         }
         
-        public updateTagsForSelectedRegions(tagsDescriptor:base.TagsDescriptor) {
+        public updateTagsForSelectedRegions(tagsDescriptor:Tags.TagsDescriptor) {
             let regions = this.lookupSelectedRegions();
 
             regions.forEach(region => {
@@ -1632,8 +1637,8 @@ export namespace CanvasTools.Region {
                 y = region.y + dy + (dh < 0 ? 0 : dh);
             }
             
-            let p1 = new base.Point2D(x, y).boundToRect(this.paperRect);
-            let p2 = new base.Point2D(x + w, y + h).boundToRect(this.paperRect);
+            let p1 = new Point2D(x, y).boundToRect(this.paperRect);
+            let p2 = new Point2D(x + w, y + h).boundToRect(this.paperRect);
 
             region.move(p1);
             region.resize(p2.x - p1.x, p2.y - p1.y);
@@ -1667,7 +1672,7 @@ export namespace CanvasTools.Region {
             // recalculate size/position for all regions;
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
-                r.move(new base.Point2D(r.x * tw, r.y * th));
+                r.move(new Point2D(r.x * tw, r.y * th));
                 r.resize(r.rect.width * tw, r.rect.height * th);
             }    
         }
@@ -1738,7 +1743,6 @@ export namespace CanvasTools.Region {
             } 
         }
 
-        private showRegionBackground:boolean = true;
         private toggleBackground() {
             this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
 

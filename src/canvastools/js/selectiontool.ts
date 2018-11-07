@@ -1,17 +1,22 @@
 /// <reference types="snapsvg" />
-import * as CT from "./basetool.js";
+import CTBaseInterfaces = require("@CTBase/CanvasTools.Base.Interfaces");
+import IBase = CTBaseInterfaces.CanvasTools.Base;
+import CTBaseRect = require("@CTBase/CanvasTools.Base.Rect");
+import Rect = CTBaseRect.CanvasTools.Base.Rect;
+import CTBasePoint = require("@CTBase/CanvasTools.Base.Point2D");
+import Point2D = CTBasePoint.CanvasTools.Base.Point2D;
+
 import * as Snap from "@snapsvg/snap.svg.js";
-import base = CT.CanvasTools.Base;
 
 export namespace CanvasTools.Selection {       
-    class CrossElement implements base.IPoint2D, base.IHideable, base.IResizable {
+    class CrossElement implements IBase.IPoint2D, IBase.IHideable, IBase.IResizable {
         private hl: Snap.Element;
         private vl: Snap.Element;
         public crossGroup: Snap.Element;
         public x: number;
         public y: number;
 
-        constructor(paper: Snap.Paper, rect: base.IRect){
+        constructor(paper: Snap.Paper, rect: IBase.IRect){
             this.build(paper, rect.width, rect.height, 0 , 0);
         }
 
@@ -30,12 +35,12 @@ export namespace CanvasTools.Selection {
             this.y = y;
         }
 
-        public boundToRect(rect: base.IRect): base.Point2D {
-            return new base.Point2D(this.x, this.y).boundToRect(rect);
+        public boundToRect(rect: IBase.IRect): Point2D {
+            return new Point2D(this.x, this.y).boundToRect(rect);
         }
 
-        public move(p: base.IPoint2D, rect:base.IRect, square:boolean = false, ref: base.IPoint2D = null) {
-            let np:base.Point2D = p.boundToRect(rect); 
+        public move(p: IBase.IPoint2D, rect:IBase.IRect, square:boolean = false, ref: IBase.IPoint2D = null) {
+            let np:Point2D = p.boundToRect(rect); 
 
             if (square) {
                 let dx = Math.abs(np.x - ref.x);
@@ -87,13 +92,13 @@ export namespace CanvasTools.Selection {
 
     }
 
-    class RectElement implements base.IHideable, base.IResizable{
+    class RectElement implements IBase.IHideable, IBase.IResizable{
         public width: number;
         public height: number;
 
         public rect: Snap.Element;
 
-        constructor(paper: Snap.Paper, rect:base.IRect){
+        constructor(paper: Snap.Paper, rect:IBase.IRect){
            this.build(paper, rect.width, rect.height);
         }
 
@@ -103,7 +108,7 @@ export namespace CanvasTools.Selection {
             this.height = height;            
         }
 
-        public move(p: base.IPoint2D) {           
+        public move(p: IBase.IPoint2D) {           
             let self = this;
             window.requestAnimationFrame(function(){
                 self.rect.attr({
@@ -148,7 +153,7 @@ export namespace CanvasTools.Selection {
     export class AreaSelector {
         private baseParent:SVGSVGElement;
         private paper: Snap.Paper;
-        private paperRect: base.Rect;
+        private paperRect: Rect;
 
         private overlay: RectElement;
         private mask: RectElement;        
@@ -178,7 +183,7 @@ export namespace CanvasTools.Selection {
         private buildUIElements(svgHost: SVGSVGElement) {
             this.baseParent = svgHost;
             this.paper = Snap(svgHost);
-            this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+            this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
             this.areaSelectorLayer = this.paper.g();
             this.areaSelectorLayer.addClass("areaSelector");
@@ -218,7 +223,7 @@ export namespace CanvasTools.Selection {
         }
 
         private createSelectionBoxMask(): RectElement {
-            let r:RectElement = new RectElement(this.paper, new base.Rect(0, 0));
+            let r:RectElement = new RectElement(this.paper, new Rect(0, 0));
             r.rect.addClass("selectionBoxMaskStyle");
             return r;
         }
@@ -241,19 +246,19 @@ export namespace CanvasTools.Selection {
             this.resizeAll([this.overlay, this.mask, this.crossA, this.crossB]);
         }
 
-        private resizeAll(elementSet: Array<base.IResizable>) {
+        private resizeAll(elementSet: Array<IBase.IResizable>) {
             elementSet.forEach(element => {
                 element.resize(this.paperRect.width, this.paperRect.height);                
             });
         }
 
-        private showAll(elementSet: Array<base.IHideable>) {
+        private showAll(elementSet: Array<IBase.IHideable>) {
             elementSet.forEach(element => {
                 element.show();                
             });
         }
 
-        private hideAll(elementSet: Array<base.IHideable>) {
+        private hideAll(elementSet: Array<IBase.IHideable>) {
             elementSet.forEach(element => {
                 element.hide();                
             });
@@ -265,7 +270,7 @@ export namespace CanvasTools.Selection {
 
         private onPointerLeave(e:PointerEvent) {
             let rect = this.baseParent.getClientRects();
-            let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
                 
             if (!this.twoPointsMode && !this.capturingState) {
                 this.hideAll([this.crossA, this.crossB, this.selectionBox]);
@@ -293,7 +298,7 @@ export namespace CanvasTools.Selection {
 
         private onPointerUp(e:PointerEvent) {
             let rect = this.baseParent.getClientRects();
-            let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
             
             if (!this.twoPointsMode) { 
                 this.capturingState = false;
@@ -328,7 +333,7 @@ export namespace CanvasTools.Selection {
 
         private onPointerMove(e:PointerEvent) {
             let rect = this.baseParent.getClientRects();
-            let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
 
             this.crossA.show();
             
@@ -386,8 +391,6 @@ export namespace CanvasTools.Selection {
         }
 
         private subscribeToEvents() {
-            let self = this;
-
             let listeners = [
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent, bypass: false},
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false},
@@ -414,7 +417,7 @@ export namespace CanvasTools.Selection {
             this.hideAll([this.overlay]);
         }
 
-        private moveCross(cross:CrossElement, p:base.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
+        private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
             cross.move(p, this.paperRect, square, refCross);
         }        
 
@@ -424,7 +427,7 @@ export namespace CanvasTools.Selection {
             var w = Math.abs(crossA.x - crossB.x);
             var h = Math.abs(crossA.y - crossB.y);
 
-            box.move(new base.Point2D(x, y));
+            box.move(new Point2D(x, y));
             box.resize(w, h);
         }
 
@@ -445,12 +448,11 @@ export namespace CanvasTools.Selection {
         }
 
         enablify(f:Function, bypass:boolean = false) {
-            let self = this;
-            return function(args:PointerEvent|KeyboardEvent) {
+            return (args:PointerEvent|KeyboardEvent) => {
                 if (this.isEnabled || bypass) {
                     f(args);
                 }
-            }.bind(self);
+            }
         }
     }
 }

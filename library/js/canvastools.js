@@ -1,4 +1,78 @@
-define("basetool", ["require", "exports"], function (require, exports) {
+define("filtertool", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Filter;
+        (function (Filter) {
+            function InvertFilter(canvas) {
+                var context = canvas.getContext('2d');
+                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                var buff = document.createElement("canvas");
+                buff.width = canvas.width;
+                buff.height = canvas.height;
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] = 255 - data[i];
+                    data[i + 1] = 255 - data[i + 1];
+                    data[i + 2] = 255 - data[i + 2];
+                }
+                buff.getContext("2d").putImageData(imageData, 0, 0);
+                return new Promise((resolve, reject) => {
+                    return resolve(buff);
+                });
+            }
+            Filter.InvertFilter = InvertFilter;
+            function GrayscaleFilter(canvas) {
+                var context = canvas.getContext('2d');
+                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                var buff = document.createElement("canvas");
+                buff.width = canvas.width;
+                buff.height = canvas.height;
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    let gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+                    data[i] = gray;
+                    data[i + 1] = gray;
+                    data[i + 2] = gray;
+                }
+                buff.getContext("2d").putImageData(imageData, 0, 0);
+                return new Promise((resolve, reject) => {
+                    return resolve(buff);
+                });
+            }
+            Filter.GrayscaleFilter = GrayscaleFilter;
+            class FilterPipeline {
+                constructor() {
+                    this.pipeline = new Array();
+                }
+                addFilter(filter) {
+                    this.pipeline.push(filter);
+                }
+                clearPipeline() {
+                    this.pipeline = new Array();
+                }
+                applyToCanvas(canvas) {
+                    let promise = new Promise((resolve, reject) => {
+                        return resolve(canvas);
+                    });
+                    if (this.pipeline.length > 0) {
+                        this.pipeline.forEach((filter) => {
+                            promise = promise.then(filter);
+                        });
+                    }
+                    return promise;
+                }
+            }
+            Filter.FilterPipeline = FilterPipeline;
+        })(Filter = CanvasTools.Filter || (CanvasTools.Filter = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("Base/CanvasTools.Base.Interfaces", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("Base/CanvasTools.Base.Rect", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var CanvasTools;
@@ -18,6 +92,16 @@ define("basetool", ["require", "exports"], function (require, exports) {
                 }
             }
             Base.Rect = Rect;
+        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("Base/CanvasTools.Base.Point2D", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Base;
+        (function (Base) {
             class Point2D {
                 constructor(x, y) {
                     this.x = x;
@@ -31,6 +115,16 @@ define("basetool", ["require", "exports"], function (require, exports) {
                 }
             }
             Base.Point2D = Point2D;
+        })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("Base/CanvasTools.Base.Tag", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Base;
+        (function (Base) {
             class Tag {
                 constructor(name, colorHue, id = "none") {
                     this.__colorPure = "";
@@ -118,80 +212,11 @@ define("basetool", ["require", "exports"], function (require, exports) {
         })(Base = CanvasTools.Base || (CanvasTools.Base = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("filtertool", ["require", "exports"], function (require, exports) {
+define("regiontool", ["require", "exports", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Point2D", "@snapsvg/snap.svg.js"], function (require, exports, CTBaseRect, CTBasePoint, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var CanvasTools;
-    (function (CanvasTools) {
-        var Filter;
-        (function (Filter) {
-            function InvertFilter(canvas) {
-                var context = canvas.getContext('2d');
-                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                var buff = document.createElement("canvas");
-                buff.width = canvas.width;
-                buff.height = canvas.height;
-                var data = imageData.data;
-                for (var i = 0; i < data.length; i += 4) {
-                    data[i] = 255 - data[i];
-                    data[i + 1] = 255 - data[i + 1];
-                    data[i + 2] = 255 - data[i + 2];
-                }
-                buff.getContext("2d").putImageData(imageData, 0, 0);
-                return new Promise((resolve, reject) => {
-                    return resolve(buff);
-                });
-            }
-            Filter.InvertFilter = InvertFilter;
-            function GrayscaleFilter(canvas) {
-                var context = canvas.getContext('2d');
-                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                var buff = document.createElement("canvas");
-                buff.width = canvas.width;
-                buff.height = canvas.height;
-                var data = imageData.data;
-                for (var i = 0; i < data.length; i += 4) {
-                    let gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-                    data[i] = gray;
-                    data[i + 1] = gray;
-                    data[i + 2] = gray;
-                }
-                buff.getContext("2d").putImageData(imageData, 0, 0);
-                return new Promise((resolve, reject) => {
-                    return resolve(buff);
-                });
-            }
-            Filter.GrayscaleFilter = GrayscaleFilter;
-            class FilterPipeline {
-                constructor() {
-                    this.pipeline = new Array();
-                }
-                addFilter(filter) {
-                    this.pipeline.push(filter);
-                }
-                clearPipeline() {
-                    this.pipeline = new Array();
-                }
-                applyToCanvas(canvas) {
-                    let promise = new Promise((resolve, reject) => {
-                        return resolve(canvas);
-                    });
-                    if (this.pipeline.length > 0) {
-                        this.pipeline.forEach((filter) => {
-                            promise = promise.then(filter);
-                        });
-                    }
-                    return promise;
-                }
-            }
-            Filter.FilterPipeline = FilterPipeline;
-        })(Filter = CanvasTools.Filter || (CanvasTools.Filter = {}));
-    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
-});
-define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var base = CT.CanvasTools.Base;
+    var Rect = CTBaseRect.CanvasTools.Base.Rect;
+    var Point2D = CTBasePoint.CanvasTools.Base.Point2D;
     var CanvasTools;
     (function (CanvasTools) {
         var Region;
@@ -314,7 +339,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                             break;
                         }
                     }
-                    return new base.Point2D(x, y);
+                    return new Point2D(x, y);
                 }
                 anchorDragMove(dx, dy, x, y) {
                     let p1, p2;
@@ -353,8 +378,8 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                             break;
                         }
                     }
-                    p1 = new base.Point2D(x1, y1);
-                    p2 = new base.Point2D(x2, y2);
+                    p1 = new Point2D(x1, y1);
+                    p2 = new Point2D(x2, y2);
                     if (this.boundRect !== null) {
                         p1 = p1.boundToRect(this.boundRect);
                         p2 = p2.boundToRect(this.boundRect);
@@ -410,7 +435,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                         let p = this.getDragOriginPoint();
                         this.dragOrigin = p;
                         this.rectOrigin = this.rect.copy();
-                        this.pointOrigin = new base.Point2D(this.x, this.y);
+                        this.pointOrigin = new Point2D(this.x, this.y);
                         window.requestAnimationFrame(() => {
                             this.ghostAnchor.attr({
                                 cx: p.x,
@@ -723,11 +748,11 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     });
                 }
                 rectDragBegin() {
-                    this.dragOrigin = new base.Point2D(this.x, this.y);
+                    this.dragOrigin = new Point2D(this.x, this.y);
                 }
                 rectDragMove(dx, dy) {
                     if (dx != 0 && dy != 0) {
-                        let p = new base.Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
+                        let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
                         if (this.boundRect !== null) {
                             p = p.boundToRect(this.boundRect);
                         }
@@ -920,7 +945,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     if (boundRect !== null) {
                         this.boundRects = {
                             host: boundRect,
-                            self: new base.Rect(boundRect.width - rect.width, boundRect.height - rect.height)
+                            self: new Rect(boundRect.width - rect.width, boundRect.height - rect.height)
                         };
                     }
                     if (onManipulationBegin !== undefined) {
@@ -967,7 +992,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                 }
                 onInternalChange(x, y, width, height, state, multiSelection = false) {
                     if (this.x != x || this.y != y) {
-                        this.move(new base.Point2D(x, y));
+                        this.move(new Point2D(x, y));
                     }
                     if (this.rect.width != width || this.rect.height != height) {
                         this.resize(width, height);
@@ -1024,10 +1049,9 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                         showRegionBackground: true
                     };
                     this.justManipulated = false;
-                    this.showRegionBackground = true;
                     this.baseParent = svgHost;
                     this.paper = Snap(svgHost);
-                    this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+                    this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
                     this.regions = new Array();
                     this.onManipulationBegin = onManipulationBegin;
                     this.onManipulationEnd = onManipulationEnd;
@@ -1039,7 +1063,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     this.regionManagerLayer.addClass("regionManager");
                     this.menuLayer = paper.g();
                     this.menuLayer.addClass("menuManager");
-                    this.menu = new MenuElement(paper, 0, 0, new base.Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
+                    this.menu = new MenuElement(paper, 0, 0, new Rect(0, 0), this.paperRect, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this));
                     this.menu.addAction("delete", "trash", (region) => {
                         console.log(region.regionID);
                         this.deleteRegion(region);
@@ -1125,14 +1149,13 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                                 }
                                 break;
                             case 66:
-                            case 98:
                                 if (e.ctrlKey) {
                                     this.toggleBackground();
                                     e.preventDefault();
                                     return false;
                                 }
                                 break;
-                            default: return;
+                            default: return false;
                         }
                     });
                 }
@@ -1142,8 +1165,8 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     let y = (pointA.y < pointB.y) ? pointA.y : pointB.y;
                     let w = Math.abs(pointA.x - pointB.x);
                     let h = Math.abs(pointA.y - pointB.y);
-                    let region = new RegionElement(this.paper, new base.Rect(w, h), this.paperRect, id, tagsDescriptor, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this), this.tagsUpdateOptions);
-                    region.move(new base.Point2D(x, y));
+                    let region = new RegionElement(this.paper, new Rect(w, h), this.paperRect, id, tagsDescriptor, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this), this.tagsUpdateOptions);
+                    region.move(new Point2D(x, y));
                     region.onChange = this.onRegionUpdate.bind(this);
                     this.unselectRegions();
                     region.select();
@@ -1155,7 +1178,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     this.menu.hide();
                     let region = new RegionElement(this.paper, rect, this.paperRect, id, tagsDescriptor, this.onManipulationBegin_local.bind(this), this.onManipulationEnd_local.bind(this), this.tagsUpdateOptions);
                     region.area = rect.height * rect.width;
-                    region.move(new base.Point2D(x, y));
+                    region.move(new Point2D(x, y));
                     region.onChange = this.onRegionUpdate.bind(this);
                     region.tags.updateTags(region.tags.tags, this.tagsUpdateOptions);
                     this.regionManagerLayer.add(region.regionGroup);
@@ -1164,21 +1187,24 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                         this.sortRegionsByArea();
                         this.redrawAllRegions();
                     }
-                    this.menu.showOnRegion(region);
                 }
                 redrawAllRegions() {
                     let sr = this.regions;
                     this.deleteAllRegions();
+                    let selectedID = "";
                     for (var i = 0; i < sr.length; i++) {
                         this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags.tags);
                         if (sr[i].isSelected) {
-                            this.selectRegionById(sr[i].ID);
+                            selectedID = sr[i].ID;
                         }
+                    }
+                    if (selectedID !== "") {
+                        this.selectRegionById(selectedID);
                     }
                 }
                 sortRegionsByArea() {
                     function quickSort(arr, left, right) {
-                        var len = arr.length, pivot, partitionIndex;
+                        var pivot, partitionIndex;
                         if (left < right) {
                             pivot = right;
                             partitionIndex = partition(arr, pivot, left, right);
@@ -1338,8 +1364,8 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                         x = region.x + dx + (dw < 0 ? 0 : dw);
                         y = region.y + dy + (dh < 0 ? 0 : dh);
                     }
-                    let p1 = new base.Point2D(x, y).boundToRect(this.paperRect);
-                    let p2 = new base.Point2D(x + w, y + h).boundToRect(this.paperRect);
+                    let p1 = new Point2D(x, y).boundToRect(this.paperRect);
+                    let p2 = new Point2D(x + w, y + h).boundToRect(this.paperRect);
                     region.move(p1);
                     region.resize(p2.x - p1.x, p2.y - p1.y);
                 }
@@ -1364,7 +1390,7 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
                     this.menu.hide();
                     for (var i = 0; i < this.regions.length; i++) {
                         let r = this.regions[i];
-                        r.move(new base.Point2D(r.x * tw, r.y * th));
+                        r.move(new Point2D(r.x * tw, r.y * th));
                         r.resize(r.rect.width * tw, r.rect.height * th);
                     }
                 }
@@ -1438,10 +1464,11 @@ define("regiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"],
         })(Region = CanvasTools.Region || (CanvasTools.Region = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js"], function (require, exports, CT, Snap) {
+define("selectiontool", ["require", "exports", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Point2D", "@snapsvg/snap.svg.js"], function (require, exports, CTBaseRect, CTBasePoint, Snap) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var base = CT.CanvasTools.Base;
+    var Rect = CTBaseRect.CanvasTools.Base.Rect;
+    var Point2D = CTBasePoint.CanvasTools.Base.Point2D;
     var CanvasTools;
     (function (CanvasTools) {
         var Selection;
@@ -1463,7 +1490,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                     this.y = y;
                 }
                 boundToRect(rect) {
-                    return new base.Point2D(this.x, this.y).boundToRect(rect);
+                    return new Point2D(this.x, this.y).boundToRect(rect);
                 }
                 move(p, rect, square = false, ref = null) {
                     let np = p.boundToRect(rect);
@@ -1569,7 +1596,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                 buildUIElements(svgHost) {
                     this.baseParent = svgHost;
                     this.paper = Snap(svgHost);
-                    this.paperRect = new base.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+                    this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
                     this.areaSelectorLayer = this.paper.g();
                     this.areaSelectorLayer.addClass("areaSelector");
                     this.overlay = this.createOverlay();
@@ -1599,7 +1626,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                     return r;
                 }
                 createSelectionBoxMask() {
-                    let r = new RectElement(this.paper, new base.Rect(0, 0));
+                    let r = new RectElement(this.paper, new Rect(0, 0));
                     r.rect.addClass("selectionBoxMaskStyle");
                     return r;
                 }
@@ -1639,7 +1666,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                 }
                 onPointerLeave(e) {
                     let rect = this.baseParent.getClientRects();
-                    let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                    let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
                     if (!this.twoPointsMode && !this.capturingState) {
                         this.hideAll([this.crossA, this.crossB, this.selectionBox]);
                     }
@@ -1662,7 +1689,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                 }
                 onPointerUp(e) {
                     let rect = this.baseParent.getClientRects();
-                    let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                    let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
                     if (!this.twoPointsMode) {
                         this.capturingState = false;
                         this.baseParent.releasePointerCapture(e.pointerId);
@@ -1692,7 +1719,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                 }
                 onPointerMove(e) {
                     let rect = this.baseParent.getClientRects();
-                    let p = new base.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                    let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
                     this.crossA.show();
                     if (!this.twoPointsMode && !this.capturingState) {
                         this.moveCross(this.crossA, p);
@@ -1738,7 +1765,6 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                     }
                 }
                 subscribeToEvents() {
-                    let self = this;
                     let listeners = [
                         { event: "pointerenter", listener: this.onPointerEnter, base: this.baseParent, bypass: false },
                         { event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false },
@@ -1770,7 +1796,7 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                     var y = (crossA.y < crossB.y) ? crossA.y : crossB.y;
                     var w = Math.abs(crossA.x - crossB.x);
                     var h = Math.abs(crossA.y - crossB.y);
-                    box.move(new base.Point2D(x, y));
+                    box.move(new Point2D(x, y));
                     box.resize(w, h);
                 }
                 enable() {
@@ -1788,12 +1814,11 @@ define("selectiontool", ["require", "exports", "basetool", "@snapsvg/snap.svg.js
                     }
                 }
                 enablify(f, bypass = false) {
-                    let self = this;
-                    return function (args) {
+                    return (args) => {
                         if (this.isEnabled || bypass) {
                             f(args);
                         }
-                    }.bind(self);
+                    };
                 }
             }
             Selection.AreaSelector = AreaSelector;

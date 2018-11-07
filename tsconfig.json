@@ -2,20 +2,27 @@
     "compilerOptions": {
         "target": "es2015",
         "module": "amd",
-        "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": true,
 
+        "isolatedModules": false,
+        "sourceMap": true,        
+        
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        
         "moduleResolution": "node",
         "baseUrl": "src",
         "paths": {
             "@snapsvg/*": ["snapsvg/*"],
+            "@canvastools/*" : ["canvastools/js/*"],
+            "@CTBase/*": ["canvastools/js/Base/*"] 
         },
 
         "outFile": "library/js/canvastools.js"
     },
     "include": [     
-        "src/canvastools/js/*.ts"
+        "src/canvastools/js/*.ts",
+        "src/canvastools/js/Base/*.ts"
     ]
 }

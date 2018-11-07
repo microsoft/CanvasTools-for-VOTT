@@ -30,16 +30,17 @@
     <script>
         SystemJS.import("./js/canvastools.js").then(function(module){
             Promise.all([
-                System.import('basetool'),
+                System.import('Base/CanvasTools.Base.Tag'),
                 System.import('selectiontool'),
-                System.import('regiontool'),
-                System.import('filtertool')
+                System.import('filtertool'),
+                System.import('regiontool')
+                
             ]).then(function(modules){
                 var btools = modules[0].CanvasTools.Base;
                 var stools = modules[1].CanvasTools.Selection;
-                var rtools = modules[2].CanvasTools.Region;                
-                var ftools = modules[3].CanvasTools.Filter;
-
+                var ftools = modules[2].CanvasTools.Filter;
+                var rtools = modules[3].CanvasTools.Region;                
+                
                 var sz = document.getElementById("selectionOverlay");
                 var selector, rm;
 
@@ -86,7 +87,8 @@
                     context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
 
                     let filter = new ftools.FilterPipeline();
-                    filter.addFilter(ftools.InvertFilter);
+                    //filter.addFilter(ftools.InvertFilter);
+                    filter.addFilter(ftools.GrayscaleFilter);
                     filter.applyToCanvas(buffCnvs).then((bcnvs) => {
                         // Copy buffer to the canvas on screen
                         imageCnvs.width = bcnvs.width;
