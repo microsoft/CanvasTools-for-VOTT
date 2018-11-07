@@ -4,9 +4,9 @@ import * as Point2D from "@CTBase/CanvasTools.Base.Point2D";
 import * as Rect from "@CTBase/CanvasTools.Base.Rect";
 import * as Tags from "@CTBase/CanvasTools.Base.Tags";
 
-import * as SelectionTool from "@canvastools/selectiontool";
-import * as RegionTool from "@canvastools/regiontool";
-import * as FilterTool from "@canvastools/filtertool";
+import * as SelectionTool from "@canvastools/CanvasTools.Selection";
+import * as RegionTool from "@canvastools/CanvasTools.Region";
+import * as FilterTool from "@canvastools/CanvasTools.Filter";
 
 export namespace CanvasTools {
     export const Base = {
