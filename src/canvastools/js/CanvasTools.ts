@@ -7,6 +7,7 @@ import * as Tags from "@canvastools/Base/CanvasTools.Base.Tags";
 import * as SelectionTool from "@canvastools/CanvasTools.Selection";
 import * as RegionTool from "@canvastools/CanvasTools.Region";
 import * as FilterTool from "@canvastools/CanvasTools.Filter";
+import * as ToolbarTools from "@canvastools/CanvasTools.Toolbar";
 
 export module CanvasTools {
     export const Base = {
@@ -18,4 +19,5 @@ export module CanvasTools {
     export const Selection = SelectionTool.CanvasTools.Selection;
     export const Region = RegionTool.CanvasTools.Region;
     export const Filter = FilterTool.CanvasTools.Filter;
+    export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
 }

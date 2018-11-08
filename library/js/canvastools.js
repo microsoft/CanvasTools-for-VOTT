@@ -1834,7 +1834,32 @@ define("CanvasTools.Selection", ["require", "exports", "Base/CanvasTools.Base.Re
         })(Selection = CanvasTools.Selection || (CanvasTools.Selection = {}));
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
-define("CanvasTools", ["require", "exports", "Base/CanvasTools.Base.Point2D", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Tags", "CanvasTools.Selection", "CanvasTools.Region", "CanvasTools.Filter"], function (require, exports, Point2D, Rect, Tags, SelectionTool, RegionTool, FilterTool) {
+define("CanvasTools.Toolbar", ["require", "exports", "@snapsvg/snap.svg.js", "Base/CanvasTools.Base.Rect"], function (require, exports, Snap, CTBaseRect) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
+    var CanvasTools;
+    (function (CanvasTools) {
+        var Toolbar;
+        (function (Toolbar_1) {
+            class Toolbar {
+                constructor(svgHost, positionMode = "fixed") {
+                    this.buildUIElements(svgHost);
+                    this.positionMode = positionMode;
+                }
+                buildUIElements(svgHost) {
+                    this.baseParent = svgHost;
+                    this.paper = Snap(svgHost);
+                    this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+                    let backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.paperRect.height);
+                    backgroundRect.addClass("toolbar");
+                }
+            }
+            Toolbar_1.Toolbar = Toolbar;
+        })(Toolbar = CanvasTools.Toolbar || (CanvasTools.Toolbar = {}));
+    })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
+});
+define("CanvasTools", ["require", "exports", "Base/CanvasTools.Base.Point2D", "Base/CanvasTools.Base.Rect", "Base/CanvasTools.Base.Tags", "CanvasTools.Selection", "CanvasTools.Region", "CanvasTools.Filter", "CanvasTools.Toolbar"], function (require, exports, Point2D, Rect, Tags, SelectionTool, RegionTool, FilterTool, ToolbarTools) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var CanvasTools;
@@ -1847,6 +1872,7 @@ define("CanvasTools", ["require", "exports", "Base/CanvasTools.Base.Point2D", "B
         CanvasTools.Selection = SelectionTool.CanvasTools.Selection;
         CanvasTools.Region = RegionTool.CanvasTools.Region;
         CanvasTools.Filter = FilterTool.CanvasTools.Filter;
+        CanvasTools.Toolbar = ToolbarTools.CanvasTools.Toolbar;
     })(CanvasTools = exports.CanvasTools || (exports.CanvasTools = {}));
 });
 //# sourceMappingURL=canvastools.js.map
