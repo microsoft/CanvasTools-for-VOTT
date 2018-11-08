@@ -8,14 +8,14 @@ CanvasTools.js is one of the UI modules used in the [VoTT project](https://githu
 
 ## Dependencies
 
-* CanvasTools heavily uses the [Snap.Svg library](https://github.com/adobe-webplatform/Snap.svg). In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
+* CanvasTools heavily uses the `[Snap.Svg library](https://github.com/adobe-webplatform/Snap.svg)`. In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
 * Current version of the library depends on some Chrome-specific features like masks-support in SVG.
 
 ## Use
 
 ### Add script to the app
 
-Add ct.js file to your web-app (e.g., an Electron-based app).
+Add the `ct.js` file to your web-app (e.g., an Electron-based app).
 
 ```html
 <script src="ct.js"></script>
