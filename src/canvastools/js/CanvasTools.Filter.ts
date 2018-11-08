@@ -1,4 +1,4 @@
-export namespace CanvasTools.Filter {
+export module CanvasTools.Filter {
 
     export type FilterFunction = (canvas: HTMLCanvasElement) => Promise<HTMLCanvasElement>;
 

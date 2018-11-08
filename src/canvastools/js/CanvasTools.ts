@@ -8,7 +8,7 @@ import * as SelectionTool from "@canvastools/CanvasTools.Selection";
 import * as RegionTool from "@canvastools/CanvasTools.Region";
 import * as FilterTool from "@canvastools/CanvasTools.Filter";
 
-export namespace CanvasTools {
+export module CanvasTools {
     export const Base = {
         Point: Point2D.CanvasTools.Base.Point,
         Rect: Rect.CanvasTools.Base.Rect,

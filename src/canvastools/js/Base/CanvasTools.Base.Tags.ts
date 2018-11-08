@@ -1,4 +1,4 @@
-export module CanvasTools.Base.Tags {
+export namespace CanvasTools.Base.Tags {
     export class Tag {
         public colorHue: number;
         public name: string;

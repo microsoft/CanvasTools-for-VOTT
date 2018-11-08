@@ -8,7 +8,7 @@ import Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
 
 import * as Snap from "@snapsvg/snap.svg.js";
 
-export namespace CanvasTools.Selection {       
+export module CanvasTools.Selection {       
     class CrossElement implements IBase.IPoint2D, IBase.IHideable, IBase.IResizable {
         private hl: Snap.Element;
         private vl: Snap.Element;

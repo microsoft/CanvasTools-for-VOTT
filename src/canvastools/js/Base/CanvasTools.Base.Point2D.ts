@@ -1,7 +1,7 @@
 import base = require("@canvastools/base/CanvasTools.Base.Interfaces");
 import IBase = base.CanvasTools.Base.Interfaces;
 
-export module CanvasTools.Base.Point {
+export namespace CanvasTools.Base.Point {
     export class Point2D implements IBase.IPoint2D {
         public x: number;
         public y: number;
