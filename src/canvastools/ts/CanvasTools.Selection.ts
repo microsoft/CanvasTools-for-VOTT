@@ -1,12 +1,11 @@
-/// <reference types="snapsvg" />
-import * as CTBaseInterfaces from "./Base/CanvasTools.Base.Interfaces";
+import CTBaseInterfaces = require("./Base/CanvasTools.Base.Interfaces");
 import IBase = CTBaseInterfaces.CanvasTools.Base.Interfaces;
-import * as CTBaseRect from "./Base/CanvasTools.Base.Rect";
+import CTBaseRect = require("./Base/CanvasTools.Base.Rect");
 import Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
-import * as CTBasePoint from "./Base/CanvasTools.Base.Point2D";
+import CTBasePoint = require("./Base/CanvasTools.Base.Point2D");
 import Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
 
-import * as Snap from "@snapsvg/snap.svg.js";
+import * as Snap from "snapsvg";
 
 export module CanvasTools.Selection {       
     class CrossElement implements IBase.IPoint2D, IBase.IHideable, IBase.IResizable {

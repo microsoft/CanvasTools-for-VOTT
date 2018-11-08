@@ -1,4 +1,4 @@
-import * as Snap from "@snapsvg/snap.svg.js";
+import * as Snap from "snapsvg";
 import * as CTBaseRect from "./Base/CanvasTools.Base.Rect";
 import Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
 

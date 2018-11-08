@@ -1,4 +1,3 @@
-/// <reference types="snapsvg" />
 import * as CTBaseInterfaces from "./Base/CanvasTools.Base.Interfaces";
 import IBase = CTBaseInterfaces.CanvasTools.Base.Interfaces;
 import * as CTBaseRect from "./Base/CanvasTools.Base.Rect";
@@ -8,14 +7,14 @@ import Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
 import * as CTBaseTag from "./Base/CanvasTools.Base.Tags";
 import Tags = CTBaseTag.CanvasTools.Base.Tags;
 
-import * as Snap from "@snapsvg/snap.svg.js";
+import * as Snap from "snapsvg";
 
 export module CanvasTools.Region { 
-    interface onManipulationFunction {
+    export interface onManipulationFunction {
         (UIElement?: IBase.IRegionPart): void;
     }
 
-    interface onChangeFunction {
+    export interface onChangeFunction {
         (x: number, y: number, width:number, height:number, eventType?: string): void;
     }
 
@@ -1734,7 +1733,7 @@ export module CanvasTools.Region {
             }
         }
 
-        public unselectRegions(except?: RegionElement){
+        private unselectRegions(except?: RegionElement){
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
                 if (r != except) {
