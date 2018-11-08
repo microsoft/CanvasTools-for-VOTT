@@ -20,6 +20,13 @@ module.exports = {
             {
                 test: require.resolve('snapsvg'),
                 loader: 'imports-loader?this=>window,fix=>module.exports=0'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
             }
           ]
       },

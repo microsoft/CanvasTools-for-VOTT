@@ -160,3 +160,8 @@ svg:not(:root) .menuLayer {
     stroke-width: 0;
     visibility: visible;
 }
+
+/* Toolbar */
+.toolbarBGStyle {
+    fill: rgba(64, 64, 64, 0.4);
+}

@@ -22,3 +22,7 @@ export module CanvasTools {
     export const Filter = FilterTool.CanvasTools.Filter;
     export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
 }
+
+
+/* CSS */
+import "./../css/canvastools.css";

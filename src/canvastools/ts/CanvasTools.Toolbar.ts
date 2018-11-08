@@ -29,6 +29,8 @@ export module CanvasTools.Toolbar {
 
             let backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.paperRect.height);
             backgroundRect.addClass("toolbarBGStyle");
+
+            toolbarLayer.add(backgroundRect);
         }
     }
 }
