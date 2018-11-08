@@ -2,16 +2,21 @@
   "name": "canvastools",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc && webpack"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "imports-loader": "^0.8.0",
+    "snapsvg": "^0.5.1",
+    "tsconfig-paths-webpack-plugin": "^3.2.0"
+  },
   "devDependencies": {
     "@types/snapsvg": "^0.4.32",
+    "ts-loader": "^5.3.0",
+    "typescript": "^3.1.6",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"
   }

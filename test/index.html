@@ -1,103 +1,98 @@
 <!doctype html>
 <html>
-    <head>
-        <link rel="stylesheet" href="css/index.css" />
-        <link rel="stylesheet" href="css/canvastools.css" />
-    </head>
-    <body>
-        <div id="selectionzone">
-            <svg id="selectionOverlay">
-                    <defs>
-                            <filter id="black-glow">
-                                <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
-                                <feOffset dx="0" dy="0" result="offsetblur"/>
-                                <feComponentTransfer>
-                                    <feFuncA type="linear" slope="0.8"/>
-                                </feComponentTransfer>
-                                <feMerge> 
-                                    <feMergeNode/>
-                                    <feMergeNode in="SourceGraphic"/> 
-                                </feMerge>
-                            </filter>
-                        </defs>
-            </svg>
-            <canvas id="sourceImageCnvs"></canvas>
-        </div>
-        <div>Some text</div>
-    </body>
-    <script src="./js/system.js"></script>
-    <script>
-        SystemJS.import("./js/canvastools.js").then(function(module){
-            Promise.all([
-                System.import('CanvasTools')
-                
-            ]).then(function(modules){
-                var ct = modules[0].CanvasTools;
-                var sz = document.getElementById("selectionOverlay");
-                var regionId = 100;
 
-                let toolbar = new ct.Toolbar.Toolbar(sz);
-                
-                let selector = new ct.Selection.AreaSelector(sz, 
-                    function(){
-                        //console.log("Rock the party!");
-                    }, 
-                    function(x1, y1, x2, y2){
-                        //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
-                        var primaryTag = new ct.Base.Tags.Tag(
-                            (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
-                            Math.floor(Math.random() * 360.0));
-                        var secondaryTag = new ct.Base.Tags.Tag(
-                            (Math.random() > 0.5) ? "Yes" : "No",
-                            Math.floor(Math.random() * 360.0));
-                        var ternaryTag = new ct.Base.Tags.Tag(
-                            (Math.random() > 0.5) ? "one" : "two",
-                            Math.floor(Math.random() * 360.0));
-                        var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-                        rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, tags);
-                    }
-                );
-                let rm = new ct.Region.RegionsManager(sz, 
-                    function() {
-                        selector.disable();
-                    },
-                    function() {
-                        selector.enable();
-                    });
+<head>
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/canvastools.css" />
+</head>
 
-                /* Upload background image for selection */
-                let imageCnvs = document.getElementById("sourceImageCnvs");
-                let imagePath = "./../images/background-cat.jpg";
-                let image = new Image();
-                image.addEventListener("load", (e) => {
-                    // Create buffer
-                    let buffCnvs = document.createElement("canvas");
-                    let context = buffCnvs.getContext("2d");
-                    buffCnvs.width = e.target.width;
-                    buffCnvs.height = e.target.height;
-                    // Fill buffer
-                    context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
+<body>
+    <div id="selectionzone">
+        <svg id="selectionOverlay">
+            <defs>
+                <filter id="black-glow">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                    <feOffset dx="0" dy="0" result="offsetblur" />
+                    <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.8" />
+                    </feComponentTransfer>
+                    <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+        </svg>
+        <canvas id="sourceImageCnvs"></canvas>
+    </div>
+    <div>Some text</div>
+</body>
+<script src="./js/ct.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", (e) => {
+        var ct = CanvasTools.CanvasTools;
+        var sz = document.getElementById("selectionOverlay");
+        var regionId = 100;
 
-                    let filter = new ct.Filter.FilterPipeline();
-                    //filter.addFilter(ftools.InvertFilter);
-                    filter.addFilter(ct.Filter.GrayscaleFilter);
-                    filter.applyToCanvas(buffCnvs).then((bcnvs) => {
-                        // Copy buffer to the canvas on screen
-                        imageCnvs.width = bcnvs.width;
-                        imageCnvs.height = bcnvs.height;
-                        let imgContext = imageCnvs.getContext("2d");
-                        imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
-                    });
-                });
-                image.src = imagePath;
+        let toolbar = new ct.Toolbar.Toolbar(sz);
 
-                
-                window.areaSelector = selector;     
-                window.regionsManager = rm;
+        let selector = new ct.Selection.AreaSelector(sz,
+            function () {
+                //console.log("Rock the party!");
+            },
+            function (x1, y1, x2, y2) {
+                //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
+                var primaryTag = new ct.Base.Tags.Tag(
+                    (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
+                    Math.floor(Math.random() * 360.0));
+                var secondaryTag = new ct.Base.Tags.Tag(
+                    (Math.random() > 0.5) ? "Yes" : "No",
+                    Math.floor(Math.random() * 360.0));
+                var ternaryTag = new ct.Base.Tags.Tag(
+                    (Math.random() > 0.5) ? "one" : "two",
+                    Math.floor(Math.random() * 360.0));
+                var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+                rm.addRegion((regionId++).toString(), { x: x1, y: y1 }, { x: x2, y: y2 }, tags);
+            }
+        );
+        let rm = new ct.Region.RegionsManager(sz,
+            function () {
+                selector.disable();
+            },
+            function () {
+                selector.enable();
             });
 
-        }).catch(function(err){ 
-            console.error(err); 
+        // Upload background image for selection 
+        let imageCnvs = document.getElementById("sourceImageCnvs");
+        let imagePath = "./../images/background-cat.jpg";
+        let image = new Image();
+        image.addEventListener("load", (e) => {
+            // Create buffer
+            let buffCnvs = document.createElement("canvas");
+            let context = buffCnvs.getContext("2d");
+            buffCnvs.width = e.target.width;
+            buffCnvs.height = e.target.height;
+            // Fill buffer
+            context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
+
+            let filter = new ct.Filter.FilterPipeline();
+            //filter.addFilter(ftools.InvertFilter);
+            filter.addFilter(ct.Filter.GrayscaleFilter);
+            filter.applyToCanvas(buffCnvs).then((bcnvs) => {
+                // Copy buffer to the canvas on screen
+                imageCnvs.width = bcnvs.width;
+                imageCnvs.height = bcnvs.height;
+                let imgContext = imageCnvs.getContext("2d");
+                imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+            });
         });
-    </script>
+        image.src = imagePath;
+
+
+        window.areaSelector = selector;
+        window.regionsManager = rm;
+    });
+</script>
+
 </html>
