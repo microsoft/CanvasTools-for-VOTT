@@ -1,4 +1,4 @@
-export module CanvasTools.Base.Interfaces {
+export namespace CanvasTools.Base.Interfaces {
     export interface IRect {
         width: number;
         height: number;
