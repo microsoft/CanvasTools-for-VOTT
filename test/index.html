@@ -33,36 +33,31 @@
                 
             ]).then(function(modules){
                 var ct = modules[0].CanvasTools;
-                var btools = ct.Base;
-                var stools = ct.Selection;
-                var ftools = ct.Filter;
-                var rtools = ct.Region;                
-                
                 var sz = document.getElementById("selectionOverlay");
-                var selector, rm;
-
                 var regionId = 100;
+
+                let toolbar = new ct.Toolbar.Toolbar(sz);
                 
-                selector = new stools.AreaSelector(sz, 
+                let selector = new ct.Selection.AreaSelector(sz, 
                     function(){
                         //console.log("Rock the party!");
                     }, 
                     function(x1, y1, x2, y2){
                         //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
-                        var primaryTag = new btools.Tags.Tag(
+                        var primaryTag = new ct.Base.Tags.Tag(
                             (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                             Math.floor(Math.random() * 360.0));
-                        var secondaryTag = new btools.Tags.Tag(
+                        var secondaryTag = new ct.Base.Tags.Tag(
                             (Math.random() > 0.5) ? "Yes" : "No",
                             Math.floor(Math.random() * 360.0));
-                        var ternaryTag = new btools.Tags.Tag(
+                        var ternaryTag = new ct.Base.Tags.Tag(
                             (Math.random() > 0.5) ? "one" : "two",
                             Math.floor(Math.random() * 360.0));
-                        var tags = new btools.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+                        var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
                         rm.addRegion((regionId++).toString(), {x:x1, y:y1}, {x:x2, y:y2}, tags);
                     }
                 );
-                rm = new rtools.RegionsManager(sz, 
+                let rm = new ct.Region.RegionsManager(sz, 
                     function() {
                         selector.disable();
                     },
@@ -83,9 +78,9 @@
                     // Fill buffer
                     context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
 
-                    let filter = new ftools.FilterPipeline();
+                    let filter = new ct.Filter.FilterPipeline();
                     //filter.addFilter(ftools.InvertFilter);
-                    filter.addFilter(ftools.GrayscaleFilter);
+                    filter.addFilter(ct.Filter.GrayscaleFilter);
                     filter.applyToCanvas(buffCnvs).then((bcnvs) => {
                         // Copy buffer to the canvas on screen
                         imageCnvs.width = bcnvs.width;
@@ -99,7 +94,6 @@
                 
                 window.areaSelector = selector;     
                 window.regionsManager = rm;
-                window.btools = btools;    
             });
 
         }).catch(function(err){ 
