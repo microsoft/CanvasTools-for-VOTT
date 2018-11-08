@@ -4,7 +4,7 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 module.exports = {
     entry: './src/canvastools/ts/CanvasTools.ts',
     output: {
-        filename: 'ct.js',
+        filename: 'ct.min.js',
         path: path.resolve(__dirname, './lib/js'),
         libraryTarget: 'umd',
         library: 'CanvasTools',

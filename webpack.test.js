@@ -5,11 +5,12 @@ module.exports = {
     entry: './src/canvastools/ts/CanvasTools.ts',
     output: {
         filename: 'ct.js',
-        path: path.resolve(__dirname, './lib/js'),
+        path: path.resolve(__dirname, './test/js'),
         libraryTarget: 'umd',
         library: 'CanvasTools',
     },
-    mode: "production",
+    mode: "development",
+    devtool: 'inline-source-map',
     module: {
         rules: [
             {
