@@ -2,13 +2,13 @@
 
 CanvasTools.js is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library is implementing the following features core for visual tagging:
 
-* Region (box) selection (CanvasTools.Selection.AreaSelector)
-* Regions manipulation (CanvasTools.Region.RegionsManager)
-* Filters pipeline for underlaying canvas element (CanvasTools.Filter.FilterPipeline)
+* Region (box) selection (`CanvasTools.Selection.AreaSelector`)
+* Regions manipulation (`CanvasTools.Region.RegionsManager`)
+* Filters pipeline for underlaying canvas element (`CanvasTools.Filter.FilterPipeline`)
 
 ## Dependencies
 
-* CanvasTools heavily uses the [Snap.Svg library](https://github.com/adobe-webplatform/Snap.svg). In webpack-eged version it bundled with CanvasTools.js into one ct.js file.
+* CanvasTools heavily uses the [Snap.Svg library](https://github.com/adobe-webplatform/Snap.svg). In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
 * Current version of the library depends on some Chrome-specific features like masks-support in SVG.
 
 ## Use
