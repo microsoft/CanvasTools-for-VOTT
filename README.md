@@ -8,7 +8,7 @@ CanvasTools.js is one of the UI modules used in the [VoTT project](https://githu
 
 ## Dependencies
 
-* CanvasTools heavily uses the `[Snap.Svg library](https://github.com/adobe-webplatform/Snap.svg)`. In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
+* CanvasTools heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
 * Current version of the library depends on some Chrome-specific features like masks-support in SVG.
 
 ## Use
@@ -30,7 +30,7 @@ let ct = CanvasTools.CanvasTools;
 
 ### Add SVG host
 
-Add SVG element to the html-page. Filter inside SVG-element is used for shadow effect on elements.
+Add a SVG element to the html-page. The filter definition inside the SVG-element is used to apply shadow effect on various UI-elements.
 
 ```html
 <svg id="svgHost">
