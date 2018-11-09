@@ -59,6 +59,9 @@ let svgHost = document.getElementById("svgHost");
 Create `RegionsManager` and `AreaSelector` in specified order and cross-link them:
 
 ```js
+// some id to reference regions
+var regionId = 100;
+
 let rm = new ct.Region.RegionsManager(svgHost, () => { }, () => { });
 
 let selector = new ct.Selection.AreaSelector(sz,
