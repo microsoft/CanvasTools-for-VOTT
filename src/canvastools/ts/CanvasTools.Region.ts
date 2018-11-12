@@ -780,29 +780,29 @@ export module CanvasTools.Region {
         }
 
         private subscribeToEvents() {
-            let self = this;
-
-            self.dragRect.mouseover(function(e){
-                self.dragRect.drag(self.rectDragMove.bind(self), self.rectDragBegin.bind(self), self.rectDragEnd.bind(self));
-                self.onManipulationBegin();
-            })
-
-            self.dragRect.mouseout(function(e){
-                self.dragRect.undrag();
-                self.onManipulationEnd();
+            this.dragRect.node.addEventListener("pointerenter", (e) => {
+                this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                this.onManipulationBegin();
+                console.log("enter region");
             });
 
-            self.dragRect.node.addEventListener("pointerdown", function(e){
-                self.dragRect.node.setPointerCapture(e.pointerId);  
-                let multiselection = e.shiftKey;
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin", multiselection);
+            this.dragRect.node.addEventListener("pointerleave", (e) => {
+                this.dragRect.undrag();
+                this.onManipulationEnd();
+                console.log("leave region");
             });
 
-            self.dragRect.node.addEventListener("pointerup", function(e){
-                self.dragRect.node.releasePointerCapture(e.pointerId);
+            this.dragRect.node.addEventListener("pointerdown", (e) => {
+                this.dragRect.node.setPointerCapture(e.pointerId);  
+                let multiselection = e.shiftKey;
+                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin", multiselection);
+            });
+
+            this.dragRect.node.addEventListener("pointerup", (e) => {
+                this.dragRect.node.releasePointerCapture(e.pointerId);
 
                 let multiselection = e.shiftKey;
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "clicked", multiselection);
+                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "clicked", multiselection);
             });
         }
     }
