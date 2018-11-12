@@ -6,35 +6,68 @@
 </head>
 
 <body>
-    <div id="selectionzone">
-        <svg id="selectionOverlay">
-            <defs>
-                <filter id="black-glow">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                    <feOffset dx="0" dy="0" result="offsetblur" />
-                    <feComponentTransfer>
-                        <feFuncA type="linear" slope="0.8" />
-                    </feComponentTransfer>
-                    <feMerge>
-                        <feMergeNode />
-                        <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                </filter>
-            </defs>
-        </svg>
-        <canvas id="sourceImageCnvs"></canvas>
+    <div id="ctZone">
+        <div id="toolbarzone">
+            <svg id="toolbarSVG">
+                <defs>
+                    <filter id="black-glow">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                        <feOffset dx="0" dy="0" result="offsetblur" />
+                        <feComponentTransfer>
+                            <feFuncA type="linear" slope="0.8" />
+                        </feComponentTransfer>
+                        <feMerge>
+                            <feMergeNode />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+            </svg>
+        </div>
+        <div id="selectionzone">
+            <svg id="selectionSVG">
+                <defs>
+                    <filter id="black-glow">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                        <feOffset dx="0" dy="0" result="offsetblur" />
+                        <feComponentTransfer>
+                            <feFuncA type="linear" slope="0.8" />
+                        </feComponentTransfer>
+                        <feMerge>
+                            <feMergeNode />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+            </svg>
+            <canvas id="sourceImageCnvs"></canvas>
+        </div>
     </div>
+
     <div>Some text</div>
 </body>
 <script src="./js/ct.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
         var ct = CanvasTools.CanvasTools;
-        var sz = document.getElementById("selectionOverlay");
+        var sz = document.getElementById("selectionSVG");
+        var tz = document.getElementById("toolbarSVG");
         var regionId = 100;
 
-        let toolbar = new ct.Toolbar.Toolbar(sz);
+        // create toolbar
+        let toolbar = new ct.Toolbar.Toolbar(tz);
+        let selectionMode = "rect-select";
+        toolbar.addAction(new ct.Toolbar.IconDescription("rect-select", "./images/icons/rect-selection.svg", "Select Rectangular Box (Ctrl+R)"), (action) => {
+            console.log(action);
+        });
+        toolbar.addAction(new ct.Toolbar.IconDescription("template-select", "./images/icons/template-selection.svg", "Select Template Box (Ctrl+T)"), (action) => {
+            console.log(action);
+        });
+        toolbar.select("rect-select");
 
+        // create regions manager 
+        let rm = new ct.Region.RegionsManager(sz, () => { }, () => { });
+        // create area selector manager 
         let selector = new ct.Selection.AreaSelector(sz,
             function () {
                 //console.log("Rock the party!");
@@ -54,13 +87,13 @@
                 rm.addRegion((regionId++).toString(), { x: x1, y: y1 }, { x: x2, y: y2 }, tags);
             }
         );
-        let rm = new ct.Region.RegionsManager(sz,
-            function () {
-                selector.disable();
-            },
-            function () {
-                selector.enable();
-            });
+
+        rm.onManipulationEnd = function () {
+            selector.enable();
+        };
+        rm.onManipulationBegin = function () {
+            selector.disable();
+        };
 
         // Upload background image for selection 
         let imageCnvs = document.getElementById("sourceImageCnvs");
@@ -76,8 +109,8 @@
             context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
 
             let filter = new ct.Filter.FilterPipeline();
-            //filter.addFilter(ftools.InvertFilter);
-            filter.addFilter(ct.Filter.GrayscaleFilter);
+            //filter.addFilter(ct.Filter.InvertFilter);
+            //filter.addFilter(ct.Filter.GrayscaleFilter);
             filter.applyToCanvas(buffCnvs).then((bcnvs) => {
                 // Copy buffer to the canvas on screen
                 imageCnvs.width = bcnvs.width;

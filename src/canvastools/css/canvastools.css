@@ -1,7 +1,7 @@
 /* CanvasTools.css */
 
-/* RegionsManager */
-/*
+/* RegionsManager
+
 .regionStyle
 --> .tagsLayer
     --> .primaryTagRectStyle
@@ -161,7 +161,27 @@ svg:not(:root) .menuLayer {
     visibility: visible;
 }
 
-/* Toolbar */
+/* Toolbar 
+
+.toolbarLayer
+--> .toolbarBGStyle
+--> .iconsLayerStyle
+    --> .iconStyle
+        --> .iconBGRectStyle
+            .iconImageStyle
+*/
 .toolbarBGStyle {
-    fill: rgba(64, 64, 64, 0.4);
+    fill: #666;
+}
+
+.iconStyle .iconBGRectStyle{
+    fill: transparent;
+}
+
+.iconStyle .iconBGRectStyle.selected {
+    fill: #333;
+}
+
+.iconStyle .iconImageStyle * {
+    stroke: #fff;
 }
