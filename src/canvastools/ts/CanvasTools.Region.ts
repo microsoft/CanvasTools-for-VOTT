@@ -260,52 +260,51 @@ export module CanvasTools.Region {
         }
 
         private subscribeToEvents() {
-            let self = this;
             this.subscribeAnchorToEvents(this.anchors.TL, "TL");
             this.subscribeAnchorToEvents(this.anchors.TR, "TR");
             this.subscribeAnchorToEvents(this.anchors.BL, "BL");
             this.subscribeAnchorToEvents(this.anchors.BR, "BR");
 
-            self.ghostAnchor.mouseover(function(e){
-                self.ghostAnchor.drag(
-                    self.anchorDragMove.bind(self),
-                    self.anchorDragBegin.bind(self),
-                    self.anchorDragEnd.bind(self)
+            this.ghostAnchor.node.addEventListener("pointerenter", (e) => {
+                this.ghostAnchor.drag(
+                    this.anchorDragMove.bind(this),
+                    this.anchorDragBegin.bind(this),
+                    this.anchorDragEnd.bind(this)
                 );                
                 window.requestAnimationFrame(() => {
-                    self.ghostAnchor.addClass(self.activeAnchor);
+                    this.ghostAnchor.addClass(this.activeAnchor);
                 });                
-                self.onManipulationBegin();
+                this.onManipulationBegin();
             });
 
-            self.ghostAnchor.mouseout(function(e){
-                self.ghostAnchor.undrag();
+            this.ghostAnchor.node.addEventListener("pointerleave", (e) => {
+                this.ghostAnchor.undrag();
 
                 window.requestAnimationFrame(() => {
-                    self.ghostAnchor.attr({
+                    this.ghostAnchor.attr({
                         display: "none"
                     });
-                    self.ghostAnchor.removeClass(self.activeAnchor);
+                    this.ghostAnchor.removeClass(this.activeAnchor);
                 });
                 
-                self.onManipulationEnd();
+                this.onManipulationEnd();
             });
 
-            self.ghostAnchor.node.addEventListener("pointerdown", function(e){
-                self.ghostAnchor.node.setPointerCapture(e.pointerId);
+            this.ghostAnchor.node.addEventListener("pointerdown", (e) => {
+                this.ghostAnchor.node.setPointerCapture(e.pointerId);
 
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingbegin");
+                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin");
             });
 
-            self.ghostAnchor.node.addEventListener("pointerup", function(e){
-                self.ghostAnchor.node.releasePointerCapture(e.pointerId);
+            this.ghostAnchor.node.addEventListener("pointerup", (e) => {
+                this.ghostAnchor.node.releasePointerCapture(e.pointerId);
 
-                self.onChange(self.x, self.y, self.rect.width, self.rect.height, "movingend");
+                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingend");
             });
         }
 
         private subscribeAnchorToEvents(anchor:Snap.Element, active:string) {
-            anchor.mouseover((e) => {
+            anchor.node.addEventListener("pointerenter", (e) => {
                 this.activeAnchor = active;
                 // Set drag origin point to current anchor
                 let p = this.getDragOriginPoint();    
@@ -783,13 +782,11 @@ export module CanvasTools.Region {
             this.dragRect.node.addEventListener("pointerenter", (e) => {
                 this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                 this.onManipulationBegin();
-                console.log("enter region");
             });
 
             this.dragRect.node.addEventListener("pointerleave", (e) => {
                 this.dragRect.undrag();
                 this.onManipulationEnd();
-                console.log("leave region");
             });
 
             this.dragRect.node.addEventListener("pointerdown", (e) => {
