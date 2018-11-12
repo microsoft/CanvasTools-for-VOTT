@@ -15,6 +15,8 @@ export module CanvasTools.Selection {
         public x: number;
         public y: number;
 
+        private isVisible: boolean = true;
+
         constructor(paper: Snap.Paper, rect: IBase.IRect){
             this.build(paper, rect.width, rect.height, 0 , 0);
         }
@@ -55,38 +57,32 @@ export module CanvasTools.Selection {
             this.x = np.x;
             this.y = np.y;  
             
-            this.vl.attr({
-                x1: np.x,
-                x2: np.x,
-                y2: rect.height
-            });
+            this.vl.node.setAttribute("x1", np.x.toString());
+            this.vl.node.setAttribute("x2", np.x.toString());
+            this.vl.node.setAttribute("y2", rect.height.toString());
 
-            this.hl.attr({
-                y1: np.y,
-                x2: rect.width,
-                y2: np.y
-            });         
+            this.hl.node.setAttribute("y1", np.y.toString());
+            this.hl.node.setAttribute("x2", rect.width.toString());
+            this.hl.node.setAttribute("y2", np.y.toString());
         }
 
         public resize(width: number, height: number) {
-            this.vl.attr({
-                y2: height
-            });
-            this.hl.attr({
-                x2: width,
-            })
+            this.vl.node.setAttribute("y2", height.toString());
+            this.hl.node.setAttribute("x2", width.toString());
         }
 
         public hide() {
-            this.crossGroup.attr({
-                visibility: 'hidden'
-            });
+            if (this.isVisible) {
+                this.crossGroup.node.setAttribute("visibility", "hidden");
+                this.isVisible = false;
+            }
         }
 
         public show() {
-            this.crossGroup.attr({
-                visibility: 'visible'
-            });
+            if (!this.isVisible) {
+                this.crossGroup.node.setAttribute("visibility", "visible");
+                this.isVisible = true;
+            }          
         }
 
     }
@@ -96,6 +92,8 @@ export module CanvasTools.Selection {
         public height: number;
 
         public rect: Snap.Element;
+
+        private isVisible:boolean = true;
 
         constructor(paper: Snap.Paper, rect:IBase.IRect){
            this.build(paper, rect.width, rect.height);
@@ -108,44 +106,30 @@ export module CanvasTools.Selection {
         }
 
         public move(p: IBase.IPoint2D) {           
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.rect.attr({
-                    x: p.x,
-                    y: p.y
-                });
-            })  
+            this.rect.node.setAttribute("x", p.x.toString());
+            this.rect.node.setAttribute("y", p.y.toString());
         }
 
         public resize(width: number, height: number){
             this.width = width;
             this.height = height;
 
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.rect.attr({
-                    width: width,
-                    height: height
-                });
-            }) 
+            this.rect.node.setAttribute("height", height.toString());
+            this.rect.node.setAttribute("width", width.toString());
         }
 
         public hide() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.rect.attr({
-                    visibility: 'hidden'
-                });
-            }) 
+            if (this.isVisible) {
+                this.rect.node.setAttribute("visibility", "hidden");
+                this.isVisible = false;
+            }
         }
 
         public show() {
-            let self = this;
-            window.requestAnimationFrame(function(){
-                self.rect.attr({
-                    visibility: 'visible'
-                });
-            }) 
+            if (!this.isVisible) {
+                this.rect.node.setAttribute("visibility", "visible");
+                this.isVisible = true;
+            }          
         }
     }
 
@@ -214,6 +198,8 @@ export module CanvasTools.Selection {
 
             this.templateRect = this.createTemplateRect();
 
+            this.hideAll([this.crossA, this.crossB, this.templateRect, this.overlay]);
+
             this.areaSelectorLayer.add(this.overlay.rect);
             this.areaSelectorLayer.add(this.crossA.crossGroup);
             this.areaSelectorLayer.add(this.crossB.crossGroup);
@@ -223,7 +209,6 @@ export module CanvasTools.Selection {
         private createOverlay(): RectElement {
             let r:RectElement = new RectElement(this.paper, this.paperRect);
             r.rect.addClass("overlayStyle");
-            r.hide();
             return r;
         }
 
@@ -241,14 +226,12 @@ export module CanvasTools.Selection {
 
         private createCross(): CrossElement {
             let cr:CrossElement = new CrossElement(this.paper, this.paperRect);  
-            cr.hide();
             return cr;
         }
 
         private createTemplateRect(): RectElement {
             let r: RectElement = new RectElement(this.paper, this.templateSize);
             r.rect.addClass("templateRectStyle");
-            r.hide();
             return r;
         }
 
@@ -265,136 +248,153 @@ export module CanvasTools.Selection {
         }
 
         private resizeAll(elementSet: Array<IBase.IResizable>) {
-            elementSet.forEach(element => {
-                element.resize(this.paperRect.width, this.paperRect.height);                
-            });
+            window.requestAnimationFrame(() => {
+                elementSet.forEach(element => {
+                    element.resize(this.paperRect.width, this.paperRect.height);                
+                });
+            })            
         }
 
         private showAll(elementSet: Array<IBase.IHideable>) {
-            elementSet.forEach(element => {
-                element.show();                
-            });
+            window.requestAnimationFrame(() => {
+                elementSet.forEach(element => {
+                    element.show();                
+                });    
+            })            
         }
 
         private hideAll(elementSet: Array<IBase.IHideable>) {
-            elementSet.forEach(element => {
-                element.hide();                
-            });
+            window.requestAnimationFrame(() => {
+                elementSet.forEach(element => {
+                    element.hide();                
+                }); 
+            })            
         }
 
         private onPointerEnter(e:PointerEvent) {
-            this.crossA.show();
+            window.requestAnimationFrame(() => {
+                this.crossA.show();
 
-            if (this.selectionMode === SelectionMode.CENTRALPOINT) {
-                this.templateRect.show();
-            }
+                if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                    this.templateRect.show();
+                }
+            })            
         }
 
         private onPointerLeave(e:PointerEvent) {
-            let rect = this.baseParent.getClientRects();
-            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-                
-            if (this.selectionMode === SelectionMode.RECT && !this.capturingState) {
-                this.hideAll([this.crossA, this.crossB, this.selectionBox]);
-            } else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
-                this.moveCross(this.crossB, p);
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
-            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
-                this.hideAll([this.templateRect, this.crossA, this.crossB]);
-            }
+            window.requestAnimationFrame(() => {
+                let rect = this.baseParent.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+
+                if (this.selectionMode === SelectionMode.RECT && !this.capturingState) {
+                    this.hideAll([this.crossA, this.crossB, this.selectionBox]);
+                } else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
+                    this.moveCross(this.crossB, p);
+                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                    this.hideAll([this.templateRect, this.crossA, this.crossB]);
+                }
+            });
+            
         }
 
         private onPointerDown(e:PointerEvent) {
-            if (this.selectionMode === SelectionMode.RECT) {
-                this.capturingState = true;
-
-                this.baseParent.setPointerCapture(e.pointerId);
-                this.moveCross(this.crossB, this.crossA); 
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
-
-                this.showAll([this.overlay, this.crossB, this.selectionBox]);
-
-                if (typeof this.onSelectionBeginCallback === "function") {
-                    this.onSelectionBeginCallback();
-                }
-            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
-                this.showAll([this.templateRect]);
-                this.moveTemplateRect(this.templateRect, this.crossA);
-                if (typeof this.onSelectionBeginCallback === "function") {
-                    this.onSelectionBeginCallback();
-                }
-            }            
-        }
-
-        private onPointerUp(e:PointerEvent) {
-            let rect = this.baseParent.getClientRects();
-            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-            
-            if (this.selectionMode === SelectionMode.RECT) { 
-                this.capturingState = false;
-                this.baseParent.releasePointerCapture(e.pointerId);                    
-                this.hideAll([this.crossB, this.overlay]);
-                
-                if (typeof this.onSelectionEndCallback === "function") {
-                    this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
-                }
-            } 
-            else if (this.selectionMode === SelectionMode.TWOPOINTS) {
-                if (this.capturingState) {
-                    this.capturingState = false;
-                    this.hideAll([this.crossB, this.overlay]);
-
-                    if (typeof this.onSelectionEndCallback === "function") {
-                        this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
-                    }
-                    this.moveCross(this.crossA, p);
-                    this.moveCross(this.crossB, p);
-                } else {
+            window.requestAnimationFrame(() => {
+                if (this.selectionMode === SelectionMode.RECT) {
                     this.capturingState = true;
-                    this.moveCross(this.crossB, p);
+
+                    this.baseParent.setPointerCapture(e.pointerId);
+                    this.moveCross(this.crossB, this.crossA);
                     this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                    this.showAll([this.crossA, this.crossB, this.selectionBox, this.overlay]);
+
+                    this.showAll([this.overlay, this.crossB, this.selectionBox]);
 
                     if (typeof this.onSelectionBeginCallback === "function") {
                         this.onSelectionBeginCallback();
                     }
+                } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                    this.showAll([this.templateRect]);
+                    this.moveTemplateRect(this.templateRect, this.crossA);
+                    if (typeof this.onSelectionBeginCallback === "function") {
+                        this.onSelectionBeginCallback();
+                    }
                 }
-            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
-                if (typeof this.onSelectionEndCallback === "function") {
-                    let p1 = new Point2D(this.crossA.x - this.templateSize.width/2, this.crossA.y - this.templateSize.height/2);
-                    let p2 = new Point2D(this.crossA.x + this.templateSize.width/2, this.crossA.y + this.templateSize.height/2);
-                    p1 = p1.boundToRect(this.paperRect);
-                    p2 = p2.boundToRect(this.paperRect);
-                    this.onSelectionEndCallback(p1.x, p1.y, p2.x, p2.y);
+            });         
+        }
+
+        private onPointerUp(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                let rect = this.baseParent.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                
+                if (this.selectionMode === SelectionMode.RECT) { 
+                    this.capturingState = false;
+                    this.baseParent.releasePointerCapture(e.pointerId);                    
+                    this.hideAll([this.crossB, this.overlay]);
+                    
+                    if (typeof this.onSelectionEndCallback === "function") {
+                        this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
+                    }
+                } 
+                else if (this.selectionMode === SelectionMode.TWOPOINTS) {
+                    if (this.capturingState) {
+                        this.capturingState = false;
+                        this.hideAll([this.crossB, this.overlay]);
+
+                        if (typeof this.onSelectionEndCallback === "function") {
+                            this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
+                        }
+                        this.moveCross(this.crossA, p);
+                        this.moveCross(this.crossB, p);
+                    } else {
+                        this.capturingState = true;
+                        this.moveCross(this.crossB, p);
+                        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                        this.showAll([this.crossA, this.crossB, this.selectionBox, this.overlay]);
+
+                        if (typeof this.onSelectionBeginCallback === "function") {
+                            this.onSelectionBeginCallback();
+                        }
+                    }
+                } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                    if (typeof this.onSelectionEndCallback === "function") {
+                        let p1 = new Point2D(this.crossA.x - this.templateSize.width/2, this.crossA.y - this.templateSize.height/2);
+                        let p2 = new Point2D(this.crossA.x + this.templateSize.width/2, this.crossA.y + this.templateSize.height/2);
+                        p1 = p1.boundToRect(this.paperRect);
+                        p2 = p2.boundToRect(this.paperRect);
+                        this.onSelectionEndCallback(p1.x, p1.y, p2.x, p2.y);
+                    }
                 }
-            }
+            });
         }
 
         private onPointerMove(e:PointerEvent) {
-            let rect = this.baseParent.getClientRects();
-            let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            window.requestAnimationFrame(() => {
+                let rect = this.baseParent.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
 
-            this.crossA.show();
+                this.crossA.show();
 
-            if (this.selectionMode === SelectionMode.RECT) {
-                if (this.capturingState) {
-                    this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
-                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                } else {
+                if (this.selectionMode === SelectionMode.RECT) {
+                    if (this.capturingState) {
+                        this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
+                        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                    } else {
+                        this.moveCross(this.crossA, p);
+                    }
+                } else if (this.selectionMode === SelectionMode.TWOPOINTS) {
+                    if (this.capturingState) {
+                        this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
+                        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                    } else {
+                        this.moveCross(this.crossA, p);
+                        this.moveCross(this.crossB, p);
+                    }
+                } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
                     this.moveCross(this.crossA, p);
+                    this.moveTemplateRect(this.templateRect, this.crossA);
                 }
-            } else if (this.selectionMode === SelectionMode.TWOPOINTS) {
-                if (this.capturingState) {
-                    this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
-                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                } else {
-                    this.moveCross(this.crossA, p);
-                    this.moveCross(this.crossB, p);
-                }
-            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
-                this.moveCross(this.crossA, p);
-                this.moveTemplateRect(this.templateRect, this.crossA);
-            }
+            });
         }
 
         private onKeyDown(e:KeyboardEvent) {
