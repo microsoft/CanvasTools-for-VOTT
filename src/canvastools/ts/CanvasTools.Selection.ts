@@ -149,6 +149,9 @@ export module CanvasTools.Selection {
         }
     }
 
+    export enum SelectionMode { RECT, TWOPOINTS, CENTRALPOINT };
+    export enum SelectionModificator { RECT, SQUARE };
+
     export class AreaSelector {
         private baseParent:SVGSVGElement;
         private paper: Snap.Paper;
@@ -168,8 +171,9 @@ export module CanvasTools.Selection {
         public onSelectionEndCallback: Function;
 
         private isEnabled: boolean = true;
-        private squareMode: boolean = false;
-        private twoPointsMode: boolean = false;
+
+        private selectionMode: SelectionMode = SelectionMode.RECT;
+        private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
         constructor(svgHost: SVGSVGElement, onSelectionBegin: Function, onSelectionEnd: Function){
             this.buildUIElements(svgHost);
@@ -271,16 +275,16 @@ export module CanvasTools.Selection {
             let rect = this.baseParent.getClientRects();
             let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
                 
-            if (!this.twoPointsMode && !this.capturingState) {
+            if (this.selectionMode === SelectionMode.RECT && !this.capturingState) {
                 this.hideAll([this.crossA, this.crossB, this.selectionBox]);
-            } else if (this.twoPointsMode && this.capturingState) {
+            } else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
                 this.moveCross(this.crossB, p);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
             }
         }
 
         private onPointerDown(e:PointerEvent) {
-            if (!this.twoPointsMode) {
+            if (this.selectionMode === SelectionMode.RECT) {
                 this.capturingState = true;
 
                 this.baseParent.setPointerCapture(e.pointerId);
@@ -299,7 +303,7 @@ export module CanvasTools.Selection {
             let rect = this.baseParent.getClientRects();
             let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
             
-            if (!this.twoPointsMode) { 
+            if (this.selectionMode === SelectionMode.RECT) { 
                 this.capturingState = false;
                 this.baseParent.releasePointerCapture(e.pointerId);                    
                 this.hideAll([this.crossB, this.overlay]);
@@ -308,7 +312,7 @@ export module CanvasTools.Selection {
                     this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
                 }
             } 
-            else if (this.twoPointsMode && !this.capturingState) {
+            else if (this.selectionMode === SelectionMode.TWOPOINTS && !this.capturingState) {
                 this.capturingState = true;                    
                 this.moveCross(this.crossB, p); 
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
@@ -336,15 +340,15 @@ export module CanvasTools.Selection {
 
             this.crossA.show();
             
-            if (!this.twoPointsMode && !this.capturingState){
+            if (this.selectionMode === SelectionMode.RECT && !this.capturingState){
                 this.moveCross(this.crossA, p);
             }
-            else if (!this.twoPointsMode && this.capturingState) {                    
-                this.moveCross(this.crossB, p, this.squareMode, this.crossA);                    
+            else if (this.selectionMode === SelectionMode.RECT && this.capturingState) {                    
+                this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
             } 
-            else if (this.twoPointsMode && this.capturingState) {
-                this.moveCross(this.crossB, p, this.squareMode, this.crossA);                    
+            else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
+                this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
             } 
             else {                    
@@ -357,21 +361,21 @@ export module CanvasTools.Selection {
 
         private onKeyDown(e:KeyboardEvent) {
             if (e.shiftKey) {
-                this.squareMode = true; 
+                this.selectionModificator = SelectionModificator.SQUARE;
             } 
             if (e.ctrlKey && !this.capturingState) {
-                this.twoPointsMode = true;                    
+                this.selectionMode = SelectionMode.TWOPOINTS;                   
             }
         }
 
         private onKeyUp(e:KeyboardEvent) {
             //Holding shift key enable square drawing mode
             if (!e.shiftKey) {
-                this.squareMode = false;
+                this.selectionModificator = SelectionModificator.RECT;
             }
             //Holding Ctrl key to enable two point selection mode
-            if (!e.ctrlKey && this.twoPointsMode) {
-                this.twoPointsMode = false;   
+            if (!e.ctrlKey && this.selectionMode === SelectionMode.TWOPOINTS) {
+                this.selectionMode = SelectionMode.RECT;  
                 this.capturingState = false;
 
                 this.moveCross(this.crossA, this.crossB);
@@ -381,7 +385,7 @@ export module CanvasTools.Selection {
             //Ctrl + N to add new region temporarily disabling all others
             if(e.ctrlKey && e.keyCode == 78 && !this.exclusiveCapturingState) {
                 this.enableExclusiveMode();
-                this.twoPointsMode = false;
+                this.selectionMode = SelectionMode.RECT;
             } 
             //Escape to exit exclusive mode
             if(e.keyCode == 27) {
