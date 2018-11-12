@@ -129,7 +129,18 @@ svg:not(:root) .menuLayer {
 }
 
 
-/* AreaSelector */
+/* AreaSelector
+
+.areaSelector
+--> .overlayStyle
+    [mask]
+        .overlayMaskStyle
+        .selectionBoxMaskStyle
+    .crossStyle
+        line
+        line
+    .templateRectStyle
+*/
 #selectionOverlay {
     position: relative;
     width: 100%;
@@ -140,6 +151,7 @@ svg:not(:root) .menuLayer {
     stroke-width:1;
     stroke-dasharray: 3 3;
     stroke: #666;
+    pointer-events: none; 
 }
 
 .overlayStyle {
@@ -159,6 +171,13 @@ svg:not(:root) .menuLayer {
     fill: #000;
     stroke-width: 0;
     visibility: visible;
+}
+
+.templateRectStyle {
+    stroke-width:1;
+    stroke: #666;
+    fill: transparent;
+    pointer-events: none; 
 }
 
 /* Toolbar 

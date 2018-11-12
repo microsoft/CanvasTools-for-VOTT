@@ -166,6 +166,7 @@ export module CanvasTools.Selection {
         private capturingState: boolean = false;
         private exclusiveCapturingState: boolean = false;
         private areaSelectorLayer: Snap.Element;
+        private templateRect: RectElement;
 
         public onSelectionBeginCallback: Function;
         public onSelectionEndCallback: Function;
@@ -175,10 +176,14 @@ export module CanvasTools.Selection {
         private selectionMode: SelectionMode = SelectionMode.RECT;
         private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
+        private templateSize: Rect;
+        public static DefaultTemplateSize: Rect = new Rect(20, 20);
+
         constructor(svgHost: SVGSVGElement, onSelectionBegin: Function, onSelectionEnd: Function){
+            this.templateSize = AreaSelector.DefaultTemplateSize;
+
             this.buildUIElements(svgHost);
             this.subscribeToEvents();
-
             this.onSelectionEndCallback = onSelectionEnd;
             this.onSelectionBeginCallback = onSelectionBegin;
         }
@@ -207,9 +212,12 @@ export module CanvasTools.Selection {
             this.crossA = this.createCross();
             this.crossB = this.createCross();
 
+            this.templateRect = this.createTemplateRect();
+
             this.areaSelectorLayer.add(this.overlay.rect);
             this.areaSelectorLayer.add(this.crossA.crossGroup);
             this.areaSelectorLayer.add(this.crossB.crossGroup);
+            this.areaSelectorLayer.add(this.templateRect.rect);
         }
 
         private createOverlay(): RectElement {
@@ -235,6 +243,13 @@ export module CanvasTools.Selection {
             let cr:CrossElement = new CrossElement(this.paper, this.paperRect);  
             cr.hide();
             return cr;
+        }
+
+        private createTemplateRect(): RectElement {
+            let r: RectElement = new RectElement(this.paper, this.templateSize);
+            r.rect.addClass("templateRectStyle");
+            r.hide();
+            return r;
         }
 
         public resize(width:number, height:number):void {
@@ -269,6 +284,10 @@ export module CanvasTools.Selection {
 
         private onPointerEnter(e:PointerEvent) {
             this.crossA.show();
+
+            if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                this.templateRect.show();
+            }
         }
 
         private onPointerLeave(e:PointerEvent) {
@@ -280,6 +299,8 @@ export module CanvasTools.Selection {
             } else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
                 this.moveCross(this.crossB, p);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
+            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                this.hideAll([this.templateRect, this.crossA, this.crossB]);
             }
         }
 
@@ -296,7 +317,13 @@ export module CanvasTools.Selection {
                 if (typeof this.onSelectionBeginCallback === "function") {
                     this.onSelectionBeginCallback();
                 }
-            }               
+            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                this.showAll([this.templateRect]);
+                this.moveTemplateRect(this.templateRect, this.crossA);
+                if (typeof this.onSelectionBeginCallback === "function") {
+                    this.onSelectionBeginCallback();
+                }
+            }            
         }
 
         private onPointerUp(e:PointerEvent) {
@@ -332,7 +359,15 @@ export module CanvasTools.Selection {
                         this.onSelectionBeginCallback();
                     }
                 }
-            } 
+            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                if (typeof this.onSelectionEndCallback === "function") {
+                    let p1 = new Point2D(this.crossA.x - this.templateSize.width/2, this.crossA.y - this.templateSize.height/2);
+                    let p2 = new Point2D(this.crossA.x + this.templateSize.width/2, this.crossA.y + this.templateSize.height/2);
+                    p1 = p1.boundToRect(this.paperRect);
+                    p2 = p2.boundToRect(this.paperRect);
+                    this.onSelectionEndCallback(p1.x, p1.y, p2.x, p2.y);
+                }
+            }
         }
 
         private onPointerMove(e:PointerEvent) {
@@ -356,18 +391,24 @@ export module CanvasTools.Selection {
                     this.moveCross(this.crossA, p);
                     this.moveCross(this.crossB, p);
                 }
+            } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                this.moveCross(this.crossA, p);
+                this.moveTemplateRect(this.templateRect, this.crossA);
             }
-
-            e.preventDefault();
         }
 
         private onKeyDown(e:KeyboardEvent) {
+            //Holding shift key enable square drawing mode
             if (e.shiftKey) {
                 this.selectionModificator = SelectionModificator.SQUARE;
             } 
-            if (e.ctrlKey && !this.capturingState) {
-                this.selectionMode = SelectionMode.TWOPOINTS;                   
-            }
+
+            if (this.selectionMode === SelectionMode.RECT || this.selectionMode === SelectionMode.TWOPOINTS) {
+                if (e.ctrlKey && !this.capturingState) {
+                    this.selectionMode = SelectionMode.TWOPOINTS;                   
+                }
+            } 
+            // else if (this.selectionMode === SelectionMode.CENTRALPOINT) { }
         }
 
         private onKeyUp(e:KeyboardEvent) {
@@ -375,14 +416,19 @@ export module CanvasTools.Selection {
             if (!e.shiftKey) {
                 this.selectionModificator = SelectionModificator.RECT;
             }
-            //Holding Ctrl key to enable two point selection mode
-            if (!e.ctrlKey && this.selectionMode === SelectionMode.TWOPOINTS) {
-                this.selectionMode = SelectionMode.RECT;  
-                this.capturingState = false;
 
-                this.moveCross(this.crossA, this.crossB);
-                this.hideAll([this.crossB, this.selectionBox, this.overlay]);
+            if (this.selectionMode === SelectionMode.RECT || this.selectionMode === SelectionMode.TWOPOINTS) {
+                //Holding Ctrl key to enable two point selection mode
+                if (!e.ctrlKey && this.selectionMode === SelectionMode.TWOPOINTS) {
+                    this.selectionMode = SelectionMode.RECT;
+                    this.capturingState = false;
+
+                    this.moveCross(this.crossA, this.crossB);
+                    this.hideAll([this.crossB, this.selectionBox, this.overlay]);
+                }
             }
+            // else if (this.selectionMode === SelectionMode.CENTRALPOINT) { }
+
 
             //Ctrl + N to add new region temporarily disabling all others
             if(e.ctrlKey && e.keyCode == 78 && !this.exclusiveCapturingState) {
@@ -401,9 +447,9 @@ export module CanvasTools.Selection {
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false},
                 {event: "pointerdown", listener: this.onPointerDown, base: this.baseParent, bypass: false},
                 {event: "pointerup", listener: this.onPointerUp, base: this.baseParent, bypass: false},
-                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: false},
+                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: true},
                 {event: "keydown", listener: this.onKeyDown, base: window, bypass: false},
-                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true},
+                {event: "keyup", listener: this.onKeyUp, base: window, bypass: false},
             ];
 
             listeners.forEach(e => {
@@ -436,14 +482,20 @@ export module CanvasTools.Selection {
             box.resize(w, h);
         }
 
-        enable() {
+        private moveTemplateRect(template: RectElement, crossA:CrossElement) {
+            var x = crossA.x - template.width/2;
+            var y = crossA.y - template.height/2;
+            template.move(new Point2D(x, y));
+        }
+
+        public enable() {
             this.isEnabled = true;
             this.areaSelectorLayer.attr({
                 display: "block"
             });
         }
 
-        disable() {
+        public disable() {
             if(!this.exclusiveCapturingState) {
                 this.isEnabled = false;
                 this.areaSelectorLayer.attr({
@@ -452,7 +504,27 @@ export module CanvasTools.Selection {
             }
         }
 
-        enablify(f:Function, bypass:boolean = false) {
+        public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
+            this.selectionMode = selectionMode;
+            if (selectionMode === SelectionMode.CENTRALPOINT) {
+                if (options !== undefined && options.template !== undefined) {
+                    this.setTemplate(options.template);
+                } else {
+                    this.setTemplate(AreaSelector.DefaultTemplateSize);
+                }
+                this.hideAll([this.overlay, this.selectionBox, this.crossB]);
+
+            } else {
+                this.templateRect.hide();
+            }
+        }
+
+        private setTemplate(template: Rect) {
+            this.templateSize = template;
+            this.templateRect.resize(template.width, template.height);
+        }
+
+        private enablify(f:Function, bypass:boolean = false) {
             return (args:PointerEvent|KeyboardEvent) => {
                 if (this.isEnabled || bypass) {
                     f(args);

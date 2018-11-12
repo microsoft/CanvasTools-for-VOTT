@@ -54,17 +54,6 @@
         var tz = document.getElementById("toolbarSVG");
         var regionId = 100;
 
-        // create toolbar
-        let toolbar = new ct.Toolbar.Toolbar(tz);
-        let selectionMode = "rect-select";
-        toolbar.addAction(new ct.Toolbar.IconDescription("rect-select", "./images/icons/rect-selection.svg", "Select Rectangular Box (Ctrl+R)"), (action) => {
-            console.log(action);
-        });
-        toolbar.addAction(new ct.Toolbar.IconDescription("template-select", "./images/icons/template-selection.svg", "Select Template Box (Ctrl+T)"), (action) => {
-            console.log(action);
-        });
-        toolbar.select("rect-select");
-
         // create regions manager 
         let rm = new ct.Region.RegionsManager(sz, () => { }, () => { });
         // create area selector manager 
@@ -90,10 +79,25 @@
 
         rm.onManipulationEnd = function () {
             selector.enable();
+            console.log("off region");
         };
         rm.onManipulationBegin = function () {
             selector.disable();
+            console.log("on region");
         };
+
+        // create toolbar
+        let toolbar = new ct.Toolbar.Toolbar(tz);
+        let selectionMode = "rect-select";
+        toolbar.addAction(new ct.Toolbar.IconDescription("rect-select", "./images/icons/rect-selection.svg", "Select Rectangular Box (Ctrl+R)"), (action) => {
+            console.log(action);
+            selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
+        });
+        toolbar.addAction(new ct.Toolbar.IconDescription("template-select", "./images/icons/template-selection.svg", "Select Template Box (Ctrl+T)"), (action) => {
+            console.log(action);
+            selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
+        });
+        toolbar.select("rect-select");
 
         // Upload background image for selection 
         let imageCnvs = document.getElementById("sourceImageCnvs");
