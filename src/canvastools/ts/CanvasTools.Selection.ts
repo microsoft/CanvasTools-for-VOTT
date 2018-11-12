@@ -296,7 +296,7 @@ export module CanvasTools.Selection {
                 if (typeof this.onSelectionBeginCallback === "function") {
                     this.onSelectionBeginCallback();
                 }
-            }                 
+            }               
         }
 
         private onPointerUp(e:PointerEvent) {
@@ -312,26 +312,27 @@ export module CanvasTools.Selection {
                     this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
                 }
             } 
-            else if (this.selectionMode === SelectionMode.TWOPOINTS && !this.capturingState) {
-                this.capturingState = true;                    
-                this.moveCross(this.crossB, p); 
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB); 
-                this.showAll([this.crossA, this.crossB, this.selectionBox, this.overlay]);
+            else if (this.selectionMode === SelectionMode.TWOPOINTS) {
+                if (this.capturingState) {
+                    this.capturingState = false;
+                    this.hideAll([this.crossB, this.overlay]);
 
-                if (typeof this.onSelectionBeginCallback === "function") {
-                    this.onSelectionBeginCallback();
+                    if (typeof this.onSelectionEndCallback === "function") {
+                        this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
+                    }
+                    this.moveCross(this.crossA, p);
+                    this.moveCross(this.crossB, p);
+                } else {
+                    this.capturingState = true;
+                    this.moveCross(this.crossB, p);
+                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                    this.showAll([this.crossA, this.crossB, this.selectionBox, this.overlay]);
+
+                    if (typeof this.onSelectionBeginCallback === "function") {
+                        this.onSelectionBeginCallback();
+                    }
                 }
-
-            } else {
-                this.capturingState = false;
-                this.hideAll([this.crossB, this.overlay]);
-
-                if (typeof this.onSelectionEndCallback === "function") {
-                    this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
-                }
-                this.moveCross(this.crossA, p);
-                this.moveCross(this.crossB, p);
-            }
+            } 
         }
 
         private onPointerMove(e:PointerEvent) {
@@ -339,21 +340,22 @@ export module CanvasTools.Selection {
             let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
 
             this.crossA.show();
-            
-            if (this.selectionMode === SelectionMode.RECT && !this.capturingState){
-                this.moveCross(this.crossA, p);
-            }
-            else if (this.selectionMode === SelectionMode.RECT && this.capturingState) {                    
-                this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-            } 
-            else if (this.selectionMode === SelectionMode.TWOPOINTS && this.capturingState) {
-                this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-            } 
-            else {                    
-                this.moveCross(this.crossA, p);
-                this.moveCross(this.crossB, p);
+
+            if (this.selectionMode === SelectionMode.RECT) {
+                if (this.capturingState) {
+                    this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
+                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                } else {
+                    this.moveCross(this.crossA, p);
+                }
+            } else if (this.selectionMode === SelectionMode.TWOPOINTS) {
+                if (this.capturingState) {
+                    this.moveCross(this.crossB, p, this.selectionModificator === SelectionModificator.SQUARE, this.crossA);                    
+                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                } else {
+                    this.moveCross(this.crossA, p);
+                    this.moveCross(this.crossB, p);
+                }
             }
 
             e.preventDefault();
