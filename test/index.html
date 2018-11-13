@@ -91,9 +91,9 @@
         let selectionMode = "rect-select";
 
         let rectIcont = new ct.Toolbar.IconDescription(
-            "rect-select", 
-            "./images/icons/rect-selection.svg", 
-            "Select Rectangular Box (R)",
+            "rect-select",
+            "./images/icons/rect-selection.svg",
+            "Select rectangular box (R)",
             'KeyR');
 
         toolbar.addAction(rectIcont, (action) => {
@@ -102,9 +102,9 @@
         });
 
         let templateIcon = new ct.Toolbar.IconDescription(
-            "template-select", 
-            "./images/icons/template-selection.svg", 
-            "Select Template Box (T)",
+            "template-select",
+            "./images/icons/template-selection.svg",
+            "Select with a template (T)",
             'KeyT');
 
         toolbar.addAction(templateIcon, (action) => {
@@ -113,20 +113,25 @@
         });
         toolbar.select("rect-select");
 
-        // steal selected region size as template
-        window.addEventListener("keyup", (e) => {
-            if (e.code === 'KeyY') {
-                let rs = rm.getSelectedRegionsBounds();
-                if (rs !== undefined && rs.length > 0) {
-                    let r = rs[0];
-                    toolbar.select("template-select");
-                    selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
-                } else {
-                    toolbar.select("template-select");
-                    selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
-                }
+        let copyTemplateIcon = new ct.Toolbar.IconDescription(
+            "copy-select",
+            "./images/icons/copy-t-selection.svg",
+            "Copy region as template (Y)",
+            'KeyY');
+
+        toolbar.addAction(copyTemplateIcon, (action) => {
+            let rs = rm.getSelectedRegionsBounds();
+            if (rs !== undefined && rs.length > 0) {
+                let r = rs[0];
+                toolbar.select("template-select");
+                selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
+            } else {
+                toolbar.select("copy-select");
+                selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
             }
-        })
+        });
+
+        toolbar.select("rect-select");
 
         // Upload background image for selection 
         let imageCnvs = document.getElementById("sourceImageCnvs");
