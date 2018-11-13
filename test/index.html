@@ -90,15 +90,27 @@
         let toolbar = new ct.Toolbar.Toolbar(tz);
         let selectionMode = "rect-select";
 
-        let rectIcont = new ct.Toolbar.IconDescription("rect-select", "./images/icons/rect-selection.svg", "Select Rectangular Box (Ctrl+R)");
+        let rectIcont = new ct.Toolbar.IconDescription(
+            "rect-select", 
+            "./images/icons/rect-selection.svg", 
+            "Select Rectangular Box (R)",
+            'KeyR');
+
         toolbar.addAction(rectIcont, (action) => {
             console.log(action);
             selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
-        }, 'KeyR');
-        toolbar.addAction(new ct.Toolbar.IconDescription("template-select", "./images/icons/template-selection.svg", "Select Template Box (Ctrl+T)"), (action) => {
+        });
+
+        let templateIcon = new ct.Toolbar.IconDescription(
+            "template-select", 
+            "./images/icons/template-selection.svg", 
+            "Select Template Box (T)",
+            'KeyT');
+
+        toolbar.addAction(templateIcon, (action) => {
             console.log(action);
             selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
-        }, 'KeyT');
+        });
         toolbar.select("rect-select");
 
         // Upload background image for selection 

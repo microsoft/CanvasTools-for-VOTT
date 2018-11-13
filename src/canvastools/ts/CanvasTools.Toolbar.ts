@@ -9,11 +9,13 @@ export module CanvasTools.Toolbar {
         public action: string;
         public iconUrl: string;
         public tooltip: string;
+        public keycode: string;
 
-        constructor(action: string, iconUrl: string, tooltip: string) {
+        constructor(action: string, iconUrl: string, tooltip: string, keycode: string) {
             this.action = action;
             this.iconUrl = iconUrl;
             this.tooltip = tooltip;
+            this.keycode = keycode;
         }
     }
 
@@ -77,6 +79,17 @@ export module CanvasTools.Toolbar {
                     this.select();
                 }
             })
+
+            if (this.description.keycode !== undefined) {
+                window.addEventListener("keyup", (e) => {
+                    if (e.code === this.description.keycode && !e.ctrlKey && !e.altKey) {
+                        if (!this.isSelected) {
+                            this.actor(this.description.action);
+                            this.select();
+                        }
+                    }
+                });
+            }
         }
 
         public move(x: number, y: number) {
@@ -165,15 +178,6 @@ export module CanvasTools.Toolbar {
 
             this.recalculateToolbarSize();
             this.updateToolbarSize();
-
-            if (keyCode !== undefined) {
-                window.addEventListener("keyup", (e) => {
-                    if (e.code === keyCode && !e.ctrlKey && !e.altKey) {
-                        this.select(icon.action);
-                        actor(icon.action);
-                    }
-                });
-            }
         }
 
         public select(action: string) {
