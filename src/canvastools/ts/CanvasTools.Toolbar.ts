@@ -74,19 +74,19 @@ export module CanvasTools.Toolbar {
             this.iconGroup.add(this.iconImage);
 
             this.iconGroup.click((e) => {
-                if (!this.isSelected) {
+                //if (!this.isSelected) {
                     this.actor(this.description.action);
                     this.select();
-                }
+                //}
             })
 
             if (this.description.keycode !== undefined) {
                 window.addEventListener("keyup", (e) => {
                     if (e.code === this.description.keycode && !e.ctrlKey && !e.altKey) {
-                        if (!this.isSelected) {
+                        //if (!this.isSelected) {
                             this.actor(this.description.action);
                             this.select();
-                        }
+                        //}
                     }
                 });
             }

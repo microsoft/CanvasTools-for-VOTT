@@ -1495,6 +1495,19 @@ export module CanvasTools.Region {
             return collection;
         }
 
+        public getSelectedRegionsBounds() {
+            let regions = this.lookupSelectedRegions().map((region) => {
+                return {
+                    id: region.ID,
+                    x: region.x,
+                    y: region.y,
+                    width: region.rect.width,
+                    height: region.rect.height
+                };
+            });
+            return regions;
+        }
+
         // REGIONS DELETE
         private deleteRegion(region:RegionElement){
             // remove style

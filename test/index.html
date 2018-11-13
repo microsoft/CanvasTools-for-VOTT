@@ -113,6 +113,21 @@
         });
         toolbar.select("rect-select");
 
+        // steal selected region size as template
+        window.addEventListener("keyup", (e) => {
+            if (e.code === 'KeyY') {
+                let rs = rm.getSelectedRegionsBounds();
+                if (rs !== undefined && rs.length > 0) {
+                    let r = rs[0];
+                    toolbar.select("template-select");
+                    selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
+                } else {
+                    toolbar.select("template-select");
+                    selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
+                }
+            }
+        })
+
         // Upload background image for selection 
         let imageCnvs = document.getElementById("sourceImageCnvs");
         let imagePath = "./../images/background-cat.jpg";
