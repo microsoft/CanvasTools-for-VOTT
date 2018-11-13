@@ -168,7 +168,7 @@ export module CanvasTools.Toolbar {
 
             if (keyCode !== undefined) {
                 window.addEventListener("keyup", (e) => {
-                    if (e.code === keyCode) {
+                    if (e.code === keyCode && !e.ctrlKey && !e.altKey) {
                         this.select(icon.action);
                         actor(icon.action);
                     }
