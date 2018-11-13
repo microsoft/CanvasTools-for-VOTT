@@ -670,6 +670,7 @@ export module CanvasTools.Region {
         // Drag rect
         public dragGroup: Snap.Element;
         private dragRect: Snap.Element;
+        private isDragged: boolean = false;
 
         // Bounding box
         private boundRect: IBase.IRect;
@@ -780,12 +781,24 @@ export module CanvasTools.Region {
 
         private subscribeToEvents() {
             this.dragRect.node.addEventListener("pointerenter", (e) => {
+                this.dragRect.undrag();
                 this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                this.isDragged = true;
+                this.onManipulationBegin();
+            });
+
+            this.dragRect.node.addEventListener("pointermove", (e) => {
+                if (!this.isDragged) {
+                    this.dragRect.undrag();
+                    this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                    this.isDragged = true;
+                }
                 this.onManipulationBegin();
             });
 
             this.dragRect.node.addEventListener("pointerleave", (e) => {
                 this.dragRect.undrag();
+                this.isDragged = false;
                 this.onManipulationEnd();
             });
 
@@ -1345,21 +1358,18 @@ export module CanvasTools.Region {
                     case 97:
                         if (e.ctrlKey) {
                             this.selectAllRegions();
-                            e.preventDefault();
-                            return false;                          
                         }
                         break;
                         // ctrl + B, ctrl + b
                         case 66:
                         if (e.ctrlKey) {
-                            this.toggleBackground();
-                            e.preventDefault();
-                            return false;                          
+                            this.toggleBackground();                 
                         }
                         break;
                     // default
-                    default: return false;
+                    default: return ;
                 }
+                e.preventDefault(); 
             });
         }
 
@@ -1758,6 +1768,22 @@ export module CanvasTools.Region {
             this.regions.forEach((r) => {
                 r.tags.updateTags(r.tags.tags, this.tagsUpdateOptions);
             });
+        }
+
+        public freeze() {
+            this.regionManagerLayer.addClass("frozen");
+            this.menuLayer.addClass('frozen');
+            this.regions.forEach((region) => {
+                region.regionGroup.addClass('old');
+            })
+        }
+
+        public unfreeze() {
+            this.regionManagerLayer.removeClass("frozen");
+            this.menuLayer.removeClass('frozen');
+            this.regions.forEach((region) => {
+                region.regionGroup.removeClass('old');
+            })
         }
     }
 }
