@@ -148,12 +148,14 @@ export module CanvasTools.Selection {
         private crossA: CrossElement;
         private crossB: CrossElement;
         private capturingState: boolean = false;
-        private exclusiveCapturingState: boolean = false;
+        private isLocked: boolean = false;
         private areaSelectorLayer: Snap.Element;
         private templateRect: RectElement;
 
         public onSelectionBeginCallback: Function;
         public onSelectionEndCallback: Function;
+        public onLocked: Function;
+        public onUnlocked: Function;
 
         private isEnabled: boolean = true;
 
@@ -396,6 +398,8 @@ export module CanvasTools.Selection {
                     this.moveTemplateRect(this.templateRect, this.crossA);
                 }
             });
+
+            e.preventDefault();
         }
 
         private onKeyDown(e:KeyboardEvent) {
@@ -431,14 +435,13 @@ export module CanvasTools.Selection {
             // else if (this.selectionMode === SelectionMode.CENTRALPOINT) { }
 
 
-            //Ctrl + N to add new region temporarily disabling all others
-            if(e.ctrlKey && e.keyCode == 78 && !this.exclusiveCapturingState) {
-                this.enableExclusiveMode();
-                this.selectionMode = SelectionMode.RECT;
+            // L key to lock/unlock selection to allow adding new regions on top of others
+            if(e.code === 'KeyL') {
+                this.toggleLockState();
             } 
             //Escape to exit exclusive mode
             if(e.keyCode == 27) {
-                this.disableExclusiveMode();
+                this.unlock();
             }
         }
 
@@ -448,9 +451,9 @@ export module CanvasTools.Selection {
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.baseParent, bypass: false},
                 {event: "pointerdown", listener: this.onPointerDown, base: this.baseParent, bypass: false},
                 {event: "pointerup", listener: this.onPointerUp, base: this.baseParent, bypass: false},
-                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: true},
+                {event: "pointermove", listener: this.onPointerMove, base: this.baseParent, bypass: false},
                 {event: "keydown", listener: this.onKeyDown, base: window, bypass: false},
-                {event: "keyup", listener: this.onKeyUp, base: window, bypass: false},
+                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true},
             ];
 
             listeners.forEach(e => {
@@ -458,15 +461,27 @@ export module CanvasTools.Selection {
             });
         }
 
-        private enableExclusiveMode() {
-            this.exclusiveCapturingState = true;
-            this.showAll([this.overlay]);
-            this.hideAll([this.selectionBox]);
-            this.enable();
+        private toggleLockState() {
+            if (this.isLocked) {
+                this.unlock();
+            } else {
+                this.lock();
+            }
         }
-        private disableExclusiveMode() {
-            this.exclusiveCapturingState = false;
-            this.hideAll([this.overlay]);
+
+        public lock() {
+            this.isLocked = true;
+            this.enable();
+            if (this.onLocked instanceof Function) {
+                this.onLocked();
+            }
+        }
+
+        public unlock() {
+            this.isLocked = false;
+            if (this.onUnlocked instanceof Function) {
+                this.onUnlocked();
+            }
         }
 
         private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
@@ -490,17 +505,21 @@ export module CanvasTools.Selection {
         }
 
         public enable() {
-            this.isEnabled = true;
-            this.areaSelectorLayer.attr({
-                display: "block"
-            });
+            if (!this.isEnabled) {
+                this.isEnabled = true;
+                this.areaSelectorLayer.attr({
+                    visibility: "visible"
+                });
+            }
         }
 
         public disable() {
-            if(!this.exclusiveCapturingState) {
+            if(!this.isLocked && this.isEnabled) {
                 this.isEnabled = false;
+
+                this.hideAll([this.crossA, this.crossB, this.overlay, this.templateRect]);
                 this.areaSelectorLayer.attr({
-                    display: "none"
+                    visibility: "hidden"
                 });
             }
         }
