@@ -138,6 +138,27 @@ svg:not(:root) .menuLayer {
     stroke: rgba(198, 198, 198, 0.8);
 }
 
+.regionManager.frozen .dragRectStyle, 
+.regionManager.frozen .anchorStyle.TL, 
+.regionManager.frozen .anchorStyle.BR, 
+.regionManager.frozen .anchorStyle.TR, 
+.regionManager.frozen .anchorStyle.BL {
+    cursor: default; 
+}
+
+.regionManager.frozen .anchorStyle.ghost {
+    display: none;
+}
+
+.regionManager.frozen .regionStyle.old, 
+.regionManager.frozen .regionStyle.old:hover{
+    opacity: 0.25;
+}
+
+.menuManager.frozen {
+    display:none;
+}
+
 
 /* AreaSelector
 
