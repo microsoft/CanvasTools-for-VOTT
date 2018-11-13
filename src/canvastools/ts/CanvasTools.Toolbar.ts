@@ -152,7 +152,7 @@ export module CanvasTools.Toolbar {
             });
         }
 
-        public addAction(icon: IconDescription, actor: IconCallback) {
+        public addAction(icon: IconDescription, actor: IconCallback, keyCode?: string) {
             let iconElement = new ToolbarIcon(icon, this.paper, (action) => {
                 this.select(action);
                 actor(action);
@@ -165,6 +165,15 @@ export module CanvasTools.Toolbar {
 
             this.recalculateToolbarSize();
             this.updateToolbarSize();
+
+            if (keyCode !== undefined) {
+                window.addEventListener("keyup", (e) => {
+                    if (e.code === keyCode) {
+                        this.select(icon.action);
+                        actor(icon.action);
+                    }
+                });
+            }
         }
 
         public select(action: string) {

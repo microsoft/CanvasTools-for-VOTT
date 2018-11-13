@@ -391,6 +391,7 @@ export module CanvasTools.Selection {
                         this.moveCross(this.crossB, p);
                     }
                 } else if (this.selectionMode === SelectionMode.CENTRALPOINT) {
+                    this.templateRect.show();
                     this.moveCross(this.crossA, p);
                     this.moveTemplateRect(this.templateRect, this.crossA);
                 }
