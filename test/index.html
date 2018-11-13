@@ -77,13 +77,19 @@
             }
         );
 
-        rm.onManipulationEnd = function () {
-            selector.enable();
-            console.log("off region");
+        selector.onLocked = () => {
+            rm.freeze();
         };
-        rm.onManipulationBegin = function () {
+
+        selector.onUnlocked = () => {
+            rm.unfreeze();
+        }
+
+        rm.onManipulationEnd = () => {
+            selector.enable();
+        };
+        rm.onManipulationBegin = () => {
             selector.disable();
-            console.log("on region");
         };
 
         // create toolbar
@@ -97,7 +103,6 @@
             'KeyR');
 
         toolbar.addAction(rectIcont, (action) => {
-            console.log(action);
             selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
         });
 
@@ -108,7 +113,6 @@
             'KeyT');
 
         toolbar.addAction(templateIcon, (action) => {
-            console.log(action);
             selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
         });
         toolbar.select("rect-select");
@@ -123,10 +127,8 @@
             let rs = rm.getSelectedRegionsBounds();
             if (rs !== undefined && rs.length > 0) {
                 let r = rs[0];
-                toolbar.select("template-select");
                 selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
             } else {
-                toolbar.select("copy-select");
                 selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
             }
         });
