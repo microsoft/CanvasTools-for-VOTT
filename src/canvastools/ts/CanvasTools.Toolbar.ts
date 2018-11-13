@@ -73,6 +73,9 @@ export module CanvasTools.Toolbar {
             this.iconImage.addClass("iconImageStyle");
             this.iconGroup.add(this.iconImage);
 
+            let title = Snap.parse(`<title>${this.description.tooltip}</title>`);
+            this.iconGroup.append(<any>title);
+
             this.iconGroup.click((e) => {
                 //if (!this.isSelected) {
                     this.actor(this.description.action);
