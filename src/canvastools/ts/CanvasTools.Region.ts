@@ -962,7 +962,11 @@ export module CanvasTools.Region {
         } 
         // position menu outside
         else {
-            this.my = this.y;
+            if (this.y + this.mh > this.boundRect.height) {
+                this.my = this.boundRect.height - this.mh - this.dw;
+            } else {
+                this.my = this.y;            
+            }
             // position menu on the right side
             if (this.x + this.rect.width + this.mw + 2 * this.dw < this.boundRect.width) {
                 this.mx = this.x + this.rect.width + this.dw;
