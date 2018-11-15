@@ -554,7 +554,7 @@ export module CanvasTools.Region {
                 let styleMap = [
                     {
                         rule: `.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${showRegionBackground? this.tags.primary.colorShadow : this.tags.primary.colorNoColor};
+                        style: `fill: ${this.tags.primary.colorShadow};
                                 stroke:${this.tags.primary.colorAccent};`
                     },
                     {
@@ -566,6 +566,10 @@ export module CanvasTools.Region {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
                         style: `fill: ${this.tags.primary.colorHighlight};
                                 stroke:${this.tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${this.tags.primary.colorAccent};`
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
@@ -583,16 +587,60 @@ export module CanvasTools.Region {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
                         style: `fill:rgba(255,255,255,0.5);`
+                    }                    
+                ];
+
+                let styleMapLight = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${this.tags.primary.colorNoColor};
+                                stroke:${this.tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
+                        style: `fill: ${this.tags.primary.colorHighlight}; 
+                                stroke: #fff;`
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${this.tags.primary.colorHighlight};
+                                stroke:${this.tags.primary.colorAccent};`
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                        style: `fill:${this.tags.primary.colorAccent};`
+                        style: `fill:${this.tags.primary.colorShadow};`
                     },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
+                        style: `opacity:0.25;`                        
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`                        
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${this.tags.primary.colorDark};
+                                fill: ${this.tags.primary.colorPure}`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill:transparent;`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                        style: `fill:rgba(255,255,255,0.5);`
+                    }  
                 ];
 
                 window.requestAnimationFrame(() => {
-                    for (let i = 0; i < styleMap.length; i++) {
-                        let r = styleMap[i];
+                    let sm = (showRegionBackground ? styleMap : styleMapLight);
+                    for (let i = 0; i < sm.length; i++) {
+                        let r = sm[i];
                         this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                     }
     
