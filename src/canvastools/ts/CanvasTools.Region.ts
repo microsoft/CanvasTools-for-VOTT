@@ -42,6 +42,9 @@ export module CanvasTools.Region {
         // Change Notifier
         private onChange: Function;
 
+        // Anchor stat
+        private isFrozen: boolean = false;
+
         // Manipulation notifiers
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
@@ -266,15 +269,17 @@ export module CanvasTools.Region {
             this.subscribeAnchorToEvents(this.anchors.BR, "BR");
 
             this.ghostAnchor.node.addEventListener("pointerenter", (e) => {
-                this.ghostAnchor.drag(
-                    this.anchorDragMove.bind(this),
-                    this.anchorDragBegin.bind(this),
-                    this.anchorDragEnd.bind(this)
-                );                
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.addClass(this.activeAnchor);
-                });                
-                this.onManipulationBegin();
+                if (!this.isFrozen) {
+                    this.ghostAnchor.drag(
+                        this.anchorDragMove.bind(this),
+                        this.anchorDragBegin.bind(this),
+                        this.anchorDragEnd.bind(this)
+                    );                
+                    window.requestAnimationFrame(() => {
+                        this.ghostAnchor.addClass(this.activeAnchor);
+                    });                
+                    this.onManipulationBegin();
+                }                
             });
 
             this.ghostAnchor.node.addEventListener("pointerleave", (e) => {
@@ -291,34 +296,39 @@ export module CanvasTools.Region {
             });
 
             this.ghostAnchor.node.addEventListener("pointerdown", (e) => {
-                this.ghostAnchor.node.setPointerCapture(e.pointerId);
+                if (!this.isFrozen) {
+                    this.ghostAnchor.node.setPointerCapture(e.pointerId);
 
-                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin");
+                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin");
+                }
             });
 
             this.ghostAnchor.node.addEventListener("pointerup", (e) => {
-                this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-
-                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingend");
+                if (!this.isFrozen) {
+                    this.ghostAnchor.node.releasePointerCapture(e.pointerId);
+                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingend");
+                }
             });
         }
 
         private subscribeAnchorToEvents(anchor:Snap.Element, active:string) {
             anchor.node.addEventListener("pointerenter", (e) => {
-                this.activeAnchor = active;
-                // Set drag origin point to current anchor
-                let p = this.getDragOriginPoint();    
-                this.dragOrigin = p;
-                this.rectOrigin = this.rect.copy();
-                this.pointOrigin = new Point2D(this.x, this.y);
-                // Move ghost anchor to current anchor position
-
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.attr({ 
-                        cx: p.x, 
-                        cy: p.y,
-                        display: 'block' });  
-                });
+                if (!this.isFrozen) {
+                    this.activeAnchor = active;
+                    // Set drag origin point to current anchor
+                    let p = this.getDragOriginPoint();    
+                    this.dragOrigin = p;
+                    this.rectOrigin = this.rect.copy();
+                    this.pointOrigin = new Point2D(this.x, this.y);
+                    // Move ghost anchor to current anchor position
+    
+                    window.requestAnimationFrame(() => {
+                        this.ghostAnchor.attr({ 
+                            cx: p.x, 
+                            cy: p.y,
+                            display: 'block' });  
+                    });
+                }
             });
         }
 
@@ -339,6 +349,20 @@ export module CanvasTools.Region {
                     visibility: 'visible'
                 });
             });            
+        }
+
+        public freeze() {
+            if (!this.isFrozen) {
+                this.isFrozen = true;
+                this.ghostAnchor.undrag();
+                this.onManipulationEnd();
+            }            
+        }
+
+        public unfreeze() {
+            if (this.isFrozen) {
+                this.isFrozen = false;
+            }            
         }
     }
 
@@ -678,6 +702,9 @@ export module CanvasTools.Region {
         // Change Notifier
         private onChange: Function;
 
+        // Drag state
+        private isFrozen: boolean = false;
+
         // Manipulation notifiers
         public onManipulationBegin: onManipulationFunction;
         public onManipulationEnd: onManipulationFunction;
@@ -781,19 +808,22 @@ export module CanvasTools.Region {
 
         private subscribeToEvents() {
             this.dragRect.node.addEventListener("pointerenter", (e) => {
-                this.dragRect.undrag();
-                this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
-                this.isDragged = true;
-                this.onManipulationBegin();
-            });
-
-            this.dragRect.node.addEventListener("pointermove", (e) => {
-                if (!this.isDragged) {
+                if (!this.isFrozen) {
                     this.dragRect.undrag();
                     this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                     this.isDragged = true;
+                    this.onManipulationBegin();
                 }
-                this.onManipulationBegin();
+            });
+
+            this.dragRect.node.addEventListener("pointermove", (e) => {
+                if (!this.isDragged && !this.isFrozen) {
+                    this.dragRect.undrag();
+                    this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                    this.isDragged = true;
+
+                    this.onManipulationBegin();
+                }                
             });
 
             this.dragRect.node.addEventListener("pointerleave", (e) => {
@@ -803,17 +833,36 @@ export module CanvasTools.Region {
             });
 
             this.dragRect.node.addEventListener("pointerdown", (e) => {
-                this.dragRect.node.setPointerCapture(e.pointerId);  
-                let multiselection = e.shiftKey;
-                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin", multiselection);
+                if (!this.isFrozen) {
+                    this.dragRect.node.setPointerCapture(e.pointerId);  
+                    let multiselection = e.shiftKey;
+                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, "movingbegin", multiselection);
+                }
             });
 
             this.dragRect.node.addEventListener("pointerup", (e) => {
-                this.dragRect.node.releasePointerCapture(e.pointerId);
-
-                let multiselection = e.shiftKey;
-                this.onChange(this.x, this.y, this.rect.width, this.rect.height, "clicked", multiselection);
+                if (!this.isFrozen) {
+                    this.dragRect.node.releasePointerCapture(e.pointerId);
+                    let multiselection = e.shiftKey;
+                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, "clicked", multiselection);
+                }
             });
+        }
+
+        public freeze() {
+            if (!this.isFrozen) {
+                this.isFrozen = true;
+
+                this.dragRect.undrag();
+                this.isDragged = false;
+                this.onManipulationEnd();
+            }            
+        }
+
+        public unfreeze() {
+            if (this.isFrozen) {
+                this.isFrozen = false;
+            }            
         }
     }
 
@@ -1076,6 +1125,7 @@ export module CanvasTools.Region {
 
         // Region state        
         public isSelected:boolean = false;
+        public isFrozen:boolean = false;
 
         // Region ID
         public ID: string;
@@ -1231,6 +1281,24 @@ export module CanvasTools.Region {
 /*             if (this.onChange != undefined) {
                 this.onChange(this, this.isSelected);
             } */
+        }
+
+        public freeze() {
+            if (!this.isFrozen) {
+                this.isFrozen = true;
+                this.regionGroup.addClass('old');
+                this.drag.freeze();
+                this.anchors.freeze();
+            }            
+        }
+
+        public unfreeze() {
+            if (this.isFrozen) {
+                this.isFrozen = false;
+                this.regionGroup.removeClass('old');
+                this.drag.unfreeze();
+                this.anchors.unfreeze();
+            }            
         }
     }
 
@@ -1778,7 +1846,7 @@ export module CanvasTools.Region {
             this.regionManagerLayer.addClass("frozen");
             this.menuLayer.addClass('frozen');
             this.regions.forEach((region) => {
-                region.regionGroup.addClass('old');
+                region.freeze();
             })
         }
 
@@ -1786,7 +1854,7 @@ export module CanvasTools.Region {
             this.regionManagerLayer.removeClass("frozen");
             this.menuLayer.removeClass('frozen');
             this.regions.forEach((region) => {
-                region.regionGroup.removeClass('old');
+                region.unfreeze();
             })
         }
     }
