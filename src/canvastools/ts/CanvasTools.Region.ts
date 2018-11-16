@@ -1489,7 +1489,7 @@ export module CanvasTools.Region {
                     // default
                     default: return ;
                 }
-                e.preventDefault(); 
+                //e.preventDefault(); 
             });
         }
 
