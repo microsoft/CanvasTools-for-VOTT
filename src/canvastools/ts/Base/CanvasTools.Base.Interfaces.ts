@@ -16,6 +16,11 @@ export namespace CanvasTools.Base.Interfaces {
         show():void;
     }
 
+    export interface IFreezable {
+        freeze():void;
+        unfreeze():void;
+    }
+
     export interface IResizable {
         resize(width:number, height:number):void;
     }
