@@ -11,7 +11,7 @@ export module CanvasTools.Selection {
     class CrossElement implements IBase.IPoint2D, IBase.IHideable, IBase.IResizable {
         private hl: Snap.Element;
         private vl: Snap.Element;
-        public crossGroup: Snap.Element;
+        public node: Snap.Element;
         public x: number;
         public y: number;
 
@@ -25,10 +25,10 @@ export module CanvasTools.Selection {
             let verticalLine: Snap.Element = paper.line(0, 0, 0, height);
             let horizontalLine: Snap.Element = paper.line(0, 0, width, 0);
 
-            this.crossGroup = paper.g();
-            this.crossGroup.addClass("crossStyle");
-            this.crossGroup.add(verticalLine);
-            this.crossGroup.add(horizontalLine);
+            this.node = paper.g();
+            this.node.addClass("crossStyle");
+            this.node.add(verticalLine);
+            this.node.add(horizontalLine);
 
             this.hl = horizontalLine;
             this.vl = verticalLine;
@@ -73,14 +73,14 @@ export module CanvasTools.Selection {
 
         public hide() {
             if (this.isVisible) {
-                this.crossGroup.node.setAttribute("visibility", "hidden");
+                this.node.node.setAttribute("visibility", "hidden");
                 this.isVisible = false;
             }
         }
 
         public show() {
             if (!this.isVisible) {
-                this.crossGroup.node.setAttribute("visibility", "visible");
+                this.node.node.setAttribute("visibility", "visible");
                 this.isVisible = true;
             }          
         }
@@ -91,7 +91,7 @@ export module CanvasTools.Selection {
         public width: number;
         public height: number;
 
-        public rect: Snap.Element;
+        public node: Snap.Element;
 
         private isVisible:boolean = true;
 
@@ -100,34 +100,34 @@ export module CanvasTools.Selection {
         }
 
         private build(paper: Snap.Paper, width:number, height:number){
-            this.rect = paper.rect(0, 0, width, height);
+            this.node = paper.rect(0, 0, width, height);
             this.width = width;
             this.height = height;            
         }
 
         public move(p: IBase.IPoint2D) {           
-            this.rect.node.setAttribute("x", p.x.toString());
-            this.rect.node.setAttribute("y", p.y.toString());
+            this.node.node.setAttribute("x", p.x.toString());
+            this.node.node.setAttribute("y", p.y.toString());
         }
 
         public resize(width: number, height: number){
             this.width = width;
             this.height = height;
 
-            this.rect.node.setAttribute("height", height.toString());
-            this.rect.node.setAttribute("width", width.toString());
+            this.node.node.setAttribute("height", height.toString());
+            this.node.node.setAttribute("width", width.toString());
         }
 
         public hide() {
             if (this.isVisible) {
-                this.rect.node.setAttribute("visibility", "hidden");
+                this.node.node.setAttribute("visibility", "hidden");
                 this.isVisible = false;
             }
         }
 
         public show() {
             if (!this.isVisible) {
-                this.rect.node.setAttribute("visibility", "visible");
+                this.node.node.setAttribute("visibility", "visible");
                 this.isVisible = true;
             }          
         }
@@ -137,14 +137,15 @@ export module CanvasTools.Selection {
         private paper: Snap.Paper;
         private boundRect: Rect;
 
-        public mask: RectElement;
+        private mask: RectElement;
+        public node: Snap.Element;
+
         private maskIn: RectElement;        
-        private maskOut: RectElement;        
-        private selectionBox: RectElement;
+        private maskOut: { node: Snap.Element };       
 
         private isVisible: boolean = false;
 
-        constructor(paper:Snap.Paper, width: number, height: number, maskOut: RectElement) {
+        constructor(paper:Snap.Paper, width: number, height: number, maskOut: { node: Snap.Element }) {
             this.maskOut = maskOut;
             this.boundRect = new Rect(width, height);
             this.buildUIElements(paper);
@@ -158,26 +159,28 @@ export module CanvasTools.Selection {
             this.mask = this.createMask();
 
             this.maskIn = this.createMaskIn();
-            this.maskOut.rect.addClass("maskOutStyle");
+            this.maskOut.node.addClass("maskOutStyle");
 
             let combinedMask = this.paper.g();
-                combinedMask.add(this.maskIn.rect);
-                combinedMask.add(this.maskOut.rect);
+                combinedMask.add(this.maskIn.node);
+                combinedMask.add(this.maskOut.node);
 
-            this.mask.rect.attr({
+            this.mask.node.attr({
                 mask: combinedMask
             });
+
+            this.node = this.mask.node;
         }
 
         private createMask(): RectElement {
             let r:RectElement = new RectElement(this.paper, this.boundRect);
-            r.rect.addClass("maskStyle");
+            r.node.addClass("maskStyle");
             return r;
         }
 
         private createMaskIn(): RectElement {
             let r:RectElement = new RectElement(this.paper, this.boundRect);            
-            r.rect.addClass("maskInStyle");
+            r.node.addClass("maskInStyle");
             return r;
         }
  
@@ -208,7 +211,7 @@ export module CanvasTools.Selection {
     export class AreaSelector {
         private baseParent:SVGSVGElement;
         private paper: Snap.Paper;
-        private paperRect: Rect;
+        private boundRect: Rect;
 
         private selectionBox: RectElement;
         private mask: MaskElement;
@@ -245,7 +248,7 @@ export module CanvasTools.Selection {
         private buildUIElements(svgHost: SVGSVGElement) {
             this.baseParent = svgHost;
             this.paper = Snap(svgHost);
-            this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+            this.boundRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
             this.areaSelectorLayer = this.paper.g();
             this.areaSelectorLayer.addClass("areaSelector");
@@ -260,41 +263,41 @@ export module CanvasTools.Selection {
 
             this.hideAll([this.crossA, this.crossB, this.templateRect, this.mask]);
 
-            this.areaSelectorLayer.add(this.mask.mask.rect);
-            this.areaSelectorLayer.add(this.crossA.crossGroup);
-            this.areaSelectorLayer.add(this.crossB.crossGroup);
-            this.areaSelectorLayer.add(this.templateRect.rect);
+            this.areaSelectorLayer.add(this.mask.node);
+            this.areaSelectorLayer.add(this.crossA.node);
+            this.areaSelectorLayer.add(this.crossB.node);
+            this.areaSelectorLayer.add(this.templateRect.node);
         }
 
         private createSelectionBox(): RectElement {
             let r:RectElement = new RectElement(this.paper, new Rect(0, 0));
-            r.rect.addClass("selectionBoxStyle");
+            r.node.addClass("selectionBoxStyle");
             return r;
         }
 
         private createMask(selectionBox: RectElement): MaskElement
         {
-            return new MaskElement(this.paper, this.paperRect.width, this.paperRect.height, selectionBox);
+            return new MaskElement(this.paper, this.boundRect.width, this.boundRect.height, selectionBox);
         }
 
         private createCross(): CrossElement {
-            let cr:CrossElement = new CrossElement(this.paper, this.paperRect);  
+            let cr:CrossElement = new CrossElement(this.paper, this.boundRect);  
             return cr;
         }
 
         private createTemplateRect(): RectElement {
             let r: RectElement = new RectElement(this.paper, this.templateSize);
-            r.rect.addClass("templateRectStyle");
+            r.node.addClass("templateRectStyle");
             return r;
         }
 
         public resize(width:number, height:number):void {
             if (width !== undefined && height !== undefined) {
-                this.paperRect.resize(width, height);
+                this.boundRect.resize(width, height);
                 this.baseParent.style.width = width.toString();
                 this.baseParent.style.height = height.toString();
             } else {
-                this.paperRect.resize(this.baseParent.width.baseVal.value, this.baseParent.height.baseVal.value);
+                this.boundRect.resize(this.baseParent.width.baseVal.value, this.baseParent.height.baseVal.value);
             }
 
             this.resizeAll([this.mask, this.crossA, this.crossB]);
@@ -303,7 +306,7 @@ export module CanvasTools.Selection {
         private resizeAll(elementSet: Array<IBase.IResizable>) {
             window.requestAnimationFrame(() => {
                 elementSet.forEach(element => {
-                    element.resize(this.paperRect.width, this.paperRect.height);                
+                    element.resize(this.boundRect.width, this.boundRect.height);                
                 });
             })            
         }
@@ -413,8 +416,8 @@ export module CanvasTools.Selection {
                     if (typeof this.onSelectionEndCallback === "function") {
                         let p1 = new Point2D(this.crossA.x - this.templateSize.width/2, this.crossA.y - this.templateSize.height/2);
                         let p2 = new Point2D(this.crossA.x + this.templateSize.width/2, this.crossA.y + this.templateSize.height/2);
-                        p1 = p1.boundToRect(this.paperRect);
-                        p2 = p2.boundToRect(this.paperRect);
+                        p1 = p1.boundToRect(this.boundRect);
+                        p2 = p2.boundToRect(this.boundRect);
                         this.onSelectionEndCallback(p1.x, p1.y, p2.x, p2.y);
                     }
                 }
@@ -536,7 +539,7 @@ export module CanvasTools.Selection {
         }
 
         private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
-            cross.move(p, this.paperRect, square, refCross);
+            cross.move(p, this.boundRect, square, refCross);
         }        
 
         private moveSelectionBox(box: RectElement, crossA:CrossElement, crossB: CrossElement) {
