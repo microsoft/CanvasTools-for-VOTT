@@ -166,7 +166,7 @@ svg:not(:root) .menuLayer {
 --> .overlayStyle
     [mask]
         .overlayMaskStyle
-        .selectionBoxMaskStyle
+        .selectionBoxStyle
     .crossStyle
         line
         line
@@ -186,21 +186,21 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
-.overlayStyle {
+.maskStyle {
     fill: #000;
     fill-opacity: 0.5;
     stroke-width: 0;
     pointer-events: none;
 }
 
-.overlayMaskStyle {
+.maskInStyle {
     fill: #fff;
     stroke-width: 0;
     visibility: visible;
     pointer-events: none;
 }
 
-.selectionBoxMaskStyle {
+.selectionBoxStyle, .maskOutStyle {
     /* Transparent crop*/
     fill: #000;
     stroke-width: 0;

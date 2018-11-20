@@ -18,10 +18,10 @@ export module CanvasTools.Selection {
         private isVisible: boolean = true;
 
         constructor(paper: Snap.Paper, rect: IBase.IRect){
-            this.build(paper, rect.width, rect.height, 0 , 0);
+            this.buildUIElements(paper, rect.width, rect.height, 0 , 0);
         }
 
-        private build(paper: Snap.Paper, width:number, height: number, x:number, y:number) {
+        private buildUIElements(paper: Snap.Paper, width:number, height: number, x:number, y:number) {
             let verticalLine: Snap.Element = paper.line(0, 0, 0, height);
             let horizontalLine: Snap.Element = paper.line(0, 0, width, 0);
 
@@ -133,6 +133,75 @@ export module CanvasTools.Selection {
         }
     }
 
+    class MaskElement implements IBase.IHideable, IBase.IResizable {
+        private paper: Snap.Paper;
+        private boundRect: Rect;
+
+        public mask: RectElement;
+        private maskIn: RectElement;        
+        private maskOut: RectElement;        
+        private selectionBox: RectElement;
+
+        private isVisible: boolean = false;
+
+        constructor(paper:Snap.Paper, width: number, height: number, maskOut: RectElement) {
+            this.maskOut = maskOut;
+            this.boundRect = new Rect(width, height);
+            this.buildUIElements(paper);
+            this.resize(width, height);
+        }
+
+        private buildUIElements(paper:Snap.Paper) {
+            this.paper = paper;
+
+
+            this.mask = this.createMask();
+
+            this.maskIn = this.createMaskIn();
+            this.maskOut.rect.addClass("maskOutStyle");
+
+            let combinedMask = this.paper.g();
+                combinedMask.add(this.maskIn.rect);
+                combinedMask.add(this.maskOut.rect);
+
+            this.mask.rect.attr({
+                mask: combinedMask
+            });
+        }
+
+        private createMask(): RectElement {
+            let r:RectElement = new RectElement(this.paper, this.boundRect);
+            r.rect.addClass("maskStyle");
+            return r;
+        }
+
+        private createMaskIn(): RectElement {
+            let r:RectElement = new RectElement(this.paper, this.boundRect);            
+            r.rect.addClass("maskInStyle");
+            return r;
+        }
+ 
+        public resize(width: number, height: number){
+            this.boundRect.resize(width, height);
+            this.mask.resize(width, height);
+            this.maskIn.resize(width, height);
+        }
+
+        public hide() {
+            if (this.isVisible) {
+                this.mask.hide();
+                this.isVisible = false;
+            }
+        }
+
+        public show() {
+            if (!this.isVisible) {
+                this.mask.show();
+                this.isVisible = true;
+            }          
+        }
+    }
+
     export enum SelectionMode { RECT, TWOPOINTS, CENTRALPOINT };
     export enum SelectionModificator { RECT, SQUARE };
 
@@ -141,9 +210,8 @@ export module CanvasTools.Selection {
         private paper: Snap.Paper;
         private paperRect: Rect;
 
-        private overlay: RectElement;
-        private mask: RectElement;        
         private selectionBox: RectElement;
+        private mask: MaskElement;
 
         private crossA: CrossElement;
         private crossB: CrossElement;
@@ -182,48 +250,31 @@ export module CanvasTools.Selection {
             this.areaSelectorLayer = this.paper.g();
             this.areaSelectorLayer.addClass("areaSelector");
             
-            this.overlay = this.createOverlay();
-
-            this.mask = this.createMask();
-            this.selectionBox = this.createSelectionBoxMask();
-
-            let combinedMask = this.paper.g();
-                combinedMask.add(this.mask.rect);
-                combinedMask.add(this.selectionBox.rect);
-
-            this.overlay.rect.attr({
-                mask: combinedMask
-            });
+            this.selectionBox = this.createSelectionBox();
+            this.mask = this.createMask(this.selectionBox);
 
             this.crossA = this.createCross();
             this.crossB = this.createCross();
 
             this.templateRect = this.createTemplateRect();
 
-            this.hideAll([this.crossA, this.crossB, this.templateRect, this.overlay]);
+            this.hideAll([this.crossA, this.crossB, this.templateRect, this.mask]);
 
-            this.areaSelectorLayer.add(this.overlay.rect);
+            this.areaSelectorLayer.add(this.mask.mask.rect);
             this.areaSelectorLayer.add(this.crossA.crossGroup);
             this.areaSelectorLayer.add(this.crossB.crossGroup);
             this.areaSelectorLayer.add(this.templateRect.rect);
         }
 
-        private createOverlay(): RectElement {
-            let r:RectElement = new RectElement(this.paper, this.paperRect);
-            r.rect.addClass("overlayStyle");
-            return r;
-        }
-
-        private createMask(): RectElement {
-            let r:RectElement = new RectElement(this.paper, this.paperRect);            
-            r.rect.addClass("overlayMaskStyle");
-            return r;
-        }
-
-        private createSelectionBoxMask(): RectElement {
+        private createSelectionBox(): RectElement {
             let r:RectElement = new RectElement(this.paper, new Rect(0, 0));
-            r.rect.addClass("selectionBoxMaskStyle");
+            r.rect.addClass("selectionBoxStyle");
             return r;
+        }
+
+        private createMask(selectionBox: RectElement): MaskElement
+        {
+            return new MaskElement(this.paper, this.paperRect.width, this.paperRect.height, selectionBox);
         }
 
         private createCross(): CrossElement {
@@ -246,7 +297,7 @@ export module CanvasTools.Selection {
                 this.paperRect.resize(this.baseParent.width.baseVal.value, this.baseParent.height.baseVal.value);
             }
 
-            this.resizeAll([this.overlay, this.mask, this.crossA, this.crossB]);
+            this.resizeAll([this.mask, this.crossA, this.crossB]);
         }
 
         private resizeAll(elementSet: Array<IBase.IResizable>) {
@@ -309,7 +360,7 @@ export module CanvasTools.Selection {
                     this.moveCross(this.crossB, this.crossA);
                     this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
 
-                    this.showAll([this.overlay, this.crossB, this.selectionBox]);
+                    this.showAll([this.mask, this.crossB, this.selectionBox]);
 
                     if (typeof this.onSelectionBeginCallback === "function") {
                         this.onSelectionBeginCallback();
@@ -332,7 +383,7 @@ export module CanvasTools.Selection {
                 if (this.selectionMode === SelectionMode.RECT) { 
                     this.capturingState = false;
                     this.baseParent.releasePointerCapture(e.pointerId);                    
-                    this.hideAll([this.crossB, this.overlay]);
+                    this.hideAll([this.crossB, this.mask]);
                     
                     if (typeof this.onSelectionEndCallback === "function") {
                         this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
@@ -341,7 +392,7 @@ export module CanvasTools.Selection {
                 else if (this.selectionMode === SelectionMode.TWOPOINTS) {
                     if (this.capturingState) {
                         this.capturingState = false;
-                        this.hideAll([this.crossB, this.overlay]);
+                        this.hideAll([this.crossB, this.mask]);
 
                         if (typeof this.onSelectionEndCallback === "function") {
                             this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
@@ -352,7 +403,7 @@ export module CanvasTools.Selection {
                         this.capturingState = true;
                         this.moveCross(this.crossB, p);
                         this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                        this.showAll([this.crossA, this.crossB, this.selectionBox, this.overlay]);
+                        this.showAll([this.crossA, this.crossB, this.selectionBox, this.mask]);
 
                         if (typeof this.onSelectionBeginCallback === "function") {
                             this.onSelectionBeginCallback();
@@ -429,7 +480,7 @@ export module CanvasTools.Selection {
                     this.capturingState = false;
 
                     this.moveCross(this.crossA, this.crossB);
-                    this.hideAll([this.crossB, this.selectionBox, this.overlay]);
+                    this.hideAll([this.crossB, this.selectionBox, this.mask]);
                 }
             }
             // else if (this.selectionMode === SelectionMode.CENTRALPOINT) { }
@@ -517,7 +568,7 @@ export module CanvasTools.Selection {
             if(!this.isLocked && this.isEnabled) {
                 this.isEnabled = false;
 
-                this.hideAll([this.crossA, this.crossB, this.overlay, this.templateRect]);
+                this.hideAll([this.crossA, this.crossB, this.mask, this.templateRect]);
                 this.areaSelectorLayer.attr({
                     visibility: "hidden"
                 });
@@ -532,7 +583,7 @@ export module CanvasTools.Selection {
                 } else {
                     this.setTemplate(AreaSelector.DefaultTemplateSize);
                 }
-                this.hideAll([this.overlay, this.selectionBox, this.crossB]);
+                this.hideAll([this.mask, this.selectionBox, this.crossB]);
 
             } else {
                 this.templateRect.hide();
