@@ -22,17 +22,13 @@ export module CanvasTools.Selection {
         }
 
         public hide() {
-            if (this.isVisible) {
-                this.node.node.setAttribute("visibility", "hidden");
-                this.isVisible = false;
-            }
+            this.node.node.setAttribute("visibility", "hidden");
+            this.isVisible = false;
         }
 
         public show() {
-            if (!this.isVisible) {
-                this.node.node.setAttribute("visibility", "visible");
-                this.isVisible = true;
-            }
+            this.node.node.setAttribute("visibility", "visible");
+            this.isVisible = true;
         }
 
         public resize(width: number, height: number) {
@@ -50,6 +46,7 @@ export module CanvasTools.Selection {
         constructor(paper: Snap.Paper, boundRect: Rect){
             super(paper, boundRect);
             this.buildUIElements();
+            this.hide();
         }
 
         private buildUIElements() {
@@ -65,8 +62,6 @@ export module CanvasTools.Selection {
             this.vl = verticalLine;
             this.x = 0;
             this.y = 0;
-
-            this.hide();
         }
 
         public boundToRect(rect: IBase.IRect): Point2D {
@@ -143,6 +138,7 @@ export module CanvasTools.Selection {
             this.maskOut = maskOut;
             this.buildUIElements();
             this.resize(boundRect.width, boundRect.height);
+            this.hide();
         }
 
         private buildUIElements() {
@@ -160,7 +156,6 @@ export module CanvasTools.Selection {
             });
 
             this.node = this.mask.node;
-            this.hide();
         }
 
         private createMask(): RectElement {
@@ -315,6 +310,7 @@ export module CanvasTools.Selection {
             super(paper, boundRect, callbacks);
             this.parentNode = parent;
             this.buildUIElements();
+            this.hide();
         }
 
         private buildUIElements() {
@@ -502,15 +498,16 @@ export module CanvasTools.Selection {
                 this.moveCross(this.crossA, this.crossB);
                 this.hideAll([this.crossB, this.selectionBox, this.mask]);
             }
+        }
 
-            // L key to lock/unlock selection to allow adding new regions on top of others
-            if(e.code === 'KeyL') {
-                this.toggleLockState();
-            } 
-            //Escape to exit exclusive mode
-            if(e.keyCode == 27) {
-                this.unlock();
-            }
+        public hide() {
+            super.hide();
+            this.hideAll([this.crossA, this.crossB, this.mask]);
+        }
+
+        public show() {
+            super.show();
+            this.crossA.show();
         }
 
     }
@@ -528,6 +525,7 @@ export module CanvasTools.Selection {
             this.parentNode = parent;
             this.copyRect = copyRect;
             this.buildUIElements();
+            this.hide();
         }
 
         private buildUIElements() {
@@ -545,9 +543,7 @@ export module CanvasTools.Selection {
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
                 {event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false},
                 {event: "pointerup", listener: this.onPointerUp, base: this.parentNode, bypass: false},
-                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false},
-                {event: "keydown", listener: this.onKeyDown, base: window, bypass: false},
-                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true},
+                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false}
             ];
 
             this.subscribeToEvents(listeners);
@@ -631,18 +627,14 @@ export module CanvasTools.Selection {
             e.preventDefault();
         }
 
-        private onKeyDown(e:KeyboardEvent) {
+        public hide() {
+            super.hide();
+            this.hideAll([this.crossA, this.copyRectEl]);
         }
 
-        private onKeyUp(e:KeyboardEvent) {
-            // L key to lock/unlock selection to allow adding new regions on top of others
-            if(e.code === 'KeyL') {
-                this.toggleLockState();
-            } 
-            //Escape to exit exclusive mode
-            if(e.keyCode == 27) {
-                this.unlock();
-            }
+        public show() {
+            super.show();
+            this.showAll([this.crossA, this.copyRectEl]);
         }
     }
 
