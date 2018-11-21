@@ -316,10 +316,12 @@ export module CanvasTools.Selection {
         private buildUIElements() {
             this.node = this.paper.g();
             this.node.addClass("RectSelector");
-            this.crossA = this.createCross();
-            this.crossB = this.createCross();
-            this.selectionBox = this.createSelectionBox();
-            this.mask = this.createMask(this.selectionBox);
+            this.crossA = new CrossElement(this.paper, this.boundRect);
+            this.crossB = new CrossElement(this.paper, this.boundRect)
+            this.selectionBox = new RectElement(this.paper, this.boundRect, new Rect(0, 0));
+            this.selectionBox.node.addClass("selectionBoxStyle");
+
+            this.mask = new MaskElement(this.paper, this.boundRect, this.selectionBox);
 
             this.node.add(this.mask.node);
             this.node.add(this.crossA.node);
@@ -336,22 +338,6 @@ export module CanvasTools.Selection {
             ];
 
             this.subscribeToEvents(listeners);
-        }
-
-        private createSelectionBox(): RectElement {
-            let r:RectElement = new RectElement(this.paper, this.boundRect, new Rect(0, 0));
-            r.node.addClass("selectionBoxStyle");
-            return r;
-        }
-
-        private createMask(selectionBox: RectElement): MaskElement
-        {
-            return new MaskElement(this.paper, this.boundRect, selectionBox);
-        }
-
-        private createCross(): CrossElement {
-            let cr:CrossElement = new CrossElement(this.paper, this.boundRect);  
-            return cr;
         }
 
         private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
@@ -532,8 +518,9 @@ export module CanvasTools.Selection {
             this.node = this.paper.g();
             this.node.addClass("RectCopySelector");
 
-            this.crossA = this.createCross();
-            this.copyRectEl = this.createCopyRect();
+            this.crossA = new CrossElement(this.paper, this.boundRect);
+            this.copyRectEl = new RectElement(this.paper, this.boundRect, this.copyRect);
+            this.copyRectEl.node.addClass("copyRectStyle");
 
             this.node.add(this.crossA.node);
             this.node.add(this.copyRectEl.node);
@@ -547,17 +534,6 @@ export module CanvasTools.Selection {
             ];
 
             this.subscribeToEvents(listeners);
-        }
-
-        private createCross(): CrossElement {
-            let cr:CrossElement = new CrossElement(this.paper, this.boundRect);  
-            return cr;
-        }
-
-        private createCopyRect(): RectElement {
-            let r: RectElement = new RectElement(this.paper, this.boundRect, this.copyRect);
-            r.node.addClass("copyRectStyle");
-            return r;
         }
 
         private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
