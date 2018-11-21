@@ -59,32 +59,33 @@
         let rm = new ct.Region.RegionsManager(sz, () => { }, () => { });
         // create area selector manager 
         let selector = new ct.Selection.AreaSelector(sz,
-            function () {
-                //console.log("Rock the party!");
-            },
-            function (x1, y1, x2, y2) {
-                //console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
-                var primaryTag = new ct.Base.Tags.Tag(
-                    (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
-                    Math.floor(Math.random() * 360.0));
-                var secondaryTag = new ct.Base.Tags.Tag(
-                    (Math.random() > 0.5) ? "Yes" : "No",
-                    Math.floor(Math.random() * 360.0));
-                var ternaryTag = new ct.Base.Tags.Tag(
-                    (Math.random() > 0.5) ? "one" : "two",
-                    Math.floor(Math.random() * 360.0));
-                var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-                rm.addRegion((regionId++).toString(), { x: x1, y: y1 }, { x: x2, y: y2 }, tags);
+            {
+                onSelectionBegin: () => {
+                    console.log("Rock the party!");
+                },
+                onSelectionEnd: (x1, y1, x2, y2) => {
+                    console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
+                    var primaryTag = new ct.Base.Tags.Tag(
+                        (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
+                        Math.floor(Math.random() * 360.0));
+                    var secondaryTag = new ct.Base.Tags.Tag(
+                        (Math.random() > 0.5) ? "Yes" : "No",
+                        Math.floor(Math.random() * 360.0));
+                    var ternaryTag = new ct.Base.Tags.Tag(
+                        (Math.random() > 0.5) ? "one" : "two",
+                        Math.floor(Math.random() * 360.0));
+                    var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+                    rm.addRegion((regionId++).toString(), { x: x1, y: y1 }, { x: x2, y: y2 }, tags);
+                },
+                onLocked: () => {
+                    rm.freeze();
+                },
+                onUnlocked: () => {
+                    rm.unfreeze();
+                }
             }
+            
         );
-
-        selector.onLocked = () => {
-            rm.freeze();
-        };
-
-        selector.onUnlocked = () => {
-            rm.unfreeze();
-        }
 
         rm.onManipulationEnd = () => {
             selector.enable();
@@ -114,7 +115,7 @@
             'KeyT');
 
         toolbar.addAction(templateIcon, (action) => {
-            selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
+            selector.setSelectionMode(ct.Selection.SelectionMode.COPYRECT, { template: new ct.Base.Rect.Rect(40, 50) });
         });
         toolbar.select("rect-select");
 
@@ -128,9 +129,9 @@
             let rs = rm.getSelectedRegionsBounds();
             if (rs !== undefined && rs.length > 0) {
                 let r = rs[0];
-                selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
+                selector.setSelectionMode(ct.Selection.SelectionMode.COPYRECT, { template: new ct.Base.Rect.Rect(r.width, r.height) });
             } else {
-                selector.setSelectionMode(ct.Selection.SelectionMode.CENTRALPOINT, { template: new ct.Base.Rect.Rect(40, 50) });
+                selector.setSelectionMode(ct.Selection.SelectionMode.COPYRECT, { template: new ct.Base.Rect.Rect(40, 50) });
             }
         });
 

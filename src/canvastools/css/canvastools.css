@@ -163,14 +163,19 @@ svg:not(:root) .menuLayer {
 /* AreaSelector
 
 .areaSelector
---> .overlayStyle
-    [mask]
-        .overlayMaskStyle
-        .selectionBoxStyle
-    .crossStyle
-        line
-        line
-    .templateRectStyle
+-->.RectSelector
+    --> .maskStyle
+        [mask]
+            .maskInStyle
+            .maskOutStyle
+        .crossStyle
+            line
+            line
+-->.RectCopySelector
+    --> .crossStyle
+            line
+            line
+        .copyRectStyle
 */
 #selectionOverlay {
     position: relative;
@@ -208,7 +213,7 @@ svg:not(:root) .menuLayer {
     pointer-events: none;
 }
 
-.templateRectStyle {
+.copyRectStyle {
     stroke-width:1;
     stroke: #666;
     fill: transparent;
