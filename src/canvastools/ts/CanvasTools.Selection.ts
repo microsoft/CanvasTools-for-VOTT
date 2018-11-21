@@ -186,6 +186,13 @@ export module CanvasTools.Selection {
     export enum SelectionMode { RECT, COPYRECT };
     export enum SelectionModificator { RECT, SQUARE };
 
+    type SelectorCallbacks = {
+        onSelectionBegin: () => void, 
+        onSelectionEnd: (x1: number, y1: number, x2: number, y2:number) => void, 
+        onLocked: () => void, 
+        onUnlocked: () => void
+    }
+
     type EventDescriptor = {
         event: string, 
         listener: (e:PointerEvent|MouseEvent|KeyboardEvent) => void, 
@@ -203,7 +210,7 @@ export module CanvasTools.Selection {
         public onLockedCallback: Function;
         public onUnlockedCallback: Function;
 
-        constructor(paper: Snap.Paper, boundRect: Rect, callbacks?: { onSelectionBegin: Function, onSelectionEnd: Function, onLocked: Function, onUnlocked: Function }) {
+        constructor(paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
             super(paper, boundRect);      
             
             if (callbacks !== undefined) {
@@ -304,7 +311,7 @@ export module CanvasTools.Selection {
 
         private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
-        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: { onSelectionBegin: Function, onSelectionEnd: Function, onLocked: Function, onUnlocked: Function }) {
+        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
             super(paper, boundRect, callbacks);
             this.parentNode = parent;
             this.buildUIElements();
@@ -516,7 +523,7 @@ export module CanvasTools.Selection {
         private crossA: CrossElement;        
         private copyRectEl: RectElement;
 
-        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, copyRect: Rect, callbacks?: { onSelectionBegin: Function, onSelectionEnd: Function, onLocked: Function, onUnlocked: Function }) {
+        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, copyRect: Rect, callbacks?: SelectorCallbacks) {
             super(paper, boundRect, callbacks);
             this.parentNode = parent;
             this.copyRect = copyRect;
@@ -651,21 +658,22 @@ export module CanvasTools.Selection {
         private rectSelector: RectSelector;
         private rectCopySelector: RectCopySelector;
 
-        public onSelectionBeginCallback: Function;
-        public onSelectionEndCallback: Function;
-        public onLockedCallback: Function;
-        public onUnlockedCallback: Function;
+        public callbacks: SelectorCallbacks;
 
         private isEnabled: boolean = true;
         public static DefaultTemplateSize: Rect = new Rect(20, 20);
 
-        constructor(svgHost: SVGSVGElement, callbacks?: { onSelectionBegin: Function, onSelectionEnd: Function, onLocked: Function, onUnlocked: Function }){
+        constructor(svgHost: SVGSVGElement, callbacks?: SelectorCallbacks){
             this.parentNode = svgHost;
             if (callbacks !== undefined) {
-                this.onSelectionBeginCallback = callbacks.onSelectionBegin;
-                this.onSelectionEndCallback = callbacks.onSelectionEnd;
-                this.onLockedCallback = callbacks.onLocked;
-                this.onUnlockedCallback = callbacks.onUnlocked;
+                this.callbacks = callbacks;
+            } else {
+                this.callbacks = { 
+                    onSelectionBegin: null,
+                    onSelectionEnd: null,
+                    onLocked: null,
+                    onUnlocked: null
+                };
             }
 
             this.buildUIElements();
@@ -679,19 +687,9 @@ export module CanvasTools.Selection {
             this.areaSelectorLayer = this.paper.g();
             this.areaSelectorLayer.addClass("areaSelector");
 
-            this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, {
-                onSelectionBegin: this.onSelectionBeginCallback,
-                onSelectionEnd: this.onSelectionEndCallback,
-                onLocked: this.onLockedCallback,
-                onUnlocked: this.onUnlockedCallback
-            });
+            this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
 
-            this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), {
-                onSelectionBegin: this.onSelectionBeginCallback,
-                onSelectionEnd: this.onSelectionEndCallback,
-                onLocked: this.onLockedCallback,
-                onUnlocked: this.onUnlockedCallback
-            });
+            this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), this.callbacks);
 
             this.selector = this.rectSelector;  
             this.rectSelector.enable();
