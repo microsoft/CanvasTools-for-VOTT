@@ -63,8 +63,9 @@
                 onSelectionBegin: () => {
                     console.log("Rock the party!");
                 },
-                onSelectionEnd: (x1, y1, x2, y2) => {
-                    console.log("Selection: " + x1 + ": " + y1 + "; " + x2 + ": " + y2);
+                onSelectionEnd: (commit) => {
+                    let r = commit.boundRect;
+                    console.log("Selection: " + JSON.stringify(commit));
                     var primaryTag = new ct.Base.Tags.Tag(
                         (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                         Math.floor(Math.random() * 360.0));
@@ -75,7 +76,7 @@
                         (Math.random() > 0.5) ? "one" : "two",
                         Math.floor(Math.random() * 360.0));
                     var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-                    rm.addRegion((regionId++).toString(), { x: x1, y: y1 }, { x: x2, y: y2 }, tags);
+                    rm.addRegion((regionId++).toString(), { x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 }, tags);
                 },
                 onLocked: () => {
                     rm.freeze();
@@ -108,22 +109,21 @@
             selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
         });
 
-        let templateIcon = new ct.Toolbar.IconDescription(
-            "template-select",
+        let pointIcon = new ct.Toolbar.IconDescription(
+            "point-select",
             "./images/icons/template-selection.svg",
-            "Template-based box (T)",
-            'KeyT');
+            "Point-selection (P)",
+            'KeyP');
 
-        toolbar.addAction(templateIcon, (action) => {
-            selector.setSelectionMode(ct.Selection.SelectionMode.COPYRECT, { template: new ct.Base.Rect.Rect(40, 50) });
+        toolbar.addAction(pointIcon, (action) => {
+            selector.setSelectionMode(ct.Selection.SelectionMode.POINT);
         });
-        toolbar.select("rect-select");
-
+        
         let copyTemplateIcon = new ct.Toolbar.IconDescription(
             "copy-select",
             "./images/icons/copy-t-selection.svg",
-            "Copy-based box (Y)",
-            'KeyY');
+            "Template-based box (T)",
+            'KeyT');
 
         toolbar.addAction(copyTemplateIcon, (action) => {
             let rs = rm.getSelectedRegionsBounds();

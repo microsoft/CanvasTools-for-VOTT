@@ -163,7 +163,7 @@ svg:not(:root) .menuLayer {
 /* AreaSelector
 
 .areaSelector
--->.RectSelector
+-->.rectSelector
     --> .maskStyle
         [mask]
             .maskInStyle
@@ -171,11 +171,14 @@ svg:not(:root) .menuLayer {
         .crossStyle
             line
             line
--->.RectCopySelector
+-->.rectCopySelector
     --> .crossStyle
             line
             line
         .copyRectStyle
+-->.pointSelector
+    --> .crossStyle
+        .pointStyle
 */
 #selectionOverlay {
     position: relative;
@@ -216,6 +219,13 @@ svg:not(:root) .menuLayer {
 .copyRectStyle {
     stroke-width:1;
     stroke: #666;
+    fill: transparent;
+    pointer-events: none; 
+}
+
+.pointStyle {
+    stroke-width:3;
+    stroke: rgba(0, 247, 247, 0.5);
     fill: transparent;
     pointer-events: none; 
 }

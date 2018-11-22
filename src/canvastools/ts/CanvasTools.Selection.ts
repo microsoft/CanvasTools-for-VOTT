@@ -178,12 +178,22 @@ export module CanvasTools.Selection {
     }
 
     /* SELECTORS */
-    export enum SelectionMode { RECT, COPYRECT };
+    export enum SelectionMode { RECT, COPYRECT, POINT };
     export enum SelectionModificator { RECT, SQUARE };
+
+    type SelectionCommit = {
+        boundRect: {
+            x1: number, 
+            y1: number, 
+            x2: number, 
+            y2:number
+        },
+        meta?: Object
+    }
 
     type SelectorCallbacks = {
         onSelectionBegin: () => void, 
-        onSelectionEnd: (x1: number, y1: number, x2: number, y2:number) => void, 
+        onSelectionEnd: (commit: SelectionCommit) => void, 
         onLocked: () => void, 
         onUnlocked: () => void
     }
@@ -199,20 +209,20 @@ export module CanvasTools.Selection {
         protected isLocked: boolean = false;
         protected isEnabled: boolean = true;
 
-        // Call backs
-        public onSelectionBeginCallback: Function;
-        public onSelectionEndCallback: Function;
-        public onLockedCallback: Function;
-        public onUnlockedCallback: Function;
+        public callbacks: SelectorCallbacks;
 
         constructor(paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
             super(paper, boundRect);      
             
             if (callbacks !== undefined) {
-                this.onSelectionBeginCallback = callbacks.onSelectionBegin;
-                this.onSelectionEndCallback = callbacks.onSelectionEnd;
-                this.onLockedCallback = callbacks.onLocked;
-                this.onUnlockedCallback = callbacks.onUnlocked;
+                this.callbacks = callbacks;
+            } else {
+                this.callbacks = { 
+                    onSelectionBegin: null,
+                    onSelectionEnd: null,
+                    onLocked: null,
+                    onUnlocked: null
+                };
             }
         }
 
@@ -233,15 +243,15 @@ export module CanvasTools.Selection {
         public lock() {
             this.isLocked = true;
             this.enable();
-            if (this.onLockedCallback instanceof Function) {
-                this.onLockedCallback();
+            if (this.callbacks.onLocked instanceof Function) {
+                this.callbacks.onLocked();
             }
         }
 
         public unlock() {
             this.isLocked = false;
-            if (this.onUnlockedCallback instanceof Function) {
-                this.onUnlockedCallback();
+            if (this.callbacks.onUnlocked instanceof Function) {
+                this.callbacks.onUnlocked();
             }
         }
 
@@ -315,7 +325,7 @@ export module CanvasTools.Selection {
 
         private buildUIElements() {
             this.node = this.paper.g();
-            this.node.addClass("RectSelector");
+            this.node.addClass("rectSelector");
             this.crossA = new CrossElement(this.paper, this.boundRect);
             this.crossB = new CrossElement(this.paper, this.boundRect)
             this.selectionBox = new RectElement(this.paper, this.boundRect, new Rect(0, 0));
@@ -387,8 +397,8 @@ export module CanvasTools.Selection {
 
                     this.showAll([this.mask, this.crossB, this.selectionBox]);
 
-                    if (typeof this.onSelectionBeginCallback === "function") {
-                        this.onSelectionBeginCallback();
+                    if (typeof this.callbacks.onSelectionBegin === "function") {
+                        this.callbacks.onSelectionBegin();
                     }
                 } 
             });         
@@ -404,8 +414,15 @@ export module CanvasTools.Selection {
                     this.parentNode.releasePointerCapture(e.pointerId);                    
                     this.hideAll([this.crossB, this.mask]);
                     
-                    if (typeof this.onSelectionEndCallback === "function") {
-                        this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
+                    if (typeof this.callbacks.onSelectionEnd === "function") {
+                        this.callbacks.onSelectionEnd({
+                            boundRect: {
+                                x1: this.crossA.x, 
+                                y1: this.crossA.y, 
+                                x2: this.crossB.x, 
+                                y2: this.crossB.y
+                            }
+                        });
                     }
                 } 
                 else {
@@ -413,8 +430,15 @@ export module CanvasTools.Selection {
                         this.capturingState = false;
                         this.hideAll([this.crossB, this.mask]);
 
-                        if (typeof this.onSelectionEndCallback === "function") {
-                            this.onSelectionEndCallback(this.crossA.x, this.crossA.y, this.crossB.x, this.crossB.y);
+                        if (typeof this.callbacks.onSelectionEnd === "function") {
+                            this.callbacks.onSelectionEnd({
+                                boundRect: {
+                                    x1: this.crossA.x, 
+                                    y1: this.crossA.y, 
+                                    x2: this.crossB.x, 
+                                    y2: this.crossB.y
+                                }
+                            });
                         }
                         this.moveCross(this.crossA, p);
                         this.moveCross(this.crossB, p);
@@ -424,8 +448,8 @@ export module CanvasTools.Selection {
                         this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
                         this.showAll([this.crossA, this.crossB, this.selectionBox, this.mask]);
 
-                        if (typeof this.onSelectionBeginCallback === "function") {
-                            this.onSelectionBeginCallback();
+                        if (typeof this.callbacks.onSelectionBegin === "function") {
+                            this.callbacks.onSelectionBegin();
                         }
                     }
                 } 
@@ -516,7 +540,7 @@ export module CanvasTools.Selection {
 
         private buildUIElements() {
             this.node = this.paper.g();
-            this.node.addClass("RectCopySelector");
+            this.node.addClass("rectCopySelector");
 
             this.crossA = new CrossElement(this.paper, this.boundRect);
             this.copyRectEl = new RectElement(this.paper, this.boundRect, this.copyRect);
@@ -570,20 +594,27 @@ export module CanvasTools.Selection {
             window.requestAnimationFrame(() => {
                 this.show();
                 this.moveCopyRect(this.copyRectEl, this.crossA);
-                if (typeof this.onSelectionBeginCallback === "function") {
-                    this.onSelectionBeginCallback();
+                if (typeof this.callbacks.onSelectionBegin === "function") {
+                    this.callbacks.onSelectionBegin();
                 }
             });         
         }
 
         private onPointerUp(e:PointerEvent) {
             window.requestAnimationFrame(() => {
-                if (typeof this.onSelectionEndCallback === "function") {
+                if (typeof this.callbacks.onSelectionEnd === "function") {
                     let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
                     let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
                     p1 = p1.boundToRect(this.boundRect);
                     p2 = p2.boundToRect(this.boundRect);
-                    this.onSelectionEndCallback(p1.x, p1.y, p2.x, p2.y);
+                    this.callbacks.onSelectionEnd({
+                        boundRect: {
+                            x1: p1.x, 
+                            y1: p1.y, 
+                            x2: p2.x, 
+                            y2: p2.y
+                        }
+                    });
                 }
             });
         }
@@ -614,6 +645,127 @@ export module CanvasTools.Selection {
         }
     }
 
+    export class PointSelector extends SelectorPrototype{
+        private parentNode: SVGSVGElement;
+
+        private crossA: CrossElement; 
+        private point: Snap.Element;
+
+        private pointRadius: number = 6;
+
+        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
+            super(paper, boundRect, callbacks);
+            this.parentNode = parent;
+            this.buildUIElements();
+            this.hide();
+        }
+
+        private buildUIElements() {
+            this.node = this.paper.g();
+            this.node.addClass("pointSelector");
+
+            this.crossA = new CrossElement(this.paper, this.boundRect);
+            this.point = this.paper.circle(0, 0, this.pointRadius);
+            this.point.addClass("pointStyle");
+
+            this.node.add(this.crossA.node);
+            this.node.add(this.point);
+
+            let listeners: Array<EventDescriptor> = [
+                {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
+                {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
+                {event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false},
+                {event: "pointerup", listener: this.onPointerUp, base: this.parentNode, bypass: false},
+                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false}
+            ];
+
+            this.subscribeToEvents(listeners);
+        }
+
+        private moveCross(cross:CrossElement, p:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
+            cross.move(p, this.boundRect, square, refCross);
+        }       
+        
+        private movePoint(point: Snap.Element, crossA:CrossElement) {
+            point.attr({
+                cx: crossA.x,
+                cy: crossA.y
+            })
+        }
+
+        private onPointerEnter(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.show();
+            })            
+        }
+
+        private onPointerLeave(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.hide();
+            });            
+        }
+
+        private onPointerDown(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.show();
+                this.movePoint(this.point, this.crossA);
+                if (typeof this.callbacks.onSelectionBegin === "function") {
+                    this.callbacks.onSelectionBegin();
+                }
+            });         
+        }
+
+        private onPointerUp(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                if (typeof this.callbacks.onSelectionEnd === "function") {
+                    let p1 = new Point2D(this.crossA.x - this.pointRadius, this.crossA.y - this.pointRadius);
+                    let p2 = new Point2D(this.crossA.x + this.pointRadius, this.crossA.y + this.pointRadius);
+                    p1 = p1.boundToRect(this.boundRect);
+                    p2 = p2.boundToRect(this.boundRect);
+                    this.callbacks.onSelectionEnd({
+                        boundRect: {
+                            x1: p1.x, 
+                            y1: p1.y, 
+                            x2: p2.x, 
+                            y2: p2.y
+                        }, 
+                        meta: {
+                            point: {
+                                x: this.crossA.x,
+                                y: this.crossA.y
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        private onPointerMove(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                let rect = this.parentNode.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+
+                this.show();
+                this.moveCross(this.crossA, p);
+                this.movePoint(this.point, this.crossA);
+            });
+
+            e.preventDefault();
+        }
+
+        public hide() {
+            super.hide();
+            this.crossA.hide();
+            this.point.node.setAttribute("visibility", "hidden");
+        }
+
+        public show() {
+            super.show();
+            this.crossA.show();
+            this.point.node.setAttribute("visibility", "visible");
+        }
+    }
+
     export class AreaSelector {
         private parentNode:SVGSVGElement;
         private paper: Snap.Paper;
@@ -625,6 +777,7 @@ export module CanvasTools.Selection {
         
         private rectSelector: RectSelector;
         private rectCopySelector: RectCopySelector;
+        private pointSelector: PointSelector;
 
         public callbacks: SelectorCallbacks;
 
@@ -656,16 +809,18 @@ export module CanvasTools.Selection {
             this.areaSelectorLayer.addClass("areaSelector");
 
             this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
-
             this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), this.callbacks);
+            this.pointSelector = new PointSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
 
             this.selector = this.rectSelector;  
             this.rectSelector.enable();
-            this.rectCopySelector.disable();          
+            this.rectCopySelector.disable();      
+            this.pointSelector.disable();       
             this.selector.hide();
 
             this.areaSelectorLayer.add(this.rectSelector.node);
             this.areaSelectorLayer.add(this.rectCopySelector.node);
+            this.areaSelectorLayer.add(this.pointSelector.node);
         }
 
         public resize(width:number, height:number):void {
@@ -715,15 +870,17 @@ export module CanvasTools.Selection {
 
         public enable() {
             this.selector.enable();
+            this.isEnabled = true;
         }
 
         public disable() {
             this.selector.disable();
+            this.isEnabled = false;
         }
 
         public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
-            this.selector.disable();
-            this.selector.hide();
+            let wasEnabled: boolean = this.isEnabled;
+            this.disable();
 
             if (selectionMode === SelectionMode.COPYRECT) {
                 this.selector = this.rectCopySelector;
@@ -734,10 +891,16 @@ export module CanvasTools.Selection {
                 }
             } else if (selectionMode === SelectionMode.RECT) {
                 this.selector = this.rectSelector;
+            } else if (selectionMode === SelectionMode.POINT) {
+                this.selector = this.pointSelector;
             }
 
-            this.selector.show();
-            this.selector.enable();
+            // restore enablement status
+            if (wasEnabled) {
+                this.enable();
+            } else {
+                this.disable();
+            }            
         }
 
         protected enablify(f:Function, bypass:boolean = false) {
