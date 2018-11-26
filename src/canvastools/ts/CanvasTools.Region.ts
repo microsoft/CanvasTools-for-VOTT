@@ -435,7 +435,7 @@ export module CanvasTools.Region {
             this.secondaryTagsGroup = paper.g();
             this.secondaryTagsGroup.addClass("secondatyTagsLayer");
             this.secondaryTags = [];
-            
+
             this.tagsGroup.add(this.primaryTagRect);
             this.tagsGroup.add(this.primaryTagTextBG);
             this.tagsGroup.add(this.primaryTagText); 
@@ -1163,13 +1163,14 @@ export module CanvasTools.Region {
 
         // Region components
         public regionGroup: Snap.Element;
-        private drag: DragElement;
-        private anchors: AnchorsElement;
-        public tags: TagsElement;
+        private dragNode: DragElement;
+        private anchorsNode: AnchorsElement;
+        private tagsNode: TagsElement;
+        private toolTip: Snap.Fragment;
         private UI: Array<IBase.IRegionPart>;
 
         // Region data
-        private tagsDescriptor: Tags.TagsDescriptor;
+        public tags: Tags.TagsDescriptor;
 
         // Region state        
         public isSelected:boolean = false;
@@ -1194,7 +1195,7 @@ export module CanvasTools.Region {
             this.y = 0;
             this.rect = rect;
             this.ID = id;
-            this.tagsDescriptor = tagsDescriptor;
+            this.tags = tagsDescriptor;
 
             if (boundRect !== null) {
                 this.boundRects = { 
@@ -1227,15 +1228,18 @@ export module CanvasTools.Region {
             this.regionGroup.addClass("regionStyle");
             this.regionGroup.addClass(this.styleID);
 
-            this.anchors = new AnchorsElement(paper, this.x, this.y, this.rect,this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.drag = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.tags = new TagsElement(paper, this.x, this.y, this.rect, this.tagsDescriptor, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+            this.anchorsNode = new AnchorsElement(paper, this.x, this.y, this.rect,this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+            this.dragNode = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+            this.tagsNode = new TagsElement(paper, this.x, this.y, this.rect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
             
-            this.regionGroup.add(this.tags.tagsGroup);
-            this.regionGroup.add(this.drag.dragGroup);                      
-            this.regionGroup.add(this.anchors.anchorsGroup);  
+            this.toolTip = Snap.parse(`<title>${this.tags.toString()}</title>`);
+            this.regionGroup.append(<any>this.toolTip);
             
-            this.UI = new Array<IBase.IRegionPart>(this.tags, this.drag, this.anchors);
+            this.regionGroup.add(this.tagsNode.tagsGroup); 
+            this.regionGroup.add(this.dragNode.dragGroup); 
+            this.regionGroup.add(this.anchorsNode.anchorsGroup);  
+            
+            this.UI = new Array<IBase.IRegionPart>(this.tagsNode, this.dragNode, this.anchorsNode);
         }
 
         // Helper function to generate random id;
@@ -1268,7 +1272,9 @@ export module CanvasTools.Region {
         }
 
         public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){
-            this.tags.updateTags(tags, options);
+            this.tagsNode.updateTags(tags, options);
+
+            this.regionGroup.select("title").node.innerHTML = tags.toString();
         }
 
         public move(p: IBase.IPoint2D) {           
@@ -1335,8 +1341,8 @@ export module CanvasTools.Region {
             if (!this.isFrozen) {
                 this.isFrozen = true;
                 this.regionGroup.addClass('old');
-                this.drag.freeze();
-                this.anchors.freeze();
+                this.dragNode.freeze();
+                this.anchorsNode.freeze();
             }            
         }
 
@@ -1344,8 +1350,8 @@ export module CanvasTools.Region {
             if (this.isFrozen) {
                 this.isFrozen = false;
                 this.regionGroup.removeClass('old');
-                this.drag.unfreeze();
-                this.anchors.unfreeze();
+                this.dragNode.unfreeze();
+                this.anchorsNode.unfreeze();
             }            
         }
     }
@@ -1529,7 +1535,7 @@ export module CanvasTools.Region {
             region.area = rect.height * rect.width;
             region.move(new Point2D(x, y));
             region.onChange = this.onRegionUpdate.bind(this);
-            region.tags.updateTags(region.tags.tags, this.tagsUpdateOptions);
+            region.updateTags(region.tags, this.tagsUpdateOptions);
             this.regionManagerLayer.add(region.regionGroup);
             this.regions.push(region);
             // Need to do a check for invalid stacking from user generated or older saved json
@@ -1546,7 +1552,7 @@ export module CanvasTools.Region {
             this.deleteAllRegions();
             let selectedID: string = "";
             for(var i = 0; i < sr.length; i++) {
-                this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags.tags);
+                this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags);
                 if(sr[i].isSelected) {
                     selectedID = sr[i].ID
                 }
@@ -1886,7 +1892,7 @@ export module CanvasTools.Region {
             this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
 
             this.regions.forEach((r) => {
-                r.tags.updateTags(r.tags.tags, this.tagsUpdateOptions);
+                r.updateTags(r.tags, this.tagsUpdateOptions);
             });
         }
 

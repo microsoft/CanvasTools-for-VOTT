@@ -91,5 +91,15 @@ export namespace CanvasTools.Base.Tags {
             this.primary = primaryTag;
             this.secondary = secondaryTags;
         }
+
+        public toString(): string {
+            let str = this.primary.name;
+
+            this.secondary.forEach((tag) => {
+                str += " " + tag.name;
+            })
+
+            return str;
+        }
     }
 }
