@@ -109,13 +109,13 @@
             selector.setSelectionMode(ct.Selection.SelectionMode.POINT);
         });
 
-        let rectIcont = new ct.Toolbar.IconDescription(
+        let rectIcon = new ct.Toolbar.IconDescription(
             "rect-select",
             "./images/icons/rect-selection.svg",
             "Rectangular box (R)",
             'KeyR');
 
-        toolbar.addAction(rectIcont, (action) => {
+        toolbar.addAction(rectIcon, (action) => {
             selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
         });        
         
@@ -134,6 +134,17 @@
                 selector.setSelectionMode(ct.Selection.SelectionMode.COPYRECT, { template: new ct.Base.Rect.Rect(40, 50) });
             }
         });
+
+        let selectionLockIcon = new ct.Toolbar.IconDescription(
+            "selection-lock",
+            "./images/icons/selection-lock.svg",
+            "Lock/unlock selection (L)",
+            'KeyL',
+            true);
+
+        toolbar.addAction(selectionLockIcon, (action) => {
+            selector.toggleLockState();
+        });  
 
         toolbar.select("rect-select");
 

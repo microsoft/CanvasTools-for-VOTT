@@ -253,10 +253,22 @@ svg:not(:root) .menuLayer {
     fill: transparent;
 }
 
-.iconStyle .iconBGRectStyle.selected {
+.iconStyle.selected .iconBGRectStyle {
     fill: #333;
 }
 
 .iconStyle .iconImageStyle * {
     stroke: #fff;
+}
+
+.iconStyle.switch .iconImageStyle * {
+    stroke: #333;
+}
+.iconStyle.switch.selected .iconImageStyle * {
+    stroke: rgb(111, 238, 255);
+    stroke-width: 1.5;
+}
+
+.iconStyle.switch.selected .iconBGRectStyle {
+    fill: transparent;
 }

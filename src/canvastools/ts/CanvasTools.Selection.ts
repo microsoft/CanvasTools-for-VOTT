@@ -837,13 +837,15 @@ export module CanvasTools.Selection {
 
         private onKeyUp(e:KeyboardEvent) {
             // L key to lock/unlock selection to allow adding new regions on top of others
-            if(e.code === 'KeyL') {
-                this.toggleLockState();
-            } 
-            //Escape to exit exclusive mode
-            if(e.keyCode == 27) {
-                this.unlock();
-            }
+            /* if (this.isEnabled) {
+                if(e.code === 'KeyL') {
+                    this.toggleLockState();
+                } 
+                //Escape to exit exclusive mode
+                if(e.keyCode == 27) {
+                    this.unlock();
+                }
+            }   */          
         }
 
         private subscribeToEvents() {
@@ -856,7 +858,7 @@ export module CanvasTools.Selection {
             });
         }
 
-        private toggleLockState() {
+        public toggleLockState() {
             this.selector.toggleLockState();
         }
 

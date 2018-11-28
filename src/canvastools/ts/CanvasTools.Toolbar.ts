@@ -10,12 +10,14 @@ export module CanvasTools.Toolbar {
         public iconUrl: string;
         public tooltip: string;
         public keycode: string;
+        public isSwitch: boolean;
 
-        constructor(action: string, iconUrl: string, tooltip: string, keycode: string) {
+        constructor(action: string, iconUrl: string, tooltip: string, keycode: string, isSwitch:boolean = false) {
             this.action = action;
             this.iconUrl = iconUrl;
             this.tooltip = tooltip;
             this.keycode = keycode;
+            this.isSwitch = isSwitch;
         }
     }
 
@@ -48,6 +50,9 @@ export module CanvasTools.Toolbar {
         private buildIconUI() {
             this.iconGroup = this.paper.g();
             this.iconGroup.addClass("iconStyle");
+            if (this.description.isSwitch) {
+                this.iconGroup.addClass("switch");
+            }
 
             this.iconBackgrounRect = this.paper.rect(0, 0, ToolbarIcon.IconWidth, ToolbarIcon.IconHeight);
             this.iconBackgrounRect.addClass("iconBGRectStyle");
@@ -77,19 +82,23 @@ export module CanvasTools.Toolbar {
             this.iconGroup.append(<any>title);
 
             this.iconGroup.click((e) => {
-                //if (!this.isSelected) {
-                    this.actor(this.description.action);
+                this.actor(this.description.action);
+                if (this.description.isSwitch) {
+                    this.toggleSelection();
+                } else {
                     this.select();
-                //}
+                }
             })
 
             if (this.description.keycode !== undefined) {
                 window.addEventListener("keyup", (e) => {
                     if (e.code === this.description.keycode && !e.ctrlKey && !e.altKey) {
-                        //if (!this.isSelected) {
-                            this.actor(this.description.action);
+                        this.actor(this.description.action);
+                        if (this.description.isSwitch) {
+                            this.toggleSelection();
+                        } else {
                             this.select();
-                        //}
+                        }
                     }
                 });
             }
@@ -105,13 +114,21 @@ export module CanvasTools.Toolbar {
         }
 
         public select() {
-            this.iconBackgrounRect.addClass("selected");
+            this.iconGroup.addClass("selected");
             this.isSelected = true;
         }
 
         public unselect() {
-            this.iconBackgrounRect.removeClass("selected");
+            this.iconGroup.removeClass("selected");
             this.isSelected = false;
+        }
+
+        public toggleSelection() {
+            if (this.isSelected) {
+                this.unselect();
+            } else {
+                this.select();
+            }
         }
     }
 
@@ -170,7 +187,10 @@ export module CanvasTools.Toolbar {
 
         public addAction(icon: IconDescription, actor: IconCallback, keyCode?: string) {
             let iconElement = new ToolbarIcon(icon, this.paper, (action) => {
-                this.select(action);
+                if (!icon.isSwitch) {
+                    this.select(action);
+                } else {
+                };                
                 actor(action);
             });
 
@@ -185,10 +205,12 @@ export module CanvasTools.Toolbar {
 
         public select(action: string) {
             this.icons.forEach((icon) => {
-                if (icon.description.action !== action) {
-                    icon.unselect();
-                } else {
-                    icon.select();
+                if (!icon.description.isSwitch) {
+                    if (icon.description.action !== action) {
+                        icon.unselect();
+                    } else {
+                        icon.select();
+                    }
                 }
             });
 

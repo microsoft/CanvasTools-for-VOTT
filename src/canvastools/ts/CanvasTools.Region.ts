@@ -1232,7 +1232,7 @@ export module CanvasTools.Region {
             this.dragNode = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
             this.tagsNode = new TagsElement(paper, this.x, this.y, this.rect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
             
-            this.toolTip = Snap.parse(`<title>${this.tags.toString()}</title>`);
+            this.toolTip = Snap.parse(`<title>${(this.tags !== null)?this.tags.toString():""}</title>`);
             this.regionGroup.append(<any>this.toolTip);
             
             this.regionGroup.add(this.tagsNode.tagsGroup); 
@@ -1375,6 +1375,9 @@ export module CanvasTools.Region {
 
         private regionManagerLayer:Snap.Element;
 
+        private isFrozen:boolean = false;
+        private frozenNuance:string;
+
         private tagsUpdateOptions: TagsUpdateOptions = {
             showRegionBackground: true
         };
@@ -1413,89 +1416,93 @@ export module CanvasTools.Region {
 
         private subscribeToEvents() {
             window.addEventListener("keyup", (e) => {
-                switch (e.keyCode) {
-                    // tab
-                    case 9:
-                        this.selectNextRegion();
-                        break;
-
-                    // delete, backspace
-                    case 46: 
-                    case 8: 
-                        this.deleteSelectedRegions();
-                        break;
-                    // ctrl + up
-                    case 38:
-                        if (e.ctrlKey) {
-                            if (!e.shiftKey && !e.altKey) {
-                                this.moveSelectedRegions(0, -5);
-                            } else if (e.shiftKey && !e.altKey) {
-                                this.resizeSelectedRegions(0, -5);
-                            } else if (e.altKey && !e.shiftKey) {
-                                this.resizeSelectedRegions(0, -5, true);
-                            }                     
-                        }
-                        break;
-                    // ctrl + down
-                    case 40:
-                        if (e.ctrlKey) {
-                            if (!e.shiftKey && !e.altKey) {
-                                this.moveSelectedRegions(0, 5);
-                            } else if (e.shiftKey && !e.altKey) {
-                                this.resizeSelectedRegions(0, 5);
-                            } else if (e.altKey && !e.shiftKey) {
-                                this.resizeSelectedRegions(0, 5, true);
-                            }  
-                        }
-                        break;
-                    // ctrl + left
-                    case 37:
-                        if (e.ctrlKey) {
-                            if (!e.shiftKey && !e.altKey) {
-                                this.moveSelectedRegions(-5, 0);
-                            } else if (e.shiftKey && !e.altKey) {
-                                this.resizeSelectedRegions(-5, 0);
-                            } else if (e.altKey && !e.shiftKey) {
-                                this.resizeSelectedRegions(-5, 0, true);
-                            } 
-                        }
-                        break;
-                    // ctrl + right
-                    case 39:
-                        if (e.ctrlKey) {
-                            if (!e.shiftKey && !e.altKey) {
-                                this.moveSelectedRegions(5, 0);
-                            } else if (e.shiftKey && !e.altKey) {
-                                this.resizeSelectedRegions(5, 0);
-                            } else if (e.altKey && !e.shiftKey) {
-                                this.resizeSelectedRegions(5, 0, true);
-                            } 
-                        }
-                        break;
-                    // default
-                    default: return;
+                if (!this.isFrozen) {
+                    switch (e.keyCode) {
+                        // tab
+                        case 9:
+                            this.selectNextRegion();
+                            break;
+    
+                        // delete, backspace
+                        case 46: 
+                        case 8: 
+                            this.deleteSelectedRegions();
+                            break;
+                        // ctrl + up
+                        case 38:
+                            if (e.ctrlKey) {
+                                if (!e.shiftKey && !e.altKey) {
+                                    this.moveSelectedRegions(0, -5);
+                                } else if (e.shiftKey && !e.altKey) {
+                                    this.resizeSelectedRegions(0, -5);
+                                } else if (e.altKey && !e.shiftKey) {
+                                    this.resizeSelectedRegions(0, -5, true);
+                                }                     
+                            }
+                            break;
+                        // ctrl + down
+                        case 40:
+                            if (e.ctrlKey) {
+                                if (!e.shiftKey && !e.altKey) {
+                                    this.moveSelectedRegions(0, 5);
+                                } else if (e.shiftKey && !e.altKey) {
+                                    this.resizeSelectedRegions(0, 5);
+                                } else if (e.altKey && !e.shiftKey) {
+                                    this.resizeSelectedRegions(0, 5, true);
+                                }  
+                            }
+                            break;
+                        // ctrl + left
+                        case 37:
+                            if (e.ctrlKey) {
+                                if (!e.shiftKey && !e.altKey) {
+                                    this.moveSelectedRegions(-5, 0);
+                                } else if (e.shiftKey && !e.altKey) {
+                                    this.resizeSelectedRegions(-5, 0);
+                                } else if (e.altKey && !e.shiftKey) {
+                                    this.resizeSelectedRegions(-5, 0, true);
+                                } 
+                            }
+                            break;
+                        // ctrl + right
+                        case 39:
+                            if (e.ctrlKey) {
+                                if (!e.shiftKey && !e.altKey) {
+                                    this.moveSelectedRegions(5, 0);
+                                } else if (e.shiftKey && !e.altKey) {
+                                    this.resizeSelectedRegions(5, 0);
+                                } else if (e.altKey && !e.shiftKey) {
+                                    this.resizeSelectedRegions(5, 0, true);
+                                } 
+                            }
+                            break;
+                        // default
+                        default: return;
+                    }
+                    e.preventDefault();
                 }
-                e.preventDefault();
             });
             window.addEventListener("keydown", (e) => {
-                switch (e.keyCode) {
-                    // ctrl + A, ctrl + a, numpad 1
-                    case 65:
-                    case 97:
-                        if (e.ctrlKey) {
-                            this.selectAllRegions();
-                        }
-                        break;
-                        // ctrl + B, ctrl + b
-                        case 66:
-                        if (e.ctrlKey) {
-                            this.toggleBackground();                 
-                        }
-                        break;
-                    // default
-                    default: return ;
-                }
-                //e.preventDefault(); 
+                if (!this.isFrozen) {
+                    switch (e.code) {
+                        // ctrl + A, ctrl + a
+                        case "KeyA":
+                        case "Numpad1":
+                            if (e.ctrlKey) {
+                                this.selectAllRegions();
+                            }
+                            break;
+                            // ctrl + B, ctrl + b
+                            case "KeyB":
+                            if (e.ctrlKey) {
+                                this.toggleBackground();                 
+                            }
+                            break;
+                        // default
+                        default: return ;
+                    }
+                    //e.preventDefault(); 
+                }                
             });
         }
 
@@ -1896,20 +1903,34 @@ export module CanvasTools.Region {
             });
         }
 
-        public freeze() {
+        public freeze(nuance?: string) {
             this.regionManagerLayer.addClass("frozen");
+            if (nuance !== undefined) {
+                this.regionManagerLayer.addClass(nuance);
+                this.frozenNuance = nuance;
+            } else {
+                this.frozenNuance = "";
+            }
             this.menuLayer.addClass('frozen');
             this.regions.forEach((region) => {
                 region.freeze();
             })
+
+            this.isFrozen = true;
         }
 
         public unfreeze() {
             this.regionManagerLayer.removeClass("frozen");
             this.menuLayer.removeClass('frozen');
+            if (this.frozenNuance !== "") {
+                this.menuLayer.removeClass(this.frozenNuance);
+            }
             this.regions.forEach((region) => {
                 region.unfreeze();
             })
+           
+
+            this.isFrozen = false;
         }
     }
 }
