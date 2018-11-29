@@ -38,6 +38,7 @@ export module CanvasTools.Toolbar {
 
         public description: IconDescription;
         public isSelected: boolean = false;
+        public areHotkeysEnabled: boolean = true;
 
         constructor(icon: IconDescription, paper: Snap.Paper, actor: IconCallback) {
             this.description = icon;
@@ -83,25 +84,7 @@ export module CanvasTools.Toolbar {
 
             this.iconGroup.click((e) => {
                 this.actor(this.description.action);
-                if (this.description.isSwitch) {
-                    this.toggleSelection();
-                } else {
-                    this.select();
-                }
             })
-
-            if (this.description.keycode !== undefined) {
-                window.addEventListener("keyup", (e) => {
-                    if (e.code === this.description.keycode && !e.ctrlKey && !e.altKey) {
-                        this.actor(this.description.action);
-                        if (this.description.isSwitch) {
-                            this.toggleSelection();
-                        } else {
-                            this.select();
-                        }
-                    }
-                });
-            }
         }
 
         public move(x: number, y: number) {
@@ -123,9 +106,17 @@ export module CanvasTools.Toolbar {
             this.isSelected = false;
         }
 
-        public toggleSelection() {
+        private toggleSelection() {
             if (this.isSelected) {
                 this.unselect();
+            } else {
+                this.select();
+            }
+        }
+
+        public toggleOnKey() {
+            if (this.description.isSwitch) {
+                this.toggleSelection();
             } else {
                 this.select();
             }
@@ -146,6 +137,8 @@ export module CanvasTools.Toolbar {
         private toolbarHeight: number;
 
         private icons: Array<ToolbarIcon>;
+
+        private areHotKeysEnabled: boolean = true;
 
         constructor(svgHost: SVGSVGElement){
             this.icons = new Array<ToolbarIcon>();
@@ -190,7 +183,8 @@ export module CanvasTools.Toolbar {
                 if (!icon.isSwitch) {
                     this.select(action);
                 } else {
-                };                
+                    iconElement.toggleOnKey();
+                }                
                 actor(action);
             });
 
@@ -201,6 +195,21 @@ export module CanvasTools.Toolbar {
 
             this.recalculateToolbarSize();
             this.updateToolbarSize();
+
+            if (icon.keycode !== undefined) {
+                window.addEventListener("keyup", (e) => {
+                    if (this.areHotKeysEnabled) {
+                        if (e.code === icon.keycode && !e.ctrlKey && !e.altKey) {
+                            if (!icon.isSwitch) {
+                                this.select(icon.action);
+                            } else {
+                                iconElement.toggleOnKey();
+                            }
+                            actor(icon.action);
+                        }
+                    }                    
+                });
+            }
         }
 
         public select(action: string) {
@@ -211,9 +220,18 @@ export module CanvasTools.Toolbar {
                     } else {
                         icon.select();
                     }
-                }
+                }                
             });
 
         }
+
+        public enableHotkeys() {
+            this.areHotKeysEnabled = true;
+        }
+
+        public disableHotkeys() {
+            this.areHotKeysEnabled = false;
+        }
+ 
     }
 }
