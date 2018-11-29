@@ -1274,7 +1274,7 @@ export module CanvasTools.Region {
         public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){
             this.tagsNode.updateTags(tags, options);
 
-            this.regionGroup.select("title").node.innerHTML = tags.toString();
+            this.regionGroup.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
         }
 
         public move(p: IBase.IPoint2D) {           
@@ -1406,7 +1406,6 @@ export module CanvasTools.Region {
                                          this.onManipulationEnd_local.bind(this));
 
             this.menu.addAction("delete", "trash", (region: RegionElement) => {
-                console.log(region.regionID);
                 this.deleteRegion(region);
                 this.menu.hide();
             })
