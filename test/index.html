@@ -135,6 +135,16 @@
             }
         });
 
+        let polylineIcon = new ct.Toolbar.IconDescription(
+            "polyline-select",
+            "./images/icons/point-selection.svg",
+            "Polyline-selection (Y)",
+            'KeyY');
+
+        toolbar.addAction(polylineIcon, (action) => {
+            selector.setSelectionMode(ct.Selection.SelectionMode.POLYLINE);
+        });
+
         let selectionLockIcon = new ct.Toolbar.IconDescription(
             "selection-lock",
             "./images/icons/selection-lock.svg",

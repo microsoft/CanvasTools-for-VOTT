@@ -185,6 +185,12 @@ svg:not(:root) .menuLayer {
 -->.pointSelector
     --> .crossStyle
         .pointStyle
+-->.polylineSelector
+    --> .polylineStyle
+        .polylineGroupStyle
+        --> .polylinePointStyle
+        .nextSegmentStyle
+        .nextPointStyle
 */
 #selectionOverlay {
     position: relative;
@@ -200,21 +206,21 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
-.maskStyle {
+.rectSelector .maskStyle {
     fill: #000;
     fill-opacity: 0.5;
     stroke-width: 0;
     pointer-events: none;
 }
 
-.maskInStyle {
+.rectSelector .maskInStyle {
     fill: #fff;
     stroke-width: 0;
     visibility: visible;
     pointer-events: none;
 }
 
-.selectionBoxStyle, .maskOutStyle {
+.rectSelector .selectionBoxStyle, .maskOutStyle {
     /* Transparent crop*/
     fill: #000;
     stroke-width: 0;
@@ -222,18 +228,44 @@ svg:not(:root) .menuLayer {
     pointer-events: none;
 }
 
-.copyRectStyle {
+.rectCopySelector .copyRectStyle {
     stroke-width:1;
     stroke: #666;
     fill: transparent;
     pointer-events: none; 
 }
 
-.pointStyle {
+.pointSelector .pointStyle {
     stroke-width:3;
     stroke: rgba(0, 247, 247, 0.5);
     fill: transparent;
     pointer-events: none; 
+}
+
+.polylineSelector .polylineStyle {
+    fill: transparent;
+    stroke-width: 2px;
+    stroke:  rgba(0, 247, 247, 0.5);
+    pointer-events: none;
+}
+
+.polylineSelector .polylinePointStyle {
+    fill:  rgba(0, 247, 247, 0.5);
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+.polylineSelector .nextSegmentStyle {
+    stroke-width:2;
+    stroke-dasharray: 3 3;
+    stroke: rgba(0, 128, 128, 0.5);
+    pointer-events: none;
+}
+.polylineSelector .nextPointStyle {
+    stroke-width:2;
+    r: 6px;
+    stroke: rgba(0, 128, 128, 0.5);
+    fill: transparent;
 }
 
 /* Toolbar 

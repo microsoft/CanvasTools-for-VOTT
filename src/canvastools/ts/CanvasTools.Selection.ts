@@ -178,7 +178,7 @@ export module CanvasTools.Selection {
     }
 
     /* SELECTORS */
-    export enum SelectionMode { RECT, COPYRECT, POINT };
+    export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE };
     export enum SelectionModificator { RECT, SQUARE };
 
     type SelectionCommit = {
@@ -510,6 +510,11 @@ export module CanvasTools.Selection {
             }
         }
 
+        public resize(width:number, height:number) {
+            super.resize(width, height);
+            this.resizeAll([this.mask, this.crossA, this.crossB]);
+        }
+
         public hide() {
             super.hide();
             this.hideAll([this.crossA, this.crossB, this.mask]);
@@ -634,6 +639,11 @@ export module CanvasTools.Selection {
             e.preventDefault();
         }
 
+        public resize(width:number, height:number) {
+            super.resize(width, height);
+            this.crossA.resize(width, height);
+        }
+
         public hide() {
             super.hide();
             this.hideAll([this.crossA, this.copyRectEl]);
@@ -753,6 +763,11 @@ export module CanvasTools.Selection {
             e.preventDefault();
         }
 
+        public resize(width:number, height:number) {
+            super.resize(width, height);
+            this.crossA.resize(width, height);
+        }
+
         public hide() {
             super.hide();
             this.crossA.hide();
@@ -763,6 +778,228 @@ export module CanvasTools.Selection {
             super.show();
             this.crossA.show();
             this.point.node.setAttribute("visibility", "visible");
+        }
+    }
+
+    export class PolylineSelector extends SelectorPrototype{
+        private parentNode: SVGSVGElement;
+
+        private crossA: CrossElement; 
+        private nextPoint: Snap.Element;
+        private nextSegment: Snap.Element;
+
+        private pointsGroup: Snap.Element;
+        private polyline: Snap.Element;
+
+        private points: Array<Point2D>;
+        private lastPoint: Point2D;
+
+        private pointRadius: number = 3;
+
+        constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
+            super(paper, boundRect, callbacks);
+            this.parentNode = parent;
+            
+            this.buildUIElements();
+            this.reset();
+            this.hide();
+        }
+
+        private buildUIElements() {
+            this.node = this.paper.g();
+            this.node.addClass("polylineSelector");
+
+            this.crossA = new CrossElement(this.paper, this.boundRect);
+            this.nextPoint = this.paper.circle(0, 0, this.pointRadius);
+            this.nextPoint.addClass("nextPointStyle");
+
+            this.nextSegment = this.paper.line(0, 0, 0, 0);
+            this.nextSegment.addClass("nextSegmentStyle");
+
+            this.pointsGroup = this.paper.g();
+            this.pointsGroup.addClass("polylineGroupStyle");
+
+            this.polyline = this.paper.polyline([]);
+            this.polyline.addClass("polylineStyle");
+            
+            this.node.add(this.polyline); 
+            this.node.add(this.pointsGroup); 
+            this.node.add(this.crossA.node);            
+            this.node.add(this.nextSegment);
+            this.node.add(this.nextPoint);
+                       
+
+            let listeners: Array<EventDescriptor> = [
+                {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
+                {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
+                {event: "pointerdown", listener: this.onPointerDown, base: this.nextPoint.node, bypass: false},
+                {event: "pointerup", listener: this.onPointerUp, base:  this.nextPoint.node, bypass: false},
+                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false},
+                {event: "dblclick", listener: this.onDoubleClick, base: this.nextPoint.node, bypass: false},
+                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true}
+            ];
+
+            this.subscribeToEvents(listeners);
+        }
+
+        private reset() {
+            this.points = new Array<Point2D>();
+            this.lastPoint = null;
+            let ps = this.pointsGroup.children();
+            while (ps.length > 0) {
+                ps[0].remove();
+            }
+
+            this.polyline.attr({
+                points: ""
+            })
+        }
+
+        private moveCross(cross:CrossElement, pointTo:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
+            cross.move(pointTo, this.boundRect, square, refCross);
+        }       
+        
+        private movePoint(element: Snap.Element, pointTo:IBase.IPoint2D) {
+            element.attr({
+                cx: pointTo.x,
+                cy: pointTo.y
+            })
+        }
+
+        private moveLine(element: Snap.Element, pointFrom: IBase.IPoint2D, pointTo:IBase.IPoint2D) {
+            element.attr({
+                x1: pointFrom.x,
+                y1: pointFrom.y,
+                x2: pointTo.x,
+                y2: pointTo.y
+            })
+        }
+
+        private addPoint(x: number, y: number) {
+            this.points.push(new Point2D(x, y));
+            
+            let point = this.paper.circle(x, y, this.pointRadius);
+            point.addClass("polylinePointStyle");
+            
+            this.pointsGroup.add(point);
+
+            let pointsStr = "";
+            this.points.forEach((p) => {
+                pointsStr += `${p.x},${p.y},`;
+            })
+
+            this.polyline.attr({
+                points: pointsStr.substr(0, pointsStr.length-1)
+            })
+        }
+
+        private onPointerEnter(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.show();
+            })            
+        }
+
+        private onPointerLeave(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.hide();
+            });            
+        }
+
+        private onPointerDown(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                this.show();
+                this.movePoint(this.nextPoint, this.crossA);
+                if (this.lastPoint != null) {
+                    this.moveLine(this.nextSegment, this.lastPoint, this.crossA);
+                } else {
+                    if (typeof this.callbacks.onSelectionBegin === "function") {
+                        this.callbacks.onSelectionBegin();
+                        this.moveLine(this.nextSegment, this.crossA, this.crossA);
+                    }
+                }
+            });         
+        }
+
+        private onPointerUp(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                let p = new Point2D(this.crossA.x, this.crossA.y);
+                this.addPoint(p.x, p.y);
+
+                this.lastPoint = p;
+            });
+        }
+
+        private onPointerMove(e:PointerEvent) {
+            window.requestAnimationFrame(() => {
+                let rect = this.parentNode.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+
+                this.show();
+                this.moveCross(this.crossA, p);
+                this.movePoint(this.nextPoint, p);
+
+                if (this.lastPoint != null) {
+                    this.moveLine(this.nextSegment, this.lastPoint, p);
+                } else {
+                    this.moveLine(this.nextSegment, p, p);
+                }
+            });
+
+            e.preventDefault();
+        }
+
+        private onDoubleClick(e: MouseEvent) {
+            this.submitPolyline();
+            this.reset();
+        }
+
+        private submitPolyline() {
+            if (typeof this.callbacks.onSelectionEnd === "function") {
+                let box = this.polyline.getBBox();
+
+                this.callbacks.onSelectionEnd({
+                    boundRect: {
+                        x1: box.x,
+                        y1: box.y,
+                        x2: box.x2, 
+                        y2: box.y2
+                    }, 
+                    meta: {
+                        polyline: this.points
+                    }
+                });
+            }
+        }
+
+        private onKeyUp(e:KeyboardEvent) {
+            //Holding shift key enable square drawing mode
+            if (e.code === "Escape") {
+                this.submitPolyline();
+                this.reset();
+            }
+        }
+
+        public resize(width:number, height:number) {
+            super.resize(width, height);
+            this.crossA.resize(width, height);
+        }
+
+        public hide() {
+            super.hide();
+            this.crossA.hide();
+            this.nextPoint.node.setAttribute("visibility", "hidden");
+            this.nextSegment.node.setAttribute("visibility", "hidden");
+            this.polyline.node.setAttribute("visibility", "hidden");
+            this.pointsGroup.node.setAttribute("visibility", "hidden");
+        }
+
+        public show() {
+            super.show();
+            this.crossA.show();
+            this.nextPoint.node.setAttribute("visibility", "visible");
+            this.nextSegment.node.setAttribute("visibility", "visible");
+            this.polyline.node.setAttribute("visibility", "visible");
+            this.pointsGroup.node.setAttribute("visibility", "visible");
         }
     }
 
@@ -778,6 +1015,7 @@ export module CanvasTools.Selection {
         private rectSelector: RectSelector;
         private rectCopySelector: RectCopySelector;
         private pointSelector: PointSelector;
+        private polylineSelector: PolylineSelector;
 
         public callbacks: SelectorCallbacks;
 
@@ -811,11 +1049,13 @@ export module CanvasTools.Selection {
             this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
             this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), this.callbacks);
             this.pointSelector = new PointSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
+            this.polylineSelector = new PolylineSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
 
             this.selector = this.rectSelector;  
             this.rectSelector.enable();
             this.rectCopySelector.disable();      
-            this.pointSelector.disable();       
+            this.pointSelector.disable(); 
+            this.polylineSelector.disable();      
             this.selector.hide();
 
             this.areaSelectorLayer.add(this.rectSelector.node);
@@ -884,7 +1124,10 @@ export module CanvasTools.Selection {
             let wasEnabled: boolean = this.isEnabled;
             this.disable();
 
-            if (selectionMode === SelectionMode.COPYRECT) {
+            if (selectionMode === SelectionMode.NONE) {
+                return;
+            }
+            else if (selectionMode === SelectionMode.COPYRECT) {
                 this.selector = this.rectCopySelector;
                 if (options !== undefined && options.template !== undefined) {
                     this.rectCopySelector.setTemplate(options.template);
@@ -895,6 +1138,8 @@ export module CanvasTools.Selection {
                 this.selector = this.rectSelector;
             } else if (selectionMode === SelectionMode.POINT) {
                 this.selector = this.pointSelector;
+            } else if (selectionMode === SelectionMode.POLYLINE) {
+                this.selector = this.polylineSelector;
             }
 
             // restore enablement status
