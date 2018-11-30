@@ -399,18 +399,11 @@ export module CanvasTools.Region {
      * TagsElement 
      * Used internally to draw labels and map colors for the region
     */
-    class TagsElement  implements IBase.IRegionPart {
+    class TagsElement  extends RegionComponentPrototype {
         // Region size
-        public rect: IBase.IRect;
-
-        // Region position
-        public x: number;
-        public y: number;
-
         private textBox: Snap.BBox;
 
         // Elements
-        public node:Snap.Element;
         private primaryTagRect: Snap.Element;
         private primaryTagText: Snap.Element;
         private primaryTagTextBG: Snap.Element;
@@ -424,19 +417,16 @@ export module CanvasTools.Region {
         // Styling
         private styleId: string;
         private styleSheet: CSSStyleSheet = null;
-        private paper: Snap.Paper;
         private tagsUpdateOptions: TagsUpdateOptions;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, tags: Tags.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
-            //this.tags = tags;
-            this.rect = rect;
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect, tags: Tags.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
+            super(paper, paperRect);
+            this.boundRect = rect;
             this.x = x;
             this.y = y;
 
-
             this.styleId = styleId;
             this.styleSheet = styleSheet;
-            this.paper = paper;
             
             this.tagsUpdateOptions = tagsUpdateOptions;
 
@@ -447,7 +437,7 @@ export module CanvasTools.Region {
             this.node = paper.g();
             this.node.addClass("tagsLayer");    
             
-            this.primaryTagRect = paper.rect(0, 0, this.rect.width, this.rect.height);
+            this.primaryTagRect = paper.rect(0, 0, this.boundRect.width, this.boundRect.height);
             this.primaryTagRect.addClass("primaryTagRectStyle");
 
             this.primaryTagText = paper.text(0, 0, "");
@@ -499,7 +489,7 @@ export module CanvasTools.Region {
                         this.primaryTagText.node.innerHTML = this.tags.primary.name;
                         this.textBox = this.primaryTagText.getBBox();
                     }
-                    let showTextLabel = (this.textBox.width + 10 <= this.rect.width) && (this.textBox.height <= this.rect.height);
+                    let showTextLabel = (this.textBox.width + 10 <= this.boundRect.width) && (this.textBox.height <= this.boundRect.height);
                     if (showTextLabel) {
 
                         window.requestAnimationFrame(() => {
@@ -517,8 +507,8 @@ export module CanvasTools.Region {
                     } else {
                         window.requestAnimationFrame(() => {
                             this.primaryTagTextBG.attr({
-                                width: Math.min(10, this.rect.width),
-                                height: Math.min(10, this.rect.height)                    
+                                width: Math.min(10, this.boundRect.width),
+                                height: Math.min(10, this.boundRect.height)                    
                             });
                             this.primaryTagText.attr({
                                 x: this.x + 5,
@@ -541,7 +531,7 @@ export module CanvasTools.Region {
                         let tagel = this.paper.circle(x, y, r);    */                     
 
                         let s = 6;
-                        let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * s - s / 2;
+                        let x = this.x + this.boundRect.width / 2 + (2 * i - length + 1) * s - s / 2;
                         let y = this.y - s - 5;
                         let tagel = this.paper.rect(x, y, s, s);
 
@@ -683,12 +673,11 @@ export module CanvasTools.Region {
             }            
         }
 
-        public move(p: IBase.IPoint2D) {           
-            this.x = p.x;
-            this.y = p.y;
+        public move(p: IBase.IPoint2D) {  
+            super.move(p);
 
             let size = 6;
-            let cx = this.x + 0.5 * this.rect.width;
+            let cx = this.x + 0.5 * this.boundRect.width;
             let cy = this.y - size - 5;
 
             window.requestAnimationFrame(() => {
@@ -722,8 +711,7 @@ export module CanvasTools.Region {
         }
 
         public resize(width: number, height: number){
-            this.rect.width = width;
-            this.rect.height = height;
+            super.resize(width, height);
 
             window.requestAnimationFrame(() => {
                 this.primaryTagRect.attr({
@@ -733,62 +721,24 @@ export module CanvasTools.Region {
             })            
             this.redrawTagLabels();
         }
-
-        // IHideable -> hide()
-        public hide() {
-            window.requestAnimationFrame(() => {
-                this.node.attr({
-                    visibility: 'hidden'
-                });
-            });            
-        }
-
-        // IHideable -> show()
-        public show() {
-            window.requestAnimationFrame(() => {
-                this.node.attr({
-                    visibility: 'visible'
-                });
-            });            
-        }
     } 
 
     /*
      * DragElement 
      * Used internally to drag the region
     */
-    class DragElement implements IBase.IRegionPart {
-        // Region size
-        public rect: IBase.IRect;
-
-        // Region position
-        public x: number;
-        public y: number;
-
-        // Drag rect
-        public node: Snap.Element;
+    class DragElement extends RegionComponentPrototype {
         private dragRect: Snap.Element;
         private isDragged: boolean = false;
-
-        // Bounding box
-        private boundRect: IBase.IRect;
 
         // Change Notifier
         private onChange: ChangeFunction;
 
-        // Drag state
-        private isFrozen: boolean = false;
-
-        // Manipulation notifiers
-        public onManipulationBegin: ManipulationFunction;
-        public onManipulationEnd: ManipulationFunction;
-
-        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, boundRect:IBase.IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction){
-            this.rect = rect;
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction){
+            super(paper, paperRect);
             this.x = x;
             this.y = y;
-
-            this.boundRect = boundRect;
+            this.boundRect = rect;
             
             if (onChange !== undefined) {
                 this.onChange = onChange;
@@ -802,22 +752,21 @@ export module CanvasTools.Region {
             }
 
             this.buildOn(paper);
-            this.subscribeToEvents();
+            this.subscribeToDragEvents();
         }
 
         private buildOn(paper:Snap.Paper){
             this.node = paper.g();
             this.node.addClass("dragLayer");    
             
-            this.dragRect = paper.rect(0, 0, this.rect.width, this.rect.height);
+            this.dragRect = paper.rect(0, 0, this.boundRect.width, this.boundRect.height);
             this.dragRect.addClass("dragRectStyle");
 
             this.node.add(this.dragRect);
         }
 
-        public move(p: IBase.IPoint2D) {           
-            this.x = p.x;
-            this.y = p.y;
+        public move(p: IBase.IPoint2D) {    
+            super.move(p);
             window.requestAnimationFrame(() => {
                 this.dragRect.attr({
                     x: p.x,
@@ -827,8 +776,7 @@ export module CanvasTools.Region {
         }
 
         public resize(width: number, height: number){
-            this.rect.width = width;
-            this.rect.height = height;
+            super.resize(width, height);
 
             window.requestAnimationFrame(() => {
                 this.dragRect.attr({
@@ -838,7 +786,7 @@ export module CanvasTools.Region {
             });            
         }
 
-        // IHideable -> hide()
+        /* // IHideable -> hide()
         public hide() {
             window.requestAnimationFrame(() => {
                 this.dragRect.attr({
@@ -855,7 +803,7 @@ export module CanvasTools.Region {
                     visibility: 'visible'
                 });
             });            
-        }
+        } */
 
         private dragOrigin: Point2D;
 
@@ -867,20 +815,20 @@ export module CanvasTools.Region {
             if (dx != 0 && dy != 0) {
                 let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
 
-                if (this.boundRect !== null) {                
-                    p = p.boundToRect(this.boundRect);
+                if (this.paperRect !== null) {                
+                    p = p.boundToRect(this.paperRect);
                 }
                 //this.move(p);            
-                this.onChange(p.x, p.y, this.rect.width, this.rect.height, ChangeEventType.MOVING);
+                this.onChange(p.x, p.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVING);
             }
         };
 
         private rectDragEnd() {
             this.dragOrigin = null;
-            this.onChange(this.x, this.y, this.rect.width, this.rect.height, ChangeEventType.MOVEEND);
+            this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEEND);
         }
 
-        private subscribeToEvents() {
+        private subscribeToDragEvents() {
             this.dragRect.node.addEventListener("pointerenter", (e) => {
                 if (!this.isFrozen) {
                     this.dragRect.undrag();
@@ -910,7 +858,7 @@ export module CanvasTools.Region {
                 if (!this.isFrozen) {
                     this.dragRect.node.setPointerCapture(e.pointerId);  
                     let multiselection = e.shiftKey;
-                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, ChangeEventType.MOVEBEGIN, multiselection);
+                    this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEBEGIN, multiselection);
                 }
             });
 
@@ -918,25 +866,15 @@ export module CanvasTools.Region {
                 if (!this.isFrozen) {
                     this.dragRect.node.releasePointerCapture(e.pointerId);
                     let multiselection = e.shiftKey;
-                    this.onChange(this.x, this.y, this.rect.width, this.rect.height, ChangeEventType.SELECTIONTOGGLE, multiselection);
+                    this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.SELECTIONTOGGLE, multiselection);
                 }
             });
         }
 
         public freeze() {
-            if (!this.isFrozen) {
-                this.isFrozen = true;
-
-                this.dragRect.undrag();
-                this.isDragged = false;
-                this.onManipulationEnd();
-            }            
-        }
-
-        public unfreeze() {
-            if (this.isFrozen) {
-                this.isFrozen = false;
-            }            
+            super.freeze();
+            this.dragRect.undrag();
+            this.onManipulationEnd();            
         }
     }
 
@@ -1256,7 +1194,7 @@ export module CanvasTools.Region {
 
             this.anchorsNode = new AnchorsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
             this.dragNode = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.tagsNode = new TagsElement(paper, this.x, this.y, this.rect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+            this.tagsNode = new TagsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
             
             this.toolTip = Snap.parse(`<title>${(this.tags !== null)?this.tags.toString():""}</title>`);
             this.node.append(<any>this.toolTip);
@@ -1508,26 +1446,28 @@ export module CanvasTools.Region {
                 }
             });
             window.addEventListener("keydown", (e) => {
-                if (!this.isFrozen) {
-                    switch (e.code) {
-                        // ctrl + A, ctrl + a
-                        case "KeyA":
-                        case "Numpad1":
-                            if (e.ctrlKey) {
-                                this.selectAllRegions();
-                            }
-                            break;
-                            // ctrl + B, ctrl + b
-                            case "KeyB":
-                            if (e.ctrlKey) {
-                                this.toggleBackground();                 
-                            }
-                            break;
-                        // default
-                        default: return ;
-                    }
-                    //e.preventDefault(); 
-                }                
+                if (!(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLSelectElement)) {
+                    if (!this.isFrozen) {
+                        switch (e.code) {
+                            // ctrl + A, ctrl + a
+                            case "KeyA":
+                            case "Numpad1":
+                                if (e.ctrlKey) {
+                                    this.selectAllRegions();
+                                }
+                                break;
+                                // ctrl + B, ctrl + b
+                                case "KeyB":
+                                if (e.ctrlKey) {
+                                    this.toggleBackground();                 
+                                }
+                                break;
+                            // default
+                            default: return ;
+                        }
+                        //e.preventDefault(); 
+                    }        
+                }        
             });
         }
 
