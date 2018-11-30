@@ -833,7 +833,7 @@ export module CanvasTools.Selection {
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
                 {event: "pointerdown", listener: this.onPointerDown, base: this.nextPoint.node, bypass: false},
-                {event: "pointerup", listener: this.onPointerUp, base:  this.nextPoint.node, bypass: false},
+                {event: "click", listener: this.onClick, base:  this.nextPoint.node, bypass: false},
                 {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false},
                 {event: "dblclick", listener: this.onDoubleClick, base: this.nextPoint.node, bypass: false},
                 {event: "keyup", listener: this.onKeyUp, base: window, bypass: true}
@@ -848,7 +848,8 @@ export module CanvasTools.Selection {
             let ps = this.pointsGroup.children();
             while (ps.length > 0) {
                 ps[0].remove();
-            }
+                ps = this.pointsGroup.children();
+            }            
 
             this.polyline.attr({
                 points: ""
@@ -907,26 +908,23 @@ export module CanvasTools.Selection {
 
         private onPointerDown(e:PointerEvent) {
             window.requestAnimationFrame(() => {
-                this.show();
-                this.movePoint(this.nextPoint, this.crossA);
-                if (this.lastPoint != null) {
-                    this.moveLine(this.nextSegment, this.lastPoint, this.crossA);
-                } else {
+                if (this.lastPoint == null) {                   
                     if (typeof this.callbacks.onSelectionBegin === "function") {
                         this.callbacks.onSelectionBegin();
-                        this.moveLine(this.nextSegment, this.crossA, this.crossA);
                     }
                 }
             });         
         }
 
-        private onPointerUp(e:PointerEvent) {
-            window.requestAnimationFrame(() => {
-                let p = new Point2D(this.crossA.x, this.crossA.y);
-                this.addPoint(p.x, p.y);
-
-                this.lastPoint = p;
-            });
+        private onClick(e:MouseEvent) {
+            if (e.detail <= 1) {
+                window.requestAnimationFrame(() => {
+                    let p = new Point2D(this.crossA.x, this.crossA.y);
+                    this.addPoint(p.x, p.y);
+    
+                    this.lastPoint = p;
+                });
+            }
         }
 
         private onPointerMove(e:PointerEvent) {
@@ -950,7 +948,7 @@ export module CanvasTools.Selection {
 
         private onDoubleClick(e: MouseEvent) {
             this.submitPolyline();
-            this.reset();
+            console.log("dblclick");
         }
 
         private submitPolyline() {
@@ -969,13 +967,13 @@ export module CanvasTools.Selection {
                     }
                 });
             }
+            this.reset();
         }
 
         private onKeyUp(e:KeyboardEvent) {
             //Holding shift key enable square drawing mode
-            if (e.code === "Escape") {
+            if (e.code === "Escape" || e.code === "Space") {
                 this.submitPolyline();
-                this.reset();
             }
         }
 
