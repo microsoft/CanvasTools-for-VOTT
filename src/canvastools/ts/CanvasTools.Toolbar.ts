@@ -198,16 +198,18 @@ export module CanvasTools.Toolbar {
 
             if (icon.keycode !== undefined) {
                 window.addEventListener("keyup", (e) => {
-                    if (this.areHotKeysEnabled) {
-                        if (e.code === icon.keycode && !e.ctrlKey && !e.altKey) {
-                            if (!icon.isSwitch) {
-                                this.select(icon.action);
-                            } else {
-                                iconElement.toggleOnKey();
+                    if (!(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLSelectElement)) {
+                        if (this.areHotKeysEnabled) {
+                            if (e.code === icon.keycode && !e.ctrlKey && !e.altKey) {
+                                if (!icon.isSwitch) {
+                                    this.select(icon.action);
+                                } else {
+                                    iconElement.toggleOnKey();
+                                }
+                                actor(icon.action);
                             }
-                            actor(icon.action);
-                        }
-                    }                    
+                        } 
+                    }                                       
                 });
             }
         }
