@@ -236,7 +236,7 @@ svg:not(:root) .menuLayer {
 }
 
 .pointSelector .pointStyle {
-    stroke-width:3;
+    stroke-width:2;
     stroke: rgba(21, 127, 240, 1.0);
     fill: transparent;
     pointer-events: none; 
