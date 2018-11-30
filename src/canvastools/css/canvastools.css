@@ -237,7 +237,7 @@ svg:not(:root) .menuLayer {
 
 .pointSelector .pointStyle {
     stroke-width:3;
-    stroke: rgba(0, 247, 247, 0.5);
+    stroke: rgba(21, 127, 240, 1.0);
     fill: transparent;
     pointer-events: none; 
 }
@@ -245,12 +245,12 @@ svg:not(:root) .menuLayer {
 .polylineSelector .polylineStyle {
     fill: transparent;
     stroke-width: 2px;
-    stroke:  rgba(0, 247, 247, 0.5);
+    stroke:  rgba(21, 127, 240, 0.5);
     pointer-events: none;
 }
 
 .polylineSelector .polylinePointStyle {
-    fill:  rgba(0, 247, 247, 0.5);
+    fill:  rgba(21, 127, 240, 1.0);
     stroke-width: 0;
     pointer-events: none;
 }
@@ -258,13 +258,13 @@ svg:not(:root) .menuLayer {
 .polylineSelector .nextSegmentStyle {
     stroke-width:2;
     stroke-dasharray: 3 3;
-    stroke: rgba(0, 128, 128, 0.5);
+    stroke: rgba(21, 127, 240, 1.0);
     pointer-events: none;
 }
 .polylineSelector .nextPointStyle {
     stroke-width:2;
     r: 6px;
-    stroke: rgba(0, 128, 128, 0.5);
+    stroke: rgba(21, 127, 240, 1.0);
     fill: transparent;
 }
 
@@ -297,10 +297,18 @@ svg:not(:root) .menuLayer {
     stroke: #333;
 }
 .iconStyle.switch.selected .iconImageStyle * {
-    stroke: rgb(111, 238, 255);
+    stroke: rgb(14, 186, 253);
     stroke-width: 1.5;
 }
 
 .iconStyle.switch.selected .iconBGRectStyle {
     fill: transparent;
+}
+
+.iconStyle .iconImageStyle .accent-f {
+    fill: rgba(21, 127, 240, 1.0);
+}
+
+.iconStyle .iconImageStyle .accent-s {
+    stroke: rgba(21, 127, 240, 1.0);
 }
