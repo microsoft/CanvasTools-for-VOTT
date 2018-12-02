@@ -6,6 +6,7 @@ import CTBasePoint = require("./Base/CanvasTools.Base.Point2D");
 import Point2D = CTBasePoint.CanvasTools.Base.Point.Point2D;
 
 import * as Snap from "snapsvg";
+import { deflate } from "zlib";
 
 export module CanvasTools.Selection {    
     
@@ -200,7 +201,7 @@ export module CanvasTools.Selection {
 
     type EventDescriptor = {
         event: string, 
-        listener: (e:PointerEvent|MouseEvent|KeyboardEvent) => void, 
+        listener: (e:PointerEvent|MouseEvent|KeyboardEvent|WheelEvent) => void, 
         base: SVGSVGElement | HTMLElement | Window, 
         bypass: boolean
     };
@@ -559,7 +560,8 @@ export module CanvasTools.Selection {
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
                 {event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false},
                 {event: "pointerup", listener: this.onPointerUp, base: this.parentNode, bypass: false},
-                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false}
+                {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false},
+                {event: "wheel", listener: this.onWheel, base: this.parentNode, bypass: false},
             ];
 
             this.subscribeToEvents(listeners);
@@ -637,6 +639,29 @@ export module CanvasTools.Selection {
             });
 
             e.preventDefault();
+        }
+
+        private onWheel(e:WheelEvent) {
+            if (e.shiftKey) {
+                window.requestAnimationFrame(() => {
+                    let width = this.copyRect.width;
+                    let height = this.copyRect.height;
+
+                    if (e.deltaY > 0) {
+                        width *= 1.1;
+                        height *= 1.1;
+                    } else {
+                        width /= 1.1;
+                        height /= 1.1;
+                    }
+
+                    console.log(e.deltaY);
+
+                    this.copyRect.resize(width, height);
+                    this.copyRectEl.resize(width, height);
+                    this.moveCopyRect(this.copyRectEl, this.crossA);
+                });
+            }            
         }
 
         public resize(width:number, height:number) {

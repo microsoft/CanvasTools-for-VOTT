@@ -77,22 +77,16 @@
                         Math.floor(Math.random() * 360.0));
                     var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
                     rm.addRegion((regionId++).toString(), { x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 }, tags);
-                },
-                onLocked: () => {
-                    rm.freeze();
-                },
-                onUnlocked: () => {
-                    rm.unfreeze();
                 }
             }
             
         );
 
         rm.onManipulationEnd = () => {
-            selector.enable();
+            selector.show();
         };
         rm.onManipulationBegin = () => {
-            selector.disable();
+            selector.hide();
         };
 
         // create toolbar
@@ -172,7 +166,7 @@
         };
 
         toolbar.addSwitch(selectionLockIcon, (action) => {
-            selector.toggleLockState();
+            regionsManager.toggleFreezeMode();
         });  
 
         toolbar.setSwitch("selection-lock", false);
