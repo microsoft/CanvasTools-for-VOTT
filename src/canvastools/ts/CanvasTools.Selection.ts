@@ -1019,6 +1019,7 @@ export module CanvasTools.Selection {
         public callbacks: SelectorCallbacks;
 
         private isEnabled: boolean = true;
+        private isVisible: boolean = true;
         public static DefaultTemplateSize: Rect = new Rect(20, 20);
 
         constructor(svgHost: SVGSVGElement, callbacks?: SelectorCallbacks){
@@ -1059,6 +1060,7 @@ export module CanvasTools.Selection {
             this.areaSelectorLayer.add(this.rectSelector.node);
             this.areaSelectorLayer.add(this.rectCopySelector.node);
             this.areaSelectorLayer.add(this.pointSelector.node);
+            this.areaSelectorLayer.add(this.polylineSelector.node);
         }
 
         public resize(width:number, height:number):void {
@@ -1108,6 +1110,16 @@ export module CanvasTools.Selection {
             }
         }
 
+        public show() {
+            this.enable();
+            this.isVisible = true;
+        }
+
+        public hide() {
+            this.disable();
+            this.isVisible = false;
+        }
+
         public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
             let wasEnabled: boolean = this.isEnabled;
             this.disable();
@@ -1132,11 +1144,12 @@ export module CanvasTools.Selection {
             }
 
             // restore enablement status
-            if (wasEnabled) {
-                this.enable();
+            this.enable();          
+            if (this.isVisible) {
+                this.show();
             } else {
-                this.disable();
-            }            
+                this.hide();
+            }
         }
 
         protected enablify(f:Function, bypass:boolean = false) {
