@@ -35,7 +35,7 @@ export module CanvasTools.Toolbar {
         constructor(paper: Snap.Paper, icon?: IconDescription) {
             this.paper = paper;       
             
-            if (icon !== undefined) {
+            if (icon !== undefined && icon !== null) {
                 this.description = icon;
                 if (icon.width !== undefined) {
                     this.width = icon.width;
@@ -138,8 +138,7 @@ export module CanvasTools.Toolbar {
         }
 
         public move(x: number, y: number) {
-            this.x = x;
-            this.y = y;
+            super.move(x, y);
             this.iconBackgrounRect.attr({ x: x, y: y });
             if (this.iconImageSVG !== undefined) {
                 this.iconImageSVG.attr({ x: x, y: y });
@@ -164,6 +163,7 @@ export module CanvasTools.Toolbar {
     export class ToolbarSwitchIcon extends ToolbarIconPrototype {
         public onAction: IconCallback;
 
+        private iconBackgrounRect: Snap.Element;
         private iconImage: Snap.Element;
         private iconImageSVG: Snap.Element;
 
@@ -178,6 +178,9 @@ export module CanvasTools.Toolbar {
             this.node = this.paper.g();
             this.node.addClass("iconStyle");
             this.node.addClass("switch");
+
+            this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
+            this.iconBackgrounRect.addClass("iconBGRectStyle");
 
             this.iconImage = this.paper.g();
             if (this.description.iconUrl !== undefined) {
@@ -200,6 +203,7 @@ export module CanvasTools.Toolbar {
 
             let title = Snap.parse(`<title>${this.description.tooltip}</title>`);
             
+            this.node.add(this.iconBackgrounRect);
             this.node.add(this.iconImage);
             this.node.append(<any>title);
 
@@ -210,8 +214,8 @@ export module CanvasTools.Toolbar {
         }
 
         public move(x: number, y: number) {
-            this.x = x;
-            this.y = y;
+            super.move(x, y);
+            this.iconBackgrounRect.attr({ x: x, y: y });
             if (this.iconImageSVG !== undefined) {
                 this.iconImageSVG.attr({ x: x, y: y });
             }            
@@ -220,6 +224,11 @@ export module CanvasTools.Toolbar {
         public resize(width: number, height: number) {
             super.resize(width, height);
 
+            this.iconBackgrounRect.attr({
+                width: this.width,
+                height: this.height
+            });
+            
             this.iconImageSVG.attr({
                 width: this.width,
                 height: this.height
@@ -227,8 +236,42 @@ export module CanvasTools.Toolbar {
         }
     }
 
-    export class ToolbarSeparator {
+    export class ToolbarSeparator extends ToolbarIconPrototype {
+        private iconSeparator: Snap.Element;
 
+        constructor(paper: Snap.Paper, width: number) {
+            super(paper, null);            
+            this.buildIconUI();
+
+            this.resize(width, 1);
+        }
+
+        private buildIconUI() {
+            this.node = this.paper.g();
+            this.node.addClass("iconStyle");
+            this.node.addClass("separator");
+
+            this.iconSeparator = this.paper.line(0, 0, this.width, 0);
+            this.node.add(this.iconSeparator);
+        }
+
+        public move(x: number, y: number) {
+            super.move(x, y);
+            this.iconSeparator.attr({ 
+                x1: x,
+                y1: y,
+                x2: x + this.width,
+                y2: y
+            });          
+        }
+
+        public resize(width: number, height: number) {
+            super.resize(width, 1);
+
+            this.iconSeparator.attr({
+                width: this.width
+            });
+        }
     }
 
     export class Toolbar {
@@ -285,7 +328,7 @@ export module CanvasTools.Toolbar {
                     this.toolbarWidth = width;
                 }
 
-                this.toolbarHeight = this.toolbarHeight + newIcon.height;
+                this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
             }
         }
 
@@ -313,24 +356,29 @@ export module CanvasTools.Toolbar {
             this.addIcon(newIcon);
         }
 
+        public addSeparator() {
+            let newIcon = new ToolbarSeparator(this.paper, ToolbarIconPrototype.IconWidth);
+            this.addIcon(newIcon);
+        }
+
         private addIcon(newIcon: ToolbarIconPrototype) {
             this.icons.push(newIcon);
             this.iconsLayer.add(newIcon.node);
 
-            newIcon.move(this.iconSpace, this.toolbarHeight - this.iconSpace);
+            newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
             this.recalculateToolbarSize(newIcon);
             this.updateToolbarSize();
         }
 
         private findIconByKeycode(keycode: string): ToolbarIconPrototype {
             return this.icons.find((icon) => {
-                return icon.description.keycode == keycode;
+                return icon.description !== null && icon.description.keycode == keycode;
             })
         }
 
         private findIconByAction(action: string): ToolbarIconPrototype {
             return this.icons.find((icon) => {
-                return icon.description.action == action;
+                return icon.description !== null && icon.description.action == action;
             })
         }
 
