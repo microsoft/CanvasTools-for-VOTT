@@ -99,33 +99,36 @@
         let toolbar = new ct.Toolbar.Toolbar(tz);
         let selectionMode = "rect-select";
 
-        let pointIcon = new ct.Toolbar.IconDescription(
-            "point-select",
-            "./images/icons/point-selection.svg",
-            "Point-selection (P)",
-            'KeyP');
-
-        toolbar.addAction(pointIcon, (action) => {
+        let pointIcon = {
+            action: "point-select",
+            iconUrl: "./images/icons/point-selection.svg",
+            tooltip: "Point-selection (P)",
+            keycode: 'KeyP'
+        }
+            
+        toolbar.addSelector(pointIcon, (action) => {
             selector.setSelectionMode(ct.Selection.SelectionMode.POINT);
         });
 
-        let rectIcon = new ct.Toolbar.IconDescription(
-            "rect-select",
-            "./images/icons/rect-selection.svg",
-            "Rectangular box (R)",
-            'KeyR');
+        let rectIcon = {
+            action: "rect-select",
+            iconUrl: "./images/icons/rect-selection.svg",
+            tooltip: "Rectangular box (R)",
+            keycode: 'KeyR'
+        };
 
-        toolbar.addAction(rectIcon, (action) => {
+        toolbar.addSelector(rectIcon, (action) => {
             selector.setSelectionMode(ct.Selection.SelectionMode.RECT);
         });        
         
-        let copyTemplateIcon = new ct.Toolbar.IconDescription(
-            "copy-select",
-            "./images/icons/copy-t-selection.svg",
-            "Template-based box (T)",
-            'KeyT');
-
-        toolbar.addAction(copyTemplateIcon, (action) => {
+        let copyTemplateIcon = {
+            action: "copy-select",
+            iconUrl: "./images/icons/copy-t-selection.svg",
+            tooltip: "Template-based box (T)",
+            keycode: 'KeyT'
+        };
+        
+        toolbar.addSelector(copyTemplateIcon, (action) => {
             let rs = rm.getSelectedRegionsBounds();
             if (rs !== undefined && rs.length > 0) {
                 let r = rs[0];
@@ -135,27 +138,29 @@
             }
         });
 
-        let polylineIcon = new ct.Toolbar.IconDescription(
-            "polyline-select",
-            "./images/icons/polyline-selection.svg",
-            "Polyline-selection (Y)",
-            'KeyY');
-
-        toolbar.addAction(polylineIcon, (action) => {
+        let polylineIcon = {
+            action: "polyline-select",
+            iconUrl: "./images/icons/polyline-selection.svg",
+            tooltip: "Polyline-selection (Y)",
+            keycode: 'KeyY'
+        };
+        
+        toolbar.addSelector(polylineIcon, (action) => {
             selector.setSelectionMode(ct.Selection.SelectionMode.POLYLINE);
         });
 
-        let selectionLockIcon = new ct.Toolbar.IconDescription(
-            "selection-lock",
-            "./images/icons/selection-lock.svg",
-            "Lock/unlock selection (L)",
-            'KeyL',
-            true);
+        let selectionLockIcon = {
+            action: "selection-lock",
+            iconUrl: "./images/icons/selection-lock.svg",
+            tooltip: "Lock/unlock selection (L)",
+            keycode: 'KeyL',
+        };
 
-        toolbar.addAction(selectionLockIcon, (action) => {
+        toolbar.addSwitch(selectionLockIcon, (action) => {
             selector.toggleLockState();
         });  
 
+        toolbar.setSwitch("selection-lock", false);
         toolbar.select("rect-select");
 
         // Upload background image for selection 

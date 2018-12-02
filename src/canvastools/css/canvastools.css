@@ -100,8 +100,8 @@
 }
 
 .anchorStyle:hover {
-    stroke: rgb(25, 119, 96);
-    fill:rgb(7, 189, 143);
+    stroke: rgb(6, 59, 116);
+    fill:rgba(21, 127, 240, 1.0);
 }
 
 .regionStyle:hover .anchorStyle {
@@ -109,7 +109,7 @@
 }
 
 .regionStyle.selected .anchorStyle {
-    stroke: rgb(7, 189, 143);
+    stroke: rgba(21, 127, 240, 1.0);
 }
 
 svg:not(:root) .menuLayer {
@@ -281,11 +281,11 @@ svg:not(:root) .menuLayer {
     fill: #666;
 }
 
-.iconStyle .iconBGRectStyle{
+.iconStyle.selector .iconBGRectStyle{
     fill: transparent;
 }
 
-.iconStyle.selected .iconBGRectStyle {
+.iconStyle.selector.selected .iconBGRectStyle {
     fill: #333;
 }
 
@@ -299,10 +299,6 @@ svg:not(:root) .menuLayer {
 .iconStyle.switch.selected .iconImageStyle * {
     stroke: rgb(14, 186, 253);
     stroke-width: 1.5;
-}
-
-.iconStyle.switch.selected .iconBGRectStyle {
-    fill: transparent;
 }
 
 .iconStyle .iconImageStyle .accent-f {

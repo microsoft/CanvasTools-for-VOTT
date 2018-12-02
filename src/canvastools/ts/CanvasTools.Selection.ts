@@ -828,6 +828,7 @@ export module CanvasTools.Selection {
             this.node.add(this.nextSegment);
             this.node.add(this.nextPoint);
                        
+            // TO FIX PointerEvents on nextPoint prevent from manipulatio of regions
 
             let listeners: Array<EventDescriptor> = [
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},

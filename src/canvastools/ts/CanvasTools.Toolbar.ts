@@ -1,63 +1,110 @@
 import * as Snap from "snapsvg";
 import * as CTBaseRect from "./Base/CanvasTools.Base.Rect";
 import Rect = CTBaseRect.CanvasTools.Base.Rect.Rect;
+import { throws } from "assert";
+import { O_NOCTTY } from "constants";
 
 export module CanvasTools.Toolbar {
     export type IconCallback = (action: string) => void;
 
-    export class IconDescription {
-        public action: string;
-        public iconUrl: string;
-        public tooltip: string;
-        public keycode: string;
-        public isSwitch: boolean;
-
-        constructor(action: string, iconUrl: string, tooltip: string, keycode: string, isSwitch:boolean = false) {
-            this.action = action;
-            this.iconUrl = iconUrl;
-            this.tooltip = tooltip;
-            this.keycode = keycode;
-            this.isSwitch = isSwitch;
-        }
+    export type IconDescription = {
+        action: string;
+        iconUrl: string;
+        tooltip: string;
+        keycode: string;
+        width: number;
+        height: number;
     }
 
-    export class ToolbarIcon {
+    abstract class ToolbarIconPrototype {
         public static IconWidth: number = 48;
         public static IconHeight: number = 48;
 
-        private actor: IconCallback;
-        private paper: Snap.Paper;
+        protected x: number;
+        protected y: number;
+        public width: number;
+        public height: number;
 
-        public iconGroup: Snap.Element;
-        public iconBackgrounRect: Snap.Element;
-        public iconImage: Snap.Element;
-        public iconImageSVG: Snap.Element;
-
-        private x: number;
-        private y: number;
+        protected paper: Snap.Paper;
 
         public description: IconDescription;
-        public isSelected: boolean = false;
-        public areHotkeysEnabled: boolean = true;
+        public node: Snap.Element;
 
-        constructor(icon: IconDescription, paper: Snap.Paper, actor: IconCallback) {
-            this.description = icon;
-            this.actor = actor;
-            this.paper = paper;
+        protected isSelected:boolean = false;
 
+        constructor(paper: Snap.Paper, icon?: IconDescription) {
+            this.paper = paper;       
+            
+            if (icon !== undefined) {
+                this.description = icon;
+                if (icon.width !== undefined) {
+                    this.width = icon.width;
+                } else {
+                    this.width = ToolbarIconPrototype.IconWidth;
+                }
+    
+                if (icon.height !== undefined) {
+                    this.height = icon.height;
+                } else {
+                    this.height = ToolbarIconPrototype.IconHeight;
+                }
+            } else {
+                this.description = null;
+                this.width = ToolbarIconPrototype.IconWidth;
+                this.height = ToolbarIconPrototype.IconHeight;
+            }
+        }
+
+        public move(x: number, y: number) {
+            this.x = x;
+            this.y = y;   
+        }
+
+        public resize(width: number, height: number) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public select() {
+            this.node.addClass("selected");
+            this.isSelected = true;
+        }
+
+        public unselect() {
+            this.node.removeClass("selected");
+            this.isSelected = false;
+        }
+
+        protected toggleSelection() {
+            if (this.isSelected) {
+                this.unselect();
+            } else {
+                this.select();
+            }
+        }
+    }
+
+    export class ToolbarSelectIcon extends ToolbarIconPrototype {
+        public onAction: IconCallback;
+
+        private iconBackgrounRect: Snap.Element;
+        private iconImage: Snap.Element;
+        private iconImageSVG: Snap.Element;
+
+        constructor(paper: Snap.Paper, icon: IconDescription, onAction: IconCallback) {
+            super(paper, icon);
+
+            this.onAction = onAction;
             this.buildIconUI();
         }
 
         private buildIconUI() {
-            this.iconGroup = this.paper.g();
-            this.iconGroup.addClass("iconStyle");
-            if (this.description.isSwitch) {
-                this.iconGroup.addClass("switch");
-            }
+            this.node = this.paper.g();
+            this.node.addClass("iconStyle");
+            this.node.addClass("selector");
 
-            this.iconBackgrounRect = this.paper.rect(0, 0, ToolbarIcon.IconWidth, ToolbarIcon.IconHeight);
+            this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
             this.iconBackgrounRect.addClass("iconBGRectStyle");
-            this.iconGroup.add(this.iconBackgrounRect);
 
             this.iconImage = this.paper.g();
             if (this.description.iconUrl !== undefined) {
@@ -68,8 +115,8 @@ export module CanvasTools.Toolbar {
                     });
                     if (this.iconImageSVG !== undefined) {
                         this.iconImageSVG.attr({
-                            width: ToolbarIcon.IconWidth,
-                            height: ToolbarIcon.IconHeight
+                            width: this.width,
+                            height: this.height
                         });
 
                         this.move(this.x, this.y);
@@ -77,13 +124,16 @@ export module CanvasTools.Toolbar {
                 });
             }
             this.iconImage.addClass("iconImageStyle");
-            this.iconGroup.add(this.iconImage);
 
             let title = Snap.parse(`<title>${this.description.tooltip}</title>`);
-            this.iconGroup.append(<any>title);
+            
+            this.node.add(this.iconBackgrounRect);
+            this.node.add(this.iconImage);
+            this.node.append(<any>title);
 
-            this.iconGroup.click((e) => {
-                this.actor(this.description.action);
+            this.node.click((e) => {
+                this.onAction(this.description.action);
+                this.select();
             })
         }
 
@@ -96,31 +146,89 @@ export module CanvasTools.Toolbar {
             }            
         }
 
-        public select() {
-            this.iconGroup.addClass("selected");
-            this.isSelected = true;
+        public resize(width: number, height: number) {
+            super.resize(width, height);
+
+            this.iconBackgrounRect.attr({
+                width: this.width,
+                height: this.height
+            });
+
+            this.iconImageSVG.attr({
+                width: this.width,
+                height: this.height
+            });
+        }
+    }
+
+    export class ToolbarSwitchIcon extends ToolbarIconPrototype {
+        public onAction: IconCallback;
+
+        private iconImage: Snap.Element;
+        private iconImageSVG: Snap.Element;
+
+        constructor(paper: Snap.Paper, icon: IconDescription, onAction: IconCallback) {
+            super(paper, icon);
+
+            this.onAction = onAction;
+            this.buildIconUI();
         }
 
-        public unselect() {
-            this.iconGroup.removeClass("selected");
-            this.isSelected = false;
-        }
+        private buildIconUI() {
+            this.node = this.paper.g();
+            this.node.addClass("iconStyle");
+            this.node.addClass("switch");
 
-        private toggleSelection() {
-            if (this.isSelected) {
-                this.unselect();
-            } else {
-                this.select();
+            this.iconImage = this.paper.g();
+            if (this.description.iconUrl !== undefined) {
+                Snap.load(this.description.iconUrl, (fragment) => {
+                    this.iconImage.append(fragment);
+                    this.iconImageSVG = this.iconImage.children().find((element) => {
+                        return (element.type === "svg");
+                    });
+                    if (this.iconImageSVG !== undefined) {
+                        this.iconImageSVG.attr({
+                            width: this.width,
+                            height: this.height
+                        });
+
+                        this.move(this.x, this.y);
+                    }                    
+                });
             }
-        }
+            this.iconImage.addClass("iconImageStyle");
 
-        public toggleOnKey() {
-            if (this.description.isSwitch) {
+            let title = Snap.parse(`<title>${this.description.tooltip}</title>`);
+            
+            this.node.add(this.iconImage);
+            this.node.append(<any>title);
+
+            this.node.click((e) => {
+                this.onAction(this.description.action);
                 this.toggleSelection();
-            } else {
-                this.select();
-            }
+            })
         }
+
+        public move(x: number, y: number) {
+            this.x = x;
+            this.y = y;
+            if (this.iconImageSVG !== undefined) {
+                this.iconImageSVG.attr({ x: x, y: y });
+            }            
+        }
+
+        public resize(width: number, height: number) {
+            super.resize(width, height);
+
+            this.iconImageSVG.attr({
+                width: this.width,
+                height: this.height
+            });
+        }
+    }
+
+    export class ToolbarSeparator {
+
     }
 
     export class Toolbar {
@@ -136,12 +244,12 @@ export module CanvasTools.Toolbar {
         private toolbarWidth: number;
         private toolbarHeight: number;
 
-        private icons: Array<ToolbarIcon>;
+        private icons: Array<ToolbarIconPrototype>;
 
         private areHotKeysEnabled: boolean = true;
 
         constructor(svgHost: SVGSVGElement){
-            this.icons = new Array<ToolbarIcon>();
+            this.icons = new Array<ToolbarIconPrototype>();
 
             this.buildUIElements(svgHost);
         }
@@ -164,11 +272,21 @@ export module CanvasTools.Toolbar {
             this.iconsLayer.addClass("iconsLayerStyle");
             toolbarGroup.add(this.iconsLayer);
             
+            this.subscribeToKeyboardEvents();
         }
 
-        private recalculateToolbarSize() {
-            this.toolbarWidth = ToolbarIcon.IconWidth + 2 * this.iconSpace;
-            this.toolbarHeight = this.icons.length * (ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+        private recalculateToolbarSize(newIcon?: ToolbarIconPrototype) {
+            if (newIcon == undefined) {
+                this.toolbarWidth = ToolbarIconPrototype.IconWidth + 2 * this.iconSpace;
+                this.toolbarHeight = this.icons.length * (ToolbarIconPrototype.IconHeight + this.iconSpace) + this.iconSpace;
+            } else {
+                let width = newIcon.width + 2 * this.iconSpace;
+                if (width > this.toolbarWidth) {
+                    this.toolbarWidth = width;
+                }
+
+                this.toolbarHeight = this.toolbarHeight + newIcon.height;
+            }
         }
 
         private updateToolbarSize() {
@@ -178,53 +296,77 @@ export module CanvasTools.Toolbar {
             });
         }
 
-        public addAction(icon: IconDescription, actor: IconCallback, keyCode?: string) {
-            let iconElement = new ToolbarIcon(icon, this.paper, (action) => {
-                if (!icon.isSwitch) {
-                    this.select(action);
-                } else {
-                    iconElement.toggleOnKey();
-                }                
+        public addSelector(icon: IconDescription, actor: IconCallback) {
+            let newIcon = new ToolbarSelectIcon(this.paper, icon, (action) => {
+                this.select(action);
                 actor(action);
             });
 
-            this.icons.push(iconElement);
-            this.iconsLayer.add(iconElement.iconGroup);
+            this.addIcon(newIcon);
+        }
 
-            iconElement.move(this.iconSpace, (this.icons.length - 1) * (ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace)
+        public addSwitch(icon: IconDescription, actor: IconCallback) {
+            let newIcon = new ToolbarSwitchIcon(this.paper, icon, (action) => {
+                actor(action);
+            });
 
-            this.recalculateToolbarSize();
+            this.addIcon(newIcon);
+        }
+
+        private addIcon(newIcon: ToolbarIconPrototype) {
+            this.icons.push(newIcon);
+            this.iconsLayer.add(newIcon.node);
+
+            newIcon.move(this.iconSpace, this.toolbarHeight - this.iconSpace);
+            this.recalculateToolbarSize(newIcon);
             this.updateToolbarSize();
+        }
 
-            if (icon.keycode !== undefined) {
-                window.addEventListener("keyup", (e) => {
-                    if (!(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLSelectElement)) {
-                        if (this.areHotKeysEnabled) {
-                            if (e.code === icon.keycode && !e.ctrlKey && !e.altKey) {
-                                if (!icon.isSwitch) {
-                                    this.select(icon.action);
-                                } else {
-                                    iconElement.toggleOnKey();
-                                }
-                                actor(icon.action);
-                            }
-                        } 
-                    }                                       
-                });
-            }
+        private findIconByKeycode(keycode: string): ToolbarIconPrototype {
+            return this.icons.find((icon) => {
+                return icon.description.keycode == keycode;
+            })
+        }
+
+        private findIconByAction(action: string): ToolbarIconPrototype {
+            return this.icons.find((icon) => {
+                return icon.description.action == action;
+            })
+        }
+
+        private subscribeToKeyboardEvents() {
+            window.addEventListener("keyup", (e) => {
+                if (!(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLSelectElement)) {
+                    if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
+                        let icon = this.findIconByKeycode(e.code);
+                        if (icon !== undefined) {
+                            if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon) {
+                                icon.onAction(icon.description.action);
+                            } 
+                        }
+                    } 
+                } 
+            });
         }
 
         public select(action: string) {
             this.icons.forEach((icon) => {
-                if (!icon.description.isSwitch) {
+                if (icon instanceof ToolbarSelectIcon) {
                     if (icon.description.action !== action) {
                         icon.unselect();
                     } else {
                         icon.select();
-                    }
-                }                
+                    }             
+                }
             });
+        }
 
+        public setSwitch(action: string, on: boolean) {
+            let switchIcon:ToolbarIconPrototype = this.findIconByAction(action);
+
+            if (switchIcon !== undefined && switchIcon instanceof ToolbarSwitchIcon) {
+                (on)? switchIcon.select() : switchIcon.unselect();
+            }
         }
 
         public enableHotkeys() {
