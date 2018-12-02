@@ -1035,7 +1035,6 @@ export module CanvasTools.Selection {
             }
 
             this.buildUIElements();
-            this.subscribeToEvents();
         }
 
         private buildUIElements() {
@@ -1071,52 +1070,42 @@ export module CanvasTools.Selection {
                 this.boundRect.resize(this.parentNode.width.baseVal.value, this.parentNode.height.baseVal.value);
             }
 
-            this.selector.resize(width, height);
-        }
-
-        private onKeyUp(e:KeyboardEvent) {
-            // L key to lock/unlock selection to allow adding new regions on top of others
-            /* if (this.isEnabled) {
-                if(e.code === 'KeyL') {
-                    this.toggleLockState();
-                } 
-                //Escape to exit exclusive mode
-                if(e.keyCode == 27) {
-                    this.unlock();
-                }
-            }   */          
-        }
-
-        private subscribeToEvents() {
-            let listeners = [
-                {event: "keyup", listener: this.onKeyUp, base: window, bypass: true},
-            ];
-
-            listeners.forEach(e => {
-                e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));            
-            });
+            if (this.selector !== null) {
+                this.selector.resize(width, height);
+            }
         }
 
         public toggleLockState() {
-            this.selector.toggleLockState();
+            if (this.selector !== null) {
+                this.selector.toggleLockState();
+            }            
         }
 
         public lock() {
-            this.selector.lock();
+            if (this.selector !== null) {
+                this.selector.lock();
+            }
         }
 
         public unlock() {
-            this.selector.unlock();
+            if (this.selector !== null) {
+                this.selector.unlock();
+            }
         }
 
         public enable() {
-            this.selector.enable();
-            this.isEnabled = true;
+            if (this.selector !== null) {
+                this.selector.enable();
+                this.isEnabled = true;
+                this.selector.resize(this.boundRect.width, this.boundRect.height);
+            }
         }
 
         public disable() {
-            this.selector.disable();
-            this.isEnabled = false;
+            if (this.selector !== null) {
+                this.selector.disable();
+                this.isEnabled = false;
+            }
         }
 
         public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
@@ -1124,6 +1113,7 @@ export module CanvasTools.Selection {
             this.disable();
 
             if (selectionMode === SelectionMode.NONE) {
+                this.selector = null;
                 return;
             }
             else if (selectionMode === SelectionMode.COPYRECT) {

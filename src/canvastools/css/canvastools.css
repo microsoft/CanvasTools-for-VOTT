@@ -281,6 +281,10 @@ svg:not(:root) .menuLayer {
     fill: #666;
 }
 
+.iconStyle {
+    pointer-events: all;
+}
+
 .iconStyle.selector .iconBGRectStyle{
     fill: transparent;
 }
@@ -293,9 +297,15 @@ svg:not(:root) .menuLayer {
     stroke: #fff;
 }
 
+
+.iconStyle.switch .iconBGRectStyle{
+    fill: transparent;
+}
+
 .iconStyle.switch .iconImageStyle * {
     stroke: #333;
 }
+
 .iconStyle.switch.selected .iconImageStyle * {
     stroke: rgb(14, 186, 253);
     stroke-width: 1.5;
@@ -307,4 +317,9 @@ svg:not(:root) .menuLayer {
 
 .iconStyle .iconImageStyle .accent-s {
     stroke: rgba(21, 127, 240, 1.0);
+}
+
+.iconStyle.separator line {
+    stroke: #333;
+    stroke-width: 0.5px;
 }

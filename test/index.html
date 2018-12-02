@@ -97,7 +97,20 @@
 
         // create toolbar
         let toolbar = new ct.Toolbar.Toolbar(tz);
-        let selectionMode = "rect-select";
+        
+
+        let noneIcon = {
+            action: "none-select",
+            iconUrl: "./images/icons/none-selection.svg",
+            tooltip: "Regions Manipulation (M)",
+            keycode: 'KeyM'
+        }
+            
+        toolbar.addSelector(noneIcon, (action) => {
+            selector.setSelectionMode(ct.Selection.SelectionMode.NONE);
+        });
+
+        toolbar.addSeparator();
 
         let pointIcon = {
             action: "point-select",
@@ -149,10 +162,12 @@
             selector.setSelectionMode(ct.Selection.SelectionMode.POLYLINE);
         });
 
+        toolbar.addSeparator();
+
         let selectionLockIcon = {
             action: "selection-lock",
             iconUrl: "./images/icons/selection-lock.svg",
-            tooltip: "Lock/unlock selection (L)",
+            tooltip: "Lock/unlock regions (L)",
             keycode: 'KeyL',
         };
 
