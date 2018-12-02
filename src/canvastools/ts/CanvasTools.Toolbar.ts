@@ -132,9 +132,13 @@ export module CanvasTools.Toolbar {
             this.node.append(<any>title);
 
             this.node.click((e) => {
-                this.onAction(this.description.action);
-                this.select();
+                this.activate();
             })
+        }
+
+        public activate() {
+            this.onAction(this.description.action);
+            this.select();
         }
 
         public move(x: number, y: number) {
@@ -208,9 +212,13 @@ export module CanvasTools.Toolbar {
             this.node.append(<any>title);
 
             this.node.click((e) => {
-                this.onAction(this.description.action);
-                this.toggleSelection();
+                this.activate();
             })
+        }
+
+        public activate() {
+            this.onAction(this.description.action);
+            this.toggleSelection();
         }
 
         public move(x: number, y: number) {
@@ -228,7 +236,7 @@ export module CanvasTools.Toolbar {
                 width: this.width,
                 height: this.height
             });
-            
+
             this.iconImageSVG.attr({
                 width: this.width,
                 height: this.height
@@ -350,7 +358,7 @@ export module CanvasTools.Toolbar {
 
         public addSwitch(icon: IconDescription, actor: IconCallback) {
             let newIcon = new ToolbarSwitchIcon(this.paper, icon, (action) => {
-                actor(action);
+                actor(action);                
             });
 
             this.addIcon(newIcon);
@@ -389,7 +397,7 @@ export module CanvasTools.Toolbar {
                         let icon = this.findIconByKeycode(e.code);
                         if (icon !== undefined) {
                             if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon) {
-                                icon.onAction(icon.description.action);
+                                icon.activate();
                             } 
                         }
                     } 

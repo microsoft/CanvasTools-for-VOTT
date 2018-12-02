@@ -1897,5 +1897,13 @@ export module CanvasTools.Region {
 
             this.isFrozen = false;
         }
+
+        public toggleFreezeMode() {
+            if (this.isFrozen) {
+                this.unfreeze();
+            } else {
+                this.freeze();
+            }
+        }
     }
 }
