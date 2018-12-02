@@ -833,10 +833,10 @@ export module CanvasTools.Selection {
             let listeners: Array<EventDescriptor> = [
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
-                {event: "pointerdown", listener: this.onPointerDown, base: this.nextPoint.node, bypass: false},
-                {event: "click", listener: this.onClick, base:  this.nextPoint.node, bypass: false},
+                {event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false},
+                {event: "click", listener: this.onClick, base:  this.parentNode, bypass: false},
                 {event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false},
-                {event: "dblclick", listener: this.onDoubleClick, base: this.nextPoint.node, bypass: false},
+                {event: "dblclick", listener: this.onDoubleClick, base: this.parentNode, bypass: false},
                 {event: "keyup", listener: this.onKeyUp, base: window, bypass: true}
             ];
 
