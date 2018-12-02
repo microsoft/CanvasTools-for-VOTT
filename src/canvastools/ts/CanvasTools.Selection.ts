@@ -973,7 +973,7 @@ export module CanvasTools.Selection {
 
         private onKeyUp(e:KeyboardEvent) {
             //Holding shift key enable square drawing mode
-            if (e.code === "Escape" || e.code === "Space") {
+            if (e.code === "Escape") {
                 this.submitPolyline();
             }
         }
