@@ -146,11 +146,11 @@ svg:not(:root) .menuLayer {
 
 /* Freezing regions */ 
 
-.regionManager.frozen .dragRectStyle, 
-.regionManager.frozen .anchorStyle.TL, 
-.regionManager.frozen .anchorStyle.BR, 
-.regionManager.frozen .anchorStyle.TR, 
-.regionManager.frozen .anchorStyle.BL {
+.regionManager.frozen .regionStyle.old .dragRectStyle, 
+.regionManager.frozen .regionStyle.old .anchorStyle.TL, 
+.regionManager.frozen .regionStyle.old .anchorStyle.BR, 
+.regionManager.frozen .regionStyle.old .anchorStyle.TR, 
+.regionManager.frozen .regionStyle.old .anchorStyle.BL {
     cursor: default; 
 }
 
