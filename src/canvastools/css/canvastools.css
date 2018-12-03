@@ -158,6 +158,20 @@ svg:not(:root) .menuLayer {
 
 .regionManager.frozen .regionStyle.old, 
 .regionManager.frozen .regionStyle.old:hover{
+    opacity: 0.5;
+}
+
+.regionManager.frozen .regionStyle.old .primaryTagRectStyle {
+    stroke-width: 1;
+    stroke-dasharray: 0 0;
+}
+
+.regionManager.frozen .regionStyle.old .anchorStyle {
+    stroke-width: 1;
+}
+
+.regionManager.frozen .regionStyle.old .primaryTagTextStyle,
+.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {
     opacity: 0.25;
 }
 
