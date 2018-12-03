@@ -144,6 +144,8 @@ svg:not(:root) .menuLayer {
     stroke: rgba(198, 198, 198, 0.8);
 }
 
+/* Freezing regions */ 
+
 .regionManager.frozen .dragRectStyle, 
 .regionManager.frozen .anchorStyle.TL, 
 .regionManager.frozen .anchorStyle.BR, 
@@ -167,7 +169,7 @@ svg:not(:root) .menuLayer {
 }
 
 .regionManager.frozen .regionStyle.old .anchorStyle {
-    stroke-width: 1;
+    display: none;
 }
 
 .regionManager.frozen .regionStyle.old .primaryTagTextStyle,
