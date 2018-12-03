@@ -1484,6 +1484,8 @@ export module CanvasTools.Region {
                 this.onManipulationBegin_local.bind(this), 
                 this.onManipulationEnd_local.bind(this),
                 this.tagsUpdateOptions);
+
+            region.area = w * h;
             region.move(new Point2D(x, y));
 
             region.onChange = this.onRegionUpdate.bind(this);
@@ -1511,7 +1513,7 @@ export module CanvasTools.Region {
             this.regionManagerLayer.add(region.node);
             this.regions.push(region);
             // Need to do a check for invalid stacking from user generated or older saved json
-            if(this.regions.length > 1 && region.area > this.regions[this.regions.length - 2].area) {   
+            if(this.regions.length > 1) {   
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
             }
@@ -1521,60 +1523,56 @@ export module CanvasTools.Region {
         // REDRAW ALL REGIONS (corrects z-order changes)
         public redrawAllRegions() {
             let sr = this.regions;
-            this.deleteAllRegions();
-            let selectedID: string = "";
-            for(var i = 0; i < sr.length; i++) {
-                this.drawRegion(sr[i].x, sr[i].y, sr[i].rect, sr[i].ID, sr[i].tags);
-                if(sr[i].isSelected) {
-                    selectedID = sr[i].ID
-                }
-            }
-            if (selectedID !== "") {
-                this.selectRegionById(selectedID);
-            }
+
+            // re-add all elements to DOM based on new order
+            window.requestAnimationFrame((e) => {
+                this.regions.forEach((region) => {
+                    let node = region.node.remove();
+                    this.regionManagerLayer.add(node);
+                });
+            })  
         }
 
         // QUICKSORT REGIONS BY AREA DESCENDING
         private sortRegionsByArea() {
-            function quickSort(arr: Array<RegionElement>, left: number, right: number){
+            function quickSort(arr: Array<RegionElement>, left: number, right: number) {
                 var pivot, partitionIndex;
-             
-             
-               if(left < right){
-                 pivot = right;
-                 partitionIndex = partition(arr, pivot, left, right);
-                 
-                //sort left and right
-                quickSort(arr, left, partitionIndex - 1);
-                quickSort(arr, partitionIndex + 1, right);
-               }
-               return arr;
-             }
 
-             function partition(arr: Array<RegionElement>, pivot: number, left: number, right: number){
+                if (left < right) {
+                    pivot = right;
+                    partitionIndex = partition(arr, pivot, left, right);
+
+                    //sort left and right
+                    quickSort(arr, left, partitionIndex - 1);
+                    quickSort(arr, partitionIndex + 1, right);
+                }
+                return arr;
+            }
+
+            function partition(arr: Array<RegionElement>, pivot: number, left: number, right: number) {
                 var pivotValue = arr[pivot].area,
                     partitionIndex = left;
-             
-                for(var i = left; i < right; i++){
-                 if(arr[i].area > pivotValue){
-                   swap(arr, i, partitionIndex);
-                   partitionIndex++;
-                 }
-               }
-               swap(arr, right, partitionIndex);
-               return partitionIndex;
-             }
 
-             function swap(arr: Array<RegionElement>, i: number, j: number){
+                for (var i = left; i < right; i++) {
+                    if (arr[i].area > pivotValue) {
+                        swap(arr, i, partitionIndex);
+                        partitionIndex++;
+                    }
+                }
+                swap(arr, right, partitionIndex);
+                return partitionIndex;
+            }
+
+            function swap(arr: Array<RegionElement>, i: number, j: number) {
                 var temp = arr[i];
                 arr[i] = arr[j];
                 arr[j] = temp;
-             }
+            }
 
-             let length = this.regions.length;
-             if(length > 1) {
+            let length = this.regions.length;
+            if (length > 1) {
                 quickSort(this.regions, 0, this.regions.length - 1);
-             }
+            }
         }
 
         // REGIONS LOOKUP
