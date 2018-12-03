@@ -10,7 +10,7 @@ import Tags = CTBaseTag.CanvasTools.Base.Tags;
 import * as Snap from "snapsvg";
 
 export module CanvasTools.Region { 
-    export type ManipulationFunction = (UIElement?: IBase.IRegionPart) => void;
+    export type ManipulationFunction = (UIElement?: RegionComponentPrototype) => void;
 
     export enum ChangeEventType { MOVEEND, MOVING, MOVEBEGIN, SELECTIONTOGGLE };
 
@@ -18,7 +18,7 @@ export module CanvasTools.Region {
 
     type EventDescriptor = {
         event: string, 
-        listener: (e:PointerEvent|MouseEvent|KeyboardEvent) => void, 
+        listener: (e:PointerEvent|MouseEvent|KeyboardEvent|WheelEvent) => void, 
         base: SVGSVGElement | HTMLElement | Window, 
         bypass: boolean
     };
@@ -27,7 +27,7 @@ export module CanvasTools.Region {
         protected paper: Snap.Paper;
         protected paperRect: IBase.IRect;
 
-        protected boundRect: IBase.IRect;
+        public boundRect: IBase.IRect;
 
         public node: Snap.Element;
 
@@ -882,14 +882,7 @@ export module CanvasTools.Region {
      * MenuElement 
      * Used internally to show actions menu for the region
     */
-   class MenuElement implements IBase.IRegionPart {
-    // Region size
-    public rect: IBase.IRect;
-
-    // Region position
-    public x: number;
-    public y: number;
-
+   class MenuElement extends RegionComponentPrototype {
     // Menu Item Size
     private menuItemSize:number = 20;
     // Menu position;
@@ -909,25 +902,13 @@ export module CanvasTools.Region {
     public menuItemsGroup: Snap.Element;
     public menuItems: Array<Snap.Element>;
 
-    // Bounding box
-    private boundRect: IBase.IRect;
-
-    // Manipulation notifiers
-    public onManipulationBegin: ManipulationFunction;
-    public onManipulationEnd: ManipulationFunction;
-
-    // Snap Paper
-    private paper: Snap.Paper;
-
     private region: RegionElement;
 
-    constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, boundRect:IBase.IRect = null, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction){
-        this.paper = paper;
-        this.rect = rect;
+    constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect = null, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction){
+        super(paper, paperRect);
+        this.boundRect = rect;
         this.x = x;
         this.y = y;
-
-        this.boundRect = boundRect;
         
         if (onManipulationBegin !== undefined) {
             this.onManipulationBegin = onManipulationBegin;
@@ -1006,11 +987,11 @@ export module CanvasTools.Region {
 
     private rearrangeMenuPosition() {
         // position menu inside
-        if (this.mh <= this.rect.height - this.dh) {
-            this.my = this.y + this.rect.height / 2 - this.mh / 2;
+        if (this.mh <= this.boundRect.height - this.dh) {
+            this.my = this.y + this.boundRect.height / 2 - this.mh / 2;
             // position menu on the right side
-            if (this.x + this.rect.width + this.mw/2 + this.dw < this.boundRect.width) {
-                this.mx = this.x + this.rect.width - this.mw/2;
+            if (this.x + this.boundRect.width + this.mw/2 + this.dw < this.paperRect.width) {
+                this.mx = this.x + this.boundRect.width - this.mw/2;
             } 
             // position menu on the left side
             else if (this.x - this.mw/2 - this.dw > 0) {
@@ -1018,19 +999,19 @@ export module CanvasTools.Region {
             }
             // position menu on the right side INSIDE 
             else {
-                this.mx = this.x + this.rect.width - this.mw - this.dw;
+                this.mx = this.x + this.boundRect.width - this.mw - this.dw;
             }
         } 
         // position menu outside
         else {
-            if (this.y + this.mh > this.boundRect.height) {
-                this.my = this.boundRect.height - this.mh - this.dw;
+            if (this.y + this.mh > this.paperRect.height) {
+                this.my = this.paperRect.height - this.mh - this.dw;
             } else {
                 this.my = this.y;            
             }
             // position menu on the right side
-            if (this.x + this.rect.width + this.mw + 2 * this.dw < this.boundRect.width) {
-                this.mx = this.x + this.rect.width + this.dw;
+            if (this.x + this.boundRect.width + this.mw + 2 * this.dw < this.paperRect.width) {
+                this.mx = this.x + this.boundRect.width + this.dw;
             } 
             // position menu on the left side
             else if (this.x - this.mw - 2 * this.dw > 0) {
@@ -1038,7 +1019,7 @@ export module CanvasTools.Region {
             }
             // position menu on the right side INSIDE 
             else {
-                this.mx = this.x + this.rect.width - this.mw - this.dw;
+                this.mx = this.x + this.boundRect.width - this.mw - this.dw;
             }
         }
     }
@@ -1047,7 +1028,7 @@ export module CanvasTools.Region {
         this.region = region;
         this.x = region.x;
         this.y = region.y;
-        this.rect = region.rect;
+        this.boundRect = region.boundRect;
         this.rearrangeMenuPosition();
 
         window.requestAnimationFrame(() => {
@@ -1058,10 +1039,8 @@ export module CanvasTools.Region {
         });        
     }
 
-    public move(p: IBase.IPoint2D) {           
-        let self = this;
-        this.x = p.x;
-        this.y = p.y;
+    public move(p: IBase.IPoint2D) {  
+        super.move(p);
 
         this.rearrangeMenuPosition();
 
@@ -1074,9 +1053,7 @@ export module CanvasTools.Region {
     }
 
     public resize(width: number, height: number){
-        let self = this;
-        this.rect.width = width;
-        this.rect.height = height;
+        super.resize(width, height);
 
         this.rearrangeMenuPosition();
 
@@ -1113,17 +1090,12 @@ export module CanvasTools.Region {
     }
 }
 
-    class RegionElement implements IBase.IHideable, IBase.IResizable{
+    class RegionElement extends RegionComponentPrototype {
         // Region size
-        public rect: IBase.IRect;
         public area: number;
 
-        // Region position
-        public x: number;
-        public y: number;
-
         // Bound rects
-        private boundRects: {host: IBase.IRect, self: IBase.IRect };
+        private paperRects: {host: IBase.IRect, actual: IBase.IRect };
 
         // Region components
         public node: Snap.Element;
@@ -1136,10 +1108,6 @@ export module CanvasTools.Region {
         // Region data
         public tags: Tags.TagsDescriptor;
 
-        // Region state        
-        public isSelected:boolean = false;
-        public isFrozen:boolean = false;
-
         // Region ID
         public ID: string;
         // Region styles
@@ -1148,23 +1116,24 @@ export module CanvasTools.Region {
         private styleSheet: CSSStyleSheet = null;
 
         // Manipulation notifiers
-        public onManipulationBegin: ManipulationFunction;
-        public onManipulationEnd: ManipulationFunction;
+        public isSelected: boolean = false;
 
         // Styling options
         private tagsUpdateOptions: TagsUpdateOptions;
 
-        constructor(paper: Snap.Paper, rect:IBase.IRect, boundRect:IBase.IRect = null, id: string, tagsDescriptor: Tags.TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
+        constructor(paper: Snap.Paper, rect:IBase.IRect, paperRect:IBase.IRect = null, id: string, tagsDescriptor: Tags.TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?:ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
+            super(paper, paperRect);
+            this.boundRect = rect;
+                        
             this.x = 0;
             this.y = 0;
-            this.rect = rect;
             this.ID = id;
             this.tags = tagsDescriptor;
 
-            if (boundRect !== null) {
-                this.boundRects = { 
-                    host: boundRect, 
-                    self: new Rect(boundRect.width - rect.width, boundRect.height - rect.height)
+            if (paperRect !== null) {
+                this.paperRects = { 
+                    host: paperRect, 
+                    actual: new Rect(paperRect.width - rect.width, paperRect.height - rect.height)
                 };
             }
 
@@ -1192,9 +1161,9 @@ export module CanvasTools.Region {
             this.node.addClass("regionStyle");
             this.node.addClass(this.styleID);
 
-            this.anchorsNode = new AnchorsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.dragNode = new DragElement(paper, this.x, this.y, this.rect, this.boundRects.self, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-            this.tagsNode = new TagsElement(paper, this.x, this.y, this.rect, this.boundRects.host, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+            this.anchorsNode = new AnchorsElement(paper, this.x, this.y, this.boundRect, this.paperRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+            this.dragNode = new DragElement(paper, this.x, this.y, this.boundRect, this.paperRects.actual, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+            this.tagsNode = new TagsElement(paper, this.x, this.y, this.boundRect, this.paperRects.host, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
             
             this.toolTip = Snap.parse(`<title>${(this.tags !== null)?this.tags.toString():""}</title>`);
             this.node.append(<any>this.toolTip);
@@ -1229,7 +1198,7 @@ export module CanvasTools.Region {
             if (this.x != x || this.y != y) {
                 this.move(new Point2D(x, y));
             }
-            if (this.rect.width != width || this.rect.height != height) {
+            if (this.boundRect.width != width || this.boundRect.height != height) {
                 this.resize(width, height);
             }            
             this.onChange(this, state, multiSelection);
@@ -1241,22 +1210,20 @@ export module CanvasTools.Region {
             this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
         }
 
-        public move(p: IBase.IPoint2D) {           
-            let self = this;
-            this.x = p.x;
-            this.y = p.y;
+        public move(p: IBase.IPoint2D) {   
+            super.move(p);
+            
             this.UI.forEach((element) => {
                 element.move(p);
             });
         }
 
         public resize(width: number, height: number){
-            this.rect.width = width;
-            this.rect.height = height;
+            super.resize(width, height);
             this.area = width * height;
 
-            this.boundRects.self.width = this.boundRects.host.width - width;
-            this.boundRects.self.height = this.boundRects.host.height - height;
+            this.paperRects.actual.width = this.paperRects.host.width - width;
+            this.paperRects.actual.height = this.paperRects.host.height - height;
 
             this.UI.forEach((element) => {
                 element.resize(width, height);
@@ -1517,6 +1484,7 @@ export module CanvasTools.Region {
             region.area = rect.height * rect.width;
             region.move(new Point2D(x, y));
             region.onChange = this.onRegionUpdate.bind(this);
+            
             region.updateTags(region.tags, this.tagsUpdateOptions);
             this.regionManagerLayer.add(region.node);
             this.regions.push(region);
@@ -1615,8 +1583,8 @@ export module CanvasTools.Region {
                     id: region.ID,
                     x: region.x,
                     y: region.y,
-                    width: region.rect.width,
-                    height: region.rect.height
+                    width: region.boundRect.width,
+                    height: region.boundRect.height
                 };
             });
             return regions;
@@ -1748,13 +1716,13 @@ export module CanvasTools.Region {
             let x: number;
             let y: number;
             if (!inverse) {
-                w = region.rect.width + Math.abs(dw);
-                h = region.rect.height + Math.abs(dh);
+                w = region.boundRect.width + Math.abs(dw);
+                h = region.boundRect.height + Math.abs(dh);
                 x = region.x + dx + (dw > 0 ? 0 : dw);
                 y = region.y + dy + (dh > 0 ? 0 : dh);
             } else {
-                w = Math.max(0, region.rect.width - Math.abs(dw));
-                h = Math.max(0, region.rect.height - Math.abs(dh));
+                w = Math.max(0, region.boundRect.width - Math.abs(dw));
+                h = Math.max(0, region.boundRect.height - Math.abs(dh));
 
                 x = region.x + dx + (dw < 0 ? 0 : dw);
                 y = region.y + dy + (dh < 0 ? 0 : dh);
@@ -1796,7 +1764,7 @@ export module CanvasTools.Region {
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
                 r.move(new Point2D(r.x * tw, r.y * th));
-                r.resize(r.rect.width * tw, r.rect.height * th);
+                r.resize(r.boundRect.width * tw, r.boundRect.height * th);
             }    
         }
 
@@ -1824,7 +1792,7 @@ export module CanvasTools.Region {
             // resizing or dragging            
             } else if (state === ChangeEventType.MOVING) {
                 if ((typeof this.onRegionMove) == "function") {
-                    this.onRegionMove(region.ID, region.x, region.y, region.rect.width, region.rect.height);
+                    this.onRegionMove(region.ID, region.x, region.y, region.boundRect.width, region.boundRect.height);
                 }   
                 this.justManipulated = true;
             // resize or drag end
