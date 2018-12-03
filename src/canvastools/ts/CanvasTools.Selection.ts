@@ -642,26 +642,43 @@ export module CanvasTools.Selection {
         }
 
         private onWheel(e:WheelEvent) {
+            let width = this.copyRect.width;
+            let height = this.copyRect.height;
+
+            let k = height/width;
+
             if (e.shiftKey) {
-                window.requestAnimationFrame(() => {
-                    let width = this.copyRect.width;
-                    let height = this.copyRect.height;
+                if (e.deltaY > 0) {
+                    width *= 1.1;
+                    height *= 1.1;
+                } else {
+                    width /= 1.1;
+                    height /= 1.1;
+                }
+            } else {
+                if (e.deltaY > 0) {
+                    width += 1.0;
+                    height += k;
+                } else {
+                    width -= 1.0;
+                    height -= k;
+                }
+            }
 
-                    if (e.deltaY > 0) {
-                        width *= 1.1;
-                        height *= 1.1;
-                    } else {
-                        width /= 1.1;
-                        height /= 1.1;
-                    }
+            if (width < 1.0) {
+                width = 1.0;
+                height = k;
+            }
+            if (height < 1.0) {
+                height = 1.0;
+                width = 1.0/k;
+            }
 
-                    console.log(e.deltaY);
-
-                    this.copyRect.resize(width, height);
-                    this.copyRectEl.resize(width, height);
-                    this.moveCopyRect(this.copyRectEl, this.crossA);
-                });
-            }            
+            window.requestAnimationFrame(() => {
+                this.copyRect.resize(width, height);
+                this.copyRectEl.resize(width, height);
+                this.moveCopyRect(this.copyRectEl, this.crossA);
+            });        
         }
 
         public resize(width:number, height:number) {
