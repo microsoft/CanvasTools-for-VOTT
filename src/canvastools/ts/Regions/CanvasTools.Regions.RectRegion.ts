@@ -312,9 +312,6 @@ export module CanvasTools.Region.RectRegion {
         }
     }
 
-    export type TagsUpdateOptions = {
-        showRegionBackground: boolean
-    };
     /*
      * TagsElement 
      * Used internally to draw labels and map colors for the region
@@ -337,9 +334,9 @@ export module CanvasTools.Region.RectRegion {
         // Styling
         private styleId: string;
         private styleSheet: CSSStyleSheet = null;
-        private tagsUpdateOptions: TagsUpdateOptions;
+        private tagsUpdateOptions: RegionBase.TagsUpdateOptions;
 
-        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect, tags: Tags.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions){
+        constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect, tags: Tags.TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: RegionBase.TagsUpdateOptions){
             super(paper, paperRect);
             this.boundRect = rect;
             this.x = x;
@@ -380,7 +377,7 @@ export module CanvasTools.Region.RectRegion {
             this.updateTags(tags, this.tagsUpdateOptions);                       
         }
 
-        public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){            
+        public updateTags(tags: Tags.TagsDescriptor, options?: RegionBase.TagsUpdateOptions){            
             let keepPrimaryText = false; // redraw by default
             if (this.tags && this.tags.primary && tags && tags.primary) {
                 keepPrimaryText = (tags.primary.name == this.tags.primary.name);
@@ -706,25 +703,6 @@ export module CanvasTools.Region.RectRegion {
             });            
         }
 
-        /* // IHideable -> hide()
-        public hide() {
-            window.requestAnimationFrame(() => {
-                this.dragRect.attr({
-                    visibility: 'hidden'
-                }); 
-            });
-            
-        }
-
-        // IHideable -> show()
-        public show() {
-            window.requestAnimationFrame(() => {
-                this.dragRect.attr({
-                    visibility: 'visible'
-                });
-            });            
-        } */
-
         private dragOrigin: Point2D;
 
         private rectDragBegin() {
@@ -798,218 +776,6 @@ export module CanvasTools.Region.RectRegion {
         }
     }
 
-    /*
-     * MenuElement 
-     * Used internally to show actions menu for the region
-    */
-   class MenuElement extends RegionBase.RegionComponentPrototype {
-    // Menu Item Size
-    private menuItemSize:number = 20;
-    // Menu position;
-    private mx: number;
-    private my: number;
-    private mw: number = this.menuItemSize + 10;
-    private mh: number = 60;
-    
-    // threshold for positioning menu inside/outside
-    private dh: number = 20;
-    // threshold for positioning menu left/right
-    private dw: number = 5;
-
-    // Menu group
-    public menuGroup: Snap.Paper;
-    public menuRect: Snap.Element;
-    public menuItemsGroup: Snap.Element;
-    public menuItems: Array<Snap.Element>;
-
-    private region: RegionBase.RegionComponentPrototype;
-
-    constructor(paper:Snap.Paper, x: number, y: number, rect:IBase.IRect, paperRect:IBase.IRect = null, onManipulationBegin?: RegionBase.ManipulationFunction, onManipulationEnd?:RegionBase.ManipulationFunction){
-        super(paper, paperRect);
-        this.boundRect = rect;
-        this.x = x;
-        this.y = y;
-        
-        if (onManipulationBegin !== undefined) {
-            this.onManipulationBegin = onManipulationBegin;
-        }
-        if (onManipulationEnd !== undefined) {
-            this.onManipulationEnd = onManipulationEnd;
-        }
-
-        this.buildOn(this.paper);
-    }
-
-    private buildOn(paper:Snap.Paper){
-        let menuSVG = this.paper.svg(this.mx, this.my, this.mw, this.mh, this.mx, this.my, this.mw, this.mh) as SVGGraphicsElement;
-
-        // Snap.Paper
-        this.menuGroup = Snap(menuSVG).paper;
-        this.menuGroup.addClass("menuLayer");
-                
-        this.rearrangeMenuPosition();
-
-        this.menuRect = this.menuGroup.rect(0, 0, this.mw, this.mh, 5, 5);
-        this.menuRect.addClass("menuRectStyle");
-
-        this.menuItemsGroup = this.menuGroup.g();
-        this.menuItemsGroup.addClass("menuItems");
-
-        this.menuItems = new Array<Snap.Element>();
-
-        this.menuGroup.add(this.menuRect);
-        this.menuGroup.add(this.menuItemsGroup);
-        //this.menuGroup.add(this.menuRect);
-        //this.menuGroup.add(this.menuItemsGroup);
-
-        this.menuGroup.mouseover((e) => {
-            this.onManipulationBegin();
-        })
-        this.menuGroup.mouseout((e) => {
-            this.onManipulationEnd();
-        })
-    }
-
-    private pathCollection = {
-        "delete": {
-            path: "M 83.4 21.1 L 74.9 12.6 L 48 39.5 L 21.1 12.6 L 12.6 21.1 L 39.5 48 L 12.6 74.9 L 21.1 83.4 L 48 56.5 L 74.9 83.4 L 83.4 74.9 L 56.5 48 Z",
-            iconSize: 96
-        }
-    }
-
-    public addAction(action: string, icon:string, actor: Function) {
-        let item = this.menuGroup.g();
-        let itemBack = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
-        itemBack.addClass("menuItemBack");
-
-        let k = (this.menuItemSize - 4) / this.pathCollection.delete.iconSize;
-        let itemIcon = this.menuGroup.path(this.pathCollection.delete.path);
-        itemIcon.transform(`scale(0.2) translate(26 26)`);
-
-        //let itemIcon = this.menuGroup.text(6, 19, "✖");
-        itemIcon.addClass("menuIcon");
-        itemIcon.addClass("menuIcon-" + icon);
-
-        let itemRect = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
-        itemRect.addClass("menuItem");
-
-        item.add(itemBack);
-        item.add(itemIcon);
-        item.add(itemRect);
-
-        item.click((e) => {
-            actor(this.region);
-        });
-
-        this.menuItemsGroup.add(item);
-        this.menuItems.push(item);
-    }
-
-    private rearrangeMenuPosition() {
-        // position menu inside
-        if (this.mh <= this.boundRect.height - this.dh) {
-            this.my = this.y + this.boundRect.height / 2 - this.mh / 2;
-            // position menu on the right side
-            if (this.x + this.boundRect.width + this.mw/2 + this.dw < this.paperRect.width) {
-                this.mx = this.x + this.boundRect.width - this.mw/2;
-            } 
-            // position menu on the left side
-            else if (this.x - this.mw/2 - this.dw > 0) {
-                this.mx = this.x - this.mw/2;
-            }
-            // position menu on the right side INSIDE 
-            else {
-                this.mx = this.x + this.boundRect.width - this.mw - this.dw;
-            }
-        } 
-        // position menu outside
-        else {
-            if (this.y + this.mh > this.paperRect.height) {
-                this.my = this.paperRect.height - this.mh - this.dw;
-            } else {
-                this.my = this.y;            
-            }
-            // position menu on the right side
-            if (this.x + this.boundRect.width + this.mw + 2 * this.dw < this.paperRect.width) {
-                this.mx = this.x + this.boundRect.width + this.dw;
-            } 
-            // position menu on the left side
-            else if (this.x - this.mw - 2 * this.dw > 0) {
-                this.mx = this.x - this.mw - this.dw;
-            }
-            // position menu on the right side INSIDE 
-            else {
-                this.mx = this.x + this.boundRect.width - this.mw - this.dw;
-            }
-        }
-    }
-
-    public attachTo(region: RegionBase.RegionComponentPrototype) {
-        this.region = region;
-        this.x = region.x;
-        this.y = region.y;
-        this.boundRect = region.boundRect;
-        this.rearrangeMenuPosition();
-
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                x: this.mx,
-                y: this.my
-            }); 
-        });        
-    }
-
-    public move(p: IBase.IPoint2D) {  
-        super.move(p);
-
-        this.rearrangeMenuPosition();
-
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                x: this.mx,
-                y: this.my
-            }); 
-        }); 
-    }
-
-    public resize(width: number, height: number){
-        super.resize(width, height);
-
-        this.rearrangeMenuPosition();
-
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                x: this.mx,
-                y: this.my
-            }); 
-        }); 
-    }
-
-    // IHideable -> hide()
-    public hide() {
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                visibility: 'hidden'
-            });
-        });
-        
-    }
-
-    // IHideable -> show()
-    public show() {
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                visibility: 'visible'
-            });
-        });        
-    }    
-
-    public showOnRegion(region:RegionBase.RegionComponentPrototype) {
-        this.attachTo(region);
-        this.show();
-    }
-}
-
     export class RectRegion extends RegionBase.RegionComponentPrototype {
         // Region size
         public area: number;
@@ -1039,9 +805,10 @@ export module CanvasTools.Region.RectRegion {
         public isSelected: boolean = false;
 
         // Styling options
-        private tagsUpdateOptions: TagsUpdateOptions;
+        private tagsUpdateOptions: RegionBase.TagsUpdateOptions;
+        public onChange: Function;
 
-        constructor(paper: Snap.Paper, rect:IBase.IRect, paperRect:IBase.IRect = null, id: string, tagsDescriptor: Tags.TagsDescriptor, onManipulationBegin?: RegionBase.ManipulationFunction, onManipulationEnd?:RegionBase.ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions){
+        constructor(paper: Snap.Paper, rect:IBase.IRect, paperRect:IBase.IRect = null, id: string, tagsDescriptor: Tags.TagsDescriptor, onManipulationBegin?: RegionBase.ManipulationFunction, onManipulationEnd?:RegionBase.ManipulationFunction, tagsUpdateOptions?: RegionBase.TagsUpdateOptions){
             super(paper, paperRect);
             this.boundRect = rect;
                         
@@ -1124,7 +891,7 @@ export module CanvasTools.Region.RectRegion {
             this.onChange(this, state, multiSelection);
         }
 
-        public updateTags(tags: Tags.TagsDescriptor, options?: TagsUpdateOptions){
+        public updateTags(tags: Tags.TagsDescriptor, options?: RegionBase.TagsUpdateOptions){
             this.tagsNode.updateTags(tags, options);
 
             this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
@@ -1149,26 +916,6 @@ export module CanvasTools.Region.RectRegion {
                 element.resize(width, height);
             });
         }
-
-        // IHideable -> hide()
-        public hide() {
-            window.requestAnimationFrame(() => {
-                this.node.attr({
-                    visibility: 'hidden'
-                });
-            });            
-        }
-
-        // IHideable -> show()
-        public show() {
-            window.requestAnimationFrame(() => {
-                this.node.attr({
-                    visibility: 'visible'
-                });
-            });            
-        }
-
-        public onChange: Function;
 
         public select() {
             this.isSelected = true;

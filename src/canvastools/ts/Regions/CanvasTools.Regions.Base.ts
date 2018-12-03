@@ -23,6 +23,10 @@ export module CanvasTools.Region.RegionBase {
         bypass: boolean
     };
 
+    export type TagsUpdateOptions = {
+        showRegionBackground: boolean
+    };
+
     export abstract class RegionComponentPrototype implements IBase.IHideable, IBase.IResizable, IBase.IMovable, IBase.IFreezable {
         protected paper: Snap.Paper;
         protected paperRect: IBase.IRect;

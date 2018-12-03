@@ -12,12 +12,16 @@ import RegionBase = CTRegion.CanvasTools.Region.RegionBase;
 
 import * as CTRectRegion from "./CanvasTools.Regions.RectRegion";
 import RectRegion = CTRectRegion.CanvasTools.Region.RectRegion.RectRegion;
-import TagsUpdateOptions = CTRectRegion.CanvasTools.Region.RectRegion.TagsUpdateOptions;
+
+import * as CTPointRegion from "./CanvasTools.Regions.PointRegion";
+import PointRegion = CTPointRegion.CanvasTools.Region.PointRegion.PointRegion;
 
 import * as CTRegionMenu from "./CanvasTools.Regions.RegionMenu";
 import MenuElement = CTRegionMenu.CanvasTools.Region.RegionMenu.MenuElement;
 
 import * as Snap from "snapsvg";
+
+type Region = RectRegion|PointRegion;
 
 export module CanvasTools.Region { 
     export class RegionsManager {
@@ -25,7 +29,7 @@ export module CanvasTools.Region {
         private paper: Snap.Paper;
         private paperRect: Rect;
 
-        private regions: Array<RectRegion>;    
+        private regions: Array<Region>;    
         
         private menuLayer: Snap.Element;
         private menu: MenuElement;
@@ -42,7 +46,7 @@ export module CanvasTools.Region {
         private isFrozen:boolean = false;
         private frozenNuance:string;
 
-        private tagsUpdateOptions: TagsUpdateOptions = {
+        private tagsUpdateOptions: RegionBase.TagsUpdateOptions = {
             showRegionBackground: true
         };
 
@@ -51,7 +55,7 @@ export module CanvasTools.Region {
             this.paper = Snap(svgHost);
             this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
-            this.regions = new Array<RectRegion>();
+            this.regions = new Array<Region>();
             this.onManipulationBegin = onManipulationBegin;
             this.onManipulationEnd = onManipulationEnd;
 
@@ -69,7 +73,7 @@ export module CanvasTools.Region {
                                         this.onManipulationBegin_local.bind(this), 
                                          this.onManipulationEnd_local.bind(this));
 
-            this.menu.addAction("delete", "trash", (region: RectRegion) => {
+            this.menu.addAction("delete", "trash", (region: Region) => {
                 this.deleteRegion(region);
                 this.menu.hide();
             })
@@ -180,7 +184,7 @@ export module CanvasTools.Region {
         }
 
         // SETUP NEW REGION
-        public addRegion(id: string, pointA: IBase.IPoint2D, pointB: IBase.IPoint2D, tagsDescriptor: Tags.TagsDescriptor) {
+        public addRectRegion(id: string, pointA: IBase.IPoint2D, pointB: IBase.IPoint2D, tagsDescriptor: Tags.TagsDescriptor) {
             this.menu.hide();
 
             let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
@@ -195,6 +199,27 @@ export module CanvasTools.Region {
 
             region.area = w * h;
             region.move(new Point2D(x, y));
+
+            region.onChange = this.onRegionUpdate.bind(this);
+
+            this.unselectRegions();
+            region.select();
+
+            this.regionManagerLayer.add(region.node);
+            this.regions.push(region);
+
+            this.menu.showOnRegion(region); 
+        }
+
+        public addPointRegion(id: string, point: IBase.IPoint2D, tagsDescriptor: Tags.TagsDescriptor) {
+            this.menu.hide();
+
+            let region = new PointRegion(this.paper, this.paperRect, id, tagsDescriptor, 
+                this.onManipulationBegin_local.bind(this), 
+                this.onManipulationEnd_local.bind(this),
+                this.tagsUpdateOptions);
+
+            region.move(point);
 
             region.onChange = this.onRegionUpdate.bind(this);
 
@@ -244,7 +269,7 @@ export module CanvasTools.Region {
 
         // QUICKSORT REGIONS BY AREA DESCENDING
         private sortRegionsByArea() {
-            function quickSort(arr: Array<RectRegion>, left: number, right: number) {
+            function quickSort(arr: Array<Region>, left: number, right: number) {
                 var pivot, partitionIndex;
 
                 if (left < right) {
@@ -258,7 +283,7 @@ export module CanvasTools.Region {
                 return arr;
             }
 
-            function partition(arr: Array<RectRegion>, pivot: number, left: number, right: number) {
+            function partition(arr: Array<Region>, pivot: number, left: number, right: number) {
                 var pivotValue = arr[pivot].area,
                     partitionIndex = left;
 
@@ -272,7 +297,7 @@ export module CanvasTools.Region {
                 return partitionIndex;
             }
 
-            function swap(arr: Array<RectRegion>, i: number, j: number) {
+            function swap(arr: Array<Region>, i: number, j: number) {
                 var temp = arr[i];
                 arr[i] = arr[j];
                 arr[j] = temp;
@@ -285,8 +310,8 @@ export module CanvasTools.Region {
         }
 
         // REGIONS LOOKUP
-        private lookupRegionByID(id:string): RectRegion {
-            let region:RectRegion = null;
+        private lookupRegionByID(id:string): Region {
+            let region:Region = null;
             let i = 0;
             while (i < this.regions.length && region == null) {
                 if (this.regions[i].ID == id) {
@@ -298,8 +323,8 @@ export module CanvasTools.Region {
             return region;
         }
 
-        private lookupSelectedRegions(): Array<RectRegion> {
-            let collection = Array<RectRegion>();
+        private lookupSelectedRegions(): Array<Region> {
+            let collection = Array<Region>();
 
             for (var i = 0; i < this.regions.length; i++) {
                 if (this.regions[i].isSelected) {
@@ -324,7 +349,7 @@ export module CanvasTools.Region {
         }
 
         // REGIONS DELETE
-        private deleteRegion(region:RectRegion){
+        private deleteRegion(region:Region){
             // remove style
             region.removeStyles();
             
@@ -386,7 +411,7 @@ export module CanvasTools.Region {
         }
 
         // REGIONS SELECTION
-        private selectRegion(region: RectRegion) {
+        private selectRegion(region: Region) {
             if (region != null) {
                 this.unselectRegions(region);
                 region.select();
@@ -443,7 +468,7 @@ export module CanvasTools.Region {
         }
 
         // REGIONS MOVE/RESIZE
-        private reshapeRegion(region: RectRegion, dx: number, dy: number, dw: number, dh: number, inverse: boolean = false) {
+        private reshapeRegion(region: Region, dx: number, dy: number, dw: number, dh: number, inverse: boolean = false) {
             let w: number;
             let h: number;
             let x: number;
@@ -501,17 +526,17 @@ export module CanvasTools.Region {
             }    
         }
 
-        private onManipulationBegin_local(region: RectRegion) {
+        private onManipulationBegin_local(region: Region) {
             this.onManipulationBegin();
         }
-        private onManipulationEnd_local(region: RectRegion) {
+        private onManipulationEnd_local(region: Region) {
             this.onManipulationEnd();
         }
 
 
         private justManipulated = false;
 
-        private onRegionUpdate(region: RectRegion, state: RegionBase.ChangeEventType, multiSelection:boolean) {
+        private onRegionUpdate(region: Region, state: RegionBase.ChangeEventType, multiSelection:boolean) {
             // resize or drag begin
             if (state === RegionBase.ChangeEventType.MOVEBEGIN) { 
                 if (!multiSelection) {              
@@ -558,7 +583,7 @@ export module CanvasTools.Region {
             }
         }
 
-        private unselectRegions(except?: RectRegion){
+        private unselectRegions(except?: Region){
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
                 if (r != except) {

@@ -10,6 +10,8 @@ import FilterTool = require("./CanvasTools.Filter");
 import ToolbarTools = require("./CanvasTools.Toolbar");
 
 import RegionTools = require("./Regions/CanvasTools.Regions.RegionsManager");
+import PointRegion = require("./Regions/CanvasTools.Regions.PointRegion");
+import RectRegion = require("./Regions/CanvasTools.Regions.RectRegion");
 
 export module CanvasTools {
     export const Base = {
@@ -20,7 +22,9 @@ export module CanvasTools {
 
     export const Selection = SelectionTool.CanvasTools.Selection;
     export const Region = {
-        RegionsManager: RegionTools.CanvasTools.Region.RegionsManager
+        RegionsManager: RegionTools.CanvasTools.Region.RegionsManager,
+        PointRegion: PointRegion.CanvasTools.Region.PointRegion.PointRegion,
+        RectRegion: RectRegion.CanvasTools.Region.RectRegion.RectRegion
     }
     export const Filter = FilterTool.CanvasTools.Filter;
     export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
