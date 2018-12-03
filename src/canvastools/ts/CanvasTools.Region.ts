@@ -1378,6 +1378,14 @@ export module CanvasTools.Region {
         }
 
         private subscribeToEvents() {
+            this.regionManagerLayer.mouseover((e: MouseEvent) => {
+                this.onManipulationBegin();
+            })
+
+            this.regionManagerLayer.mouseout((e: MouseEvent) => {
+                this.onManipulationEnd();
+            })
+
             window.addEventListener("keyup", (e) => {
                 if (!this.isFrozen) {
                     switch (e.keyCode) {
@@ -1874,7 +1882,7 @@ export module CanvasTools.Region {
             } else {
                 this.frozenNuance = "";
             }
-            this.menuLayer.addClass('frozen');
+            this.menu.hide();
             this.regions.forEach((region) => {
                 region.freeze();
             })
@@ -1884,15 +1892,20 @@ export module CanvasTools.Region {
 
         public unfreeze() {
             this.regionManagerLayer.removeClass("frozen");
-            this.menuLayer.removeClass('frozen');
             if (this.frozenNuance !== "") {
-                this.menuLayer.removeClass(this.frozenNuance);
+                this.regionManagerLayer.removeClass(this.frozenNuance);
             }
+
+            let selectedRegions = this.lookupSelectedRegions();
+
+            if (selectedRegions.length > 0) {
+                this.menu.showOnRegion(selectedRegions[0]);
+            }
+
             this.regions.forEach((region) => {
                 region.unfreeze();
             })
            
-
             this.isFrozen = false;
         }
 

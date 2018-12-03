@@ -146,6 +146,11 @@ svg:not(:root) .menuLayer {
 
 /* Freezing regions */ 
 
+.regionManager.frozen .regionStyle.old,
+.regionManager.frozen .regionStyle.old .dragRectStyle {
+    pointer-events: none;
+}
+
 .regionManager.frozen .regionStyle.old .dragRectStyle, 
 .regionManager.frozen .regionStyle.old .anchorStyle.TL, 
 .regionManager.frozen .regionStyle.old .anchorStyle.BR, 
@@ -176,11 +181,6 @@ svg:not(:root) .menuLayer {
 .regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {
     opacity: 0.25;
 }
-
-.menuManager.frozen {
-    display:none;
-}
-
 
 /* AreaSelector
 
