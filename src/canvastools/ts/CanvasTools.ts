@@ -6,9 +6,10 @@ import Rect = require("./Base/CanvasTools.Base.Rect");
 import Tags = require("./Base/CanvasTools.Base.Tags");
 
 import SelectionTool = require("./CanvasTools.Selection");
-import RegionTool = require("./CanvasTools.Region");
 import FilterTool = require("./CanvasTools.Filter");
 import ToolbarTools = require("./CanvasTools.Toolbar");
+
+import RegionTools = require("./Regions/CanvasTools.Regions.RegionsManager");
 
 export module CanvasTools {
     export const Base = {
@@ -18,7 +19,9 @@ export module CanvasTools {
     } 
 
     export const Selection = SelectionTool.CanvasTools.Selection;
-    export const Region = RegionTool.CanvasTools.Region;
+    export const Region = {
+        RegionsManager: RegionTools.CanvasTools.Region.RegionsManager
+    }
     export const Filter = FilterTool.CanvasTools.Filter;
     export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
 }
