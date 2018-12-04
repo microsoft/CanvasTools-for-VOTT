@@ -195,8 +195,8 @@ export module CanvasTools.Selection {
     type SelectorCallbacks = {
         onSelectionBegin: () => void, 
         onSelectionEnd: (commit: SelectionCommit) => void, 
-        onLocked: () => void, 
-        onUnlocked: () => void
+        onLocked?: () => void, 
+        onUnlocked?: () => void
     }
 
     type EventDescriptor = {
@@ -207,7 +207,6 @@ export module CanvasTools.Selection {
     };
 
     abstract class SelectorPrototype extends ElementPrototype {
-        protected isLocked: boolean = false;
         protected isEnabled: boolean = true;
 
         public callbacks: SelectorCallbacks;
@@ -235,32 +234,9 @@ export module CanvasTools.Selection {
         }
 
         public disable() {
-            if(!this.isLocked && this.isEnabled) {
+            if(this.isEnabled) {
                 this.isEnabled = false;
                 this.hide();
-            }
-        }
-
-        public lock() {
-            this.isLocked = true;
-            this.enable();
-            if (this.callbacks.onLocked instanceof Function) {
-                this.callbacks.onLocked();
-            }
-        }
-
-        public unlock() {
-            this.isLocked = false;
-            if (this.callbacks.onUnlocked instanceof Function) {
-                this.callbacks.onUnlocked();
-            }
-        }
-
-        public toggleLockState() {
-            if (this.isLocked) {
-                this.unlock();
-            } else {
-                this.lock();
             }
         }
 
@@ -1132,24 +1108,6 @@ export module CanvasTools.Selection {
             }
         }
 
-        public toggleLockState() {
-            if (this.selector !== null) {
-                this.selector.toggleLockState();
-            }            
-        }
-
-        public lock() {
-            if (this.selector !== null) {
-                this.selector.lock();
-            }
-        }
-
-        public unlock() {
-            if (this.selector !== null) {
-                this.selector.unlock();
-            }
-        }
-
         public enable() {
             if (this.selector !== null) {
                 this.selector.enable();
@@ -1176,7 +1134,6 @@ export module CanvasTools.Selection {
         }
 
         public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
-            let wasEnabled: boolean = this.isEnabled;
             this.disable();
 
             if (selectionMode === SelectionMode.NONE) {
