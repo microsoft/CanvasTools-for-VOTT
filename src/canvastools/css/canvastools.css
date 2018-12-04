@@ -33,6 +33,14 @@
     cursor: move;
 }
 
+.dragPointStyle {
+    fill: rgba(255, 255, 255, 0.25); 
+    stroke-width: 0;
+    pointer-events: all;
+    cursor: move;
+    filter: url(#black-glow);
+}
+
 .tagsLayer {
     pointer-events: none;
 }
@@ -44,6 +52,12 @@
     stroke-dasharray: 2 6;
     stroke-linecap: round;
     filter: url(#black-glow);
+}
+
+.primaryTagPointStyle {
+    fill: rgba(196, 196, 196, 0.6);
+    stroke-width: 1;
+    stroke:rgba(255, 255, 255, 1.0);    
 }
 
 .primaryTagTextStyle {
@@ -74,6 +88,11 @@
     fill: rgba(128, 128, 128, 0.4);
     stroke: rgb(255, 255, 255);
     stroke-dasharray: none;
+}
+
+.regionStyle:hover .dragPointStyle,
+.regionStyle.selected .dragPointStyle {
+    fill: rgba(255, 255, 255, 0.5); 
 }
 
 .anchorStyle {
@@ -147,7 +166,8 @@ svg:not(:root) .menuLayer {
 /* Freezing regions */ 
 
 .regionManager.frozen .regionStyle.old,
-.regionManager.frozen .regionStyle.old .dragRectStyle {
+.regionManager.frozen .regionStyle.old .dragRectStyle,
+.regionManager.frozen .regionStyle.old .dragPointStyle {
     pointer-events: none;
 }
 
@@ -168,7 +188,8 @@ svg:not(:root) .menuLayer {
     opacity: 0.5;
 }
 
-.regionManager.frozen .regionStyle.old .primaryTagRectStyle {
+.regionManager.frozen .regionStyle.old .primaryTagRectStyle,
+.regionManager.frozen .regionStyle.old .primaryTagPointStyle {
     stroke-width: 1;
     stroke-dasharray: 0 0;
 }
@@ -229,14 +250,14 @@ svg:not(:root) .menuLayer {
     pointer-events: none;
 }
 
-.rectSelector .maskInStyle {
+.maskInStyle {
     fill: #fff;
     stroke-width: 0;
     visibility: visible;
     pointer-events: none;
 }
 
-.rectSelector .selectionBoxStyle, .maskOutStyle {
+.maskOutStyle {
     /* Transparent crop*/
     fill: #000;
     stroke-width: 0;
