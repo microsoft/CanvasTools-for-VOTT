@@ -16,6 +16,8 @@ export module CanvasTools.Toolbar {
         height: number;
     }
 
+    export enum ToolbarItemType { SELECTOR, SWITCH, SEPARATOR};
+
     abstract class ToolbarIconPrototype {
         public static IconWidth: number = 48;
         public static IconHeight: number = 48;
