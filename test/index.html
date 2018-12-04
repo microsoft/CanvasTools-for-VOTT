@@ -58,12 +58,19 @@
         // create regions manager 
         let rm = new ct.Region.RegionsManager(sz, () => { }, () => { });
         // create area selector manager 
+        let rmWasFrozen = false;
         let selector = new ct.Selection.AreaSelector(sz,
             {
                 onSelectionBegin: () => {
-                    console.log("Rock the party!");
+                    //console.log("Rock the party!");
+                    rmWasFrozen = rm.isFrozen;
+                    rm.freeze();
                 },
                 onSelectionEnd: (commit) => {
+                    if (!rmWasFrozen) {
+                        rm.unfreeze();
+                    }
+                    
                     let r = commit.boundRect;
                     console.log("Selection: " + JSON.stringify(commit));
                     var primaryTag = new ct.Base.Tags.Tag(
@@ -76,7 +83,14 @@
                         (Math.random() > 0.5) ? "one" : "two",
                         Math.floor(Math.random() * 360.0));
                     var tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-                    rm.addRegion((regionId++).toString(), { x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 }, tags);
+
+                    if (commit.meta !== undefined && commit.meta.point !== undefined) {
+                        let point = commit.meta.point;
+                        rm.addPointRegion((regionId++).toString(), { x: point.x, y: point.y }, tags);
+                    } else {
+                        rm.addRectRegion((regionId++).toString(), { x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 }, tags);
+                    }
+                    
                 }
             }
             
