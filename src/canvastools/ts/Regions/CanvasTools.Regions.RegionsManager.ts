@@ -43,7 +43,12 @@ export module CanvasTools.Region {
 
         private regionManagerLayer:Snap.Element;
 
-        private isFrozen:boolean = false;
+        private __isFrozen:boolean = false;
+
+        public get isFrozen(): boolean {
+            return this.__isFrozen;            
+        }        
+
         private frozenNuance:string;
 
         private tagsUpdateOptions: RegionBase.TagsUpdateOptions = {
@@ -613,7 +618,7 @@ export module CanvasTools.Region {
                 region.freeze();
             })
 
-            this.isFrozen = true;
+            this.__isFrozen = true;
         }
 
         public unfreeze() {
@@ -632,7 +637,7 @@ export module CanvasTools.Region {
                 region.unfreeze();
             })
            
-            this.isFrozen = false;
+            this.__isFrozen = false;
         }
 
         public toggleFreezeMode() {
