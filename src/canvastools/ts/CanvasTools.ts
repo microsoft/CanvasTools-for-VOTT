@@ -13,6 +13,8 @@ import RegionTools = require("./Regions/CanvasTools.Regions.RegionsManager");
 import PointRegion = require("./Regions/CanvasTools.Regions.PointRegion");
 import RectRegion = require("./Regions/CanvasTools.Regions.RectRegion");
 
+import EditorTools = require("./CanvasTools.Editor");
+
 export module CanvasTools {
     export const Base = {
         Point: Point2D.CanvasTools.Base.Point,
@@ -28,6 +30,8 @@ export module CanvasTools {
     }
     export const Filter = FilterTool.CanvasTools.Filter;
     export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
+
+    export const Editor = EditorTools.CanvasTools.Editor.Editor
 }
 
 
