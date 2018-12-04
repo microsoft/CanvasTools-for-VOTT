@@ -33,14 +33,13 @@ export module CanvasTools.Editor {
         type: Toolbar.ToolbarItemType.SEPARATOR,
     }
 
-
     export class Editor {
         private toolbar: Toolbar.Toolbar;
         private regionsManager: RegionsManager;
         private areaSelector: Selection.AreaSelector;
 
         private isRMFrozen: boolean = false;
-        
+
         constructor(regionsZone: SVGSVGElement, toolbarZone: SVGSVGElement, toolbarSet?:Array<ToolbarIconDescription>) {
             this.regionsManager = new RegionsManager(regionsZone, 
                 (region?: RegionComponent) => {
@@ -52,15 +51,15 @@ export module CanvasTools.Editor {
                     this.onRegionManipulationEnd(region);
                 });
 
-                this.regionsManager.onRegionSelected = (id, multiselection) => {
+                this.regionsManager.onRegionSelected = (id: string, multiselection: boolean) => {
                     this.onRegionSelected(id, multiselection);
                 };
         
-                this.regionsManager.onRegionMove = (id, x, y, width, height) => {
+                this.regionsManager.onRegionMove = (id: string, x: number, y: number, width: number, height: number) => {
                     this.onRegionMove(id, x, y, width, height);
                 };
         
-                this.regionsManager.onRegionDelete = (id) => {
+                this.regionsManager.onRegionDelete = (id: string) => {
                     this.onRegionDelete(id);
                 };
 
@@ -114,7 +113,8 @@ export module CanvasTools.Editor {
             // do something
         }
 
-        public onSelectionEnd(commit): void {            
+        public onSelectionEnd(commit): void {  
+            // do something          
         }
 
         public static FullToolbarSet: Array<ToolbarIconDescription> = [
