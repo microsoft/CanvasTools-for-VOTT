@@ -337,6 +337,7 @@ export module CanvasTools.Selection {
             this.node.add(this.mask.node);
             this.node.add(this.crossA.node);
             this.node.add(this.crossB.node);
+            
 
             let listeners: Array<EventDescriptor> = [
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
@@ -838,6 +839,9 @@ export module CanvasTools.Selection {
 
         private pointRadius: number = 3;
 
+        private isCapturing: boolean = false;
+        private capturePointerId: number;
+
         constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: SelectorCallbacks) {
             super(paper, boundRect, callbacks);
             this.parentNode = parent;
@@ -870,8 +874,6 @@ export module CanvasTools.Selection {
             this.node.add(this.nextSegment);
             this.node.add(this.nextPoint);
                        
-            // TO FIX PointerEvents on nextPoint prevent from manipulatio of regions
-
             let listeners: Array<EventDescriptor> = [
                 {event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false},
                 {event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false},
@@ -897,6 +899,10 @@ export module CanvasTools.Selection {
             this.polyline.attr({
                 points: ""
             })
+
+            if (this.isCapturing) {
+                this.isCapturing = false;
+            }            
         }
 
         private moveCross(cross:CrossElement, pointTo:IBase.IPoint2D, square:boolean = false, refCross: CrossElement = null) {
@@ -944,19 +950,27 @@ export module CanvasTools.Selection {
         }
 
         private onPointerLeave(e:PointerEvent) {
-            window.requestAnimationFrame(() => {
-                this.hide();
-            });            
+            if (!this.isCapturing) {
+                window.requestAnimationFrame(() => {
+                    this.hide();
+                }); 
+            }  else {
+                let rect = this.parentNode.getClientRects();
+                let p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+
+                this.moveCross(this.crossA, p);
+                this.movePoint(this.nextPoint, p);
+            }                     
         }
 
         private onPointerDown(e:PointerEvent) {
-            window.requestAnimationFrame(() => {
-                if (this.lastPoint == null) {                   
-                    if (typeof this.callbacks.onSelectionBegin === "function") {
-                        this.callbacks.onSelectionBegin();
-                    }
-                }
-            });         
+            if (!this.isCapturing) {                
+                this.isCapturing = true;
+                
+                if (typeof this.callbacks.onSelectionBegin === "function") {
+                    this.callbacks.onSelectionBegin();
+                }                
+            }  
         }
 
         private onClick(e:MouseEvent) {
@@ -990,8 +1004,7 @@ export module CanvasTools.Selection {
         }
 
         private onDoubleClick(e: MouseEvent) {
-            this.submitPolyline();
-            console.log("dblclick");
+            this.submitPolyline();                     
         }
 
         private submitPolyline() {
