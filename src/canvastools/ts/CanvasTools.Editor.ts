@@ -22,7 +22,7 @@ export module CanvasTools.Editor {
     type ToolbarIconDescription = {
         type: Toolbar.ToolbarItemType.SELECTOR | Toolbar.ToolbarItemType.SWITCH,
         action: string,
-        iconUrl: string,
+        iconFile: string,
         tooltip: string,
         keycode: string,
         actionCallback: (action: string, rm: RegionsManager, sl: Selection.AreaSelector) => void,
@@ -40,7 +40,7 @@ export module CanvasTools.Editor {
 
         private isRMFrozen: boolean = false;
 
-        constructor(regionsZone: SVGSVGElement, toolbarZone: SVGSVGElement, toolbarSet?:Array<ToolbarIconDescription>) {
+        constructor(regionsZone: SVGSVGElement) {
             this.regionsManager = new RegionsManager(regionsZone, 
                 (region?: RegionComponent) => {
                     this.areaSelector.hide();                    
@@ -78,15 +78,7 @@ export module CanvasTools.Editor {
 
                         this.onSelectionEnd(commit);
                     }
-                })
-
-            this.toolbar = new Toolbar.Toolbar(toolbarZone);
-
-            if (toolbarSet !== undefined) {
-                this.buildToolbarUI(toolbarSet);
-            } else {
-                this.buildToolbarUI(Editor.FullToolbarSet);
-            }
+                });            
         }
 
         public onRegionManipulationBegin(region?: RegionComponent): void {
@@ -121,7 +113,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "none-select",
-                iconUrl: "./images/icons/none-selection.svg",
+                iconFile: "none-selection.svg",
                 tooltip: "Regions Manipulation (M)",
                 keycode: 'KeyM',
                 actionCallback: (action, rm, sl) => {
@@ -135,7 +127,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "point-select",
-                iconUrl: "./images/icons/point-selection.svg",
+                iconFile: "point-selection.svg",
                 tooltip: "Point-selection (P)",
                 keycode: 'KeyP',
                 actionCallback: (action, rm, sl) => {
@@ -146,7 +138,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "rect-select",
-                iconUrl: "./images/icons/rect-selection.svg",
+                iconFile: "rect-selection.svg",
                 tooltip: "Rectangular box (R)",
                 keycode: 'KeyR',
                 actionCallback: (action, rm, sl) => {
@@ -157,7 +149,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "copy-select",
-                iconUrl: "./images/icons/copy-t-selection.svg",
+                iconFile: "copy-t-selection.svg",
                 tooltip: "Template-based box (T)",
                 keycode: 'KeyT',
                 actionCallback: (action, rm, sl) => {
@@ -174,7 +166,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "polyline-select",
-                iconUrl: "./images/icons/polyline-selection.svg",
+                iconFile: "polyline-selection.svg",
                 tooltip: "Polyline-selection (Y)",
                 keycode: 'KeyY',
                 actionCallback: (action, rm, sl) => {
@@ -188,7 +180,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SWITCH,
                 action: "selection-lock",
-                iconUrl: "./images/icons/selection-lock.svg",
+                iconFile: "selection-lock.svg",
                 tooltip: "Lock/unlock regions (L)",
                 keycode: 'KeyL',
                 actionCallback: (action, rm, sl) => {
@@ -203,7 +195,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "none-select",
-                iconUrl: "./images/icons/none-selection.svg",
+                iconFile: "none-selection.svg",
                 tooltip: "Regions Manipulation (M)",
                 keycode: 'KeyM',
                 actionCallback: (action, rm, sl) => {
@@ -217,7 +209,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "rect-select",
-                iconUrl: "./images/icons/rect-selection.svg",
+                iconFile: "rect-selection.svg",
                 tooltip: "Rectangular box (R)",
                 keycode: 'KeyR',
                 actionCallback: (action, rm, sl) => {
@@ -228,7 +220,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SELECTOR,
                 action: "copy-select",
-                iconUrl: "./images/icons/copy-t-selection.svg",
+                iconFile: "copy-t-selection.svg",
                 tooltip: "Template-based box (T)",
                 keycode: 'KeyT',
                 actionCallback: (action, rm, sl) => {
@@ -248,7 +240,7 @@ export module CanvasTools.Editor {
             {
                 type: Toolbar.ToolbarItemType.SWITCH,
                 action: "selection-lock",
-                iconUrl: "./images/icons/selection-lock.svg",
+                iconFile: "selection-lock.svg",
                 tooltip: "Lock/unlock regions (L)",
                 keycode: 'KeyL',
                 actionCallback: (action, rm, sl) => {
@@ -259,7 +251,13 @@ export module CanvasTools.Editor {
 
         ];
 
-        private buildToolbarUI(toolbarSet: Array<ToolbarIconDescription>) {
+        public addToolbar(toolbarZone: SVGSVGElement, toolbarSet: Array<ToolbarIconDescription>, iconsPath: string) {
+            this.toolbar = new Toolbar.Toolbar(toolbarZone);
+
+            if (toolbarSet === null) {
+                toolbarSet = Editor.FullToolbarSet;
+            }
+
             let activeSelector: string;
             toolbarSet.forEach((item) => {
                 if (item.type == Toolbar.ToolbarItemType.SEPARATOR) {
@@ -267,7 +265,7 @@ export module CanvasTools.Editor {
                 } else if (item.type == Toolbar.ToolbarItemType.SELECTOR) {
                     this.toolbar.addSelector({
                         action: item.action,
-                        iconUrl: item.iconUrl,
+                        iconUrl: iconsPath + item.iconFile,
                         tooltip: item.tooltip,
                         keycode: item.keycode,
                         width: item.width,
@@ -282,7 +280,7 @@ export module CanvasTools.Editor {
                 } else if (item.type == Toolbar.ToolbarItemType.SWITCH) {
                     this.toolbar.addSwitch({
                         action: item.action,
-                        iconUrl: item.iconUrl,
+                        iconUrl: iconsPath + item.iconFile,
                         tooltip: item.tooltip,
                         keycode: item.keycode,
                         width: item.width,

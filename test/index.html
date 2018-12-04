@@ -54,7 +54,8 @@
         var sz = document.getElementById("selectionSVG");
         var tz = document.getElementById("toolbarSVG");
 
-        var editor = new ct.Editor(sz, tz, ct.Editor.FullToolbarSet);
+        var editor = new ct.Editor(sz);
+        editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 
         var incrementalRegionID = 100;
 
