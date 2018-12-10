@@ -389,9 +389,12 @@ export module CanvasTools.Editor {
             }
 
             this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+
+            let actualWidth = this.editorSVG.clientWidth;
+            let actualHeight = this.editorSVG.clientHeight;
             
-            this.regionsManager.resize(width, height);
-            this.areaSelector.resize(width, height);
+            this.regionsManager.resize(actualWidth, actualHeight);
+            this.areaSelector.resize(actualWidth, actualHeight);
         }
 
         public get RM(): RegionsManager {
