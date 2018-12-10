@@ -73,6 +73,7 @@ export module CanvasTools.Editor {
 
             this.editorDiv = editorZone;
             
+            this.editorDiv.classList.add("CanvasToolsEditor");
             this.editorDiv.append(this.contentCanvas);
             this.editorDiv.append(this.editorSVG);                  
             

@@ -11,6 +11,7 @@
         <div id="toolbarzone">
         </div>
         <div id="selectionzone">
+            <div id="editorzone"></div>
         </div>
     </div>
 
@@ -20,7 +21,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
         var ct = CanvasTools.CanvasTools;
-        var sz = document.getElementById("selectionzone");
+        var sz = document.getElementById("editorzone");
         var tz = document.getElementById("toolbarzone");
 
         var editor = new ct.Editor(sz);
