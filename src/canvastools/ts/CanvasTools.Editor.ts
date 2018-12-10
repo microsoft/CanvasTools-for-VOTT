@@ -64,6 +64,8 @@ export module CanvasTools.Editor {
 
         private isRMFrozen: boolean = false;
 
+        public autoResize: boolean = true;
+
         constructor(editorZone: HTMLDivElement) {
             // Create SVG Element
             this.contentCanvas = this.createCanvasElement();
@@ -74,8 +76,11 @@ export module CanvasTools.Editor {
             this.editorDiv.append(this.contentCanvas);
             this.editorDiv.append(this.editorSVG);                  
             
+            // automatically resize internals on window resize
             window.addEventListener("resize", (e) => {
-                this.resize(this.editorDiv.clientWidth, this.editorDiv.clientHeight);
+                if (this.autoResize) {
+                    this.resize(this.editorDiv.clientWidth, this.editorDiv.clientHeight);
+                }
             });
             
             this.regionsManager = new RegionsManager(this.editorSVG, 
@@ -361,6 +366,7 @@ export module CanvasTools.Editor {
                 let imgContext = this.contentCanvas.getContext("2d");
                 imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
             }).then(() => {
+                // resize the editor size to adjust to the new content size
                 this.resize(this.editorDiv.clientWidth, this.editorDiv.clientHeight);
             });
         }
@@ -382,10 +388,8 @@ export module CanvasTools.Editor {
                 this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
             }
 
-            console.log(`padding: ${vpadding}px ${hpadding}px`);
             this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
             
-
             this.regionsManager.resize(width, height);
             this.areaSelector.resize(width, height);
         }
