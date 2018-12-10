@@ -9,39 +9,8 @@
 <body>
     <div id="ctZone">
         <div id="toolbarzone">
-            <svg id="toolbarSVG">
-                <defs>
-                    <filter id="black-glow">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                        <feOffset dx="0" dy="0" result="offsetblur" />
-                        <feComponentTransfer>
-                            <feFuncA type="linear" slope="0.8" />
-                        </feComponentTransfer>
-                        <feMerge>
-                            <feMergeNode />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>
-            </svg>
         </div>
         <div id="selectionzone">
-            <svg id="selectionSVG">
-                <defs>
-                    <filter id="black-glow">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                        <feOffset dx="0" dy="0" result="offsetblur" />
-                        <feComponentTransfer>
-                            <feFuncA type="linear" slope="0.8" />
-                        </feComponentTransfer>
-                        <feMerge>
-                            <feMergeNode />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>
-            </svg>
-            <canvas id="sourceImageCnvs"></canvas>
         </div>
     </div>
 
@@ -51,18 +20,15 @@
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
         var ct = CanvasTools.CanvasTools;
-        var sz = document.getElementById("selectionSVG");
-        var tz = document.getElementById("toolbarSVG");
+        var sz = document.getElementById("selectionzone");
+        var tz = document.getElementById("toolbarzone");
 
         var editor = new ct.Editor(sz);
         editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 
         var incrementalRegionID = 100;
 
-        editor.onSelectionEnd = (commit) => {
-            let r = commit.boundRect;
-
-            let primaryTag = new ct.Base.Tags.Tag(
+        let primaryTag = new ct.Base.Tags.Tag(
                         (Math.random() > 0.5) ? "Awesome" : "Brilliante!",
                         Math.floor(Math.random() * 360.0));
             let secondaryTag = new ct.Base.Tags.Tag(
@@ -71,7 +37,16 @@
             let ternaryTag = new ct.Base.Tags.Tag(
                         (Math.random() > 0.5) ? "one" : "two",
                         Math.floor(Math.random() * 360.0));
-            let tags = new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+
+        editor.onSelectionEnd = (commit) => {
+            let r = commit.boundRect;
+            
+            let tags = 
+                (Math.random() < 0.3) ?        
+                    new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
+                ((Math.random() > 0.5) ? 
+                    new ct.Base.Tags.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
+                    new ct.Base.Tags.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
 
             if (commit.meta !== undefined && commit.meta.point !== undefined) {
                 let point = commit.meta.point;
@@ -86,7 +61,6 @@
         }
 
         // Upload background image for selection 
-        let imageCnvs = document.getElementById("sourceImageCnvs");
         let imagePath = "./../images/background-cat.jpg";
         let image = new Image();
         image.addEventListener("load", (e) => {
@@ -95,19 +69,11 @@
             let context = buffCnvs.getContext("2d");
             buffCnvs.width = e.target.width;
             buffCnvs.height = e.target.height;
+
             // Fill buffer
             context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
 
-            let filter = new ct.Filter.FilterPipeline();
-            //filter.addFilter(ct.Filter.InvertFilter);
-            //filter.addFilter(ct.Filter.GrayscaleFilter);
-            filter.applyToCanvas(buffCnvs).then((bcnvs) => {
-                // Copy buffer to the canvas on screen
-                imageCnvs.width = bcnvs.width;
-                imageCnvs.height = bcnvs.height;
-                let imgContext = imageCnvs.getContext("2d");
-                imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
-            });
+            editor.addContentSource(buffCnvs);
         });
         image.src = imagePath;
     });

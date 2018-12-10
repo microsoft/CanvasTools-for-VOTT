@@ -1097,8 +1097,8 @@ export module CanvasTools.Selection {
         public resize(width:number, height:number):void {
             if (width !== undefined && height !== undefined) {
                 this.boundRect.resize(width, height);
-                this.parentNode.style.width = width.toString();
-                this.parentNode.style.height = height.toString();
+                //this.parentNode.style.width = width.toString();
+                //this.parentNode.style.height = height.toString();
             } else {
                 this.boundRect.resize(this.parentNode.width.baseVal.value, this.parentNode.height.baseVal.value);
             }
