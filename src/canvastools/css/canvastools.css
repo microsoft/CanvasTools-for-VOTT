@@ -10,6 +10,10 @@
     box-sizing: content-box;
 }
 
+.CanvasToolsEditor * {
+    box-sizing: content-box;
+}
+
 .CanvasToolsEditor canvas {
     position: relative;
     grid-row: 1;
