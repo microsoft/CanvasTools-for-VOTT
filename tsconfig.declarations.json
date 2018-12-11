@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "module": "amd",
+
+        "declaration": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+
+        "isolatedModules": false,
+        "sourceMap": true,      
+                
+        "moduleResolution": "node",
+        "baseUrl": "src",
+        "paths": {
+        },
+       /*  "outDir": "lib/js" */
+        "outFile": "lib/js/ct.amd.js"
+    },
+    "include": [     
+        "src/canvastools/ts/CanvasTools.ts"
+    ]
+}
