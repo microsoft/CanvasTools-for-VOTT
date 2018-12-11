@@ -96,70 +96,72 @@ export module CanvasTools.Region {
             })
 
             window.addEventListener("keyup", (e) => {
-                if (!this.isFrozen) {
-                    switch (e.keyCode) {
-                        // tab
-                        case 9:
-                            this.selectNextRegion();
-                            break;
-    
-                        // delete, backspace
-                        case 46: 
-                        case 8: 
-                            this.deleteSelectedRegions();
-                            break;
-                        // ctrl + up
-                        case 38:
-                            if (e.ctrlKey) {
-                                if (!e.shiftKey && !e.altKey) {
-                                    this.moveSelectedRegions(0, -5);
-                                } else if (e.shiftKey && !e.altKey) {
-                                    this.resizeSelectedRegions(0, -5);
-                                } else if (e.altKey && !e.shiftKey) {
-                                    this.resizeSelectedRegions(0, -5, true);
-                                }                     
-                            }
-                            break;
-                        // ctrl + down
-                        case 40:
-                            if (e.ctrlKey) {
-                                if (!e.shiftKey && !e.altKey) {
-                                    this.moveSelectedRegions(0, 5);
-                                } else if (e.shiftKey && !e.altKey) {
-                                    this.resizeSelectedRegions(0, 5);
-                                } else if (e.altKey && !e.shiftKey) {
-                                    this.resizeSelectedRegions(0, 5, true);
-                                }  
-                            }
-                            break;
-                        // ctrl + left
-                        case 37:
-                            if (e.ctrlKey) {
-                                if (!e.shiftKey && !e.altKey) {
-                                    this.moveSelectedRegions(-5, 0);
-                                } else if (e.shiftKey && !e.altKey) {
-                                    this.resizeSelectedRegions(-5, 0);
-                                } else if (e.altKey && !e.shiftKey) {
-                                    this.resizeSelectedRegions(-5, 0, true);
-                                } 
-                            }
-                            break;
-                        // ctrl + right
-                        case 39:
-                            if (e.ctrlKey) {
-                                if (!e.shiftKey && !e.altKey) {
-                                    this.moveSelectedRegions(5, 0);
-                                } else if (e.shiftKey && !e.altKey) {
-                                    this.resizeSelectedRegions(5, 0);
-                                } else if (e.altKey && !e.shiftKey) {
-                                    this.resizeSelectedRegions(5, 0, true);
-                                } 
-                            }
-                            break;
-                        // default
-                        default: return;
+                if (!(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLSelectElement)) {
+                    if (!this.isFrozen) {
+                        switch (e.keyCode) {
+                            // tab
+                            case 9:
+                                this.selectNextRegion();
+                                break;
+        
+                            // delete, backspace
+                            case 46: 
+                            case 8: 
+                                this.deleteSelectedRegions();
+                                break;
+                            // ctrl + up
+                            case 38:
+                                if (e.ctrlKey) {
+                                    if (!e.shiftKey && !e.altKey) {
+                                        this.moveSelectedRegions(0, -5);
+                                    } else if (e.shiftKey && !e.altKey) {
+                                        this.resizeSelectedRegions(0, -5);
+                                    } else if (e.altKey && !e.shiftKey) {
+                                        this.resizeSelectedRegions(0, -5, true);
+                                    }                     
+                                }
+                                break;
+                            // ctrl + down
+                            case 40:
+                                if (e.ctrlKey) {
+                                    if (!e.shiftKey && !e.altKey) {
+                                        this.moveSelectedRegions(0, 5);
+                                    } else if (e.shiftKey && !e.altKey) {
+                                        this.resizeSelectedRegions(0, 5);
+                                    } else if (e.altKey && !e.shiftKey) {
+                                        this.resizeSelectedRegions(0, 5, true);
+                                    }  
+                                }
+                                break;
+                            // ctrl + left
+                            case 37:
+                                if (e.ctrlKey) {
+                                    if (!e.shiftKey && !e.altKey) {
+                                        this.moveSelectedRegions(-5, 0);
+                                    } else if (e.shiftKey && !e.altKey) {
+                                        this.resizeSelectedRegions(-5, 0);
+                                    } else if (e.altKey && !e.shiftKey) {
+                                        this.resizeSelectedRegions(-5, 0, true);
+                                    } 
+                                }
+                                break;
+                            // ctrl + right
+                            case 39:
+                                if (e.ctrlKey) {
+                                    if (!e.shiftKey && !e.altKey) {
+                                        this.moveSelectedRegions(5, 0);
+                                    } else if (e.shiftKey && !e.altKey) {
+                                        this.resizeSelectedRegions(5, 0);
+                                    } else if (e.altKey && !e.shiftKey) {
+                                        this.resizeSelectedRegions(5, 0, true);
+                                    } 
+                                }
+                                break;
+                            // default
+                            default: return;
+                        }
+                        e.preventDefault();
                     }
-                    e.preventDefault();
                 }
             });
             window.addEventListener("keydown", (e) => {
