@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "webpack --config webpack.test.js",
-    "lib": "webpack --config webpack.lib.js"
+    "lib": "webpack --config webpack.lib.js & webpack --config webpack.lib.min.js"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",
