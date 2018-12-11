@@ -359,8 +359,21 @@ export module CanvasTools.Editor {
             this.toolbar.select(activeSelector);
         }
 
-        public async addContentSource(canvasBuffer: HTMLCanvasElement): Promise<void> {
-            return this.filterPipeline.applyToCanvas(canvasBuffer).then((bcnvs) => {
+        public async addContentSource(source: HTMLCanvasElement|HTMLImageElement|HTMLVideoElement): Promise<void> {
+            let buffCnvs = document.createElement("canvas");
+            let context = buffCnvs.getContext("2d");
+            
+            if (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement) {
+                buffCnvs.width = source.width;
+                buffCnvs.height = source.height;
+            } else if (source instanceof HTMLVideoElement) {
+                buffCnvs.width = source.videoWidth;
+                buffCnvs.height = source.videoHeight;
+            } 
+            
+            context.drawImage(source, 0, 0, buffCnvs.width, buffCnvs.height);
+            
+            return this.filterPipeline.applyToCanvas(buffCnvs).then((bcnvs) => {
                 // Copy buffer to the canvas on screen
                 this.contentCanvas.width = bcnvs.width;
                 this.contentCanvas.height = bcnvs.height;

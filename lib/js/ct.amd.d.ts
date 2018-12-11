@@ -657,7 +657,7 @@ declare module "CanvasTools.Editor" {
             static FullToolbarSet: Array<ToolbarIconDescription>;
             static RectToolbarSet: Array<ToolbarIconDescription>;
             addToolbar(toolbarZone: HTMLDivElement, toolbarSet: Array<ToolbarIconDescription>, iconsPath: string): void;
-            addContentSource(canvasBuffer: HTMLCanvasElement): Promise<void>;
+            addContentSource(source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement): Promise<void>;
             resize(containerWidth: number, containerHeight: number): void;
             readonly RM: RegionsManager;
             readonly FilterPipeline: Filter.FilterPipeline;
@@ -692,4 +692,5 @@ declare module "CanvasTools" {
         const Toolbar: typeof ToolbarTools.CanvasTools.Toolbar;
         const Editor: typeof EditorTools.CanvasTools.Editor.Editor;
     }
+    import "./../css/canvastools.css";
 }
