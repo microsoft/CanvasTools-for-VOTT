@@ -80,7 +80,7 @@ export module CanvasTools.Editor {
             // automatically resize internals on window resize
             window.addEventListener("resize", (e) => {
                 if (this.autoResize) {
-                    this.resize(this.editorDiv.clientWidth, this.editorDiv.clientHeight);
+                    this.resize(this.editorDiv.offsetWidth, this.editorDiv.offsetHeight);
                 }
             });
             
@@ -125,7 +125,7 @@ export module CanvasTools.Editor {
 
             this.filterPipeline = new Filter.FilterPipeline();
                 
-            this.resize(editorZone.clientWidth, editorZone.clientHeight);
+            this.resize(editorZone.offsetWidth, editorZone.offsetHeight);
         }
 
         private createSVGElement():SVGSVGElement {
@@ -359,8 +359,8 @@ export module CanvasTools.Editor {
             this.toolbar.select(activeSelector);
         }
 
-        public addContentSource(canvasBuffer: HTMLCanvasElement) {
-            this.filterPipeline.applyToCanvas(canvasBuffer).then((bcnvs) => {
+        public async addContentSource(canvasBuffer: HTMLCanvasElement): Promise<void> {
+            return this.filterPipeline.applyToCanvas(canvasBuffer).then((bcnvs) => {
                 // Copy buffer to the canvas on screen
                 this.contentCanvas.width = bcnvs.width;
                 this.contentCanvas.height = bcnvs.height;
@@ -368,23 +368,23 @@ export module CanvasTools.Editor {
                 imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
             }).then(() => {
                 // resize the editor size to adjust to the new content size
-                this.resize(this.editorDiv.clientWidth, this.editorDiv.clientHeight);
+                this.resize(this.editorDiv.offsetWidth, this.editorDiv.offsetHeight);
             });
         }
 
-        public resize(width: number, height: number) {
+        public resize(containerWidth: number, containerHeight: number) {
             let imgRatio = this.contentCanvas.width / this.contentCanvas.height;
-            let containerRatio = width / height;
+            let containerRatio = containerWidth / containerHeight;
 
             let hpadding = 0;
             let vpadding = 0;
 
             if (imgRatio > containerRatio) {
-                vpadding = (height - width / imgRatio) / 2;   
+                vpadding = (containerHeight - containerWidth / imgRatio) / 2;   
                 this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
                 this.editorDiv.style.width = "";               
             } else {
-                hpadding = (width - height * imgRatio) / 2;
+                hpadding = (containerWidth - containerHeight * imgRatio) / 2;
                 this.editorDiv.style.height = ""; 
                 this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
             }
@@ -394,8 +394,8 @@ export module CanvasTools.Editor {
             let actualWidth = this.editorSVG.clientWidth;
             let actualHeight = this.editorSVG.clientHeight;
             
-            this.regionsManager.resize(actualWidth, actualHeight);
             this.areaSelector.resize(actualWidth, actualHeight);
+            this.regionsManager.resize(actualWidth, actualHeight);
         }
 
         public get RM(): RegionsManager {

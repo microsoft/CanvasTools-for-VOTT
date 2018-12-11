@@ -526,6 +526,7 @@ export module CanvasTools.Region {
             // recalculate size/position for all regions;
             for (var i = 0; i < this.regions.length; i++){
                 let r = this.regions[i];
+                
                 r.move(new Point2D(r.x * tw, r.y * th));
                 r.resize(r.boundRect.width * tw, r.boundRect.height * th);
             }    
