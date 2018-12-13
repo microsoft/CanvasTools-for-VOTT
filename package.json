@@ -1,6 +1,6 @@
 {
   "name": "vott-ct",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./dist/ct.js",
   "types": "./lib/ct.d.ts",

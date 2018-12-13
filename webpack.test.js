@@ -7,7 +7,7 @@ module.exports = {
         filename: 'ct.js',
         path: path.resolve(__dirname, './test/js'),
         libraryTarget: 'umd',
-        library: 'CanvasTools',
+        library: '',
     },
     mode: "development",
     devtool: 'inline-source-map',
