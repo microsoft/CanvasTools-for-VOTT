@@ -65,13 +65,13 @@ Add a callback for onSelectionEnd to define what should happen when a new region
 
 ```js
 // Random tags generation
-let primaryTag = new ct.Base.Tags.Tag(
+let primaryTag = new ct.Core.Tag(
                     (Math.random() > 0.5) ? "Awesome" : "Brilliante",
                      Math.floor(Math.random() * 360.0));
-let secondaryTag = new ct.Base.Tags.Tag(
+let secondaryTag = new ct.Core.Tag(
                    (Math.random() > 0.5) ? "Yes" : "No",
                     Math.floor(Math.random() * 360.0));
-let ternaryTag = new ct.Base.Tags.Tag(
+let ternaryTag = new ct.Core.Tag(
                  (Math.random() > 0.5) ? "one" : "two",
                   Math.floor(Math.random() * 360.0));
 
@@ -82,17 +82,17 @@ editor.onSelectionEnd = (commit) => {
     // Build a random tags collection
     let tags = 
         (Math.random() < 0.3) ?        
-         new ct.Base.Tags.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
+         new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
         ((Math.random() > 0.5) ? 
-         new ct.Base.Tags.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
-         new ct.Base.Tags.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
+         new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
+         new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
 
     // Add new region to the Editor based on selection type
     if (commit.meta !== undefined && commit.meta.point !== undefined) {
         let point = commit.meta.point;
-        editor.RM.addPointRegion((incrementalRegionID++).toString(), new ct.Base.Point.Point2D(point.x, point.y), tags);
+        editor.RM.addPointRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(point.x, point.y), tags);
     } else {
-        editor.RM.addRectRegion((incrementalRegionID++).toString(), new ct.Base.Point.Point2D(r.x1, r.y1), new ct.Base.Point.Point2D(r.x2, r.y2), tags);
+        editor.RM.addRectRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(r.x1, r.y1), new ct.Core.Point2D(r.x2, r.y2), tags);
     }
 }
 ```
