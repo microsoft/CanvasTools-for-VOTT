@@ -1,13 +1,14 @@
 {
-  "name": "canvastools",
-  "version": "2.0.0",
+  "name": "vott-ct",
+  "version": "2.0.1",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./lib/ct.js",
   "types" : "./lib/ct.d.ts",
   "scripts": {
     "webpack-test": "webpack --config webpack.test.js",
-    "webpack-lib": "webpack --config webpack.lib.js & webpack --config webpack.lib.min.js",
-    "tsc-bundle": "tsc --project ./tsconfig.bundle.json"
+    "webpack-lib": "webpack --config webpack.lib.js && webpack --config webpack.lib.min.js",
+    "bundle": "tsc --project ./tsconfig.bundle.json && cpx './src/canvastools/{icons,css}/*' './lib/bundle/'",
+    "prepare": "npm run bundle && npm run webpack-lib"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",
@@ -20,12 +21,12 @@
    },
   "homepage":"https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
 
-  "dependencies": {
-    "imports-loader": "^0.8.0",
-    "snapsvg": "^0.5.1",
-    "tsconfig-paths-webpack-plugin": "^3.2.0"
+  "dependencies": {    
+    "snapsvg": "^0.5.1"    
   },
   "devDependencies": {
+    "tsconfig-paths-webpack-plugin": "^3.2.0",
+    "imports-loader": "^0.8.0",
     "@types/snapsvg": "^0.4.32",
     "css-loader": "^1.0.1",
     "style-loader": "^0.23.1",
@@ -34,5 +35,8 @@
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.1.4"
-  }
+  },
+  "files": [
+    "./lib/**/*"
+  ]
 }

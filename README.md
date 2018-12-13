@@ -1,6 +1,6 @@
-# CanvasTools.js librarary for VoTT
+# CanvasTools librarary for VoTT
 
-CanvasTools.js is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library is implementing the following features core for visual tagging:
+`ct.js` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelemtns the following core features:
 
 * Region (box) selection & manipulation
 * Filters pipeline for underlaying canvas element
@@ -8,10 +8,10 @@ CanvasTools.js is one of the UI modules used in the [VoTT project](https://githu
 
 ## Dependencies
 
-* CanvasTools heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with `CanvasTools.js` into one `ct.js` file.
+* CanvasTools heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with CanvasTools into one `ct.js` file, including also styles.
 * Current version of the library depends on some features (e.g., masks-support in SVG) that are not fully cross-browser, but targeting Electron (Chromium).
 
-## Use
+## Hot to use
 
 ### Add library to the app
 
@@ -34,7 +34,7 @@ let ct = CanvasTools.CanvasTools;
 
 ### Add Editor to the page
 
-Add some containers to host SVG elements for the toolbar and the editor.
+Add container elements to host SVG elements for the toolbar and the editor.
 
 ```html
 <div id="ctZone">
@@ -45,7 +45,7 @@ Add some containers to host SVG elements for the toolbar and the editor.
     </div>
 ```
 
-Add Editor from CanvasTools.
+Initiate Editor-object from the CanvasTools.
 
 ```js
 var sz = document.getElementById("editorzone");
@@ -56,12 +56,12 @@ editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 ```
 
 The editor will auto-adjust to available space in provided container block.
-`FullToolbarSet` is one of the available icons sets. Another one is `RectToolbarSet` containing only box-creation tools.
+`FullToolbarSet` icons set is used by default and exposes all available tools. The `RectToolbarSet` set contains only box-creation tools.
 Correct the path to toolbar icons based on the structure of your project.
 
 ### Add callbacks to the Editor
 
-Add a callback for onSelectionEnd to define what should happen when a new region is selected.
+Add a callback for `onSelectionEnd` event to define what should happen when a new region is selected. Usually at the end of processing new region you want to add it actuall to the screen. Use `.RM.addPointRegion` to register point-based regions, and `.RM.addRectRegion` to register box-based regions.
 
 ```js
 // Random tags generation
@@ -99,7 +99,7 @@ editor.onSelectionEnd = (commit) => {
 
 ### Update background
 
-Once a background image for tagging task is loaded (or a video element is ready), create a `HTMLCanvasElement`, fill it with the image to be used and pass to the editor as new content source.
+Once the background image for tagging task is loaded (or a video element is ready, or a canvas element), pass it to the editor as a new content source.
 
 ```js
 let imagePath = "./../images/background-forest-v.jpg";

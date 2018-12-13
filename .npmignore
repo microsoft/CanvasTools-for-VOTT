@@ -1,0 +1,8 @@
+# .npmignore 
+src
+node_modules
+test
+.gitignore
+.gitattributes
+webpack.*
+tsconfig.*
