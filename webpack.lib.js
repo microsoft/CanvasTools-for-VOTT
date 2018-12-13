@@ -5,7 +5,7 @@ module.exports = {
     entry: './src/canvastools/ts/CanvasTools.ts',
     output: {
         filename: 'ct.js',
-        path: path.resolve(__dirname, './lib/webpack'),
+        path: path.resolve(__dirname, './dist'),
         libraryTarget: 'umd',
         library: 'CanvasTools',
     },

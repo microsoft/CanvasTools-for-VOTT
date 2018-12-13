@@ -14,7 +14,7 @@
         "baseUrl": "src",
         "paths": {
         },
-        "outDir": "lib/js"
+        "outDir": "dist"
     },
     "include": [     
         "src/canvastools/ts/*.ts"

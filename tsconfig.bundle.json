@@ -15,7 +15,7 @@
         "paths": {
         },
         /* "outDir": "./../bundle/js/" */
-        "outFile": "./lib/bundle/amd/ct.js"
+        "outFile": "./lib/ct.js"
     },
     "include": [     
         "./src/canvastools/ts/*.ts"
