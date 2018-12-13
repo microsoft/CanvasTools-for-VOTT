@@ -42,12 +42,7 @@
         editor.onSelectionEnd = (commit) => {
             let r = commit.boundRect;
             
-            let tags = 
-                (Math.random() < 0.3) ?        
-                    new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
-                ((Math.random() > 0.5) ? 
-                    new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
-                    new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
+            let tags = generateTagDescriptor();
 
             if (commit.meta !== undefined && commit.meta.point !== undefined) {
                 let point = commit.meta.point;
@@ -55,6 +50,27 @@
             } else {
                 editor.RM.addRectRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(r.x1, r.y1), new ct.Core.Point2D(r.x2, r.y2), tags);
             }
+        }
+
+        let primaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "Awesome" : "Brilliante",
+                        Math.floor(Math.random() * 360.0));
+        let secondaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "Yes" : "No",
+                        Math.floor(Math.random() * 360.0));
+        let ternaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "one" : "two",
+                        Math.floor(Math.random() * 360.0));
+
+        function generateTagDescriptor() {
+            let tags = 
+                (Math.random() < 0.3) ?        
+                    new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
+                ((Math.random() > 0.5) ? 
+                    new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
+                    new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
+
+            return tags
         }
         
         editor.onRegionMove = (id, x, y, width, height) => {

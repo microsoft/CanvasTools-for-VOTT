@@ -45,10 +45,10 @@ Add container elements to host SVG elements for the toolbar and the editor.
 ```html
 <div id="ctZone">
     <div id="toolbarzone"></div>
-        <div id="selectionzone">
-            <div id="editorzone"></div>
-        </div>
+    <div id="selectionzone">
+        <div id="editorzone"></div>
     </div>
+</div>
 ```
 
 Initiate Editor-object from the CanvasTools.
@@ -70,28 +70,12 @@ Correct the path to toolbar icons based on the structure of your project.
 Add a callback for `onSelectionEnd` event to define what should happen when a new region is selected. Usually at the end of processing new region you want to add it actuall to the screen. Use `.RM.addPointRegion` to register point-based regions, and `.RM.addRectRegion` to register box-based regions.
 
 ```js
-// Random tags generation
-let primaryTag = new ct.Core.Tag(
-                    (Math.random() > 0.5) ? "Awesome" : "Brilliante",
-                     Math.floor(Math.random() * 360.0));
-let secondaryTag = new ct.Core.Tag(
-                   (Math.random() > 0.5) ? "Yes" : "No",
-                    Math.floor(Math.random() * 360.0));
-let ternaryTag = new ct.Core.Tag(
-                 (Math.random() > 0.5) ? "one" : "two",
-                  Math.floor(Math.random() * 360.0));
-
 // Callback for onSelectionEnd
 editor.onSelectionEnd = (commit) => {
     let r = commit.boundRect;
   
     // Build a random tags collection
-    let tags =
-        (Math.random() < 0.3) ?
-         new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
-        ((Math.random() > 0.5) ?
-         new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
-         new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
+    let tags = generateTagDescriptor();
 
     // Add new region to the Editor based on selection type
     if (commit.meta !== undefined && commit.meta.point !== undefined) {
@@ -100,6 +84,27 @@ editor.onSelectionEnd = (commit) => {
     } else {
         editor.RM.addRectRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(r.x1, r.y1), new ct.Core.Point2D(r.x2, r.y2), tags);
     }
+}
+
+// Generate random tags
+let primaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "Awesome" : "Brilliante",
+                        Math.floor(Math.random() * 360.0));
+let secondaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "Yes" : "No",
+                        Math.floor(Math.random() * 360.0));
+let ternaryTag = new ct.Core.Tag(
+                        (Math.random() > 0.5) ? "one" : "two",
+                        Math.floor(Math.random() * 360.0));
+
+function generateTagDescriptor() {
+    let tags = (Math.random() < 0.3) ?        
+                    new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
+                ((Math.random() > 0.5) ? 
+                    new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
+                    new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
+
+    return tags
 }
 ```
 
