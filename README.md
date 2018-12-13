@@ -1,6 +1,6 @@
 # CanvasTools librarary for VoTT
 
-`ct.js` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelemtns the following core features:
+CanvasTools is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelements the following core features:
 
 * Region (box) selection & manipulation
 * Filters pipeline for underlaying canvas element
