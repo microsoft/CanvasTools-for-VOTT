@@ -80,10 +80,10 @@ editor.onSelectionEnd = (commit) => {
     let r = commit.boundRect;
   
     // Build a random tags collection
-    let tags = 
-        (Math.random() < 0.3) ?        
+    let tags =
+        (Math.random() < 0.3) ?
          new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
-        ((Math.random() > 0.5) ? 
+        ((Math.random() > 0.5) ?
          new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
          new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
 
