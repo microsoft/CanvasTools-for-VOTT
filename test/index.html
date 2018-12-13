@@ -20,7 +20,7 @@
 <script src="./js/ct.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
-        var ct = CanvasTools.CanvasTools;
+        var ct = CanvasTools;
         var sz = document.getElementById("editorzone");
         var tz = document.getElementById("toolbarzone");
 
@@ -28,16 +28,6 @@
         editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 
         var incrementalRegionID = 100;
-
-        let primaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "Awesome" : "Brilliante",
-                        Math.floor(Math.random() * 360.0));
-            let secondaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "Yes" : "No",
-                        Math.floor(Math.random() * 360.0));
-            let ternaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "one" : "two",
-                        Math.floor(Math.random() * 360.0));
 
         editor.onSelectionEnd = (commit) => {
             let r = commit.boundRect;
