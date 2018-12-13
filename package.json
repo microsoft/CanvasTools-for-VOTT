@@ -1,9 +1,9 @@
 {
   "name": "vott-ct",
-  "version": "2.0.3",
+  "version": "2.0.7",
   "description": "CanvasTools editor for the VoTT project",
-  "main": "./lib/ct.js",
-  "types" : "./lib/ct.d.ts",
+  "main": "./lib/webpack/ct.js",
+  "types": "./lib/webpack/ct.d.ts",
   "scripts": {
     "webpack-test": "webpack --config webpack.test.js",
     "webpack-lib": "webpack --config webpack.lib.js && webpack --config webpack.lib.min.js",
@@ -14,15 +14,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kichinsky/CanvasTools-for-VOTT"
+    "url": "git+https://github.com/kichinsky/CanvasTools-for-VOTT.git"
   },
   "bugs": {
     "url": "https://github.com/kichinsky/CanvasTools-for-VOTT/issues"
-   },
-  "homepage":"https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
-
-  "dependencies": {    
-    "snapsvg": "^0.5.1"    
+  },
+  "homepage": "https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
+  "dependencies": {
+    "snapsvg": "^0.5.1"
   },
   "devDependencies": {
     "tsconfig-paths-webpack-plugin": "^3.2.0",
@@ -35,8 +34,5 @@
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.1.4"
-  },
-  "files": [
-    "./lib/**/*"
-  ]
+  }
 }
