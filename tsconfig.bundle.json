@@ -14,10 +14,10 @@
         "baseUrl": "src",
         "paths": {
         },
-       /*  "outDir": "lib/js" */
-        "outFile": "lib/js/ct.amd.js"
+        /* "outDir": "./../bundle/js/" */
+        "outFile": "./../bundle/ct.js"
     },
     "include": [     
-        "src/canvastools/ts/CanvasTools.ts"
+        "./*.ts"
     ]
 }

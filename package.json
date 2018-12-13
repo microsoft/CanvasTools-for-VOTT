@@ -5,7 +5,7 @@
   "scripts": {
     "test": "webpack --config webpack.test.js",
     "lib": "webpack --config webpack.lib.js & webpack --config webpack.lib.min.js",
-    "typings": "tsc --project tsconfig.declarations.json"
+    "bundle-ts": "tsc --project ./tsconfig.bundle.json"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",

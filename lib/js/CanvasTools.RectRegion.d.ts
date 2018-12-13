@@ -1,0 +1,37 @@
+import { IRect } from "./Interface/IRect";
+import { IPoint2D } from "./Interface/IPoint2D";
+import { RegionComponent, ManipulationFunction } from "./CanvasTools.RegionComponent";
+import { TagsDescriptor } from "./Core/CanvasTools.Tags";
+import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
+import * as Snap from "snapsvg";
+export declare class RectRegion extends RegionComponent {
+    area: number;
+    private paperRects;
+    node: Snap.Element;
+    private dragNode;
+    private anchorsNode;
+    private tagsNode;
+    private toolTip;
+    private UI;
+    tags: TagsDescriptor;
+    ID: string;
+    regionID: string;
+    private styleID;
+    private styleSheet;
+    isSelected: boolean;
+    private tagsUpdateOptions;
+    onChange: Function;
+    constructor(paper: Snap.Paper, rect: IRect, paperRect: IRect, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions);
+    private buildOn;
+    private s8;
+    private insertStyleSheet;
+    removeStyles(): void;
+    private onInternalChange;
+    updateTags(tags: TagsDescriptor, options?: TagsUpdateOptions): void;
+    move(p: IPoint2D): void;
+    resize(width: number, height: number): void;
+    select(): void;
+    unselect(): void;
+    freeze(): void;
+    unfreeze(): void;
+}

@@ -1,39 +1,37 @@
-/// <reference types="snapsvg" />
-export * from "./Base/CanvasTools.Base.Interfaces";
-import IBase = require("./Base/CanvasTools.Base.Interfaces");
-import Point2D = require("./Base/CanvasTools.Base.Point2D");
-import Rect = require("./Base/CanvasTools.Base.Rect");
-import Tags = require("./Base/CanvasTools.Base.Tags");
-
-import SelectionTool = require("./CanvasTools.Selection");
-import FilterTool = require("./CanvasTools.Filter");
-import ToolbarTools = require("./CanvasTools.Toolbar");
-
-import RegionTools = require("./Regions/CanvasTools.Regions.RegionsManager");
-import PointRegion = require("./Regions/CanvasTools.Regions.PointRegion");
-import RectRegion = require("./Regions/CanvasTools.Regions.RectRegion");
-
-import EditorTools = require("./CanvasTools.Editor");
+import { Toolbar as CTToolbar, ToolbarItemType } from "./CanvasTools.Toolbar";
+import { RegionsManager } from "./CanvasTools.RegionsManager";
+import { PointRegion } from "./CanvasTools.PointRegion";
+import { RectRegion } from "./CanvasTools.RectRegion";
+import { AreaSelector, SelectionMode } from "./CanvasTools.Selection";
+import { FilterPipeline } from "./CanvasTools.Filter";
+import { RegionComponent } from "./CanvasTools.RegionComponent";
+import { Rect } from "./Core/CanvasTools.Rect";
+import { Point2D } from "./Core/CanvasTools.Point2D";
+import { TagsDescriptor, Tag } from "./Core/CanvasTools.Tags";
+import { Editor as CTEditor } from "./CanvasTools.Editor";
+import * as Snap from "snapsvg";
 
 export module CanvasTools {
-    export const Base = {
-        Point: Point2D.CanvasTools.Base.Point,
-        Rect: Rect.CanvasTools.Base.Rect,
-        Tags: Tags.CanvasTools.Base.Tags
-    } 
-
-    export const Selection = SelectionTool.CanvasTools.Selection;
-    export const Region = {
-        RegionsManager: RegionTools.CanvasTools.Region.RegionsManager,
-        PointRegion: PointRegion.CanvasTools.Region.PointRegion.PointRegion,
-        RectRegion: RectRegion.CanvasTools.Region.RectRegion.RectRegion
+    export const Core = {
+        Rect: Rect,
+        Point2D: Point2D,
+        TagsDescriptor: TagsDescriptor,
+        Tag: Tag
     }
-    export const Filter = FilterTool.CanvasTools.Filter;
-    export const Toolbar = ToolbarTools.CanvasTools.Toolbar;
 
-    export const Editor = EditorTools.CanvasTools.Editor.Editor
+    export const Selection = {
+        AreaSelector: AreaSelector,
+        SelectionMode: SelectionMode
+    }
+    export const Region = {
+        RegionsManager: RegionsManager,
+        PointRegion: PointRegion,
+        RectRegion: RectRegion
+    }
+    export const Filter = FilterPipeline;
+    export const Editor = CTEditor;
+    export const Toolbar = CTToolbar;
 }
-
 
 /* CSS */
 import "./../css/canvastools.css";
