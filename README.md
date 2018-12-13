@@ -105,16 +105,7 @@ Once a background image for tagging task is loaded (or a video element is ready)
 let imagePath = "./../images/background-forest-v.jpg";
 let image = new Image();
 image.addEventListener("load", (e) => {
-    // Create buffer
-    let buffCnvs = document.createElement("canvas");
-    let context = buffCnvs.getContext("2d");
-    buffCnvs.width = e.target.width;
-    buffCnvs.height = e.target.height;
-
-    // Fill buffer
-    context.drawImage(e.target, 0, 0, buffCnvs.width, buffCnvs.height);
-
-    editor.addContentSource(buffCnvs);
+    editor.addContentSource(e.target);
 });
 image.src = imagePath;
 ```
