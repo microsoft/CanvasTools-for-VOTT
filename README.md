@@ -11,7 +11,13 @@ CanvasTools is one of the UI modules used in the [VoTT project](https://github.c
 * CanvasTools heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with CanvasTools into one `ct.js` file, including also styles.
 * Current version of the library depends on some features (e.g., masks-support in SVG) that are not fully cross-browser, but targeting Electron (Chromium).
 
-## Hot to use
+## How to use
+
+### Install npm package
+
+```npm
+npm i vott-ct
+```
 
 ### Add library to the app
 
