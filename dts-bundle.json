@@ -1,0 +1,8 @@
+{
+    "name": "CanvasTools",
+    "separator": "/",
+    "main": "./dist/**/*.d.ts",
+    "out": "ct.d.ts",
+    "removeSource": true,
+    "outputAsModuleFolder": false
+}

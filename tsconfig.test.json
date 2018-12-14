@@ -3,8 +3,8 @@
         "target": "es2015",
         "module": "commonjs",
 
-        "declaration": true,
-        "removeComments": true,
+        "declaration": false,
+        "removeComments": false,
         "preserveConstEnums": true,
 
         "isolatedModules": false,
