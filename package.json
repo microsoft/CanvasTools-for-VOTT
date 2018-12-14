@@ -1,9 +1,9 @@
 {
   "name": "vott-ct",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "description": "CanvasTools editor for the VoTT project",
-  "main": "./dist/ct.js",
-  "types": "./dist/ct.d.ts",
+  "main": "./lib/ct.js",
+  "types": "./lib/ct.d.ts",
   "scripts": {
     "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && tsc --project ./tsconfig.bundle.json",
     "prepare": "npm run clean-dist && npm run clean-lib && npm run bundle-lib && npm run webpack-dist",
