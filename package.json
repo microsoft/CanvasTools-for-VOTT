@@ -1,14 +1,14 @@
 {
   "name": "vott-ct",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./dist/ct.js",
   "types": "./lib/ct.d.ts",
   "scripts": {
     "webpack-test": "webpack --config webpack.test.js",
-    "webpack-lib": "webpack --config webpack.lib.js && webpack --config webpack.lib.min.js",
-    "bundle": "cpx ./src/canvastools/{icons,css}/* ./lib/ && tsc --project ./tsconfig.bundle.json",
-    "prepare": "npm run bundle && npm run webpack-lib"
+    "webpack-dist": "webpack --config webpack.lib.js && webpack --config webpack.lib.min.js && webpack --config webpack.lib.dev.js",
+    "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && tsc --project ./tsconfig.bundle.json",
+    "prepare": "npm run bundle-lib && npm run webpack-dist"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",
