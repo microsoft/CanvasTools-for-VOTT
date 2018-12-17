@@ -37,6 +37,10 @@
             if (commit.meta !== undefined && commit.meta.point !== undefined) {
                 let point = commit.meta.point;
                 editor.RM.addPointRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(point.x, point.y), tags);
+            } else if (commit.meta !== undefined && commit.meta.polyline !== undefined) {
+                let polyline = commit.meta.polyline;
+                let points = polyline.map((p) => { return new ct.Core.Point2D(p.x, p.y) });
+                editor.RM.addPolylineRegion((incrementalRegionID++).toString(), points, tags);
             } else {
                 editor.RM.addRectRegion((incrementalRegionID++).toString(), new ct.Core.Point2D(r.x1, r.y1), new ct.Core.Point2D(r.x2, r.y2), tags);
             }
