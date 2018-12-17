@@ -31,7 +31,7 @@
     "snapsvg": "^0.5.1"
   },
   "devDependencies": {
-    "@types/snapsvg": "^0.4.32",
+    "@types/snapsvg": "^0.4.35",
     "css-loader": "^1.0.1",
     "del-cli": "^1.1.0",
     "dts-bundle": "^0.7.3",
