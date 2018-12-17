@@ -16,9 +16,6 @@ class AnchorsElement extends RegionComponent {
     private anchors: { TL: Snap.Element, TR: Snap.Element, BR: Snap.Element, BL: Snap.Element };
     private ghostAnchor: Snap.Element;
 
-    // Change Notifier
-    private onChange: ChangeFunction;
-
     constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.x = x;
@@ -129,7 +126,7 @@ class AnchorsElement extends RegionComponent {
 
         this.flipActiveAnchor(flipX, flipY);
 
-        this.onChange(x, y, width, height, ChangeEventType.MOVING);
+        this.onChange(this, x, y, width, height, [new Point2D(x, y)], ChangeEventType.MOVING);
     }
 
     private activeAnchor: string;
@@ -293,12 +290,12 @@ class AnchorsElement extends RegionComponent {
     private onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
 
-        this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEBEGIN);
+        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEBEGIN);
     }
 
     private onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-        this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEEND);
+        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEEND);
     }
 
     public freeze() {
@@ -644,9 +641,6 @@ class DragElement extends RegionComponent {
     private dragRect: Snap.Element;
     private isDragged: boolean = false;
 
-    // Change Notifier
-    private onChange: ChangeFunction;
-
     constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.x = x;
@@ -713,13 +707,13 @@ class DragElement extends RegionComponent {
                 p = p.boundToRect(this.paperRect);
             }
             //this.move(p);            
-            this.onChange(p.x, p.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVING);
+            this.onChange(this, p.x, p.y, this.boundRect.width, this.boundRect.height, [new Point2D(p.x, p.y)], ChangeEventType.MOVING);
         }
     };
 
     private rectDragEnd() {
         this.dragOrigin = null;
-        this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEEND);
+        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEEND);
     }
 
     private subscribeToDragEvents() {
@@ -752,7 +746,7 @@ class DragElement extends RegionComponent {
             if (!this.isFrozen) {
                 this.dragRect.node.setPointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
-                this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.MOVEBEGIN, multiselection);
+                this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEBEGIN, multiselection);
             }
         });
 
@@ -760,7 +754,7 @@ class DragElement extends RegionComponent {
             if (!this.isFrozen) {
                 this.dragRect.node.releasePointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
-                this.onChange(this.x, this.y, this.boundRect.width, this.boundRect.height, ChangeEventType.SELECTIONTOGGLE, multiselection);
+                this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.SELECTIONTOGGLE, multiselection);
             }
         });
     }
@@ -802,7 +796,6 @@ export class RectRegion extends RegionComponent {
 
     // Styling options
     private tagsUpdateOptions: TagsUpdateOptions;
-    public onChange: Function;
 
     constructor(paper: Snap.Paper, paperRect: IRect = null, point: Point2D, rect: IRect, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
@@ -878,14 +871,14 @@ export class RectRegion extends RegionComponent {
         document.getElementById(this.styleID).remove();
     }
 
-    private onInternalChange(x: number, y: number, width: number, height: number, state: string, multiSelection: boolean = false) {
+    private onInternalChange(component: RegionComponent, x: number, y: number, width: number, height: number, points: Array<Point2D>, state: ChangeEventType, multiSelection: boolean = false) {
         if (this.x != x || this.y != y) {
             this.move(new Point2D(x, y));
         }
         if (this.boundRect.width != width || this.boundRect.height != height) {
             this.resize(width, height);
         }
-        this.onChange(this, state, multiSelection);
+        this.onChange(this, x, y, width, height, points.concat([new Point2D(x + width, y + height)]), state, multiSelection);
     }
 
     public updateTags(tags: TagsDescriptor, options?: TagsUpdateOptions) {

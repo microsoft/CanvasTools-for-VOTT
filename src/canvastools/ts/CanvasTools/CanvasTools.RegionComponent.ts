@@ -13,7 +13,7 @@ export type ManipulationFunction = (UIElement?: RegionComponent) => void;
 
 export enum ChangeEventType { MOVEEND, MOVING, MOVEBEGIN, SELECTIONTOGGLE };
 
-export type ChangeFunction = (x: number, y: number, width: number, height: number, eventType?: ChangeEventType, multiSelection?: boolean) => void;
+export type ChangeFunction = (region: RegionComponent, x: number, y: number, width: number, height: number, points?: Array<Point2D>, eventType?: ChangeEventType, multiSelection?: boolean) => void;
 
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
     protected paper: Snap.Paper;
@@ -69,6 +69,8 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         this.x = point.x;
         this.y = point.y;
     }
+
+    public onChange: ChangeFunction;
 
     protected subscribeToEvents(listeners: Array<EventDescriptor>) {
         listeners.forEach(e => {

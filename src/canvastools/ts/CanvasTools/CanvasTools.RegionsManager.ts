@@ -181,7 +181,7 @@ export class RegionsManager {
     }
 
     private registerRegion(region:Region) {
-        region.onChange = this.onRegionUpdate.bind(this);
+        region.onChange = this.onRegionChange.bind(this);
 
         this.unselectRegions();
         region.select();
@@ -241,7 +241,7 @@ export class RegionsManager {
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
         region.area = rect.height * rect.width;
-        region.onChange = this.onRegionUpdate.bind(this);
+        region.onChange = this.onRegionChange.bind(this);
 
         region.updateTags(region.tags, this.tagsUpdateOptions);
         this.regionManagerLayer.add(region.node);
@@ -537,7 +537,7 @@ export class RegionsManager {
 
     private justManipulated = false;
 
-    private onRegionUpdate(region: Region, state: ChangeEventType, multiSelection: boolean) {
+    private onRegionChange(region: Region, x: number, y: number, width: number, height: number, points: Array<Point2D>, state: ChangeEventType, multiSelection: boolean = false) {
         // resize or drag begin
         if (state === ChangeEventType.MOVEBEGIN) {
             if (!multiSelection) {
