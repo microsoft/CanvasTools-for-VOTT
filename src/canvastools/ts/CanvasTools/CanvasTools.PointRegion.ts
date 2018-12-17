@@ -367,12 +367,12 @@ export class PointRegion extends RegionComponent {
     private tagsUpdateOptions: TagsUpdateOptions;
     public onChange: Function;
 
-    constructor(paper: Snap.Paper, paperRect: IRect = null, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: IRect = null, point: Point2D, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
         this.boundRect = new Rect(0, 0);
 
-        this.x = 0;
-        this.y = 0;
+        this.x = point.x;
+        this.y = point.y;
         this.area = 1.0;
         this.ID = id;
         this.tags = tagsDescriptor;
@@ -394,6 +394,7 @@ export class PointRegion extends RegionComponent {
         this.tagsUpdateOptions = tagsUpdateOptions;
 
         this.buildOn(paper);
+        this.move(point);
     }
 
     private buildOn(paper: Snap.Paper) {

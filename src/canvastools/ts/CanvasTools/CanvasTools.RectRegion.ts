@@ -804,12 +804,12 @@ export class RectRegion extends RegionComponent {
     private tagsUpdateOptions: TagsUpdateOptions;
     public onChange: Function;
 
-    constructor(paper: Snap.Paper, rect: IRect, paperRect: IRect = null, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: IRect = null, point: Point2D, rect: IRect, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
         this.boundRect = rect;
 
-        this.x = 0;
-        this.y = 0;
+        this.x = point.x;
+        this.y = point.y;
         this.ID = id;
         this.tags = tagsDescriptor;
 
@@ -835,8 +835,9 @@ export class RectRegion extends RegionComponent {
         this.styleID = `region_${this.regionID}_style`;
         this.styleSheet = this.insertStyleSheet();
         this.tagsUpdateOptions = tagsUpdateOptions;
-
+        
         this.buildOn(paper);
+        this.move(point);
     }
 
     private buildOn(paper: Snap.Paper) {

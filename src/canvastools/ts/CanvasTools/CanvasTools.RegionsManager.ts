@@ -8,10 +8,11 @@ import { TagsDescriptor } from "./Core/CanvasTools.Tags";
 import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
 import { RectRegion } from "./CanvasTools.RectRegion";
 import { PointRegion } from "./CanvasTools.PointRegion";
+import { PolylineRegion } from "./CanvasTools.PolylineRegion";
 import { MenuElement } from "./CanvasTools.RegionMenu";
 import * as Snap from "snapsvg";
 
-type Region = RectRegion | PointRegion;
+type Region = RectRegion | PointRegion | PolylineRegion;
 
 export class RegionsManager {
     private baseParent: SVGSVGElement;
@@ -179,6 +180,18 @@ export class RegionsManager {
         });
     }
 
+    private registerRegion(region:Region) {
+        region.onChange = this.onRegionUpdate.bind(this);
+
+        this.unselectRegions();
+        region.select();
+
+        this.regionManagerLayer.add(region.node);
+        this.regions.push(region);
+
+        this.menu.showOnRegion(region);
+    }
+
     // SETUP NEW REGION
     public addRectRegion(id: string, pointA: IPoint2D, pointB: IPoint2D, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
@@ -188,55 +201,46 @@ export class RegionsManager {
         let w = Math.abs(pointA.x - pointB.x);
         let h = Math.abs(pointA.y - pointB.y);
 
-        let region = new RectRegion(this.paper, new Rect(w, h), this.paperRect, id, tagsDescriptor,
+        let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), new Rect(w, h), id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
 
         region.area = w * h;
-        region.move(new Point2D(x, y));
 
-        region.onChange = this.onRegionUpdate.bind(this);
-
-        this.unselectRegions();
-        region.select();
-
-        this.regionManagerLayer.add(region.node);
-        this.regions.push(region);
-
-        this.menu.showOnRegion(region);
+        this.registerRegion(region);
     }
 
     public addPointRegion(id: string, point: IPoint2D, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let region = new PointRegion(this.paper, this.paperRect, id, tagsDescriptor,
+        let region = new PointRegion(this.paper, this.paperRect, point, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
 
-        region.move(point);
+        this.registerRegion(region);
+    }
 
-        region.onChange = this.onRegionUpdate.bind(this);
+    public addPolylineRegion(id: string, points: Array<IPoint2D>, tagsDescriptor: TagsDescriptor) {
+        this.menu.hide();
 
-        this.unselectRegions();
-        region.select();
+        let region = new PolylineRegion(this.paper, this.paperRect, points, id, tagsDescriptor,
+            this.onManipulationBegin_local.bind(this),
+            this.onManipulationEnd_local.bind(this),
+            this.tagsUpdateOptions);
 
-        this.regionManagerLayer.add(region.node);
-        this.regions.push(region);
-
-        this.menu.showOnRegion(region);
+        this.registerRegion(region);
     }
 
     // REGION CREATION
     public drawRegion(x: number, y: number, rect: IRect, id: string, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
-        let region = new RectRegion(this.paper, rect, this.paperRect, id, tagsDescriptor,
+        let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), rect, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
         region.area = rect.height * rect.width;
-        region.move(new Point2D(x, y));
         region.onChange = this.onRegionUpdate.bind(this);
 
         region.updateTags(region.tags, this.tagsUpdateOptions);
