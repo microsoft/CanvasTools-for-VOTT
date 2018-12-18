@@ -7,6 +7,7 @@ import { FilterPipeline, InvertFilter, GrayscaleFilter } from "./CanvasTools/Can
 import { RegionComponent } from "./CanvasTools/CanvasTools.RegionComponent";
 import { Rect } from "./CanvasTools/Core/CanvasTools.Rect";
 import { Point2D } from "./CanvasTools/Core/CanvasTools.Point2D";
+import { RegionData } from "./CanvasTools/Core/CanvasTools.RegionData";
 import { TagsDescriptor, Tag } from "./CanvasTools/Core/CanvasTools.Tags";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
 
@@ -16,6 +17,7 @@ export module CanvasTools {
     export const Core = {
         Rect: Rect,
         Point2D: Point2D,
+        RegionData: RegionData,
         TagsDescriptor: TagsDescriptor,
         Tag: Tag
     }
