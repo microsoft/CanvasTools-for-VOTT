@@ -149,14 +149,14 @@ class AnchorsElement extends RegionComponent {
             if (this.activeAnchor[1] == "R") {
                 this.pointOrigin.x += this.rectOrigin.width;
             }
-            this.rectOrigin.width = 0;
+            this.rectOrigin.resize(0, this.rectOrigin.height);
         }
 
         if (flipY) {
             if (this.activeAnchor[0] == "B") {
                 this.pointOrigin.y += this.rectOrigin.height;
             }
-            this.rectOrigin.height = 0;
+            this.rectOrigin.resize(this.rectOrigin.width, 0);
         }
     }
 
@@ -906,8 +906,7 @@ export class RectRegion extends RegionComponent {
         super.resize(width, height);
         this.area = width * height;
 
-        this.paperRects.actual.width = this.paperRects.host.width - width;
-        this.paperRects.actual.height = this.paperRects.host.height - height;
+        this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
 
         this.UI.forEach((element) => {
             element.resize(width, height);
