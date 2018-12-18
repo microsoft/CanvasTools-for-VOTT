@@ -9,7 +9,8 @@ import { Rect } from "./CanvasTools/Core/CanvasTools.Rect";
 import { Point2D } from "./CanvasTools/Core/CanvasTools.Point2D";
 import { TagsDescriptor, Tag } from "./CanvasTools/Core/CanvasTools.Tags";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
-import * as Snap from "snapsvg";
+
+import * as Snap from "snapsvg-cjs";
 
 export module CanvasTools {
     export const Core = {
