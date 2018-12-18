@@ -6,6 +6,7 @@ import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 
 import * as Snap from "snapsvg-cjs";
 import { IMovable } from "./Interface/IMovable";
+import { RegionData, RegionDataType } from "./Core/CanvasTools.RegionData";
 
 abstract class ElementPrototype implements IHideable, IResizable {
     protected paper: Snap.Paper;
@@ -201,19 +202,9 @@ class MaskElement extends ElementPrototype {
 export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE };
 export enum SelectionModificator { RECT, SQUARE };
 
-type SelectionCommit = {
-    boundRect: {
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number
-    },
-    meta?: Object
-}
-
 type SelectorCallbacks = {
     onSelectionBegin: () => void,
-    onSelectionEnd: (commit: SelectionCommit) => void,
+    onSelectionEnd: (regionData: RegionData) => void,
     onLocked?: () => void,
     onUnlocked?: () => void
 }
@@ -405,14 +396,12 @@ export class RectSelector extends SelectorPrototype {
                 this.hideAll([this.crossB, this.mask]);
 
                 if (typeof this.callbacks.onSelectionEnd === "function") {
-                    this.callbacks.onSelectionEnd({
-                        boundRect: {
-                            x1: this.crossA.x,
-                            y1: this.crossA.y,
-                            x2: this.crossB.x,
-                            y2: this.crossB.y
-                        }
-                    });
+                    let x = Math.min(this.crossA.x, this.crossB.x);
+                    let y = Math.min(this.crossA.y, this.crossB.y);
+                    let w = Math.abs(this.crossA.x - this.crossB.x);
+                    let h = Math.abs(this.crossA.y - this.crossB.y);
+
+                    this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
                 }
             }
             else {
@@ -421,14 +410,12 @@ export class RectSelector extends SelectorPrototype {
                     this.hideAll([this.crossB, this.mask]);
 
                     if (typeof this.callbacks.onSelectionEnd === "function") {
-                        this.callbacks.onSelectionEnd({
-                            boundRect: {
-                                x1: this.crossA.x,
-                                y1: this.crossA.y,
-                                x2: this.crossB.x,
-                                y2: this.crossB.y
-                            }
-                        });
+                        let x = Math.min(this.crossA.x, this.crossB.x);
+                        let y = Math.min(this.crossA.y, this.crossB.y);
+                        let w = Math.abs(this.crossA.x - this.crossB.x);
+                        let h = Math.abs(this.crossA.y - this.crossB.y);
+    
+                        this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
                     }
                     this.moveCross(this.crossA, p);
                     this.moveCross(this.crossB, p);
@@ -603,14 +590,13 @@ export class RectCopySelector extends SelectorPrototype {
                 let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
                 p1 = p1.boundToRect(this.boundRect);
                 p2 = p2.boundToRect(this.boundRect);
-                this.callbacks.onSelectionEnd({
-                    boundRect: {
-                        x1: p1.x,
-                        y1: p1.y,
-                        x2: p2.x,
-                        y2: p2.y
-                    }
-                });
+
+                let x = Math.min(p1.x, p2.x);
+                let y = Math.min(p1.y, p2.y);
+                let w = Math.abs(p1.x - p2.x);
+                let h = Math.abs(p1.y - p2.y);
+
+                this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(p1.x, p1.y, this.copyRect.width, this.copyRect.height));
             }
         });
     }
@@ -759,24 +745,7 @@ export class PointSelector extends SelectorPrototype {
     private onPointerUp(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             if (typeof this.callbacks.onSelectionEnd === "function") {
-                let p1 = new Point2D(this.crossA.x - this.pointRadius, this.crossA.y - this.pointRadius);
-                let p2 = new Point2D(this.crossA.x + this.pointRadius, this.crossA.y + this.pointRadius);
-                p1 = p1.boundToRect(this.boundRect);
-                p2 = p2.boundToRect(this.boundRect);
-                this.callbacks.onSelectionEnd({
-                    boundRect: {
-                        x1: p1.x,
-                        y1: p1.y,
-                        x2: p2.x,
-                        y2: p2.y
-                    },
-                    meta: {
-                        point: {
-                            x: this.crossA.x,
-                            y: this.crossA.y
-                        }
-                    }
-                });
+                this.callbacks.onSelectionEnd(RegionData.BuildPointRegionData(this.crossA.x, this.crossA.y));
             }
         });
     }
@@ -999,17 +968,7 @@ export class PolylineSelector extends SelectorPrototype {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             let box = this.polyline.getBBox();
 
-            this.callbacks.onSelectionEnd({
-                boundRect: {
-                    x1: box.x,
-                    y1: box.y,
-                    x2: box.x2,
-                    y2: box.y2
-                },
-                meta: {
-                    polyline: this.points
-                }
-            });
+            this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height, this.points.map(p => p.copy()), RegionDataType.Polyline));
         }
         this.reset();
     }
