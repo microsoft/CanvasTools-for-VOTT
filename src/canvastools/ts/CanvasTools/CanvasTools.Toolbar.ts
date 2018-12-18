@@ -1,5 +1,5 @@
-import * as Snap from "snapsvg";
 import { Rect } from "./Core/CanvasTools.Rect";
+import * as Snap from "snapsvg-cjs";
 
 export type IconCallback = (action: string) => void;
 
@@ -107,7 +107,7 @@ export class ToolbarSelectIcon extends ToolbarIconPrototype {
         this.iconImage = this.paper.g();
         if (this.description.iconUrl !== undefined) {
             Snap.load(this.description.iconUrl, (fragment) => {
-                this.iconImage.append(fragment);
+                this.iconImage.append(<any>fragment);
                 this.iconImageSVG = this.iconImage.children().find((element) => {
                     return (element.type === "svg");
                 });
@@ -187,7 +187,7 @@ export class ToolbarSwitchIcon extends ToolbarIconPrototype {
         this.iconImage = this.paper.g();
         if (this.description.iconUrl !== undefined) {
             Snap.load(this.description.iconUrl, (fragment) => {
-                this.iconImage.append(fragment);
+                this.iconImage.append(<any>fragment);
                 this.iconImageSVG = this.iconImage.children().find((element) => {
                     return (element.type === "svg");
                 });

@@ -2,10 +2,11 @@ import { IHideable } from "./Interface/IHideadble";
 import { IResizable } from "./Interface/IResizable";
 import { IRect } from "./Interface/IRect";
 import { IPoint2D } from "./Interface/IPoint2D";
-import * as Snap from "snapsvg";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
+
+import * as Snap from "snapsvg-cjs";
 
 abstract class ElementPrototype implements IHideable, IResizable {
     protected paper: Snap.Paper;

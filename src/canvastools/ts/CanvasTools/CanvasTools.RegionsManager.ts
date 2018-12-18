@@ -10,7 +10,7 @@ import { RectRegion } from "./CanvasTools.RectRegion";
 import { PointRegion } from "./CanvasTools.PointRegion";
 import { PolylineRegion } from "./CanvasTools.PolylineRegion";
 import { MenuElement } from "./CanvasTools.RegionMenu";
-import * as Snap from "snapsvg";
+import * as Snap from "snapsvg-cjs";
 
 type Region = RectRegion | PointRegion | PolylineRegion;
 

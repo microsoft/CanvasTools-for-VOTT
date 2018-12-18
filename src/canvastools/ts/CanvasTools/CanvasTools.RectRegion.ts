@@ -1,12 +1,11 @@
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
+import { IMovable } from "./Interface/IMovable";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.RegionComponent";
 import { TagsDescriptor } from "./Core/CanvasTools.Tags";
 import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
-import * as Snap from "snapsvg";
+import * as Snap from "snapsvg-cjs";
 
 /*
  * AnchorsElement 
@@ -16,7 +15,7 @@ class AnchorsElement extends RegionComponent {
     private anchors: { TL: Snap.Element, TR: Snap.Element, BR: Snap.Element, BL: Snap.Element };
     private ghostAnchor: Snap.Element;
 
-    constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, rect: Rect, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.x = x;
         this.y = y;
@@ -99,8 +98,10 @@ class AnchorsElement extends RegionComponent {
         return a;
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
         this.rearrangeAnchors(this.x, this.y, this.x + this.boundRect.width, this.y + this.boundRect.height);
     }
 
@@ -118,7 +119,7 @@ class AnchorsElement extends RegionComponent {
         });
     }
 
-    private rearrangeCoord(p1: IPoint2D, p2: IPoint2D, flipX: boolean, flipY: boolean) {
+    private rearrangeCoord(p1: Point2D, p2: Point2D, flipX: boolean, flipY: boolean) {
         let x = (p1.x < p2.x) ? p1.x : p2.x;
         let y = (p1.y < p2.y) ? p1.y : p2.y;
         let width = Math.abs(p1.x - p2.x);
@@ -161,7 +162,7 @@ class AnchorsElement extends RegionComponent {
 
     private dragOrigin: Point2D;
     private pointOrigin: Point2D;
-    private rectOrigin: IRect;
+    private rectOrigin: Rect;
 
     private anchorDragBegin() {
         this.originalAnchor = this.activeAnchor;
@@ -329,7 +330,7 @@ class TagsElement extends RegionComponent {
     private styleSheet: CSSStyleSheet = null;
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect, x: number, y: number, rect: Rect, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
         this.boundRect = rect;
         this.x = x;
@@ -583,8 +584,10 @@ class TagsElement extends RegionComponent {
         }
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
 
         let size = 6;
         let cx = this.x + 0.5 * this.boundRect.width;
@@ -592,16 +595,16 @@ class TagsElement extends RegionComponent {
 
         window.requestAnimationFrame(() => {
             this.primaryTagRect.attr({
-                x: p.x,
-                y: p.y
+                x: this.x,
+                y: this.y
             });
             this.primaryTagText.attr({
-                x: p.x + 5,
-                y: p.y + this.textBox.height
+                x: this.x + 5,
+                y: this.y + this.textBox.height
             });
             this.primaryTagTextBG.attr({
-                x: p.x + 1,
-                y: p.y + 1
+                x: this.x + 1,
+                y: this.y + 1
             })
 
             // Secondary Tags
@@ -641,7 +644,7 @@ class DragElement extends RegionComponent {
     private dragRect: Snap.Element;
     private isDragged: boolean = false;
 
-    constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, rect: Rect, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.x = x;
         this.y = y;
@@ -672,12 +675,14 @@ class DragElement extends RegionComponent {
         this.node.add(this.dragRect);
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
         window.requestAnimationFrame(() => {
             this.dragRect.attr({
-                x: p.x,
-                y: p.y
+                x: this.x,
+                y: this.y
             });
         });
     }
@@ -771,7 +776,7 @@ export class RectRegion extends RegionComponent {
     public area: number;
 
     // Bound rects
-    private paperRects: { host: IRect, actual: IRect };
+    private paperRects: { host: Rect, actual: Rect };
 
     // Region components
     public node: Snap.Element;
@@ -797,7 +802,7 @@ export class RectRegion extends RegionComponent {
     // Styling options
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: IRect = null, point: Point2D, rect: IRect, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, point: Point2D, rect: Rect, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
         this.boundRect = rect;
 
@@ -838,9 +843,9 @@ export class RectRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.anchorsNode = new AnchorsElement(paper, this.x, this.y, this.boundRect, this.paperRects.host, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-        this.dragNode = new DragElement(paper, this.x, this.y, this.boundRect, this.paperRects.actual, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-        this.tagsNode = new TagsElement(paper, this.x, this.y, this.boundRect, this.paperRects.host, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.anchorsNode = new AnchorsElement(paper, this.paperRects.host, this.x, this.y, this.boundRect, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.dragNode = new DragElement(paper, this.paperRects.actual, this.x, this.y, this.boundRect, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.tagsNode = new TagsElement(paper, this.paperRects.host, this.x, this.y, this.boundRect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(<any>this.toolTip);
@@ -887,11 +892,13 @@ export class RectRegion extends RegionComponent {
         this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
 
         this.UI.forEach((element) => {
-            element.move(p);
+            element.move(arg1, arg2);
         });
     }
 

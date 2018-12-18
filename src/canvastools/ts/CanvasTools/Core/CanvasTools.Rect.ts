@@ -1,7 +1,6 @@
-import { IRect } from "./../Interface/IRect";
 import { IResizable } from "./../Interface/IResizable";
 
-export class Rect implements IRect, IResizable {
+export class Rect implements IResizable {
     public width: number;
     public height: number;
     constructor(width: number, height: number) {

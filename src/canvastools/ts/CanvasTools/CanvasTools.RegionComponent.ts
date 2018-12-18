@@ -2,12 +2,10 @@ import { IHideable } from "./Interface/IHideadble";
 import { IResizable } from "./Interface/IResizable";
 import { IMovable } from "./Interface/IMovable";
 import { IFreezable } from "./Interface/IFreezable";
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
-import * as Snap from "snapsvg";
+import * as Snap from "snapsvg-cjs";
 
 export type ManipulationFunction = (UIElement?: RegionComponent) => void;
 
@@ -17,9 +15,9 @@ export type ChangeFunction = (region: RegionComponent, x: number, y: number, wid
 
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
     protected paper: Snap.Paper;
-    protected paperRect: IRect;
+    protected paperRect: Rect;
 
-    public boundRect: IRect;
+    public boundRect: Rect;
 
     public node: Snap.Element;
 
@@ -33,7 +31,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     public onManipulationBegin: ManipulationFunction;
     public onManipulationEnd: ManipulationFunction;
 
-    constructor(paper: Snap.Paper, paperRect: IRect) {
+    constructor(paper: Snap.Paper, paperRect: Rect) {
         this.paper = paper;
         this.paperRect = paperRect;
         this.boundRect = new Rect(0, 0);
@@ -65,9 +63,17 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         this.paperRect.resize(width, height);
     }
 
-    public move(point: Point2D) {
-        this.x = point.x;
-        this.y = point.y;
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+
+    public move(arg1: any, arg2?: any): void {
+        if (typeof arg1 === "number" && typeof arg2 === "number") {
+            this.x = arg1;
+            this.y = arg2;
+        } else if (arg1.x !== undefined && arg1.y !== undefined) {
+            this.x = arg1.x;
+            this.y = arg1.y;
+        }        
     }
 
     public onChange: ChangeFunction;

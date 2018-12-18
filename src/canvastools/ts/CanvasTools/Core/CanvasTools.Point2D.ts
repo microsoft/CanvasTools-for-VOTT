@@ -1,7 +1,8 @@
 import { IRect } from "./../Interface/IRect";
-import { IPoint2D } from "./../Interface/IPoint2D";
+import { IMovable } from "./../Interface/IMovable";
+import { IBoundable } from "../Interface/IBoundable";
 
-export class Point2D implements IPoint2D {
+export class Point2D implements IMovable, IBoundable<Point2D> {
     public x: number;
     public y: number;
     constructor(x: number, y: number) {
@@ -9,6 +10,19 @@ export class Point2D implements IPoint2D {
         this.y = y;
     }
 
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+
+    public move(arg1: any, arg2?: any): void {
+        if (typeof arg1 === "number" && typeof arg2 === "number") {
+            this.x = arg1;
+            this.y = arg2;
+        } else if (arg1.x !== undefined && arg1.y !== undefined) {
+            this.x = arg1.x;
+            this.y = arg1.y;
+        }        
+    }
+    
     public boundToRect(r: IRect): Point2D {
         let newp = new Point2D(0, 0);
 

@@ -1,12 +1,11 @@
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
+import { IMovable } from "./Interface/IMovable";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.RegionComponent";
 import { TagsDescriptor } from "./Core/CanvasTools.Tags";
 import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
-import * as Snap from "snapsvg";
+import * as Snap from "snapsvg-cjs";
 
 /*
  * TagsElement 
@@ -29,9 +28,9 @@ class TagsElement extends RegionComponent {
     private styleSheet: CSSStyleSheet = null;
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, x: number, y: number, paperRect: IRect, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect, x: number, y: number, rect: Rect, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
-        this.boundRect = new Rect(0, 0);
+        this.boundRect = rect;
         this.x = x;
         this.y = y;
 
@@ -174,8 +173,10 @@ class TagsElement extends RegionComponent {
         }
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
 
         let size = 6;
         let cx = this.x;
@@ -183,8 +184,8 @@ class TagsElement extends RegionComponent {
 
         window.requestAnimationFrame(() => {
             this.primaryTagPoint.attr({
-                cx: p.x,
-                cy: p.y
+                cx: this.x,
+                cy: this.y
             });
 
             // Secondary Tags
@@ -218,7 +219,7 @@ class DragElement extends RegionComponent {
 
     private radius: number = 7;
 
-    constructor(paper: Snap.Paper, x: number, y: number, paperRect: IRect = null, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.x = x;
         this.y = y;
@@ -249,12 +250,14 @@ class DragElement extends RegionComponent {
         this.node.add(this.dragPoint);
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
         window.requestAnimationFrame(() => {
             this.dragPoint.attr({
-                cx: p.x,
-                cy: p.y
+                cx: this.x,
+                cy: this.y
             });
         });
     }
@@ -363,12 +366,15 @@ export class PolylineRegion extends RegionComponent {
     // Styling options
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: IRect = null, points: Array<Point2D>, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
+    private points: Array<Point2D>;
+
+    constructor(paper: Snap.Paper, paperRect: Rect = null, points: Array<Point2D>, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
         this.boundRect = new Rect(0, 0);
 
         this.x = points[0].x;
         this.y = points[0].y;
+        this.points = points;
         this.area = 1.0;
         this.ID = id;
         this.tags = tagsDescriptor;
@@ -398,8 +404,8 @@ export class PolylineRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.dragNode = new DragElement(paper, this.x, this.y, this.paperRect, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-        this.tagsNode = new TagsElement(paper, this.x, this.y, this.paperRect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.dragNode = new DragElement(paper, this.paperRect, this.x, this.y, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.tagsNode = new TagsElement(paper, this.paperRect, this.x, this.y, this.boundRect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(<any>this.toolTip);
@@ -445,11 +451,13 @@ export class PolylineRegion extends RegionComponent {
         this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any) {
+        super.move(arg1, arg2);
 
         this.UI.forEach((element) => {
-            element.move(p);
+            element.move(arg1, arg2);
         });
     }
 

@@ -1,7 +1,7 @@
 import { IRect } from "./Interface/IRect";
 import { IPoint2D } from "./Interface/IPoint2D";
 import { RegionComponent, ManipulationFunction } from "./CanvasTools.RegionComponent";
-import * as Snap from "snapsvg";
+import * as Snap from "snapsvg-cjs";
 
 /*
  * MenuElement 
