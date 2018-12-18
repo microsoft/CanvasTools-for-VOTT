@@ -1,6 +1,6 @@
-import { IRect } from "./../Interface/IRect";
 import { IMovable } from "./../Interface/IMovable";
 import { IBoundable } from "../Interface/IBoundable";
+import { Rect} from "./CanvasTools.Rect";
 
 export class Point2D implements IMovable, IBoundable<Point2D> {
     public x: number;
@@ -23,12 +23,16 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
         }        
     }
     
-    public boundToRect(r: IRect): Point2D {
+    public boundToRect(r: Rect): Point2D {
         let newp = new Point2D(0, 0);
 
         newp.x = (this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x);
         newp.y = (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y);
 
         return newp;
+    }
+
+    public copy(): Point2D {
+        return new Point2D(this.x, this.y);
     }
 }
