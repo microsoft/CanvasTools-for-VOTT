@@ -1,5 +1,5 @@
-import { IRect } from "./IRect";
+import { IResizable } from "./IResizable";
 
 export interface IBoundable<T> {
-    boundToRect(rect: IRect):T;
+    boundToRect(rect: IResizable):T;
 }

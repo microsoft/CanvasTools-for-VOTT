@@ -1,21 +1,28 @@
 import { IHideable } from "./Interface/IHideadble";
 import { IResizable } from "./Interface/IResizable";
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 
 import * as Snap from "snapsvg-cjs";
+import { IMovable } from "./Interface/IMovable";
 
 abstract class ElementPrototype implements IHideable, IResizable {
     protected paper: Snap.Paper;
-    protected boundRect: IRect;
+    protected boundRect: Rect;
     public node: Snap.Element;
 
     protected isVisible: boolean = true;
 
-    constructor(paper: Snap.Paper, boundRect: IRect) {
+    public get width() {
+        return this.boundRect.width;
+    }
+
+    public get height() {
+        return this.boundRect.height;
+    }
+
+    constructor(paper: Snap.Paper, boundRect: Rect) {
         this.paper = paper;
         this.boundRect = boundRect;
     }
@@ -36,13 +43,21 @@ abstract class ElementPrototype implements IHideable, IResizable {
 }
 
 
-class CrossElement extends ElementPrototype implements IPoint2D {
+class CrossElement extends ElementPrototype implements IMovable {
     private hl: Snap.Element;
     private vl: Snap.Element;
-    public x: number;
-    public y: number;
 
-    constructor(paper: Snap.Paper, boundRect: IRect) {
+    private center: Point2D;
+
+    public get x(): number {
+        return this.center.x;
+    };
+
+    public get y(): number {
+        return this.center.y;
+    };
+
+    constructor(paper: Snap.Paper, boundRect: Rect) {
         super(paper, boundRect);
         this.buildUIElements();
         this.hide();
@@ -59,16 +74,23 @@ class CrossElement extends ElementPrototype implements IPoint2D {
 
         this.hl = horizontalLine;
         this.vl = verticalLine;
-        this.x = 0;
-        this.y = 0;
+
+        this.center = new Point2D(0, 0);
     }
 
-    public boundToRect(rect: IRect): Point2D {
+    public boundToRect(rect: Rect): Point2D {
         return new Point2D(this.x, this.y).boundToRect(rect);
     }
 
-    public move(p: IPoint2D, rect: IRect, square: boolean = false, ref: IPoint2D = null) {
-        let np: Point2D = p.boundToRect(rect);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+
+    public move(arg1: any, arg2?: any): void {
+        this.center.move(arg1, arg2);       
+    }
+
+    public moveCross(p: IMovable, rect: Rect, square: boolean = false, ref: IMovable = null) {
+        let np: Point2D = new Point2D(p).boundToRect(rect);
 
         if (square) {
             let dx = Math.abs(np.x - ref.x);
@@ -81,8 +103,7 @@ class CrossElement extends ElementPrototype implements IPoint2D {
             np.y = ref.y + d * vy;
         }
 
-        this.x = np.x;
-        this.y = np.y;
+        this.center.move(np);
 
         this.vl.node.setAttribute("x1", np.x.toString());
         this.vl.node.setAttribute("x2", np.x.toString());
@@ -115,7 +136,7 @@ class RectElement extends ElementPrototype {
 
     }
 
-    public move(p: IPoint2D) {
+    public move(p: Point2D) {
         this.node.node.setAttribute("x", p.x.toString());
         this.node.node.setAttribute("y", p.y.toString());
     }
@@ -319,8 +340,8 @@ export class RectSelector extends SelectorPrototype {
         this.subscribeToEvents(listeners);
     }
 
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: CrossElement = null) {
-        cross.move(p, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, p: IMovable, square: boolean = false, refCross: CrossElement = null) {
+        cross.moveCross(p, this.boundRect, square, refCross);
     }
 
     private moveSelectionBox(box: RectElement, crossA: CrossElement, crossB: CrossElement) {
@@ -535,8 +556,8 @@ export class RectCopySelector extends SelectorPrototype {
         this.subscribeToEvents(listeners);
     }
 
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: CrossElement = null) {
-        cross.move(p, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, p: IMovable, square: boolean = false, refCross: IMovable = null) {
+        cross.moveCross(p, this.boundRect, square, refCross);
     }
 
     private moveCopyRect(copyRect: RectElement, crossA: CrossElement) {
@@ -702,8 +723,8 @@ export class PointSelector extends SelectorPrototype {
         this.subscribeToEvents(listeners);
     }
 
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: CrossElement = null) {
-        cross.move(p, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, p: IMovable, square: boolean = false, refCross: IMovable = null) {
+        cross.moveCross(p, this.boundRect, square, refCross);
     }
 
     private movePoint(point: Snap.Element, crossA: CrossElement) {
@@ -872,18 +893,18 @@ export class PolylineSelector extends SelectorPrototype {
         }
     }
 
-    private moveCross(cross: CrossElement, pointTo: IPoint2D, square: boolean = false, refCross: CrossElement = null) {
-        cross.move(pointTo, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, pointTo: IMovable, square: boolean = false, refCross: IMovable = null) {
+        cross.moveCross(pointTo, this.boundRect, square, refCross);
     }
 
-    private movePoint(element: Snap.Element, pointTo: IPoint2D) {
+    private movePoint(element: Snap.Element, pointTo: Point2D) {
         element.attr({
             cx: pointTo.x,
             cy: pointTo.y
         })
     }
 
-    private moveLine(element: Snap.Element, pointFrom: IPoint2D, pointTo: IPoint2D) {
+    private moveLine(element: Snap.Element, pointFrom: Point2D, pointTo: Point2D) {
         element.attr({
             x1: pointFrom.x,
             y1: pointFrom.y,

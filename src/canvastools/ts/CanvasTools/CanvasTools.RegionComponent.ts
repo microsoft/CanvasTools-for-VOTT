@@ -23,6 +23,14 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
 
     public x: number;
     public y: number;
+    
+    public get width() {
+        return this.boundRect.width;
+    }
+
+    public get height() {
+        return this.boundRect.height;
+    }
 
     protected isVisible: boolean = true;
     protected isFrozen: boolean = false;

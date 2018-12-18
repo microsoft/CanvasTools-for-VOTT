@@ -5,9 +5,16 @@ import { Rect} from "./CanvasTools.Rect";
 export class Point2D implements IMovable, IBoundable<Point2D> {
     public x: number;
     public y: number;
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    constructor(x:number, y: number);
+    constructor(p: IMovable);
+    constructor(arg1: any, arg2?: number) {
+        if (typeof arg1 === "number" && typeof arg2 === "number") {
+            this.x = arg1;
+            this.y = arg2;
+        } else if (arg1.x !== undefined && arg1.y !== undefined) {
+            this.x = arg1.x;
+            this.y = arg1.y;
+        }
     }
 
     public move(point: IMovable): void;
@@ -22,6 +29,11 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
             this.y = arg1.y;
         }        
     }
+
+    public moveDelta(dx: number, dy: number): void {
+        this.x += dx;
+        this.y += dy;
+    }
     
     public boundToRect(r: Rect): Point2D {
         let newp = new Point2D(0, 0);
@@ -34,5 +46,9 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
 
     public copy(): Point2D {
         return new Point2D(this.x, this.y);
+    }
+
+    public toString(): string {
+        return `{${this.x.toString()}, ${this.y.toString()}}`;
     }
 }

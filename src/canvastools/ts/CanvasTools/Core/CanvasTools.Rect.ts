@@ -28,4 +28,8 @@ export class Rect implements IResizable {
     public copy(): Rect {
         return new Rect(this.__width, this.__height);
     }
+
+    public toString(): string {
+        return `[${this.width.toString()}, ${this.height.toString()}]`;
+    }
 }

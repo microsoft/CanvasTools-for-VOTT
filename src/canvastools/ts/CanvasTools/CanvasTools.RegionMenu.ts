@@ -1,7 +1,7 @@
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
 import { RegionComponent, ManipulationFunction } from "./CanvasTools.RegionComponent";
 import * as Snap from "snapsvg-cjs";
+import { Rect } from "./Core/CanvasTools.Rect";
+import { IMovable } from "./Interface/IMovable";
 
 /*
  * MenuElement 
@@ -29,7 +29,7 @@ export class MenuElement extends RegionComponent {
 
     private region: RegionComponent;
 
-    constructor(paper: Snap.Paper, x: number, y: number, rect: IRect, paperRect: IRect = null, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, rect: Rect, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
         this.boundRect = rect;
         this.x = x;
@@ -164,8 +164,10 @@ export class MenuElement extends RegionComponent {
         });
     }
 
-    public move(p: IPoint2D) {
-        super.move(p);
+    public move(point: IMovable): void;
+    public move(x: number, y: number): void;
+    public move(arg1: any, arg2?: any): void {
+        super.move(arg1, arg2);
 
         this.rearrangeMenuPosition();
 

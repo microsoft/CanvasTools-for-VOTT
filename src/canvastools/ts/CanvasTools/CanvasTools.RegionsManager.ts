@@ -1,5 +1,3 @@
-import { IRect } from "./Interface/IRect";
-import { IPoint2D } from "./Interface/IPoint2D";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
@@ -64,7 +62,7 @@ export class RegionsManager {
 
         this.menuLayer = paper.g();
         this.menuLayer.addClass("menuManager");
-        this.menu = new MenuElement(paper, 0, 0, new Rect(0, 0), this.paperRect,
+        this.menu = new MenuElement(paper, this.paperRect, 0, 0, new Rect(0, 0),
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this));
 
@@ -193,7 +191,7 @@ export class RegionsManager {
     }
 
     // SETUP NEW REGION
-    public addRectRegion(id: string, pointA: IPoint2D, pointB: IPoint2D, tagsDescriptor: TagsDescriptor) {
+    public addRectRegion(id: string, pointA: Point2D, pointB: Point2D, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
         let x = (pointA.x < pointB.x) ? pointA.x : pointB.x;
@@ -211,7 +209,7 @@ export class RegionsManager {
         this.registerRegion(region);
     }
 
-    public addPointRegion(id: string, point: IPoint2D, tagsDescriptor: TagsDescriptor) {
+    public addPointRegion(id: string, point: Point2D, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
         let region = new PointRegion(this.paper, this.paperRect, point, id, tagsDescriptor,
@@ -222,7 +220,7 @@ export class RegionsManager {
         this.registerRegion(region);
     }
 
-    public addPolylineRegion(id: string, points: Array<IPoint2D>, tagsDescriptor: TagsDescriptor) {
+    public addPolylineRegion(id: string, points: Array<Point2D>, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
         let region = new PolylineRegion(this.paper, this.paperRect, points, id, tagsDescriptor,
@@ -234,7 +232,7 @@ export class RegionsManager {
     }
 
     // REGION CREATION
-    public drawRegion(x: number, y: number, rect: IRect, id: string, tagsDescriptor: TagsDescriptor) {
+    public drawRegion(x: number, y: number, rect: Rect, id: string, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
         let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), rect, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
