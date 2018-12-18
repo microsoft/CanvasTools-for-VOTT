@@ -4,7 +4,7 @@ const yargs = require('yargs');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 var libraryName = "CanvasTools";
-var libraryEntry = "./src/canvastools/ts/CanvasTools.ts"
+var libraryEntry = "./src/canvastools/ts/ct.ts"
 var libraryFileName = "ct";
 
 var webpackSettings = {
@@ -83,10 +83,10 @@ module.exports = function (env) {
                     ],
                     exclude: /node_modules/                    
                 },
-                {
+                /* {
                     test: require.resolve('snapsvg'),
                     loader: 'imports-loader?this=>window,fix=>module.exports=0'
-                },
+                }, */
                 {
                     test: /\.css$/,
                     use: [

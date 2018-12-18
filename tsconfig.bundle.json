@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es2015",
-        "module": "amd",
+        "module": "commonjs",
 
         "declaration": true,
         "removeComments": true,
@@ -14,8 +14,8 @@
         "baseUrl": "src",
         "paths": {
         },
-        /* "outDir": "./../bundle/js/" */
-        "outFile": "./lib/ct.js"
+        "outDir": "./lib/js"
+        /* "outFile": "./lib/ct.js" */
     },
     "include": [     
         "./src/canvastools/ts/*.ts"

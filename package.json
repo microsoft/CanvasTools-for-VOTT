@@ -1,9 +1,9 @@
 {
   "name": "vott-ct",
-  "version": "2.0.13",
+  "version": "2.0.15",
   "description": "CanvasTools editor for the VoTT project",
-  "main": "./lib/ct.js",
-  "types": "./lib/ct.d.ts",
+  "main": "./lib/js/ct.js",
+  "types": "./lib/js/ct.d.ts",
   "scripts": {
     "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && tsc --project ./tsconfig.bundle.json",
     "prepare": "npm run clean-dist && npm run clean-lib && npm run bundle-lib && npm run webpack-dist",
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
   "dependencies": {
-    "snapsvg": "^0.5.1"
+    "snapsvg-cjs": "0.0.6"
   },
   "devDependencies": {
     "@types/snapsvg": "^0.4.35",
