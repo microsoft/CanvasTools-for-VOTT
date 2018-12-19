@@ -11,7 +11,9 @@ import { RegionData } from "./CanvasTools/Core/CanvasTools.RegionData";
 import { TagsDescriptor, Tag } from "./CanvasTools/Core/CanvasTools.Tags";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
 
-import * as Snap from "snapsvg-cjs";
+import "snapsvg-cjs";
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 export module CanvasTools {
     export const Core = {
