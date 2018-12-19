@@ -1,4 +1,4 @@
-import { RegionData } from "./../Core/CanvasTools.RegionData";
+import { RegionData } from "../Core/RegionData";
 
 export interface ISelectorCallbacks {
     onSelectionBegin: () => void;

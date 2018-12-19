@@ -1,16 +1,16 @@
-import { ToolbarItemType } from "./CanvasTools/Toolbar/CanvasTools.ToolbarIcon";
-import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/CanvasTools.Toolbar";
-import { RegionsManager } from "./CanvasTools/Region/CanvasTools.Region.RegionsManager";
-import { PointRegion } from "./CanvasTools/Region/Point/CanvasTools.Region.PointRegion";
-import { RectRegion } from "./CanvasTools/Region/Rect/CanvasTools.Region.RectRegion";
-import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/CanvasTools.Selection.AreaSelector";
+import { ToolbarItemType } from "./CanvasTools/Toolbar/ToolbarIcon";
+import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
+import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
+import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
+import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
+import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/AreaSelector";
 import { FilterPipeline, InvertFilter, GrayscaleFilter } from "./CanvasTools/CanvasTools.Filter";
-import { RegionComponent } from "./CanvasTools/Region/CanvasTools.Region.RegionComponent";
-import { Rect } from "./CanvasTools/Core/CanvasTools.Rect";
-import { Point2D } from "./CanvasTools/Core/CanvasTools.Point2D";
-import { RegionData } from "./CanvasTools/Core/CanvasTools.RegionData";
-import { Tag } from "./CanvasTools/Core/CanvasTools.Tag";
-import { TagsDescriptor } from "./CanvasTools/Core/CanvasTools.TagsDescriptor";
+import { RegionComponent } from "./CanvasTools/Region/RegionComponent";
+import { Rect } from "./CanvasTools/Core/Rect";
+import { Point2D } from "./CanvasTools/Core/Point2D";
+import { RegionData } from "./CanvasTools/Core/RegionData";
+import { Tag } from "./CanvasTools/Core/Tag";
+import { TagsDescriptor } from "./CanvasTools/Core/TagsDescriptor";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
 
 import "snapsvg-cjs";
