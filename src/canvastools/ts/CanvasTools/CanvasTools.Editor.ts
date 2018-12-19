@@ -4,6 +4,8 @@ import { AreaSelector, SelectionMode } from "./CanvasTools.Selection";
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { RegionComponent } from "./CanvasTools.RegionComponent";
 import { Rect } from "./Core/CanvasTools.Rect";
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 type ToolbarIconDescription = {
     type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH,
