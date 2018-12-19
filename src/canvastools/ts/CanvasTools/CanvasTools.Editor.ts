@@ -1,8 +1,9 @@
-import { Toolbar, ToolbarItemType } from "./CanvasTools.Toolbar";
-import { RegionsManager } from "./CanvasTools.RegionsManager";
-import { AreaSelector, SelectionMode } from "./CanvasTools.Selection";
+import { ToolbarItemType} from "./Toolbar/CanvasTools.ToolbarIcon";
+import { Toolbar } from "./Toolbar/CanvasTools.Toolbar";
+import { RegionsManager } from "./Region/CanvasTools.Region.RegionsManager";
+import { AreaSelector, SelectionMode } from "./Selection/CanvasTools.Selection.AreaSelector";
 import { FilterPipeline } from "./CanvasTools.Filter";
-import { RegionComponent } from "./CanvasTools.RegionComponent";
+import { RegionComponent } from "./Region/CanvasTools.Region.RegionComponent";
 import { Rect } from "./Core/CanvasTools.Rect";
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;

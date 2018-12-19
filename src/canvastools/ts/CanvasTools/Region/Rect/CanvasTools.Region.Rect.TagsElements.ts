@@ -9,7 +9,7 @@ import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
-import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../CanvasTools.RegionComponent";
+import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "./../CanvasTools.Region.RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;

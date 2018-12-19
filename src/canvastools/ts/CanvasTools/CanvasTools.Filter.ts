@@ -136,7 +136,7 @@ export class FilterPipeline {
     public applyToCanvas(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
         let promise = new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(canvas);
-        })
+        });
 
         if (this.pipeline.length > 0) {
             this.pipeline.forEach((filter) => {

@@ -1,14 +1,14 @@
-import { Point2D } from "./Core/CanvasTools.Point2D";
-import { Rect } from "./Core/CanvasTools.Rect";
-import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
-import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.RegionComponent";
-import { TagsDescriptor } from "./Core/CanvasTools.Tags";
-import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
-import { RectRegion } from "./CanvasTools.RectRegion";
-import { PointRegion } from "./CanvasTools.PointRegion";
-import { PolylineRegion } from "./CanvasTools.PolylineRegion";
-import { MenuElement } from "./CanvasTools.RegionMenu";
-import { RegionData, RegionDataType } from "./Core/CanvasTools.RegionData";
+import { Point2D } from "../Core/CanvasTools.Point2D";
+import { Rect } from "../Core/CanvasTools.Rect";
+import { IEventDescriptor } from "../Interface/IEventDescriptor";
+import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.Region.RegionComponent";
+import { TagsDescriptor } from "../Core/CanvasTools.TagsDescriptor";
+import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
+import { RectRegion } from "./Rect/CanvasTools.Region.RectRegion";
+import { PointRegion } from "./Point/CanvasTools.Region.PointRegion";
+import { PolylineRegion } from "./Polyline/CanvasTools.Region.PolylineRegion";
+import { MenuElement } from "./CanvasTools.Region.RegionMenu";
+import { RegionData, RegionDataType } from "../Core/CanvasTools.RegionData";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
@@ -42,7 +42,7 @@ export class RegionsManager {
 
     private frozenNuance: string;
 
-    private tagsUpdateOptions: TagsUpdateOptions = {
+    private tagsUpdateOptions: ITagsUpdateOptions = {
         showRegionBackground: true
     };
 

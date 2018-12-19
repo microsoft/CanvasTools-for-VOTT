@@ -1,11 +1,11 @@
-import { Point2D } from "./../Core/CanvasTools.Point2D";
-import { Rect } from "./../Core/CanvasTools.Rect";
+import { Point2D } from "../Core/CanvasTools.Point2D";
+import { Rect } from "../Core/CanvasTools.Rect";
 
 import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { IFreezable } from "./../Interface/IFreezable";
-import { IHideable } from "./../Interface/IHideadble";
-import { IMovable } from "./../Interface/IMovable";
-import { IResizable } from "./../Interface/IResizable";
+import { IFreezable } from "../Interface/IFreezable";
+import { IHideable } from "../Interface/IHideadble";
+import { IMovable } from "../Interface/IMovable";
+import { IResizable } from "../Interface/IResizable";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
