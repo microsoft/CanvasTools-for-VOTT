@@ -31,6 +31,10 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     public x: number;
     public y: number;
 
+    public isVisible: boolean = true;
+    public isFrozen: boolean = false;
+    public isSelected: boolean = false;
+
     protected paper: Snap.Paper;
     protected paperRect: Rect;
 
@@ -41,9 +45,6 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     public get height() {
         return this.boundRect.height;
     }
-
-    protected isVisible: boolean = true;
-    protected isFrozen: boolean = false;
 
     constructor(paper: Snap.Paper, paperRect: Rect) {
         this.paper = paper;
@@ -59,6 +60,16 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     public show() {
         this.node.node.setAttribute("visibility", "visible");
         this.isVisible = true;
+    }
+
+    public select() {
+        this.isSelected = true;
+        this.node.addClass("selected");
+    }
+
+    public unselect() {
+        this.isSelected = false;
+        this.node.removeClass("selected");
     }
 
     public freeze() {

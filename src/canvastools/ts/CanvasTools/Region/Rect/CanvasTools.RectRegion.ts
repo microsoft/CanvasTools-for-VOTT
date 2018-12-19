@@ -26,8 +26,6 @@ export class RectRegion extends RegionComponent {
     public ID: string;
     // Region styles
     public regionID: string;
-    // Manipulation notifiers
-    public isSelected: boolean = false;
 
     // Bound rects
     private paperRects: { host: Rect, actual: Rect };
@@ -114,40 +112,20 @@ export class RectRegion extends RegionComponent {
         });
     }
 
-    public select() {
-        this.isSelected = true;
-        this.node.addClass("selected");
-
-        /*             if (this.onChange != undefined) {
-                        this.onChange(this, this.isSelected);
-                    } */
-    }
-
-    public unselect() {
-        this.isSelected = false;
-        this.node.removeClass("selected");
-
-        /*             if (this.onChange != undefined) {
-                        this.onChange(this, this.isSelected);
-                    } */
-    }
-
     public freeze() {
-        if (!this.isFrozen) {
-            this.isFrozen = true;
-            this.node.addClass("old");
-            this.dragNode.freeze();
-            this.anchorsNode.freeze();
-        }
+        super.freeze();
+
+        this.node.addClass("old");
+        this.dragNode.freeze();
+        this.anchorsNode.freeze();
     }
 
     public unfreeze() {
-        if (this.isFrozen) {
-            this.isFrozen = false;
-            this.node.removeClass("old");
-            this.dragNode.unfreeze();
-            this.anchorsNode.unfreeze();
-        }
+        super.unfreeze();
+
+        this.node.removeClass("old");
+        this.dragNode.unfreeze();
+        this.anchorsNode.unfreeze();
     }
 
     private buildOn(paper: Snap.Paper) {
