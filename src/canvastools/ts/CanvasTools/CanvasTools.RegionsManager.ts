@@ -8,8 +8,10 @@ import { RectRegion } from "./CanvasTools.RectRegion";
 import { PointRegion } from "./CanvasTools.PointRegion";
 import { PolylineRegion } from "./CanvasTools.PolylineRegion";
 import { MenuElement } from "./CanvasTools.RegionMenu";
-import * as Snap from "snapsvg-cjs";
 import { RegionData, RegionDataType } from "./Core/CanvasTools.RegionData";
+
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 type Region = RectRegion | PointRegion | PolylineRegion;
 
@@ -60,7 +62,7 @@ export class RegionsManager {
     private buildOn(paper: Snap.Paper) {
         this.regionManagerLayer = paper.g();
         this.regionManagerLayer.addClass("regionManager");
-
+        
         this.menuLayer = paper.g();
         this.menuLayer.addClass("menuManager");
         this.menu = new MenuElement(paper, this.paperRect, 0, 0, new Rect(0, 0),
@@ -237,7 +239,7 @@ export class RegionsManager {
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let region = new PolylineRegion(this.paper, this.paperRect, regionData.points, id, tagsDescriptor,
+        let region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);

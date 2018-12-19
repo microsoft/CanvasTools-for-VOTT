@@ -1,5 +1,6 @@
 import { Rect } from "./Core/CanvasTools.Rect";
-import * as Snap from "snapsvg-cjs";
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 export type IconCallback = (action: string) => void;
 

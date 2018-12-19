@@ -5,7 +5,8 @@ import { IFreezable } from "./Interface/IFreezable";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
-import * as Snap from "snapsvg-cjs";
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 export type ManipulationFunction = (UIElement?: RegionComponent) => void;
 

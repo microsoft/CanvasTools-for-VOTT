@@ -1,8 +1,9 @@
 import { RegionComponent, ManipulationFunction } from "./CanvasTools.RegionComponent";
-import * as Snap from "snapsvg-cjs";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { IMovable } from "./Interface/IMovable";
 
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 /*
  * MenuElement 
  * Used internally to show actions menu for the region

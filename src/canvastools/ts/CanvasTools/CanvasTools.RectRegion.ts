@@ -5,8 +5,8 @@ import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.RegionComponent";
 import { TagsDescriptor } from "./Core/CanvasTools.Tags";
 import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
-import * as Snap from "snapsvg-cjs";
-
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 /*
  * AnchorsElement 
  * Used internally to draw anchors to resize the region
