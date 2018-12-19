@@ -1,12 +1,13 @@
 import { IMovable } from "./Interface/IMovable";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
-import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
 import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./CanvasTools.RegionComponent";
 import { TagsDescriptor } from "./Core/CanvasTools.Tags";
 import { TagsUpdateOptions } from "./CanvasTools.TagsUpdateOptions";
-import * as Snap from "snapsvg-cjs";
+import { RegionData } from "./Core/CanvasTools.RegionData";
 
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 /*
  * TagsElement 
  * Used internally to draw labels and map colors for the region
@@ -15,7 +16,12 @@ class TagsElement extends RegionComponent {
     private radius: number = 3;
 
     // Elements
-    private primaryTagPoint: Snap.Element;
+    private primaryTagNode: Snap.Element;
+    private primaryTagBoundRect: Snap.Element;
+
+    private primaryTagPointsArray: Array<Snap.Element>;
+    private primaryTagPointsGroup: Snap.Element;
+    private primaryTagPolyline: Snap.Element;
 
     private secondaryTagsGroup: Snap.Element;
     private secondaryTags: Array<Snap.Element>;
@@ -28,11 +34,14 @@ class TagsElement extends RegionComponent {
     private styleSheet: CSSStyleSheet = null;
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: Rect, x: number, y: number, rect: Rect, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
+    private regionData: RegionData;
+
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
-        this.boundRect = rect;
-        this.x = x;
-        this.y = y;
+        this.boundRect = regionData.boundRect;
+        this.x = regionData.x;
+        this.y = regionData.y;
+        this.regionData = regionData.copy();
 
         this.styleId = styleId;
         this.styleSheet = styleSheet;
@@ -46,14 +55,42 @@ class TagsElement extends RegionComponent {
         this.node = paper.g();
         this.node.addClass("tagsLayer");
 
-        this.primaryTagPoint = paper.circle(0, 0, this.radius);
-        this.primaryTagPoint.addClass("primaryTagPointStyle");
+        this.primaryTagNode = paper.g();
+
+        this.primaryTagBoundRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
+        this.primaryTagBoundRect.addClass("primaryTagBoundRectStyle");
+       
+        this.primaryTagPointsGroup = paper.g();
+        this.primaryTagPointsArray = new Array<Snap.Element>();
+
+        let pointsData = [];
+        this.regionData.points.forEach(p => {
+            pointsData.push(p.x, p.y);
+            let point = paper.circle(p.x, p.y, 3);
+
+            point.addClass("primaryTagPolylinePointStyle")
+            this.primaryTagPointsArray.push(point);
+            this.primaryTagPointsGroup.add(point);
+        });
+        this.primaryTagPolyline = paper.polyline(pointsData);
+        this.primaryTagPolyline.addClass("primaryTagPolylineStyle");
+        
+        this.regionData.points.forEach(p => {
+            pointsData.push(p.x, p.y);
+        });
+
+        this.primaryTagNode.add(this.primaryTagBoundRect);
+        this.primaryTagNode.add(this.primaryTagPolyline);
+        this.primaryTagNode.add(this.primaryTagPointsGroup);
+
+        //this.primaryTagPoint = paper.circle(0, 0, this.radius);
+        //this.primaryTagPoint.addClass("primaryTagPointStyle");
 
         this.secondaryTagsGroup = paper.g();
         this.secondaryTagsGroup.addClass("secondatyTagsLayer");
         this.secondaryTags = [];
 
-        this.node.add(this.primaryTagPoint);
+        this.node.add(this.primaryTagNode);
         this.node.add(this.secondaryTagsGroup);
 
         this.updateTags(tags, this.tagsUpdateOptions);
@@ -116,35 +153,74 @@ class TagsElement extends RegionComponent {
         if (this.tags && this.tags.primary !== undefined) {
             let styleMap = [
                 {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorAccent};`
+                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `fill: ${this.tags.primary.colorShadow};
+                            stroke: ${this.tags.primary.colorDark};`
                 },
                 {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
                     style: `fill: ${this.tags.primary.colorAccent};
+                            stroke: ${this.tags.primary.colorDark};`
+                },
+                {
+                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                    style: `fill: ${this.tags.primary.colorShadow};
+                            stroke: ${this.tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                    style: `stroke: ${this.tags.primary.colorPure};`
+                },             
+                {
+                    rule: `.${this.styleId} .primaryTagPolylinePointStyle`,
+                    style: `fill: ${this.tags.primary.colorPure};
+                            stroke:${this.tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPolylinePointStyle`,
+                    style: `fill: ${this.tags.primary.colorHighlight}; 
+                            stroke: #fff;`
+                },
+                {
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPolylinePointStyle`,
+                    style: `fill: ${this.tags.primary.colorPure};
                                 stroke:${this.tags.primary.colorHighlight};`
                 }
             ];
 
             let styleMapLight = [
                 {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorNoColor};
-                                stroke:${this.tags.primary.colorAccent};`
+                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `fill: none;
+                            stroke: ${this.tags.primary.colorDark};`
                 },
                 {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `stroke: ${this.tags.primary.colorShadow};`
+                },
+                {
+                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                    style: `fill: none;
+                            stroke: ${this.tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                    style: `stroke: ${this.tags.primary.colorPure};
+                            stroke-width: 1px;`
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagPolylinePointStyle`,
+                    style: `fill: ${this.tags.primary.colorPure};
+                            stroke:${this.tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPolylinePointStyle`,
                     style: `fill: ${this.tags.primary.colorHighlight}; 
                                 stroke: #fff;`
                 },
                 {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight};
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPolylinePointStyle`,
+                    style: `fill: ${this.tags.primary.colorPure};
                                 stroke:${this.tags.primary.colorAccent};`
                 },
                 {
@@ -177,15 +253,32 @@ class TagsElement extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
+        this.regionData.move(arg1, arg2);
 
         let size = 6;
-        let cx = this.x;
+        let cx = this.x + this.boundRect.width / 2;
         let cy = this.y - size - 5;
 
+        let pointsData = [];
+        this.regionData.points.forEach(p => {
+            pointsData.push(p.x, p.y);
+        });
+
         window.requestAnimationFrame(() => {
-            this.primaryTagPoint.attr({
-                cx: this.x,
-                cy: this.y
+            this.primaryTagBoundRect.attr({
+                x: this.x,
+                y: this.y
+            });
+
+            this.primaryTagPointsArray.forEach((p, index) => {
+                p.attr({
+                    cx: this.regionData.points[index].x,
+                    cy: this.regionData.points[index].y
+                });
+            });
+
+            this.primaryTagPolyline.attr({
+                points: pointsData.toString()
             });
 
             // Secondary Tags
@@ -205,7 +298,31 @@ class TagsElement extends RegionComponent {
     }
 
     public resize(width: number, height: number) {
-        // do nothing
+        super.resize(width, height);
+        this.regionData.resize(width,height);
+        
+        let pointsData = [];
+        this.regionData.points.forEach(p => {
+            pointsData.push(p.x, p.y);
+        });
+
+        window.requestAnimationFrame(() => {
+            this.primaryTagBoundRect.attr({
+                width: width,
+                height: height
+            });
+
+            this.primaryTagPointsArray.forEach((p, index) => {
+                p.attr({
+                    cx: this.regionData.points[index].x,
+                    cy: this.regionData.points[index].y
+                });
+            });
+
+            this.primaryTagPolyline.attr({
+                points: pointsData.toString()
+            });
+        });
     }
 }
 
@@ -214,16 +331,14 @@ class TagsElement extends RegionComponent {
  * Used internally to drag the region
 */
 class DragElement extends RegionComponent {
-    private dragPoint: Snap.Element;
+    private dragRect: Snap.Element;
     private isDragged: boolean = false;
 
-    private radius: number = 7;
-
-    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
         super(paper, paperRect);
-        this.x = x;
-        this.y = y;
-        this.boundRect = new Rect(0, 0);
+        this.x = regionData.x;
+        this.y = regionData.y;
+        this.boundRect = regionData.boundRect;
 
         if (onChange !== undefined) {
             this.onChange = onChange;
@@ -244,10 +359,10 @@ class DragElement extends RegionComponent {
         this.node = paper.g();
         this.node.addClass("dragLayer");
 
-        this.dragPoint = paper.circle(0, 0, this.radius);
-        this.dragPoint.addClass("dragPointStyle");
+        this.dragRect = paper.rect(this.x, this.y, this.width, this.height);
+        this.dragRect.addClass("dragRectStyle");
 
-        this.node.add(this.dragPoint);
+        this.node.add(this.dragRect);
     }
 
     public move(point: IMovable): void;
@@ -255,15 +370,21 @@ class DragElement extends RegionComponent {
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
         window.requestAnimationFrame(() => {
-            this.dragPoint.attr({
-                cx: this.x,
-                cy: this.y
+            this.dragRect.attr({
+                x: this.x,
+                y: this.y
             });
         });
     }
 
     public resize(width: number, height: number) {
-        // do nothing
+        super.resize(width, height);
+        window.requestAnimationFrame(() => {
+            this.dragRect.attr({
+                width: width,
+                height: height
+            });
+        });
     }
 
     private dragOrigin: Point2D;
@@ -290,42 +411,42 @@ class DragElement extends RegionComponent {
     }
 
     private subscribeToDragEvents() {
-        this.dragPoint.node.addEventListener("pointerenter", (e) => {
+        this.dragRect.node.addEventListener("pointerenter", (e) => {
             if (!this.isFrozen) {
-                this.dragPoint.undrag();
-                this.dragPoint.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                this.dragRect.undrag();
+                this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                 this.isDragged = true;
                 this.onManipulationBegin();
             }
         });
 
-        this.dragPoint.node.addEventListener("pointermove", (e) => {
+        this.dragRect.node.addEventListener("pointermove", (e) => {
             if (!this.isDragged && !this.isFrozen) {
-                this.dragPoint.undrag();
-                this.dragPoint.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
+                this.dragRect.undrag();
+                this.dragRect.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                 this.isDragged = true;
 
                 this.onManipulationBegin();
             }
         });
 
-        this.dragPoint.node.addEventListener("pointerleave", (e) => {
-            this.dragPoint.undrag();
+        this.dragRect.node.addEventListener("pointerleave", (e) => {
+            this.dragRect.undrag();
             this.isDragged = false;
             this.onManipulationEnd();
         });
 
-        this.dragPoint.node.addEventListener("pointerdown", (e) => {
+        this.dragRect.node.addEventListener("pointerdown", (e) => {
             if (!this.isFrozen) {
-                this.dragPoint.node.setPointerCapture(e.pointerId);
+                this.dragRect.node.setPointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
                 this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEBEGIN, multiselection);
             }
         });
 
-        this.dragPoint.node.addEventListener("pointerup", (e) => {
+        this.dragRect.node.addEventListener("pointerup", (e) => {
             if (!this.isFrozen) {
-                this.dragPoint.node.releasePointerCapture(e.pointerId);
+                this.dragRect.node.releasePointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
                 this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.SELECTIONTOGGLE, multiselection);
             }
@@ -334,7 +455,7 @@ class DragElement extends RegionComponent {
 
     public freeze() {
         super.freeze();
-        this.dragPoint.undrag();
+        this.dragRect.undrag();
         this.onManipulationEnd();
     }
 }
@@ -366,16 +487,17 @@ export class PolylineRegion extends RegionComponent {
     // Styling options
     private tagsUpdateOptions: TagsUpdateOptions;
 
-    private points: Array<Point2D>;
+    private regionData: RegionData;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, points: Array<Point2D>, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData:RegionData, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: TagsUpdateOptions) {
         super(paper, paperRect);
-        this.boundRect = new Rect(0, 0);
+        this.boundRect = regionData.boundRect;
 
-        this.x = points[0].x;
-        this.y = points[0].y;
-        this.points = points;
-        this.area = 1.0;
+        this.regionData = regionData;
+        this.x = regionData.x;
+        this.y = regionData.y;
+        this.area = regionData.area;
+
         this.ID = id;
         this.tags = tagsDescriptor;
 
@@ -396,7 +518,7 @@ export class PolylineRegion extends RegionComponent {
         this.tagsUpdateOptions = tagsUpdateOptions;
 
         this.buildOn(paper);
-        this.move(points[0]);
+        this.move(this.x, this.y);
     }
 
     private buildOn(paper: Snap.Paper) {
@@ -404,8 +526,8 @@ export class PolylineRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.dragNode = new DragElement(paper, this.paperRect, this.x, this.y, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-        this.tagsNode = new TagsElement(paper, this.paperRect, this.x, this.y, this.boundRect, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.dragNode = new DragElement(paper, this.paperRect, this.regionData, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(<any>this.toolTip);
@@ -455,6 +577,7 @@ export class PolylineRegion extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
+        this.regionData.move(arg1, arg2);
 
         this.UI.forEach((element) => {
             element.move(arg1, arg2);
@@ -462,10 +585,15 @@ export class PolylineRegion extends RegionComponent {
     }
 
     public resize(width: number, height: number) {
-        // do nothing
+        super.resize(width, height);
+        this.regionData.resize(width, height);
+
+        this.area = this.regionData.area;
+
+        this.UI.forEach((element) => {
+            element.resize(width, height)
+        });
     }
-
-
 
     public select() {
         this.isSelected = true;
