@@ -124,14 +124,6 @@ export class AreaSelector {
         }
     }
 
-    protected enablify(f: (args: PointerEvent | KeyboardEvent) => void, bypass: boolean = false) {
-        return (args: PointerEvent | KeyboardEvent) => {
-            if (this.isEnabled || bypass) {
-                f(args);
-            }
-        };
-    }
-
     private buildUIElements() {
         this.paper = Snap(this.parentNode);
         this.boundRect = new Rect(this.parentNode.width.baseVal.value, this.parentNode.height.baseVal.value);
