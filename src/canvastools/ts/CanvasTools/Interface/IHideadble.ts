@@ -1,4 +1,4 @@
 export interface IHideable {
-    hide():void;
-    show():void;
+    hide(): void;
+    show(): void;
 }
