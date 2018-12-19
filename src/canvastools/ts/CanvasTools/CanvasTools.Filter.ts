@@ -1,15 +1,15 @@
 export type FilterFunction = (canvas: HTMLCanvasElement) => Promise<HTMLCanvasElement>;
 
 export function InvertFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
-    var context = canvas.getContext('2d');
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const context = canvas.getContext("2d");
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    var buff = document.createElement("canvas");
+    const buff = document.createElement("canvas");
     buff.width = canvas.width;
     buff.height = canvas.height;
 
-    var data = imageData.data;
-    for (var i = 0; i < data.length; i += 4) {
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
         data[i] = 255 - data[i];     // red
         data[i + 1] = 255 - data[i + 1]; // green
         data[i + 2] = 255 - data[i + 2]; // blue
@@ -23,16 +23,16 @@ export function InvertFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEleme
 }
 
 export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
-    var context = canvas.getContext('2d');
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const context = canvas.getContext("2d");
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    var buff = document.createElement("canvas");
+    const buff = document.createElement("canvas");
     buff.width = canvas.width;
     buff.height = canvas.height;
 
-    var data = imageData.data;
-    for (var i = 0; i < data.length; i += 4) {
-        let gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
         data[i] = gray;      // red
         data[i + 1] = gray;      // green
         data[i + 2] = gray;      // blue
@@ -53,7 +53,6 @@ export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEl
         var buff = document.createElement("canvas");
         buff.width = canvas.width;
         buff.height = canvas.height;
-
 
         var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
@@ -119,9 +118,8 @@ export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEl
         return output;
     } */
 
-
 export class FilterPipeline {
-    private pipeline: Array<FilterFunction>;
+    private pipeline: FilterFunction[];
 
     constructor() {
         this.pipeline = new Array<FilterFunction>();
@@ -143,7 +141,7 @@ export class FilterPipeline {
         if (this.pipeline.length > 0) {
             this.pipeline.forEach((filter) => {
                 promise = promise.then(filter);
-            })
+            });
         }
         return promise;
     }
