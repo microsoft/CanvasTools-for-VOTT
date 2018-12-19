@@ -3,7 +3,7 @@ import { IResizable } from "./../Interface/IResizable";
 import { Point2D } from "./CanvasTools.Point2D";
 import { Rect } from "./CanvasTools.Rect";
 
-export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline"};
+export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline"}
 
 export class RegionData implements IMovable, IResizable {
     public static BuildPointRegionData(x: number, y: number): RegionData {
