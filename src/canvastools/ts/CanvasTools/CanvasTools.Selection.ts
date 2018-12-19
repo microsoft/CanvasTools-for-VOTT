@@ -3,10 +3,11 @@ import { IResizable } from "./Interface/IResizable";
 import { Point2D } from "./Core/CanvasTools.Point2D";
 import { Rect } from "./Core/CanvasTools.Rect";
 import { EventDescriptor } from "./Core/CanvasTools.EventDescriptor";
-
-import * as Snap from "snapsvg-cjs";
 import { IMovable } from "./Interface/IMovable";
 import { RegionData, RegionDataType } from "./Core/CanvasTools.RegionData";
+
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
 
 abstract class ElementPrototype implements IHideable, IResizable {
     protected paper: Snap.Paper;
@@ -968,9 +969,25 @@ export class PolylineSelector extends SelectorPrototype {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             let box = this.polyline.getBBox();
 
-            this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height, this.points.map(p => p.copy()), RegionDataType.Polyline));
+            this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height, this.getPolylinePoints(), RegionDataType.Polyline));
         }
         this.reset();
+    }
+
+    private getPolylinePoints(close:boolean = true, threshold: number = 5) {
+        let points = this.points.map(p => p.copy());
+
+        if (points.length >=3 && close) {
+            let fp = points[0];
+            let lp = points[points.length - 1];
+
+            let distanceSquare = (fp.x - lp.x) * (fp.x - lp.x) + (fp.y - lp.y) * (fp.y - lp.y);
+            if (distanceSquare <= threshold * threshold) {
+                points[points.length - 1] = fp.copy();
+            }
+        }
+
+        return points;
     }
 
     private onKeyUp(e: KeyboardEvent) {
