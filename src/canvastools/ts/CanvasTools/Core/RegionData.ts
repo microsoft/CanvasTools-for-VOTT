@@ -35,7 +35,14 @@ export class RegionData implements IMovable, IResizable {
     }
 
     public get area(): number {
-        return this.boundRect.width * this.boundRect.height;
+        let area = 0;
+        
+        if (this.regionType === RegionDataType.Point) {
+            area = 1.0;
+        } else {
+            area = this.boundRect.width * this.boundRect.height;
+        }
+        return area;
     }
 
     public regionType: RegionDataType;
@@ -78,6 +85,32 @@ export class RegionData implements IMovable, IResizable {
         });
     }
 
+    public setPoints(points: Point2D[]) {
+        let xmin = Number.MAX_VALUE;
+        let xmax = 0;
+        let ymin = Number.MAX_VALUE;
+        let ymax = 0;
+
+        points.forEach((point) => {
+            if (point.x > xmax) {
+                xmax = point.x;
+            }
+            if (point.x < xmin) {
+                xmin = point.x;
+            }
+            if (point.y > ymax) {
+                ymax = point.y;
+            }
+            if (point.y < ymin) {
+                ymin = point.y;
+            }
+        });
+
+        this.points = points;
+        this.corner.move(xmin, ymin);
+        this.boundRect.resize(xmax - xmin, ymax - ymin);
+    }
+
     public boundToRect(rect: Rect): RegionData {
         const tlCorner = this.corner.boundToRect(rect);
         const brCorner = (new Point2D(this.x + this.width, this.y + this.height)).boundToRect(rect);
@@ -85,11 +118,22 @@ export class RegionData implements IMovable, IResizable {
         const width = brCorner.x - tlCorner.x;
         const height = brCorner.y - brCorner.y;
 
-        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.points.map((p) => p.boundToRect(rect)));
+        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.points.map((p) => p.boundToRect(rect)), this.regionType);
+    }
+
+    public scaleByFactor(xfactor: number, yfactor: number):RegionData;
+    public scaleByFactor(factor: number):RegionData;    
+    public scaleByFactor(f1: number, f2?: number):RegionData {
+        let xf = f1;
+        let yf = (f2 !== undefined) ? f2: f1;
+
+        return new RegionData(this.x * xf, this.y * yf, this.width * xf, this.height * yf, 
+                              this.points.map((p) => new Point2D(p.x * xf, p.y * yf)),
+                              this.regionType);
     }
 
     public copy(): RegionData {
-        return new RegionData(this.x, this.y, this.width, this.height, this.points.map((p) => p.copy()));
+        return new RegionData(this.x, this.y, this.width, this.height, this.points.map((p) => p.copy()), this.regionType);
     }
 
     public toString(): string {
