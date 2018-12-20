@@ -1,5 +1,6 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
@@ -12,6 +13,7 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+
 declare var Snap: typeof SNAPSVG_TYPE;
 
 /*
@@ -35,11 +37,8 @@ export class TagsElement extends RegionComponent {
     private styleSheet: CSSStyleSheet = null;
     private tagsUpdateOptions: ITagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: Rect, x: number, y: number, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect);
-        this.boundRect = new Rect(0, 0);
-        this.x = x;
-        this.y = y;
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
+        super(paper, paperRect, regionData);
 
         this.styleId = styleId;
         this.styleSheet = styleSheet;
@@ -53,7 +52,7 @@ export class TagsElement extends RegionComponent {
         this.node = paper.g();
         this.node.addClass("tagsLayer");
 
-        this.primaryTagPoint = paper.circle(0, 0, this.radius);
+        this.primaryTagPoint = paper.circle(this.x, this.y, this.radius);
         this.primaryTagPoint.addClass("primaryTagPointStyle");
 
         this.secondaryTagsGroup = paper.g();
@@ -184,7 +183,15 @@ export class TagsElement extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
+        this.redraw();
+    }
 
+    public resize(width: number, height: number) {
+        super.resize(width, height);
+        this.redraw();
+    }
+
+    public redraw() {
         let size = 6;
         let cx = this.x;
         let cy = this.y - size - 5;
@@ -209,9 +216,5 @@ export class TagsElement extends RegionComponent {
                 }
             }
         });
-    }
-
-    public resize(width: number, height: number) {
-        // do nothing
     }
 }

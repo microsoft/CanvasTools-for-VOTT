@@ -1,5 +1,6 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
@@ -39,13 +40,9 @@ export class PointRegion extends RegionComponent {
     // Styling options
     private tagsUpdateOptions: ITagsUpdateOptions;    
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, point: Point2D, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect);
-        this.boundRect = new Rect(0, 0);
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin: ManipulationFunction = null, onManipulationEnd: ManipulationFunction = null, tagsUpdateOptions?: ITagsUpdateOptions) {
+        super(paper, paperRect, regionData);
 
-        this.x = point.x;
-        this.y = point.y;
-        this.area = 1.0;
         this.ID = id;
         this.tags = tagsDescriptor;
 
@@ -66,7 +63,6 @@ export class PointRegion extends RegionComponent {
         this.tagsUpdateOptions = tagsUpdateOptions;
 
         this.buildOn(paper);
-        this.move(point);
     }
 
     private buildOn(paper: Snap.Paper) {
@@ -74,8 +70,8 @@ export class PointRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.dragNode = new DragElement(paper, this.paperRect, this.x, this.y, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
-        this.tagsNode = new TagsElement(paper,this.paperRect,  this.x, this.y, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.dragNode = new DragElement(paper, this.paperRect, this.regionData, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.tagsNode = new TagsElement(paper,this.paperRect,  this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(<any>this.toolTip);
@@ -105,14 +101,13 @@ export class PointRegion extends RegionComponent {
         document.getElementById(this.styleID).remove();
     }
 
-    private onInternalChange(component: RegionComponent, x: number, y: number, width: number, height: number, points: Array<Point2D>, state: ChangeEventType, multiSelection: boolean = false) {
-        if (this.x != x || this.y != y) {
-            this.move(new Point2D(x, y));
-        }
-        if (this.boundRect.width != width || this.boundRect.height != height) {
-            this.resize(width, height);
-        }
-        this.onChange(this, x, y, width, height, points, state, multiSelection);
+    private onInternalChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
+        this.regionData.initFrom(regionData);
+        this.redraw();
+
+        if (this.onChange !== null) {
+            this.onChange(this, this.regionData.copy(), state, multiSelection);
+        }        
     }
 
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
@@ -125,14 +120,20 @@ export class PointRegion extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
-
-        this.UI.forEach((element) => {
-            element.move(arg1, arg2);
-        });
+        this.redraw();
     }
 
     public resize(width: number, height: number) {
-        // do nothing
+        super.resize(width, height);
+        this.redraw();
+    }
+
+    public redraw() {
+        super.redraw();
+
+        this.UI.forEach((element) => {
+            element.redraw();
+        });
     }
 
     public freeze() {
