@@ -5,6 +5,7 @@ import { Rect} from "./Rect";
 export class Point2D implements IMovable, IBoundable<Point2D> {
     public x: number;
     public y: number;
+
     constructor(x: number, y: number);
     constructor(p: IMovable);
     constructor(arg1: any, arg2?: number) {
@@ -36,12 +37,8 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
     }
 
     public boundToRect(r: Rect): Point2D {
-        const newp = new Point2D(0, 0);
-
-        newp.x = (this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x);
-        newp.y = (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y);
-
-        return newp;
+        return new Point2D((this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x),
+                           (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y));
     }
 
     public copy(): Point2D {
