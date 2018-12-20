@@ -8,28 +8,23 @@ import { IMovable } from "../Interface/IMovable";
 import { IResizable } from "../Interface/IResizable";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+import { RegionData } from "../Core/RegionData";
 declare var Snap: typeof SNAPSVG_TYPE;
 
 export type ManipulationFunction = (UIElement?: RegionComponent) => void;
 
 export enum ChangeEventType { MOVEEND, MOVING, MOVEBEGIN, SELECTIONTOGGLE }
 
-export type ChangeFunction = (region: RegionComponent, x: number, y: number,
-                              width: number, height: number, points?: Point2D[],
+export type ChangeFunction = (region: RegionComponent, regionData: RegionData,
                               eventType?: ChangeEventType, multiSelection?: boolean) => void;
 
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
-    public boundRect: Rect;
-
     public node: Snap.Element;
 
     // Manipulation notifiers
     public onChange: ChangeFunction;
     public onManipulationBegin: ManipulationFunction;
     public onManipulationEnd: ManipulationFunction;
-
-    public x: number;
-    public y: number;
 
     public isVisible: boolean = true;
     public isFrozen: boolean = false;
@@ -38,18 +33,36 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     protected paper: Snap.Paper;
     protected paperRect: Rect;
 
-    public get width() {
-        return this.boundRect.width;
+    public regionData: RegionData;
+    
+    public get x(): number {
+        return this.regionData.x;
     }
 
-    public get height() {
-        return this.boundRect.height;
+    public get y(): number {
+        return this.regionData.y;
     }
 
-    constructor(paper: Snap.Paper, paperRect: Rect) {
+    public get width(): number {
+        return this.regionData.boundRect.width;
+    }
+
+    public get height(): number {
+        return this.regionData.boundRect.height;
+    }
+
+    public get area(): number {
+        return this.regionData.area;
+    }
+
+    public get boundRect() : Rect {
+        return this.regionData.boundRect;
+    }
+
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData) {
         this.paper = paper;
         this.paperRect = paperRect;
-        this.boundRect = new Rect(0, 0);
+        this.regionData = regionData;
     }
 
     public hide() {
@@ -80,25 +93,22 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         this.isFrozen = false;
     }
 
-    public resize(width: number, height: number) {
-        this.boundRect.resize(width, height);
-    }
-
-    public resizePaper(width: number, height: number) {
-        this.paperRect.resize(width, height);
-    }
-
     public move(point: IMovable): void;
     public move(x: number, y: number): void;
 
     public move(arg1: any, arg2?: any): void {
-        if (typeof arg1 === "number" && typeof arg2 === "number") {
-            this.x = arg1;
-            this.y = arg2;
-        } else if (arg1.x !== undefined && arg1.y !== undefined) {
-            this.x = arg1.x;
-            this.y = arg1.y;
-        }
+        this.regionData.move(arg1, arg2);
+    }
+
+    public redraw(): void {
+    }
+
+    public resize(width: number, height: number) {
+        this.regionData.resize(width, height);
+    }
+
+    public resizePaper(width: number, height: number) {
+        this.paperRect.resize(width, height);
     }
 
     protected subscribeToEvents(listeners: IEventDescriptor[]) {
