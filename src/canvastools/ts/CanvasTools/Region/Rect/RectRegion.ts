@@ -101,7 +101,6 @@ export class RectRegion extends RegionComponent {
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
-
         this.redraw();
     }
 
@@ -169,6 +168,8 @@ export class RectRegion extends RegionComponent {
 
     private onInternalChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
         this.regionData.initFrom(regionData);
+
+        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width, this.paperRects.host.height - regionData.height);
         this.redraw();
         
         if (this.onChange !== null) {
