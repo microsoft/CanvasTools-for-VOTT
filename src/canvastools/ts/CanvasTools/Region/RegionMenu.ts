@@ -1,5 +1,6 @@
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
+import { RegionData } from "../Core/RegionData";
 
 import { IEventDescriptor } from "../Interface/IEventDescriptor";
 import { IFreezable } from "../Interface/IFreezable";
@@ -45,12 +46,9 @@ export class MenuElement extends RegionComponent {
 
     private region: RegionComponent;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, rect: Rect,
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData,
                 onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
-        super(paper, paperRect);
-        this.boundRect = rect;
-        this.x = x;
-        this.y = y;
+        super(paper, paperRect, regionData);
 
         if (onManipulationBegin !== undefined) {
             this.onManipulationBegin = onManipulationBegin;
@@ -90,9 +88,7 @@ export class MenuElement extends RegionComponent {
 
     public attachTo(region: RegionComponent) {
         this.region = region;
-        this.x = region.x;
-        this.y = region.y;
-        this.boundRect = region.boundRect;
+        this.regionData.initFrom(region.regionData);
         this.rearrangeMenuPosition();
 
         window.requestAnimationFrame(() => {
