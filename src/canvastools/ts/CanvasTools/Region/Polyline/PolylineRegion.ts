@@ -11,18 +11,18 @@ import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
+import { AnchorsElement } from "./AnchorsElements";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+
 declare var Snap: typeof SNAPSVG_TYPE;
 
 export class PolylineRegion extends RegionComponent {
-    // Region size
-    public area: number;
-
     // Region components
     public node: Snap.Element;
+    private anchorNode: AnchorsElement;
     private dragNode: DragElement;
     private tagsNode: TagsElement;
     private toolTip: Snap.Fragment;
@@ -38,25 +38,27 @@ export class PolylineRegion extends RegionComponent {
     private styleID: string;
     private styleSheet: CSSStyleSheet = null;
 
+    // Bound rects
+    private paperRects: { host: Rect, actual: Rect };
+
     // Manipulation notifiers
     public isSelected: boolean = false;
 
     // Styling options
     private tagsUpdateOptions: ITagsUpdateOptions;
 
-    private regionData: RegionData;
-
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData:RegionData, id: string, tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect);
-        this.boundRect = regionData.boundRect;
-
-        this.regionData = regionData;
-        this.x = regionData.x;
-        this.y = regionData.y;
-        this.area = regionData.area;
+        super(paper, paperRect, regionData);
 
         this.ID = id;
         this.tags = tagsDescriptor;
+
+        if (paperRect !== null) {
+            this.paperRects = {
+                actual: new Rect(paperRect.width - regionData.width, paperRect.height - regionData.height),
+                host: paperRect,
+            };
+        }
 
         if (onManipulationBegin !== undefined) {
             this.onManipulationBegin = () => {
@@ -83,16 +85,18 @@ export class PolylineRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.dragNode = new DragElement(paper, this.paperRect, this.regionData, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
+        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
         this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, this.onInternalChange.bind(this), this.onManipulationBegin, this.onManipulationEnd);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(<any>this.toolTip);
 
         this.node.add(this.dragNode.node);
         this.node.add(this.tagsNode.node);
+        this.node.add(this.anchorNode.node);
 
-        this.UI = new Array<RegionComponent>(this.tagsNode, this.dragNode);
+        this.UI = new Array<RegionComponent>(this.tagsNode, this.dragNode, this.anchorNode);
     }
 
     // Helper function to generate random id;
@@ -114,14 +118,12 @@ export class PolylineRegion extends RegionComponent {
         document.getElementById(this.styleID).remove();
     }
 
-    private onInternalChange(component: RegionComponent, x: number, y: number, width: number, height: number, points: Array<Point2D>, state: ChangeEventType, multiSelection: boolean = false) {
-        if (this.x != x || this.y != y) {
-            this.move(new Point2D(x, y));
-        }
-        if (this.boundRect.width != width || this.boundRect.height != height) {
-            this.resize(width, height);
-        }
-        this.onChange(this, x, y, width, height, points, state, multiSelection);
+    private onInternalChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
+        this.regionData.initFrom(regionData);
+        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width, this.paperRects.host.height - regionData.height);
+        this.redraw();
+
+        this.onChange(this, this.regionData.copy(), state, multiSelection);
     }
 
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
@@ -134,21 +136,18 @@ export class PolylineRegion extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
-        this.regionData.move(arg1, arg2);
-
-        this.UI.forEach((element) => {
-            element.move(arg1, arg2);
-        });
+        this.redraw();
     }
 
     public resize(width: number, height: number) {
         super.resize(width, height);
-        this.regionData.resize(width, height);
+        this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
+        this.redraw();
+    }
 
-        this.area = this.regionData.area;
-
+    public redraw() {
         this.UI.forEach((element) => {
-            element.resize(width, height)
+            element.redraw();
         });
     }
 

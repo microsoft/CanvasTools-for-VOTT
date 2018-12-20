@@ -24,10 +24,7 @@ export class DragElement extends RegionComponent {
     private isDragged: boolean = false;
 
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
-        super(paper, paperRect);
-        this.x = regionData.x;
-        this.y = regionData.y;
-        this.boundRect = regionData.boundRect;
+        super(paper, paperRect, regionData);
 
         if (onChange !== undefined) {
             this.onChange = onChange;
@@ -58,20 +55,21 @@ export class DragElement extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
-        window.requestAnimationFrame(() => {
-            this.dragRect.attr({
-                x: this.x,
-                y: this.y
-            });
-        });
+        this.redraw();
     }
 
     public resize(width: number, height: number) {
         super.resize(width, height);
+        this.redraw();
+    }
+
+    public redraw() {
         window.requestAnimationFrame(() => {
             this.dragRect.attr({
-                width: width,
-                height: height
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height
             });
         });
     }
@@ -84,19 +82,23 @@ export class DragElement extends RegionComponent {
 
     private rectDragMove(dx: number, dy: number) {
         if (dx != 0 && dy != 0) {
-            let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
-
-            if (this.paperRect !== null) {
-                p = p.boundToRect(this.paperRect);
-            }
-            //this.move(p);            
-            this.onChange(this, p.x, p.y, this.boundRect.width, this.boundRect.height, [new Point2D(p.x, p.y)], ChangeEventType.MOVING);
+            if (this.onChange !== null) {
+                let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
+                if (this.paperRect !== null) {
+                    p = p.boundToRect(this.paperRect);
+                }
+                const rd = this.regionData.copy();
+                rd.move(p);
+                this.onChange(this, rd, ChangeEventType.MOVING);
+            } 
         }
     };
 
     private rectDragEnd() {
         this.dragOrigin = null;
-        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEEND);
+        if (this.onChange !== null) {
+            this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
+        }        
     }
 
     private subscribeToDragEvents() {
@@ -128,16 +130,22 @@ export class DragElement extends RegionComponent {
         this.dragRect.node.addEventListener("pointerdown", (e) => {
             if (!this.isFrozen) {
                 this.dragRect.node.setPointerCapture(e.pointerId);
-                let multiselection = e.shiftKey;
-                this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.MOVEBEGIN, multiselection);
+
+                if (this.onChange !== null) {
+                    const multiselection = e.shiftKey;
+                    this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
+                }
             }
         });
 
         this.dragRect.node.addEventListener("pointerup", (e) => {
             if (!this.isFrozen) {
                 this.dragRect.node.releasePointerCapture(e.pointerId);
-                let multiselection = e.shiftKey;
-                this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height, [new Point2D(this.x, this.y)], ChangeEventType.SELECTIONTOGGLE, multiselection);
+                
+                if (this.onChange !== null) {
+                    const multiselection = e.shiftKey;
+                    this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
+                }                
             }
         });
     }
