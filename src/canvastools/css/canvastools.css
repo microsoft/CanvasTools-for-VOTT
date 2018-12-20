@@ -79,7 +79,7 @@
 }
 
 .primaryTagRectStyle {
-    fill: rgba(64, 64, 64, 0.4);
+    fill: rgba(128, 128, 128, 0.2);
     stroke-width: 2;
     stroke:rgba(196, 196, 196, 0.6);
     stroke-dasharray: 2 6;
@@ -155,21 +155,21 @@
     stroke:rgba(196, 196, 196, 0.6);
 }
 
-.primaryTagPolylinePointStyle {
+/* .primaryTagPolylinePointStyle {
     fill: rgba(196, 196, 196, 0.6);
     stroke-width: 1;
     stroke:rgba(196, 196, 196, 0.6);
-}
+} */
 
-.regionStyle.selected .primaryTagPolylineStyle, 
-.regionStyle.selected .primaryTagPolylinePointStyle {
+.regionStyle.selected .primaryTagPolylineStyle/* , 
+.regionStyle.selected .primaryTagPolylinePointStyle */ {
     filter: url(#black-glow);
 }
 
 .anchorStyle {
     stroke-width: 2;
     stroke: #ccc;
-    fill: #333;
+    fill: #666;
 }
 
 .anchorStyle.TL, .anchorStyle.BR {
@@ -180,18 +180,20 @@
     cursor: nesw-resize;
 }
 
-.anchorStyle.ghost, .anchorStyle.ghost:hover{
+.anchorStyle.ghost {
     stroke-width: 0;
-    fill: rgba(255, 0, 0, 0);
+    fill: rgba(255,255,255, 0);
 }
 
-.anchorStyle.ghost:hover {
+.anchorStyle.ghost:hover,
+.regionStyle.selected .anchorStyle.ghost,
+.regionStyle.selected .anchorStyle.ghost:hover {
     fill: rgba(255,255,255,0.5);
 }
 
 .anchorStyle:hover {
-    stroke: rgb(6, 59, 116);
-    fill:rgba(21, 127, 240, 1.0);
+    stroke: #eee;
+    fill: #333;
 }
 
 .regionStyle:hover .anchorStyle {
@@ -199,7 +201,8 @@
 }
 
 .regionStyle.selected .anchorStyle {
-    stroke: rgba(21, 127, 240, 1.0);
+    stroke: #fff;
+    fill: #111;
 }
 
 svg:not(:root) .menuLayer {
