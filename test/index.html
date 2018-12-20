@@ -33,6 +33,7 @@
             let id = (incrementalRegionID++).toString();
             let tags = generateTagDescriptor();            
             editor.RM.addRegion(id, regionData, tags);
+            console.log(regionData.toString());
         }
 
         let primaryTag = new ct.Core.Tag(
@@ -46,22 +47,27 @@
                         Math.floor(Math.random() * 360.0));
 
         function generateTagDescriptor() {
-            let tags = 
-                (Math.random() < 0.3) ?        
-                    new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]):
-                ((Math.random() > 0.5) ? 
-                    new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]):
-                    new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]));
-
+            let rnd = Math.random();
+            let tags;
+            
+            if (rnd < 0.25) {
+                tags = new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+            } else if (rnd < 0.5) {
+                tags = new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]);
+            } else if (rnd < 0.75) {
+                tags = new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]);
+            } else {
+                tags = null;
+            }
             return tags
         }
         
         editor.onRegionMove = (id, x, y, width, height) => {
-            console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
+            //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
         }
 
         // Upload background image for selection 
-        let imagePath = "./../images/background-forest-v.jpg";
+        let imagePath = "./../images/background-cat.jpg";
         let image = new Image();
         image.addEventListener("load", (e) => {
             editor.addContentSource(e.target);
