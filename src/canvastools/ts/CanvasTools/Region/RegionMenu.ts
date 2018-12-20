@@ -182,7 +182,7 @@ export class MenuElement extends RegionComponent {
     }
 
     private rearrangeMenuPosition() {
-        // position menu inside
+        /* // position menu inside
         if (this.mh <= this.boundRect.height - this.dh) {
             this.my = this.y + this.boundRect.height / 2 - this.mh / 2;
             // position menu on the right side
@@ -207,6 +207,22 @@ export class MenuElement extends RegionComponent {
             } else { // position menu on the right side INSIDE
                 this.mx = this.x + this.boundRect.width - this.mw - this.dw;
             }
+        } */
+
+        // position menu outside
+        if (this.y + this.mh + this.dw > this.paperRect.height) {
+            this.my = this.paperRect.height - this.mh - this.dw;
+        } else {
+            this.my = this.y + this.dw;
         }
+        // position menu on the right side
+        if (this.x + this.boundRect.width + this.mw + 2 * this.dw < this.paperRect.width) {
+            this.mx = this.x + this.boundRect.width + this.dw;
+        } else if (this.x - this.mw - 2 * this.dw > 0) { // position menu on the left side
+            this.mx = this.x - this.mw - this.dw;
+        } else { // position menu on the right side INSIDE
+            this.mx = this.x + this.boundRect.width - this.mw - this.dw;
+        }
+
     }
 }
