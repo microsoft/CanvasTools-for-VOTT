@@ -98,7 +98,7 @@ export class RegionData implements IMovable, IResizable {
         const dx = this.x - oldx;
         const dy = this.y - oldy;
 
-        this.points.forEach((p) => {
+        this.regionPoints.forEach((p) => {
             p.moveDelta(dx, dy);
         });
     }
@@ -109,7 +109,7 @@ export class RegionData implements IMovable, IResizable {
 
         this.regionRect.resize(width, height);
 
-        this.points.forEach((p) => {
+        this.regionPoints.forEach((p) => {
             const px = (p.x - this.x) * sx + this.x;
             const py = (p.y - this.y) * sy + this.y;
             p.move(px, py);
