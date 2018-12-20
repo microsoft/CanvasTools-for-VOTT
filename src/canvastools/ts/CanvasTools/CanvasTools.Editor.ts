@@ -1,10 +1,16 @@
+import { FilterPipeline } from "./CanvasTools.Filter";
+
+import { Rect } from "./Core/Rect";
+import { RegionData } from "./Core/RegionData";
+
+import { RegionComponent } from "./Region/RegionComponent";
+import { RegionsManager } from "./Region/RegionsManager";
+
+import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";
+
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
-import { RegionsManager } from "./Region/RegionsManager";
-import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";
-import { FilterPipeline } from "./CanvasTools.Filter";
-import { RegionComponent } from "./Region/RegionComponent";
-import { Rect } from "./Core/Rect";
+
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
 
@@ -51,6 +57,12 @@ export class Editor {
     private isRMFrozen: boolean = false;
 
     public autoResize: boolean = true;
+
+    private sourceWidth: number;
+    private sourceHeight: number;
+
+    private frameWidth: number;
+    private frameHeight: number;
 
     constructor(editorZone: HTMLDivElement) {
         // Create SVG Element
@@ -100,12 +112,12 @@ export class Editor {
 
                     this.onSelectionBegin();
                 },
-                onSelectionEnd: (commit) => {
+                onSelectionEnd: (regionData: RegionData) => {
                     if (!this.isRMFrozen) {
                         this.regionsManager.unfreeze();
                     }
 
-                    this.onSelectionEnd(commit);
+                    this.onSelectionEnd(regionData);
                 }
             });
 
@@ -350,12 +362,15 @@ export class Editor {
         let context = buffCnvs.getContext("2d");
 
         if (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement) {
-            buffCnvs.width = source.width;
-            buffCnvs.height = source.height;
+            this.sourceWidth = source.width;
+            this.sourceHeight = source.height;
         } else if (source instanceof HTMLVideoElement) {
-            buffCnvs.width = source.videoWidth;
-            buffCnvs.height = source.videoHeight;
+            this.sourceWidth = source.videoWidth;
+            this.sourceHeight = source.videoHeight;
         }
+
+        buffCnvs.width = this.sourceWidth;
+        buffCnvs.height = this.sourceHeight;
 
         context.drawImage(source, 0, 0, buffCnvs.width, buffCnvs.height);
 
@@ -372,6 +387,9 @@ export class Editor {
     }
 
     public resize(containerWidth: number, containerHeight: number) {
+        this.frameWidth = containerWidth;
+        this.frameHeight = containerHeight;
+
         let imgRatio = this.contentCanvas.width / this.contentCanvas.height;
         let containerRatio = containerWidth / containerHeight;
 
@@ -390,11 +408,11 @@ export class Editor {
 
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
 
-        let actualWidth = this.editorSVG.clientWidth;
-        let actualHeight = this.editorSVG.clientHeight;
+        this.frameWidth = this.editorSVG.clientWidth;
+        this.frameHeight = this.editorSVG.clientHeight;
 
-        this.areaSelector.resize(actualWidth, actualHeight);
-        this.regionsManager.resize(actualWidth, actualHeight);
+        this.areaSelector.resize(this.frameWidth, this.frameHeight);
+        this.regionsManager.resize(this.frameWidth, this.frameHeight);
     }
 
     public get RM(): RegionsManager {
@@ -403,5 +421,23 @@ export class Editor {
 
     public get FilterPipeline(): FilterPipeline {
         return this.filterPipeline;
+    }
+
+    public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
+        let sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        let sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+
+        let xf = sw / this.frameWidth;
+        let yf = sh / this.frameHeight;
+        return regionData.scaleByFactor(xf, yf);
+    }
+
+    public scaleRegionToFrameSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
+        let sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        let sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+
+        let xf = this.frameWidth / sw;
+        let yf = this.frameHeight / sh;
+        return regionData.scaleByFactor(xf, yf);
     }
 }
