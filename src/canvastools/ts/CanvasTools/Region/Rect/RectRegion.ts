@@ -1,5 +1,6 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
@@ -15,6 +16,7 @@ import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElements";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+
 declare var Snap: typeof SNAPSVG_TYPE;
 
 export class RectRegion extends RegionComponent {
@@ -43,20 +45,17 @@ export class RectRegion extends RegionComponent {
     // Styling options
     private tagsUpdateOptions: ITagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, point: Point2D, rect: Rect, id: string,
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string,
                 tagsDescriptor: TagsDescriptor, onManipulationBegin?: ManipulationFunction,
                 onManipulationEnd?: ManipulationFunction, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect);
-        this.boundRect = rect;
+        super(paper, paperRect, regionData);
 
-        this.x = point.x;
-        this.y = point.y;
         this.ID = id;
         this.tags = tagsDescriptor;
 
         if (paperRect !== null) {
             this.paperRects = {
-                actual: new Rect(paperRect.width - rect.width, paperRect.height - rect.height),
+                actual: new Rect(paperRect.width - regionData.width, paperRect.height - regionData.height),
                 host: paperRect,
             };
         }
@@ -78,7 +77,7 @@ export class RectRegion extends RegionComponent {
         this.tagsUpdateOptions = tagsUpdateOptions;
 
         this.buildOn(paper);
-        this.move(point);
+        //this.move(point);
     }
 
     public removeStyles() {
@@ -96,19 +95,19 @@ export class RectRegion extends RegionComponent {
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
 
-        this.UI.forEach((element) => {
-            element.move(arg1, arg2);
-        });
+        this.redraw();
     }
 
     public resize(width: number, height: number) {
         super.resize(width, height);
-        this.area = width * height;
-
         this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
 
+        this.redraw();
+    }
+
+    public redraw() {
         this.UI.forEach((element) => {
-            element.resize(width, height);
+            element.redraw();
         });
     }
 
@@ -133,13 +132,13 @@ export class RectRegion extends RegionComponent {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        this.anchorsNode = new AnchorsElement(paper, this.paperRects.host, this.x, this.y, this.boundRect,
+        this.anchorsNode = new AnchorsElement(paper, this.paperRects.host, this.regionData,
                                               this.onInternalChange.bind(this), this.onManipulationBegin,
                                               this.onManipulationEnd);
-        this.dragNode = new DragElement(paper, this.paperRects.actual, this.x, this.y, this.boundRect,
+        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData,
                                         this.onInternalChange.bind(this), this.onManipulationBegin,
                                         this.onManipulationEnd);
-        this.tagsNode = new TagsElement(paper, this.paperRects.host, this.x, this.y, this.boundRect,
+        this.tagsNode = new TagsElement(paper, this.paperRects.host, this.regionData,
                                         this.tags, this.styleID, this.styleSheet,
                                         this.tagsUpdateOptions);
 
@@ -168,15 +167,12 @@ export class RectRegion extends RegionComponent {
         return style.sheet as CSSStyleSheet;
     }
 
-    private onInternalChange(component: RegionComponent, x: number, y: number, width: number, height: number,
-                             points: Point2D[], state: ChangeEventType, multiSelection: boolean = false) {
-        if (this.x !== x || this.y !== y) {
-            this.move(new Point2D(x, y));
-        }
-        if (this.boundRect.width !== width || this.boundRect.height !== height) {
-            this.resize(width, height);
-        }
-        this.onChange(this, x, y, width, height, points.concat([new Point2D(x + width, y + height)]),
-                      state, multiSelection);
+    private onInternalChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
+        this.regionData.initFrom(regionData);
+        this.redraw();
+        
+        if (this.onChange !== null) {
+            this.onChange(this, this.regionData.copy(), state, multiSelection);
+        }   
     }
 }

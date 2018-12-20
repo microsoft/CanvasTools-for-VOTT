@@ -1,5 +1,6 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
@@ -38,13 +39,10 @@ export class TagsElement extends RegionComponent {
     private styleSheet: CSSStyleSheet = null;
     private tagsUpdateOptions: ITagsUpdateOptions;
 
-    constructor(paper: Snap.Paper, paperRect: Rect, x: number, y: number, rect: Rect,
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData,
                 tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet,
                 tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect);
-        this.boundRect = rect;
-        this.x = x;
-        this.y = y;
+        super(paper, paperRect, regionData);
 
         this.styleId = styleId;
         this.styleSheet = styleSheet;
@@ -55,14 +53,10 @@ export class TagsElement extends RegionComponent {
     }
 
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
-        let keepPrimaryText = false; // redraw by default
-        if (this.tags && this.tags.primary && tags && tags.primary) {
-            keepPrimaryText = (tags.primary.name === this.tags.primary.name);
-        }
-
         this.tags = tags;
+        const rebuildTags = true;
 
-        this.redrawTagLabels(keepPrimaryText);
+        this.redraw(rebuildTags);
         this.clearColors();
 
         const showBackground = (options !== undefined) ? options.showRegionBackground : true;
@@ -73,67 +67,147 @@ export class TagsElement extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
-
-        const size = 6;
-        const cx = this.x + 0.5 * this.boundRect.width;
-        const cy = this.y - size - 5;
-
-        window.requestAnimationFrame(() => {
-            this.primaryTagRect.attr({
-                x: this.x,
-                y: this.y,
-            });
-            this.primaryTagText.attr({
-                x: this.x + 5,
-                y: this.y + this.textBox.height,
-            });
-            this.primaryTagTextBG.attr({
-                x: this.x + 1,
-                y: this.y + 1,
-            });
-
-            // Secondary Tags
-            if (this.secondaryTags && this.secondaryTags.length > 0) {
-                const length = this.secondaryTags.length;
-                for (let i = 0; i < length; i++) {
-                    const stag = this.secondaryTags[i];
-                    const x = cx + (2 * i - length + 0.5) * size;
-
-                    stag.attr({
-                        x,
-                        y: cy,
-                    });
-                }
-            }
-        });
+        this.redraw();        
     }
 
     public resize(width: number, height: number) {
         super.resize(width, height);
+        this.redraw();
+    }
 
-        window.requestAnimationFrame(() => {
-            this.primaryTagRect.attr({
-                height,
-                width,
+    public redraw(rebuildTags: boolean = false) {
+        // If there are tags assigned
+        if (this.tags) {
+            window.requestAnimationFrame(() => {
+                if (this.tags.primary !== undefined) {
+                    // Update primaty tag rect
+                    this.primaryTagRect.attr({
+                        height: this.height,
+                        width: this.width,
+                        x: this.x,
+                        y: this.y,
+                    });
+        
+                    // Update primary tag text
+                    if (rebuildTags) {
+                        this.primaryTagText.node.innerHTML = this.tags.primary.name;
+                        this.textBox = this.primaryTagText.getBBox();
+                    }
+
+                    const showTextLabel = (this.textBox.width + 10 <= this.width)
+                                           && (this.textBox.height <= this.height);
+
+                    if (showTextLabel) {
+                        this.primaryTagTextBG.attr({
+                            height: this.textBox.height + 5,
+                            width: this.textBox.width + 10,
+                            x: this.x + 1,
+                            y: this.y + 1,                            
+                        });
+                        this.primaryTagText.attr({
+                            visibility: "visible",
+                            x: this.x + 5,
+                            y: this.y + this.textBox.height,
+                        });
+                    } else {
+                        this.primaryTagTextBG.attr({
+                            height: Math.min(10, this.height),
+                            width: Math.min(10, this.width),
+                            x: this.x,
+                            y: this.y,                            
+                        });
+                        this.primaryTagText.attr({
+                            visibility: "hidden",
+                            x: this.x + 5,
+                            y: this.y + this.textBox.height,
+                        });
+                    }
+                } else {
+                    this.primaryTagTextBG.attr({
+                        height: 0,
+                        width: 0,
+                    });
+                    this.primaryTagText.attr({
+                        visibility: "hidden",
+                        x: this.x + 5,
+                        y: this.y + this.textBox.height,
+                    });
+                }
+    
+                // Clear secondary tags -> redraw from scratch
+                if (rebuildTags) {
+                    this.secondaryTags.forEach((tag) => {
+                        tag.remove();
+                    });
+                    this.secondaryTags = [];
+                }
+
+                // Recreate secondary tags
+                if (this.tags.secondary && this.tags.secondary.length > 0) {
+                    const s = 6;
+                    const cx = this.x + 0.5 * this.boundRect.width;
+                    const cy = this.y - s - 5;
+
+                    const length = this.tags.secondary.length;
+                    for (let i = 0; i < length; i++) {
+                        const stag = this.tags.secondary[i];
+
+                        const x = cx + (2 * i - length + 1) * s - s / 2;
+
+                        if (rebuildTags) {
+                            const tagel = this.paper.rect(x, cy, s, s);
+                            tagel.addClass("secondaryTagStyle");
+                            tagel.addClass(`secondaryTag-${stag.name}`);
+                            this.secondaryTagsGroup.add(tagel);
+                            this.secondaryTags.push(tagel);
+                        } else {
+                            const tagel = this.secondaryTags[i];
+                            tagel.attr({
+                                x,
+                                y: cy,
+                            })
+                        }
+                    }
+                }
             });
-        });
+        } else {
+            window.requestAnimationFrame(() => {
+                this.primaryTagRect.attr({
+                    height: this.height,
+                    width: this.width,
+                    x: this.x,
+                    y: this.y,
+                });
 
-        this.redrawTagLabels();
+                // Remove primary tag
+                this.primaryTagText.node.innerHTML = "";
+                this.primaryTagTextBG.attr({
+                    height: 0,
+                    width: 0,
+                });
+
+                // Clear secondary tags
+                this.secondaryTags.forEach((tag) => {
+                    tag.remove();
+                });
+                this.secondaryTags = [];
+            });
+        }
     }
 
     private buildOn(paper: Snap.Paper, tags: TagsDescriptor) {
         this.node = paper.g();
         this.node.addClass("tagsLayer");
 
-        this.primaryTagRect = paper.rect(0, 0, this.boundRect.width, this.boundRect.height);
+        this.primaryTagRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
         this.primaryTagRect.addClass("primaryTagRectStyle");
 
-        this.primaryTagText = paper.text(0, 0, "");
+        this.primaryTagText = paper.text(this.x, this.y, "");
         this.primaryTagText.addClass("primaryTagTextStyle");
         this.textBox = this.primaryTagText.getBBox();
 
         // bound to region???
-        this.primaryTagTextBG = paper.rect(0, 0, 0, 0);
+        this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
         this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
 
         this.secondaryTagsGroup = paper.g();
@@ -146,90 +220,6 @@ export class TagsElement extends RegionComponent {
         this.node.add(this.secondaryTagsGroup);
 
         this.updateTags(tags, this.tagsUpdateOptions);
-    }
-
-    private redrawTagLabels(keepPrimaryText: boolean = true) {
-        // Clear secondary tags -> redraw from scratch
-        this.secondaryTags.forEach((tag) => {
-            tag.remove();
-        });
-
-        this.secondaryTags = [];
-        // If there are tags assigned
-        if (this.tags) {
-            if (this.tags.primary !== undefined) {
-                // Primary Tag
-                if (!keepPrimaryText || this.textBox === undefined) {
-                    this.primaryTagText.node.innerHTML = this.tags.primary.name;
-                    this.textBox = this.primaryTagText.getBBox();
-                }
-
-                const showTextLabel = (this.textBox.width + 10 <= this.boundRect.width)
-                                    && (this.textBox.height <= this.boundRect.height);
-                if (showTextLabel) {
-
-                    window.requestAnimationFrame(() => {
-                        this.primaryTagTextBG.attr({
-                            height: this.textBox.height + 5,
-                            width: this.textBox.width + 10,
-                        });
-                        this.primaryTagText.attr({
-                            visibility: "visible",
-                            x: this.x + 5,
-                            y: this.y + this.textBox.height,
-                        });
-                    });
-
-                } else {
-                    window.requestAnimationFrame(() => {
-                        this.primaryTagTextBG.attr({
-                            height: Math.min(10, this.boundRect.height),
-                            width: Math.min(10, this.boundRect.width),
-                        });
-                        this.primaryTagText.attr({
-                            visibility: "hidden",
-                            x: this.x + 5,
-                            y: this.y + this.textBox.height,
-                        });
-                    });
-                }
-            }
-            // Secondary Tags
-            if (this.tags.secondary && this.tags.secondary.length > 0) {
-                const length = this.tags.secondary.length;
-                for (let i = 0; i < length; i++) {
-                    const stag = this.tags.secondary[i];
-
-                    /* let r = 3;
-                    let x = this.x + this.rect.width / 2 + (2 * i - length + 1) * 2 * r;
-                    let y = this.y - r - 5;
-
-                    let tagel = this.paper.circle(x, y, r);    */
-
-                    const s = 6;
-                    const x = this.x + this.boundRect.width / 2 + (2 * i - length + 1) * s - s / 2;
-                    const y = this.y - s - 5;
-                    const tagel = this.paper.rect(x, y, s, s);
-
-                    window.requestAnimationFrame(() => {
-                        tagel.addClass("secondaryTagStyle");
-                        tagel.addClass(`secondaryTag-${stag.name}`);
-                    });
-
-                    this.secondaryTagsGroup.add(tagel);
-                    this.secondaryTags.push(tagel);
-                }
-            }
-            // Clear primary tag label
-        } else {
-            window.requestAnimationFrame(() => {
-                this.primaryTagText.node.innerHTML = "";
-                this.primaryTagTextBG.attr({
-                    height: 0,
-                    width: 0,
-                });
-            });
-        }
     }
 
     private clearColors() {

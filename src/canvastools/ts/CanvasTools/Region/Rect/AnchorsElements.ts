@@ -1,5 +1,6 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
@@ -12,6 +13,7 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+
 declare var Snap: typeof SNAPSVG_TYPE;
 
 /*
@@ -29,13 +31,10 @@ export class AnchorsElement extends RegionComponent {
     private pointOrigin: Point2D;
     private rectOrigin: Rect;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, x: number, y: number, rect: Rect,
-                onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction,
-                onManipulationEnd?: ManipulationFunction) {
-        super(paper, paperRect);
-        this.x = x;
-        this.y = y;
-        this.boundRect = rect;
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData,
+                onChange: ChangeFunction = null, onManipulationBegin: ManipulationFunction = null,
+                onManipulationEnd: ManipulationFunction = null) {
+        super(paper, paperRect, regionData);
 
         if (onChange !== undefined) {
             this.onChange = onChange;
@@ -55,18 +54,35 @@ export class AnchorsElement extends RegionComponent {
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
-        this.rearrangeAnchors(this.x, this.y, this.x + this.boundRect.width, this.y + this.boundRect.height);
+        this.redraw();
     }
 
     public resize(width: number, height: number) {
         super.resize(width, height);
-        this.rearrangeAnchors(this.x, this.y, this.x + this.boundRect.width, this.y + this.boundRect.height);
+        this.redraw();
+    }
+
+    public redraw() {
+        const x1 = this.x;
+        const y1 = this.y;
+        const x2 = this.x + this.width;
+        const y2 = this.y + this.height;
+
+        window.requestAnimationFrame(() => {
+            this.anchors.TL.attr({ cx: x1, cy: y1 });
+            this.anchors.TR.attr({ cx: x2, cy: y1 });
+            this.anchors.BR.attr({ cx: x2, cy: y2 });
+            this.anchors.BL.attr({ cx: x1, cy: y2 });
+        });
     }
 
     public freeze() {
         super.freeze();
         this.ghostAnchor.undrag();
-        this.onManipulationEnd();
+
+        if (this.onManipulationEnd !== null) {
+            this.onManipulationEnd();
+        }        
     }
 
     private buildOn(paper: Snap.Paper) {
@@ -79,8 +95,11 @@ export class AnchorsElement extends RegionComponent {
             TR: this.createAnchor(paper, "TR"),
         };
         this.ghostAnchor = this.createAnchor(paper, "ghost", 7);
+        this.ghostAnchor.attr({
+            display: "none"
+        })
 
-        this.rearrangeAnchors(this.x, this.y, this.x + this.boundRect.width, this.y + this.boundRect.height);
+        this.redraw();
 
         this.node.add(this.anchors.TL);
         this.node.add(this.anchors.TR);
@@ -132,24 +151,21 @@ export class AnchorsElement extends RegionComponent {
         return a;
     }
 
-    private rearrangeAnchors(x1: number, y1: number, x2: number, y2: number) {
-        window.requestAnimationFrame(() => {
-            this.anchors.TL.attr({ cx: x1, cy: y1 });
-            this.anchors.TR.attr({ cx: x2, cy: y1 });
-            this.anchors.BR.attr({ cx: x2, cy: y2 });
-            this.anchors.BL.attr({ cx: x1, cy: y2 });
-        });
-    }
-
     private rearrangeCoord(p1: Point2D, p2: Point2D, flipX: boolean, flipY: boolean) {
-        const x = (p1.x < p2.x) ? p1.x : p2.x;
-        const y = (p1.y < p2.y) ? p1.y : p2.y;
-        const width = Math.abs(p1.x - p2.x);
-        const height = Math.abs(p1.y - p2.y);
-
         this.flipActiveAnchor(flipX, flipY);
 
-        this.onChange(this, x, y, width, height, [new Point2D(x, y)], ChangeEventType.MOVING);
+        if(this.onChange !== null) {
+            const x = (p1.x < p2.x) ? p1.x : p2.x;
+            const y = (p1.y < p2.y) ? p1.y : p2.y;
+            const width = Math.abs(p1.x - p2.x);
+            const height = Math.abs(p1.y - p2.y);
+
+            let rd = this.regionData.copy();
+            rd.move(x, y);
+            rd.resize(width, height);
+
+            this.onChange(this, rd, ChangeEventType.MOVING);
+        }        
     }
 
     private flipActiveAnchor(flipX: boolean, flipY: boolean) {
@@ -290,7 +306,10 @@ export class AnchorsElement extends RegionComponent {
         window.requestAnimationFrame(() => {
             this.ghostAnchor.addClass(this.activeAnchor);
         });
-        this.onManipulationBegin();
+
+        if(this.onManipulationBegin !== null) {
+            this.onManipulationBegin();
+        }        
     }
 
     private onGhostPointerLeave(e: PointerEvent) {
@@ -303,19 +322,24 @@ export class AnchorsElement extends RegionComponent {
             this.ghostAnchor.removeClass(this.activeAnchor);
         });
 
-        this.onManipulationEnd();
+        if (this.onManipulationEnd !== null) {
+            this.onManipulationEnd();
+        }        
     }
 
     private onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
 
-        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height,
-            [new Point2D(this.x, this.y)], ChangeEventType.MOVEBEGIN);
+        if (this.onChange !== null) {
+            this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
+        }        
     }
 
     private onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-        this.onChange(this, this.x, this.y, this.boundRect.width, this.boundRect.height,
-            [new Point2D(this.x, this.y)], ChangeEventType.MOVEEND);
+
+        if (this.onChange !== null) {
+            this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
+        }        
     }
 }
