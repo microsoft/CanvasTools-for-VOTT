@@ -65,7 +65,7 @@ export class RegionsManager {
         
         this.menuLayer = paper.g();
         this.menuLayer.addClass("menuManager");
-        this.menu = new MenuElement(paper, this.paperRect, 0, 0, new Rect(0, 0),
+        this.menu = new MenuElement(paper, this.paperRect, new RegionData(0, 0, 0, 0),
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this));
 
@@ -207,17 +207,10 @@ export class RegionsManager {
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let x = regionData.x;
-        let y = regionData.y;
-        let w = regionData.width;
-        let h = regionData.height;
-
-        let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), new Rect(w, h), id, tagsDescriptor,
+        let region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
-
-        region.area = w * h;
 
         this.registerRegion(region);
     }
@@ -225,10 +218,7 @@ export class RegionsManager {
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let x = regionData.x;
-        let y = regionData.y;
-
-        let region = new PointRegion(this.paper, this.paperRect, new Point2D(x, y), id, tagsDescriptor,
+        let region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
             this.onManipulationBegin_local.bind(this),
             this.onManipulationEnd_local.bind(this),
             this.tagsUpdateOptions);
@@ -247,7 +237,7 @@ export class RegionsManager {
         this.registerRegion(region);
     }
 
-    // REGION CREATION
+/*     // REGION CREATION
     public drawRegion(x: number, y: number, rect: Rect, id: string, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
         let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), rect, id, tagsDescriptor,
@@ -266,7 +256,7 @@ export class RegionsManager {
             this.redrawAllRegions();
         }
         //this.menu.showOnRegion(region);  
-    }
+    } */
 
     // REDRAW ALL REGIONS (corrects z-order changes)
     public redrawAllRegions() {
@@ -551,7 +541,7 @@ export class RegionsManager {
 
     private justManipulated = false;
 
-    private onRegionChange(region: Region, x: number, y: number, width: number, height: number, points: Array<Point2D>, state: ChangeEventType, multiSelection: boolean = false) {
+    private onRegionChange(region: Region, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
         // resize or drag begin
         if (state === ChangeEventType.MOVEBEGIN) {
             if (!multiSelection) {
@@ -565,7 +555,7 @@ export class RegionsManager {
             // resizing or dragging            
         } else if (state === ChangeEventType.MOVING) {
             if ((typeof this.onRegionMove) == "function") {
-                this.onRegionMove(region.ID, region.x, region.y, region.boundRect.width, region.boundRect.height);
+                this.onRegionMove(region.ID, regionData);
             }
             this.justManipulated = true;
             // resize or drag end
