@@ -86,7 +86,7 @@ export class RectRegion extends RegionComponent {
 
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
         this.tagsNode.updateTags(tags, options);
-
+        this.tags = tags;
         this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 

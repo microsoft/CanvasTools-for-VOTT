@@ -186,7 +186,7 @@ export class RegionData implements IMovable, IResizable {
         const width = brCorner.x - tlCorner.x;
         const height = brCorner.y - brCorner.y;
 
-        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.points.map((p) => p.boundToRect(rect)), this.regionType);
+        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType);
     }
 
     public scaleByFactor(xfactor: number, yfactor: number):RegionData;
@@ -196,15 +196,15 @@ export class RegionData implements IMovable, IResizable {
         let yf = (f2 !== undefined) ? f2: f1;
 
         return new RegionData(this.x * xf, this.y * yf, this.width * xf, this.height * yf, 
-                              this.points.map((p) => new Point2D(p.x * xf, p.y * yf)),
+                              this.regionPoints.map((p) => new Point2D(p.x * xf, p.y * yf)),
                               this.regionType);
     }
 
     public copy(): RegionData {
-        return new RegionData(this.x, this.y, this.width, this.height, this.points.map((p) => p.copy()), this.regionType);
+        return new RegionData(this.x, this.y, this.width, this.height, this.regionPoints.map((p) => p.copy()), this.regionType);
     }
 
     public toString(): string {
-        return `${this.corner.toString()} x ${this.boundRect.toString()}: {${this.points.toString()}}`;
+        return `${this.corner.toString()} x ${this.boundRect.toString()}: {${this.regionPoints.toString()}}`;
     }
 }
