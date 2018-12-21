@@ -401,6 +401,10 @@ svg:not(:root) .menuLayer {
     fill: transparent;
 }
 
+.iconStyle.selector:hover .iconBGRectStyle{
+    fill: rgba(68, 68, 68, 0.5);
+}
+
 .iconStyle.selector.selected .iconBGRectStyle {
     fill: #333;
 }
@@ -412,6 +416,10 @@ svg:not(:root) .menuLayer {
 
 .iconStyle.switch .iconBGRectStyle{
     fill: transparent;
+}
+
+.iconStyle.switch:hover .iconBGRectStyle{
+    fill: rgba(68, 68, 68, 0.5);
 }
 
 .iconStyle.switch .iconImageStyle * {
