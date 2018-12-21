@@ -5,6 +5,15 @@ import { Rect } from "./Rect";
 
 export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline"}
 
+export interface IRegionData {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    points: {x: number, y: number}[];
+    type: RegionDataType;
+}
+
 export class RegionData implements IMovable, IResizable {
     public static BuildPointRegionData(x: number, y: number): RegionData {
         return new RegionData(x, y, 0, 0, [new Point2D(x, y)], RegionDataType.Point);
@@ -13,6 +22,12 @@ export class RegionData implements IMovable, IResizable {
     public static BuildRectRegionData(x: number, y: number, width: number, height: number): RegionData {
         return new RegionData(x, y, width, height,
             [new Point2D(x, y), new Point2D(x + width, y + height)], RegionDataType.Rect);
+    }
+
+    public static BuildFromJson(data: IRegionData): RegionData {
+        return new RegionData(data.x, data.y, data.width, data.height,
+                              data.points.map((p) => new Point2D(p.x, p.y)),
+                              data.type);
     }
 
     public get x(): number {
@@ -206,5 +221,18 @@ export class RegionData implements IMovable, IResizable {
 
     public toString(): string {
         return `${this.corner.toString()} x ${this.boundRect.toString()}: {${this.regionPoints.toString()}}`;
+    }
+
+    public toJSON(): IRegionData {
+        return {
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+            points: this.regionPoints.map((point) => {
+                return { x: point.x, y: point.y };
+            }),
+            type: this.regionType
+        }
     }
 }
