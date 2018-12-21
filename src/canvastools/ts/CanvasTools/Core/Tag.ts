@@ -1,4 +1,14 @@
+export interface ITag {
+    colorHue: number,
+    name: string,
+    id?: string
+}
+
 export class Tag {
+    public static BuildFromJSON(data: ITag): Tag {
+        return new Tag(data.name, data.colorHue, (data.id === undefined) ? "" : data.id);
+    }
+
     public static getHueFromColor(color: string): number {
         const r = parseInt(color.substring(1, 3), 16) / 255;
         const g = parseInt(color.substring(3, 5), 16) / 255;
@@ -78,9 +88,17 @@ export class Tag {
         return this.tagColorDark;
     }
 
-    constructor(name: string, colorHue: number, id: string = "none") {
+    constructor(name: string, colorHue: number, id: string = "") {
         this.name = name;
         this.colorHue = colorHue;
         this.id = id;
+    }
+
+    public toJSON(): ITag {
+        return {
+            name: this.name,
+            colorHue: this.colorHue,
+            id: this.id
+        }
     }
 }

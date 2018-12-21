@@ -2,7 +2,16 @@ import { IBoundable } from "../Interface/IBoundable";
 import { IMovable } from "../Interface/IMovable";
 import { Rect} from "./Rect";
 
+export interface IPoint2D {
+    x: number,
+    y: number
+}
+
 export class Point2D implements IMovable, IBoundable<Point2D> {
+    public static BuildFromJSON(data: IPoint2D): Point2D {
+        return new Point2D(data.x, data.y);
+    }
+
     public x: number;
     public y: number;
 
@@ -47,5 +56,12 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
 
     public toString(): string {
         return `{${this.x.toString()}, ${this.y.toString()}}`;
+    }
+
+    public toJSON(): IPoint2D {
+        return {
+            x: this.x,
+            y: this.y
+        };
     }
 }

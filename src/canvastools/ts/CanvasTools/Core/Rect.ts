@@ -1,6 +1,15 @@
 import { IResizable } from "../Interface/IResizable";
 
+export interface IRect {
+    width: number,
+    height: number
+}
+
 export class Rect implements IResizable {
+    public static BuildFromJSON(data: IRect): Rect {
+        return new Rect(data.width, data.height);
+    }
+
     public width: number;
     public height: number;
 
@@ -23,5 +32,12 @@ export class Rect implements IResizable {
 
     public toString(): string {
         return `[${this.width.toString()}, ${this.height.toString()}]`;
+    }
+
+    public toJSON(): IRect {
+        return {
+            width: this.width,
+            height: this.height
+        };
     }
 }
