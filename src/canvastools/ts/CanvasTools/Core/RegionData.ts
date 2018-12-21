@@ -11,7 +11,7 @@ export interface IRegionData {
     width: number;
     height: number;
     points: {x: number, y: number}[];
-    type: RegionDataType;
+    regionType: RegionDataType;
 }
 
 export class RegionData implements IMovable, IResizable {
@@ -27,7 +27,7 @@ export class RegionData implements IMovable, IResizable {
     public static BuildFromJson(data: IRegionData): RegionData {
         return new RegionData(data.x, data.y, data.width, data.height,
                               data.points.map((p) => new Point2D(p.x, p.y)),
-                              data.type);
+                              data.regionType);
     }
 
     public get x(): number {
@@ -232,7 +232,7 @@ export class RegionData implements IMovable, IResizable {
             points: this.regionPoints.map((point) => {
                 return { x: point.x, y: point.y };
             }),
-            type: this.regionType
+            regionType: this.regionType
         }
     }
 }
