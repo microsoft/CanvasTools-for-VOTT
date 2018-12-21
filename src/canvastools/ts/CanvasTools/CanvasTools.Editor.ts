@@ -96,8 +96,8 @@ export class Editor {
             this.onRegionSelected(id, multiselection);
         };
 
-        this.regionsManager.onRegionMove = (id: string, x: number, y: number, width: number, height: number) => {
-            this.onRegionMove(id, x, y, width, height);
+        this.regionsManager.onRegionMove = (id: string, regionData: RegionData) => {
+            this.onRegionMove(id, regionData);
         };
 
         this.regionsManager.onRegionDelete = (id: string) => {
@@ -149,7 +149,7 @@ export class Editor {
         // do something
     }
 
-    public onRegionMove(id: string, x: number, y: number, width: number, height: number) {
+    public onRegionMove(id: string, regionData: RegionData) {
         // do something
     }
 
