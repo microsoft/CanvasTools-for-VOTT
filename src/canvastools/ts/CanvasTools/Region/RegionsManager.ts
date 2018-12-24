@@ -194,11 +194,11 @@ export class RegionsManager {
     }
 
     public addRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
-        if (regionData.regionType === RegionDataType.Point) {
+        if (regionData.type === RegionDataType.Point) {
             this.addPointRegion(id, regionData, tagsDescriptor);
-        } else if (regionData.regionType === RegionDataType.Polyline) {
+        } else if (regionData.type === RegionDataType.Polyline) {
             this.addPolylineRegion(id, regionData, tagsDescriptor);
-        } else if (regionData.regionType === RegionDataType.Rect) {
+        } else if (regionData.type === RegionDataType.Rect) {
             this.addRectRegion(id, regionData, tagsDescriptor);
         }
     }
