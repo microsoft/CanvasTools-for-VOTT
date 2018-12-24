@@ -1,7 +1,8 @@
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { RegionComponent, ManipulationFunction, ChangeFunction, ChangeEventType } from "./RegionComponent";
+import { ManipulationFunction, ChangeFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
+import { RegionComponent } from "./RegionComponent";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";
@@ -65,10 +66,12 @@ export class RegionsManager {
         
         this.menuLayer = paper.g();
         this.menuLayer.addClass("menuManager");
-        this.menu = new MenuElement(paper, this.paperRect, new RegionData(0, 0, 0, 0),
-            this.onManipulationBegin_local.bind(this),
-            this.onManipulationEnd_local.bind(this));
-
+        this.menu = new MenuElement(paper, this.paperRect, new RegionData(0, 0, 0, 0), {
+            onChange: null,
+            onManipulationBegin: this.onManipulationBegin_local.bind(this),
+            onManipulationEnd: this.onManipulationEnd_local.bind(this)
+        });
+        
         this.menu.addAction("delete", "trash", (region: Region) => {
             this.deleteRegion(region);
             this.menu.hide();
@@ -182,8 +185,6 @@ export class RegionsManager {
     }
 
     private registerRegion(region:Region) {
-        region.onChange = this.onRegionChange.bind(this);
-
         this.unselectRegions();
         region.select();
 
@@ -207,10 +208,11 @@ export class RegionsManager {
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-            this.onManipulationBegin_local.bind(this),
-            this.onManipulationEnd_local.bind(this),
-            this.tagsUpdateOptions);
+        let region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
+            onChange: this.onRegionChange.bind(this),
+            onManipulationBegin: this.onManipulationBegin_local.bind(this),
+            onManipulationEnd: this.onManipulationEnd_local.bind(this)
+        }, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -218,10 +220,11 @@ export class RegionsManager {
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-            this.onManipulationBegin_local.bind(this),
-            this.onManipulationEnd_local.bind(this),
-            this.tagsUpdateOptions);
+        let region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
+            onChange: this.onRegionChange.bind(this),
+            onManipulationBegin: this.onManipulationBegin_local.bind(this),
+            onManipulationEnd: this.onManipulationEnd_local.bind(this)
+        }, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -229,10 +232,11 @@ export class RegionsManager {
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        let region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-            this.onManipulationBegin_local.bind(this),
-            this.onManipulationEnd_local.bind(this),
-            this.tagsUpdateOptions);
+        let region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,{
+            onChange: this.onRegionChange.bind(this),
+            onManipulationBegin: this.onManipulationBegin_local.bind(this),
+            onManipulationEnd: this.onManipulationEnd_local.bind(this)
+        }, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }

@@ -7,8 +7,9 @@ import { IFreezable } from "../Interface/IFreezable";
 import { IHideable } from "../Interface/IHideadble";
 import { IMovable } from "../Interface/IMovable";
 import { IResizable } from "../Interface/IResizable";
+import { ChangeFunction, ManipulationFunction, IRegionCallbacks, ChangeEventType } from "../Interface/IRegionCallbacks";
 
-import { ManipulationFunction, RegionComponent } from "./RegionComponent";
+import { RegionComponent } from "./RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
@@ -46,17 +47,8 @@ export class MenuElement extends RegionComponent {
 
     private region: RegionComponent;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData,
-                onManipulationBegin?: ManipulationFunction, onManipulationEnd?: ManipulationFunction) {
-        super(paper, paperRect, regionData);
-
-        if (onManipulationBegin !== undefined) {
-            this.onManipulationBegin = onManipulationBegin;
-        }
-        if (onManipulationEnd !== undefined) {
-            this.onManipulationEnd = onManipulationEnd;
-        }
-
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
+        super(paper, paperRect, regionData, callbacks);
         this.buildOn(this.paper);
     }
 

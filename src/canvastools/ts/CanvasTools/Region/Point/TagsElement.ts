@@ -9,8 +9,9 @@ import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
+import { RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 
@@ -38,7 +39,7 @@ export class TagsElement extends RegionComponent {
     private tagsUpdateOptions: ITagsUpdateOptions;
 
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData);
+        super(paper, paperRect, regionData, null);
 
         this.styleId = styleId;
         this.styleSheet = styleSheet;

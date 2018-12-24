@@ -9,8 +9,9 @@ import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
+import { RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
@@ -28,21 +29,8 @@ export class AnchorsElement extends RegionComponent {
    
     private dragOrigin: Point2D;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData,
-                onChange?: ChangeFunction, onManipulationBegin?: ManipulationFunction,
-                onManipulationEnd?: ManipulationFunction) {
-        super(paper, paperRect, regionData);
-
-        if (onChange !== undefined) {
-            this.onChange = onChange;
-        }
-
-        if (onManipulationBegin !== undefined) {
-            this.onManipulationBegin = onManipulationBegin;
-        }
-        if (onManipulationEnd !== undefined) {
-            this.onManipulationEnd = onManipulationEnd;
-        }
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
+        super(paper, paperRect, regionData, callbacks);
 
         this.buildOn(paper);
     }
@@ -138,9 +126,7 @@ export class AnchorsElement extends RegionComponent {
             rd.setPoint(p, this.activeAnchorIndex);
         }
 
-        if (this.onChange !== null) {
-            this.onChange(this, rd, ChangeEventType.MOVING);
-        }
+        this.onChange(this, rd, ChangeEventType.MOVING);
     }
 
     private anchorDragBegin() {
@@ -195,16 +181,13 @@ export class AnchorsElement extends RegionComponent {
     private onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
 
-        if (this.onChange !== null) {
-            this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
-        }
+        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
         
     }
 
     private onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-        if (this.onChange !== null) {
-            this.onChange(this, this.regionData, ChangeEventType.MOVEEND);
-        }        
+        
+        this.onChange(this, this.regionData, ChangeEventType.MOVEEND);
     }
 }

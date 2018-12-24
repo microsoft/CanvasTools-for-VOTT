@@ -9,8 +9,9 @@ import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
+import { RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 
@@ -25,21 +26,8 @@ export class DragElement extends RegionComponent {
     private isDragged: boolean = false;
     private dragOrigin: Point2D;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData,
-                onChange: ChangeFunction = null, onManipulationBegin: ManipulationFunction = null,
-                onManipulationEnd: ManipulationFunction = null) {
-        super(paper, paperRect, regionData);
-
-        if (onChange !== undefined) {
-            this.onChange = onChange;
-        }
-
-        if (onManipulationBegin !== undefined) {
-            this.onManipulationBegin = onManipulationBegin;
-        }
-        if (onManipulationEnd !== undefined) {
-            this.onManipulationEnd = onManipulationEnd;
-        }
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
+        super(paper, paperRect, regionData, callbacks);
 
         this.buildOn(paper);
         this.subscribeToDragEvents();

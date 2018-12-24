@@ -9,11 +9,11 @@ import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { ChangeEventType, ChangeFunction, ManipulationFunction, RegionComponent } from "../RegionComponent";
+import { RegionComponent } from "../RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
-
 declare var Snap: typeof SNAPSVG_TYPE;
 
 /*
@@ -26,19 +26,8 @@ export class DragElement extends RegionComponent {
 
     private radius: number = 7;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, onChange: ChangeFunction = null, onManipulationBegin: ManipulationFunction = null, onManipulationEnd: ManipulationFunction = null) {
-        super(paper, paperRect, regionData);
-
-        if (onChange !== undefined) {
-            this.onChange = onChange;
-        }
-
-        if (onManipulationBegin !== undefined) {
-            this.onManipulationBegin = onManipulationBegin;
-        }
-        if (onManipulationEnd !== undefined) {
-            this.onManipulationEnd = onManipulationEnd;
-        }
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
+        super(paper, paperRect, regionData, callbacks);
 
         this.buildOn(paper);
         this.subscribeToDragEvents();
@@ -92,18 +81,14 @@ export class DragElement extends RegionComponent {
             let rd = this.regionData.copy();
             rd.move(p);
             
-            if (this.onChange !== null) {
-                this.onChange(this, rd, ChangeEventType.MOVING);
-            }
+            this.onChange(this, rd, ChangeEventType.MOVING);
         }
     };
 
     private rectDragEnd() {
         this.dragOrigin = null;
 
-        if (this.onChange !== null) {
-            this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
-        }        
+        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
     }
 
     private subscribeToDragEvents() {
@@ -113,9 +98,7 @@ export class DragElement extends RegionComponent {
                 this.dragPoint.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                 this.isDragged = true;
 
-                if (this.onManipulationBegin !== null) {
-                    this.onManipulationBegin();
-                }                
+                this.onManipulationBegin();
             }
         });
 
@@ -125,9 +108,7 @@ export class DragElement extends RegionComponent {
                 this.dragPoint.drag(this.rectDragMove.bind(this), this.rectDragBegin.bind(this), this.rectDragEnd.bind(this));
                 this.isDragged = true;
 
-                if (this.onManipulationBegin !== null) {
-                    this.onManipulationBegin();
-                } 
+                this.onManipulationBegin();
             }
         });
 
@@ -135,9 +116,7 @@ export class DragElement extends RegionComponent {
             this.dragPoint.undrag();
             this.isDragged = false;
 
-            if (this.onManipulationEnd !== null) {
-                this.onManipulationEnd();
-            }
+            this.onManipulationEnd();
         });
 
         this.dragPoint.node.addEventListener("pointerdown", (e) => {
@@ -145,9 +124,7 @@ export class DragElement extends RegionComponent {
                 this.dragPoint.node.setPointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
 
-                if (this.onChange !== null) {
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
-                }
+                this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
             }
         });
 
@@ -155,9 +132,8 @@ export class DragElement extends RegionComponent {
             if (!this.isFrozen) {
                 this.dragPoint.node.releasePointerCapture(e.pointerId);
                 let multiselection = e.shiftKey;
-                if (this.onChange !== null) {
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
-                }                
+                
+                this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
             }
         });
     }
@@ -165,8 +141,6 @@ export class DragElement extends RegionComponent {
     public freeze() {
         super.freeze();
         this.dragPoint.undrag();
-        if (this.onManipulationEnd !== null) {
-            this.onManipulationEnd();
-        }
+        this.onManipulationEnd();
     }
 }
