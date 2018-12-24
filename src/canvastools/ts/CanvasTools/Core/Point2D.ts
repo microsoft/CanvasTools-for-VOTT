@@ -1,7 +1,7 @@
 import { IBoundable } from "../Interface/IBoundable";
 import { IMovable } from "../Interface/IMovable";
 import { IPoint2D } from "../Interface/IPoint2D";
-import { Rect} from "./Rect";
+import { IRect} from "../Interface/IRect";
 
 /**
  * Represents a 2d point object
@@ -33,10 +33,10 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
      */
     constructor(x: number, y: number);
     /**
-     * Creates a new Point2D object from other `IMovable` object
-     * @param p - an object implementing `IMovable`, which location will be copied
+     * Creates a new Point2D object from other `IPoint2D` object
+     * @param p - an object implementing `IPoint2D`, which location will be copied
      */
-    constructor(p: IMovable);
+    constructor(p: IPoint2D);
     constructor(arg1: any, arg2?: number) {
         if (typeof arg1 === "number" && typeof arg2 === "number") {
             this.x = arg1;
@@ -55,9 +55,9 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
     public move(x: number, y: number): void;
     /**
      * Moves point to the location of specified object
-     * @param point - an object implementing `IMovable`, which location will be used as reference
+     * @param point - an object implementing `IPoint2D`, which location will be used as reference
      */
-    public move(point: IMovable): void;
+    public move(point: IPoint2D): void;
     public move(arg1: any, arg2?: any): void {
         if (typeof arg1 === "number" && typeof arg2 === "number") {
             this.x = arg1;
@@ -84,7 +84,7 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
      * @param r - a bounding box
      * @returns A new `Point2D` object, with coordinates bounded to the box
      */
-    public boundToRect(r: Rect): Point2D {
+    public boundToRect(r: IRect): Point2D {
         return new Point2D((this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x),
                            (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y));
     }
