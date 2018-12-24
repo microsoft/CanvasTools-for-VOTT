@@ -6,5 +6,5 @@ export interface IRegionData {
     width: number;
     height: number;
     points: {x: number, y: number}[];
-    regionType: RegionDataType;
+    type: RegionDataType;
 }
