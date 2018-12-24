@@ -6,25 +6,18 @@ import { IFreezable } from "../Interface/IFreezable";
 import { IHideable } from "../Interface/IHideadble";
 import { IMovable } from "../Interface/IMovable";
 import { IResizable } from "../Interface/IResizable";
+import { ChangeFunction, ManipulationFunction, IRegionCallbacks, ChangeEventType } from "../Interface/IRegionCallbacks";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 import { RegionData } from "../Core/RegionData";
 declare var Snap: typeof SNAPSVG_TYPE;
 
-export type ManipulationFunction = (UIElement?: RegionComponent) => void;
-
-export enum ChangeEventType { MOVEEND, MOVING, MOVEBEGIN, SELECTIONTOGGLE }
-
-export type ChangeFunction = (region: RegionComponent, regionData: RegionData,
-                              eventType?: ChangeEventType, multiSelection?: boolean) => void;
-
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
     public node: Snap.Element;
+    public regionData: RegionData;
 
     // Manipulation notifiers
-    public onChange: ChangeFunction;
-    public onManipulationBegin: ManipulationFunction;
-    public onManipulationEnd: ManipulationFunction;
+    private callbacks: IRegionCallbacks;
 
     public isVisible: boolean = true;
     public isFrozen: boolean = false;
@@ -32,8 +25,6 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
 
     protected paper: Snap.Paper;
     protected paperRect: Rect;
-
-    public regionData: RegionData;
     
     public get x(): number {
         return this.regionData.x;
@@ -59,11 +50,49 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         return this.regionData.boundRect;
     }
 
-    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData) {
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, callbacks: IRegionCallbacks = null) {
         this.paper = paper;
         this.paperRect = paperRect;
         this.regionData = regionData;
+
+        this.callbacks = {
+            onChange: null,
+            onManipulationBegin: null,
+            onManipulationEnd: null
+        };
+
+        if (callbacks !== null && callbacks !== undefined) {
+            if (callbacks.onManipulationBegin !== undefined) {
+                this.callbacks.onManipulationBegin = callbacks.onManipulationBegin;
+            }
+            if (callbacks.onManipulationEnd !== undefined) {
+                this.callbacks.onManipulationEnd = callbacks.onManipulationEnd;
+            }
+    
+            if (callbacks.onChange !== undefined) {
+                this.callbacks.onChange = callbacks.onChange;
+            }
+        }
     }
+
+    public onChange(region: RegionComponent, regionData: RegionData, eventType?: ChangeEventType, multiSelection?: boolean) {
+        if (this.callbacks.onChange !== null && this.callbacks.onChange !== undefined) {
+            this.callbacks.onChange(region, regionData, eventType, multiSelection);
+        }
+    };
+    public onManipulationBegin(region?: RegionComponent) {
+        if (this.callbacks.onManipulationBegin !== null && this.callbacks.onManipulationBegin !== undefined) {
+            //let r = (region !== undefined) ? region : this;
+            this.callbacks.onManipulationBegin(region);
+        }
+    };
+    
+    public onManipulationEnd(region?: RegionComponent) {
+        if (this.callbacks.onManipulationEnd !== null && this.callbacks.onManipulationEnd !== undefined) {
+            //let r = (region !== undefined) ? region : this;
+            this.callbacks.onManipulationEnd(region);
+        }
+    };
 
     public hide() {
         this.node.node.setAttribute("visibility", "hidden");
