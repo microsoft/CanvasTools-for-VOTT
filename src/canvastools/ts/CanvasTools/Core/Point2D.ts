@@ -1,11 +1,7 @@
 import { IBoundable } from "../Interface/IBoundable";
 import { IMovable } from "../Interface/IMovable";
+import { IPoint2D } from "../Interface/IPoint2D";
 import { Rect} from "./Rect";
-
-export interface IPoint2D {
-    x: number,
-    y: number
-}
 
 /**
  * Represents a 2d point object
