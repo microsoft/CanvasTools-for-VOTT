@@ -429,7 +429,10 @@ export class Editor {
 
         let xf = sw / this.frameWidth;
         let yf = sh / this.frameHeight;
-        return regionData.scaleByFactor(xf, yf);
+
+        let rd = regionData.copy();
+        rd.scale(xf, yf);
+        return rd;
     }
 
     public scaleRegionToFrameSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
@@ -438,6 +441,9 @@ export class Editor {
 
         let xf = this.frameWidth / sw;
         let yf = this.frameHeight / sh;
-        return regionData.scaleByFactor(xf, yf);
+        
+        let rd = regionData.copy();
+        rd.scale(xf, yf);
+        return rd;
     }
 }
