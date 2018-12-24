@@ -40,7 +40,7 @@ export class TagsDescriptor {
      */
     public get secondary(): Tag[] {
         return this.allTags.filter((tag) => {
-            return (tag !== this.primary);
+            return (tag.name !== this.primary.name);
         })
     }
 
