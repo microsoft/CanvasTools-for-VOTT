@@ -43,7 +43,7 @@ export class RegionData implements IMovable, IResizable {
     public static BuildFromJson(data: IRegionData): RegionData {
         return new RegionData(data.x, data.y, data.width, data.height,
                               data.points.map((p) => new Point2D(p.x, p.y)),
-                              data.regionType);
+                              data.type);
     }
 
     /**
@@ -356,7 +356,7 @@ export class RegionData implements IMovable, IResizable {
             points: this.regionPoints.map((point) => {
                 return { x: point.x, y: point.y };
             }),
-            regionType: this.regionType
+            type: this.regionType
         }
     }
 }
