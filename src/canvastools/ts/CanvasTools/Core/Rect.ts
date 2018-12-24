@@ -1,9 +1,5 @@
+import { IRect } from "../Interface/IRect";
 import { IResizable } from "../Interface/IResizable";
-
-export interface IRect {
-    width: number,
-    height: number
-}
 
 export class Rect implements IResizable {
     public static BuildFromJSON(data: IRect): Rect {
