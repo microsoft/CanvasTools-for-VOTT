@@ -278,7 +278,7 @@ export class RegionData implements IMovable, IResizable {
 
         this.regionPoints = points.map((p) => new Point2D(p));
         this.corner.move(xmin, ymin);
-        this.boundRect.resize(xmax - xmin, ymax - ymin);
+        this.regionRect.resize(xmax - xmin, ymax - ymin);
     }
 
     /**
