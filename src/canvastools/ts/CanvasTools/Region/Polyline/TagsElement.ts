@@ -1,17 +1,11 @@
-import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IFreezable } from "../../Interface/IFreezable";
-import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
-import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
-import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "../RegionComponent";
+import { TagsComponent } from "../Component/TagsComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
@@ -20,59 +14,30 @@ declare var Snap: typeof SNAPSVG_TYPE;
 * TagsElement 
 * Used internally to draw labels and map colors for the region
 */
-export class TagsElement extends RegionComponent {
-    private radius: number = 3;
+export class TagsElement extends TagsComponent {
+    public static DEFAULT_PRIMARY_TAG_RADIUS: number = 3;
+    public static DEFAULT_SECONDARY_TAG_SIZE: number = 6;
+    public static DEFAULT_SECONDARY_TAG_DY: number = 6;
 
     // Elements
-    private primaryTagNode: Snap.Element;
     private primaryTagBoundRect: Snap.Element;
-
-    //private primaryTagPointsArray: Array<Snap.Element>;
-    //private primaryTagPointsGroup: Snap.Element;
     private primaryTagPolyline: Snap.Element;
 
-    private secondaryTagsGroup: Snap.Element;
-    private secondaryTags: Array<Snap.Element>;
-
-    // Tags
-    public tags: TagsDescriptor;
-
-    // Styling
-    private styleId: string;
-    private styleSheet: CSSStyleSheet = null;
-    private tagsUpdateOptions: ITagsUpdateOptions;
-
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, null);
-
-        this.styleId = styleId;
-        this.styleSheet = styleSheet;
-
-        this.tagsUpdateOptions = tagsUpdateOptions;
+        super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
 
         this.buildOn(paper, tags);
     }
 
     private buildOn(paper: Snap.Paper, tags: TagsDescriptor) {
-        this.node = paper.g();
-        this.node.addClass("tagsLayer");
-
         this.primaryTagNode = paper.g();
 
         this.primaryTagBoundRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
         this.primaryTagBoundRect.addClass("primaryTagBoundRectStyle");
 
-        //this.primaryTagPointsGroup = paper.g();
-        //this.primaryTagPointsArray = new Array<Snap.Element>();
-
         let pointsData = [];
         this.regionData.points.forEach(p => {
             pointsData.push(p.x, p.y);
-            //let point = paper.circle(p.x, p.y, 3);
-
-            //point.addClass("primaryTagPolylinePointStyle")
-            //this.primaryTagPointsArray.push(point);
-            //this.primaryTagPointsGroup.add(point);
         });
         this.primaryTagPolyline = paper.polyline(pointsData);
         this.primaryTagPolyline.addClass("primaryTagPolylineStyle");
@@ -83,32 +48,117 @@ export class TagsElement extends RegionComponent {
 
         this.primaryTagNode.add(this.primaryTagBoundRect);
         this.primaryTagNode.add(this.primaryTagPolyline);
-        //this.primaryTagNode.add(this.primaryTagPointsGroup);
 
-        //this.primaryTagPoint = paper.circle(0, 0, this.radius);
-        //this.primaryTagPoint.addClass("primaryTagPointStyle");
-
-        this.secondaryTagsGroup = paper.g();
-        this.secondaryTagsGroup.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode = paper.g();
+        this.secondaryTagsNode.addClass("secondatyTagsLayer");
         this.secondaryTags = [];
 
         this.node.add(this.primaryTagNode);
-        this.node.add(this.secondaryTagsGroup);
+        this.node.add(this.secondaryTagsNode);
 
+        this.initStyleMaps(tags);
         this.updateTags(tags, this.tagsUpdateOptions);
     }
 
-    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
-        this.tags = tags;
+    protected initStyleMaps(tags: TagsDescriptor) {
+        if (tags !== null) {
+            this.styleMap = [
+                {
+                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `fill: ${tags.primary.colorShadow};
+                           stroke: ${tags.primary.colorDark};`
+                },
+                {
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `fill: ${tags.primary.colorAccent};
+                           stroke: ${tags.primary.colorDark};`
+                },
+                {
+                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                    style: `fill: ${tags.primary.colorShadow};
+                           stroke: ${tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                    style: `stroke: ${tags.primary.colorPure};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                    style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure}`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                    style: `stroke:#fff;`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                    style: `fill:transparent;`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                    style: `fill:rgba(255,255,255,0.5);`,
+                },
+            ];
+    
+            this.styleLightMap = [
+                {
+                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `fill: none;
+                           stroke: ${tags.primary.colorDark};`
+                },
+                {
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                    style: `stroke: ${tags.primary.colorShadow};`
+                },
+                {
+                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                    style: `fill: none;
+                           stroke: ${tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                    style: `stroke: ${tags.primary.colorPure};
+                           stroke-width: 1px;`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                    style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure}`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                    style: `stroke:#fff;`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                    style: `fill:transparent;`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                    style: `fill:rgba(255,255,255,0.5);`,
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                    style: `opacity:0.25;`
+                }
+            ];
 
-        this.redrawTagLabels();
-        this.clearColors();
-
-        let showBackground = (options !== undefined) ? options.showRegionBackground : true;
-        this.applyColors(showBackground);
+            if (tags.secondary !== null && tags.secondary !== undefined) {
+                tags.secondary.forEach((tag) => {
+                    let rule = {
+                        rule: `.secondaryTagStyle.secondaryTag-${tag.name}`,
+                        style: `fill: ${tag.colorAccent};`
+                    }
+        
+                    this.styleMap.push(rule);
+                    this.styleLightMap.push(rule);
+                })
+            }
+        }
     }
 
-    private redrawTagLabels() {
+    protected rebuildTagLabels() {
         // Clear secondary tags -> redraw from scratch
         for (let i = 0; i < this.secondaryTags.length; i++) {
             this.secondaryTags[i].remove();
@@ -136,169 +186,11 @@ export class TagsElement extends RegionComponent {
                         tagel.addClass(`secondaryTag-${stag.name}`);
                     });
 
-                    this.secondaryTagsGroup.add(tagel);
+                    this.secondaryTagsNode.add(tagel);
                     this.secondaryTags.push(tagel);
                 }
             }
         }
-    }
-
-    private clearColors() {
-        while (this.styleSheet.cssRules.length > 0) {
-            this.styleSheet.deleteRule(0);
-        }
-    }
-
-    // Map colors to region
-    private applyColors(showRegionBackground: boolean = true) {
-        // Map primary tag color
-        if (this.tags && this.tags.primary !== undefined) {
-            let styleMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: ${this.tags.primary.colorShadow};
-                           stroke: ${this.tags.primary.colorDark};`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: ${this.tags.primary.colorAccent};
-                           stroke: ${this.tags.primary.colorDark};`
-                },
-                {
-                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
-                    style: `fill: ${this.tags.primary.colorShadow};
-                           stroke: ${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
-                    style: `stroke: ${this.tags.primary.colorPure};`
-                },
-                /* {
-                    rule: `.${this.styleId} .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorPure};
-                            stroke:${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight}; 
-                            stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorPure};
-                                stroke:${this.tags.primary.colorHighlight};`
-                } */
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${this.tags.primary.colorDark};
-                                fill: ${this.tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
-                },
-            ];
-
-            let styleMapLight = [
-                {
-                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: none;
-                           stroke: ${this.tags.primary.colorDark};`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `stroke: ${this.tags.primary.colorShadow};`
-                },
-                {
-                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
-                    style: `fill: none;
-                           stroke: ${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
-                    style: `stroke: ${this.tags.primary.colorPure};
-                           stroke-width: 1px;`
-                },
-                /* {
-                    rule: `.${this.styleId} .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorPure};
-                            stroke:${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPolylinePointStyle`,
-                    style: `fill: ${this.tags.primary.colorPure};
-                                stroke:${this.tags.primary.colorAccent};`
-                }, */
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${this.tags.primary.colorDark};
-                                fill: ${this.tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                    style: `opacity:0.25;`
-                }
-            ];
-
-            window.requestAnimationFrame(() => {
-                let sm = (showRegionBackground ? styleMap : styleMapLight);
-                for (let i = 0; i < sm.length; i++) {
-                    let r = sm[i];
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
-                }
-
-                if (this.tags && this.tags.secondary.length > 0) {
-                    for (let i = 0; i < this.tags.secondary.length; i++) {
-                        let tag = this.tags.secondary[i];
-                        let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
-                               fill: ${tag.colorAccent};
-                           }`;
-                        this.styleSheet.insertRule(rule, 0);
-                    }
-                }
-            });
-        }
-    }
-
-    public move(point: IMovable): void;
-    public move(x: number, y: number): void;
-    public move(arg1: any, arg2?: any) {
-        super.move(arg1, arg2);
-        this.regionData.move(arg1, arg2);
-
-        this.redraw();
-    }
-
-    public resize(width: number, height: number) {
-        super.resize(width, height);
-        this.regionData.resize(width, height);
-
-        this.redraw();
     }
 
     public redraw() {

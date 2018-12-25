@@ -1,17 +1,10 @@
-import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IFreezable } from "../../Interface/IFreezable";
-import { IHideable } from "../../Interface/IHideadble";
-import { IMovable } from "../../Interface/IMovable";
-import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
-import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "../RegionComponent";
+import { TagsComponent } from "../Component/TagsComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 
@@ -21,62 +14,88 @@ declare var Snap: typeof SNAPSVG_TYPE;
  * TagsElement 
  * Used internally to draw labels and map colors for the region
 */
-export class TagsElement extends RegionComponent {
-    private radius: number = 3;
-
-    // Elements
-    private primaryTagPoint: Snap.Element;
-
-    private secondaryTagsGroup: Snap.Element;
-    private secondaryTags: Array<Snap.Element>;
-
-    // Tags
-    public tags: TagsDescriptor;
-
-    // Styling
-    private styleId: string;
-    private styleSheet: CSSStyleSheet = null;
-    private tagsUpdateOptions: ITagsUpdateOptions;
+export class TagsElement extends TagsComponent {
+    public static DEFAULT_PRIMARY_TAG_RADIUS: number = 3;
+    public static DEFAULT_SECONDARY_TAG_SIZE: number = 6;
+    public static DEFAULT_SECONDARY_TAG_DY: number = 6;
 
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, null);
-
-        this.styleId = styleId;
-        this.styleSheet = styleSheet;
-
-        this.tagsUpdateOptions = tagsUpdateOptions;
+        super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
 
         this.buildOn(paper, tags);
     }
 
     private buildOn(paper: Snap.Paper, tags: TagsDescriptor) {
-        this.node = paper.g();
-        this.node.addClass("tagsLayer");
+        this.primaryTagNode = paper.circle(this.x, this.y, TagsElement.DEFAULT_PRIMARY_TAG_RADIUS);
+        this.primaryTagNode.addClass("primaryTagPointStyle");
 
-        this.primaryTagPoint = paper.circle(this.x, this.y, this.radius);
-        this.primaryTagPoint.addClass("primaryTagPointStyle");
-
-        this.secondaryTagsGroup = paper.g();
-        this.secondaryTagsGroup.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode = paper.g();
+        this.secondaryTagsNode.addClass("secondatyTagsLayer");
         this.secondaryTags = [];
 
-        this.node.add(this.primaryTagPoint);
-        this.node.add(this.secondaryTagsGroup);
+        this.node.add(this.primaryTagNode);
+        this.node.add(this.secondaryTagsNode);
 
+        this.initStyleMaps(tags);
         this.updateTags(tags, this.tagsUpdateOptions);
     }
 
-    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
-        this.tags = tags;
+    protected initStyleMaps(tags: TagsDescriptor) {
+        if (tags !== null) {
+            this.styleMap = [
+                {
+                    rule: `.${this.styleId} .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorHighlight}; 
+                                stroke: #fff;`
+                },
+                {
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorAccent};
+                                stroke:${tags.primary.colorHighlight};`
+                }
+            ];
+    
+            this.styleLightMap = [
+                {
+                    rule: `.${this.styleId} .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorNoColor};
+                                stroke:${tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorHighlight}; 
+                                stroke: #fff;`
+                },
+                {
+                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
+                    style: `fill: ${tags.primary.colorHighlight};
+                                stroke:${tags.primary.colorAccent};`
+                },
+                {
+                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                    style: `opacity:0.25;`
+                }
+            ];
 
-        this.redrawTagLabels();
-        this.clearColors();
-
-        let showBackground = (options !== undefined) ? options.showRegionBackground : true;
-        this.applyColors(showBackground);
+            if (tags.secondary !== null && tags.secondary !== undefined) {
+                tags.secondary.forEach((tag) => {
+                    let rule = {
+                        rule: `.secondaryTagStyle.secondaryTag-${tag.name}`,
+                        style: `fill: ${tag.colorAccent};`
+                    }
+        
+                    this.styleMap.push(rule);
+                    this.styleLightMap.push(rule);
+                })
+            }
+        }       
     }
 
-    private redrawTagLabels() {
+    protected rebuildTagLabels() {
         // Clear secondary tags -> redraw from scratch
         for (let i = 0; i < this.secondaryTags.length; i++) {
             this.secondaryTags[i].remove();
@@ -94,111 +113,30 @@ export class TagsElement extends RegionComponent {
                 for (let i = 0; i < length; i++) {
                     let stag = this.tags.secondary[i];
 
-                    let s = 6;
-                    let x = this.x + this.boundRect.width / 2 + (2 * i - length + 1) * s - s / 2;
-                    let y = this.y - s - 5;
-                    let tagel = this.paper.rect(x, y, s, s);
+                    let size = TagsElement.DEFAULT_SECONDARY_TAG_SIZE;
+                    let x = this.x + this.boundRect.width / 2 + (2 * i - length + 1) * size - size / 2;
+                    let y = this.y - size - TagsElement.DEFAULT_SECONDARY_TAG_DY;
+                    let tagel = this.paper.rect(x, y, size, size);
 
                     window.requestAnimationFrame(() => {
                         tagel.addClass("secondaryTagStyle");
                         tagel.addClass(`secondaryTag-${stag.name}`);
                     });
 
-                    this.secondaryTagsGroup.add(tagel);
+                    this.secondaryTagsNode.add(tagel);
                     this.secondaryTags.push(tagel);
                 }
             }
         }
     }
 
-    private clearColors() {
-        while (this.styleSheet.cssRules.length > 0) {
-            this.styleSheet.deleteRule(0);
-        }
-    }
-
-    // Map colors to region
-    private applyColors(showRegionBackground: boolean = true) {
-        // Map primary tag color
-        if (this.tags && this.tags.primary !== undefined) {
-            let styleMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorAccent};
-                                stroke:${this.tags.primary.colorHighlight};`
-                }
-            ];
-
-            let styleMapLight = [
-                {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorNoColor};
-                                stroke:${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${this.tags.primary.colorHighlight};
-                                stroke:${this.tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                    style: `opacity:0.25;`
-                }
-            ];
-
-            window.requestAnimationFrame(() => {
-                let sm = (showRegionBackground ? styleMap : styleMapLight);
-                for (let i = 0; i < sm.length; i++) {
-                    let r = sm[i];
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
-                }
-
-                if (this.tags && this.tags.secondary.length > 0) {
-                    for (let i = 0; i < this.tags.secondary.length; i++) {
-                        let tag = this.tags.secondary[i];
-                        let rule = `.secondaryTagStyle.secondaryTag-${tag.name}{
-                                fill: ${tag.colorAccent};
-                            }`;
-                        this.styleSheet.insertRule(rule, 0);
-                    }
-                }
-            });
-        }
-    }
-
-    public move(point: IMovable): void;
-    public move(x: number, y: number): void;
-    public move(arg1: any, arg2?: any) {
-        super.move(arg1, arg2);
-        this.redraw();
-    }
-
-    public resize(width: number, height: number) {
-        super.resize(width, height);
-        this.redraw();
-    }
-
     public redraw() {
-        let size = 6;
+        let size = TagsElement.DEFAULT_SECONDARY_TAG_SIZE;;
         let cx = this.x;
-        let cy = this.y - size - 5;
+        let cy = this.y - size - TagsElement.DEFAULT_SECONDARY_TAG_DY;
 
         window.requestAnimationFrame(() => {
-            this.primaryTagPoint.attr({
+            this.primaryTagNode.attr({
                 cx: this.x,
                 cy: this.y
             });
