@@ -13,7 +13,7 @@ declare var Snap: typeof SNAPSVG_TYPE;
  * DragElement 
  * Used internally to drag the region
 */
-export class DragComponent extends RegionComponent {
+export abstract class DragComponent extends RegionComponent {
     protected dragNode: Snap.Element;
     protected isDragged: boolean = false;
 
