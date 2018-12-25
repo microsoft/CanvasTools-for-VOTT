@@ -2,7 +2,6 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
-import { IMovable } from "../../Interface/IMovable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";

@@ -1,6 +1,4 @@
-import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
-import { IMovable } from "../Interface/IMovable";
 
 import { ElementPart } from "./ElementPart";
 import { RectElement } from "./RectElement";

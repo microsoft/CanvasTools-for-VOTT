@@ -2,8 +2,6 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { AnchorsComponent } from "../Component/AnchorsComponent";

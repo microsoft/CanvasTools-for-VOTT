@@ -1,17 +1,10 @@
-import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IFreezable } from "../../Interface/IFreezable";
-import { IHideable } from "../../Interface/IHideadble";
-import { IMovable } from "../../Interface/IMovable";
-import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
-import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
+import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "../Component/RegionComponent";
 import { Region } from "../Region";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";

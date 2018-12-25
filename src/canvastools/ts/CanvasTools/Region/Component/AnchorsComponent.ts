@@ -3,7 +3,6 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { RegionComponent } from "./RegionComponent";
@@ -37,7 +36,7 @@ export class AnchorsComponent extends RegionComponent {
         this.ghostAnchor.attr({
             display: "none"
         });
-        
+
         this.node.add(this.ghostAnchor);
 
         const listeners: IEventDescriptor[] = [

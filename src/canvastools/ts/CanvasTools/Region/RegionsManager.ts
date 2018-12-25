@@ -1,8 +1,6 @@
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
-import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { ManipulationFunction, ChangeFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
-import { RegionComponent } from "./Component/RegionComponent";
+import { ManipulationFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";

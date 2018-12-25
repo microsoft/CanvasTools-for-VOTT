@@ -1,10 +1,7 @@
-import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
-import { RegionData, RegionDataType } from "../Core/RegionData";
 
 import { IEventDescriptor } from "../Interface/IEventDescriptor";
 import { IHideable } from "../Interface/IHideadble";
-import { IMovable } from "../Interface/IMovable";
 import { IResizable } from "../Interface/IResizable";
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 

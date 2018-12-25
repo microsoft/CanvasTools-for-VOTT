@@ -1,4 +1,3 @@
-import { Rect } from "../Core/Rect";
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
 
 import * as SNAPSVG_TYPE from "snapsvg";

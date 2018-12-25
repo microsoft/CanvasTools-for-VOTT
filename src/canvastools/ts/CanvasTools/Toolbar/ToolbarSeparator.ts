@@ -1,5 +1,4 @@
-import { IToolbarIcon } from "../Interface/IToolbarIcon";
-import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;

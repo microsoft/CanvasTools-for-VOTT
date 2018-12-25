@@ -1,6 +1,6 @@
 import { Rect } from "../Core/Rect";
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
-import { IconCallback, ToolbarIcon, ToolbarItemType } from "./ToolbarIcon";
+import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
 import { ToolbarSelectIcon } from "./ToolbarSelectIcon";
 import { ToolbarSeparator } from "./ToolbarSeparator";
 import { ToolbarSwitchIcon } from "./ToolbarSwitchIcon";
