@@ -1,5 +1,5 @@
 import { RegionData } from "../Core/RegionData";
-import { RegionComponent } from "../Region/RegionComponent";
+import { RegionComponent } from "../Region/Component/RegionComponent";
 
 export type ManipulationFunction = (UIElement?: RegionComponent) => void;
 

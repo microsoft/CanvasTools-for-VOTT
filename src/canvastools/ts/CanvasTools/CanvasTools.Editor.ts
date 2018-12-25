@@ -3,7 +3,7 @@ import { FilterPipeline } from "./CanvasTools.Filter";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
 
-import { RegionComponent } from "./Region/RegionComponent";
+import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 
 import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";

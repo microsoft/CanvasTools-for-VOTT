@@ -11,7 +11,7 @@ import { IResizable } from "../../Interface/IResizable";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "../RegionComponent";
+import { RegionComponent } from "../Component/RegionComponent";
 import { Region } from "../Region";
 import { AnchorsElement } from "./AnchorsElements";
 import { DragElement } from "./DragElement";

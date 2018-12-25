@@ -9,7 +9,7 @@ import { IMovable } from "../Interface/IMovable";
 import { IResizable } from "../Interface/IResizable";
 import { ChangeFunction, ManipulationFunction, IRegionCallbacks, ChangeEventType } from "../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "./RegionComponent";
+import { RegionComponent } from "./Component/RegionComponent";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;

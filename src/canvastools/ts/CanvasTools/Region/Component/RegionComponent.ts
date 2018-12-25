@@ -1,15 +1,14 @@
-import { Point2D } from "../Core/Point2D";
-import { Rect } from "../Core/Rect";
+import { Rect } from "../../Core/Rect";
 
-import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { IFreezable } from "../Interface/IFreezable";
-import { IHideable } from "../Interface/IHideadble";
-import { IMovable } from "../Interface/IMovable";
-import { IResizable } from "../Interface/IResizable";
-import { ChangeFunction, ManipulationFunction, IRegionCallbacks, ChangeEventType } from "../Interface/IRegionCallbacks";
+import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { IFreezable } from "../../Interface/IFreezable";
+import { IHideable } from "../../Interface/IHideadble";
+import { IMovable } from "../../Interface/IMovable";
+import { IResizable } from "../../Interface/IResizable";
+import { IRegionCallbacks, ChangeEventType } from "../../Interface/IRegionCallbacks";
 
 import * as SNAPSVG_TYPE from "snapsvg";
-import { RegionData } from "../Core/RegionData";
+import { RegionData } from "../../Core/RegionData";
 declare var Snap: typeof SNAPSVG_TYPE;
 
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
@@ -127,6 +126,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
 
     public move(arg1: any, arg2?: any): void {
         this.regionData.move(arg1, arg2);
+        this.redraw();
     }
 
     public redraw(): void {
@@ -134,6 +134,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
 
     public resize(width: number, height: number) {
         this.regionData.resize(width, height);
+        this.redraw();
     }
 
     public resizePaper(width: number, height: number) {

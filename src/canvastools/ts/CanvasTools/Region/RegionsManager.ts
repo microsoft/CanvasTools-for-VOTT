@@ -2,7 +2,7 @@ import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { IEventDescriptor } from "../Interface/IEventDescriptor";
 import { ManipulationFunction, ChangeFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
-import { RegionComponent } from "./RegionComponent";
+import { RegionComponent } from "./Component/RegionComponent";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";
@@ -10,11 +10,10 @@ import { PointRegion } from "./Point/PointRegion";
 import { PolylineRegion } from "./Polyline/PolylineRegion";
 import { MenuElement } from "./RegionMenu";
 import { RegionData, RegionDataType } from "../Core/RegionData";
+import { Region } from "./Region";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
-
-type Region = RectRegion | PointRegion | PolylineRegion;
 
 export class RegionsManager {
     private baseParent: SVGSVGElement;
