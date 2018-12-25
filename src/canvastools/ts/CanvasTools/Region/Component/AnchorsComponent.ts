@@ -18,6 +18,7 @@ export class AnchorsComponent extends RegionComponent {
     public static DEFAULT_ANCHOR_RADIUS = 3;
     public static DEFAULT_GHOST_ANCHOR_RADIUS = 7;
     protected anchors: Snap.Element[];
+    protected anchorsNode: Snap.Element;
     protected ghostAnchor: Snap.Element;
 
     protected activeAnchorIndex: number = -1;
@@ -29,14 +30,16 @@ export class AnchorsComponent extends RegionComponent {
         this.node = paper.g();
         this.node.addClass("anchorsLayer");
         this.anchors = [];
+        this.anchorsNode = paper.g();
 
-        this.buildPointAnchors(paper);
+        this.buildPointAnchors();
 
         this.ghostAnchor = this.createAnchor(paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
         this.ghostAnchor.attr({
             display: "none"
         });
 
+        this.node.add(this.anchorsNode);
         this.node.add(this.ghostAnchor);
 
         const listeners: IEventDescriptor[] = [
@@ -44,16 +47,17 @@ export class AnchorsComponent extends RegionComponent {
             { event: "pointerleave", listener: this.onGhostPointerLeave, base: this.ghostAnchor.node, bypass: false },
             { event: "pointerdown", listener: this.onGhostPointerDown, base: this.ghostAnchor.node, bypass: false },
             { event: "pointerup", listener: this.onGhostPointerUp, base: this.ghostAnchor.node, bypass: false },
+            { event: "pointermove", listener: this.onGhostPointerMove, base: this.ghostAnchor.node, bypass: false },
         ];
 
         this.subscribeToEvents(listeners);
     }
 
-    protected buildPointAnchors(paper: Snap.Paper) {
+    protected buildPointAnchors() {
         this.regionData.points.forEach((point, index) => {
-            const anchor = this.createAnchor(paper, point.x, point.y);
+            const anchor = this.createAnchor(this.paper, point.x, point.y);
             this.anchors.push(anchor);
-            this.node.add(anchor);
+            this.anchorsNode.add(anchor);
 
             this.subscribeAnchorToEvents(anchor, index);
         })
@@ -165,9 +169,12 @@ export class AnchorsComponent extends RegionComponent {
         
     }
 
+    protected onGhostPointerMove(e: PointerEvent) {
+    }
+
     protected onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
         
-        this.onChange(this, this.regionData, ChangeEventType.MOVEEND);
+        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
     }
 }

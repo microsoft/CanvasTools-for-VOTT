@@ -21,13 +21,13 @@ export class AnchorsElement extends AnchorsComponent {
         super(paper, paperRect, regionData, callbacks);
     }
 
-    protected buildPointAnchors(paper: Snap.Paper) {
+    protected buildPointAnchors() {
         this.anchorStyles = ["TL", "TR", "BR", "BL"];
 
         this.regionData.points.forEach((point, index) => {
-            const anchor = this.createAnchor(paper, point.x, point.y, this.anchorStyles[index]);
+            const anchor = this.createAnchor(this.paper, point.x, point.y, this.anchorStyles[index]);
             this.anchors.push(anchor);
-            this.node.add(anchor);
+            this.anchorsNode.add(anchor);
 
             this.subscribeAnchorToEvents(anchor, index);
         })
