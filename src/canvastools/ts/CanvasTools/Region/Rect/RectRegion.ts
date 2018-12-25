@@ -15,7 +15,7 @@ import { RegionComponent } from "../Component/RegionComponent";
 import { Region } from "../Region";
 import { AnchorsElement } from "./AnchorsElements";
 import { DragElement } from "./DragElement";
-import { TagsElement } from "./TagsElements";
+import { TagsElement } from "./TagsElement";
 
 import * as SNAPSVG_TYPE from "snapsvg";
 
