@@ -5,7 +5,7 @@ import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
 import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/AreaSelector";
 import { FilterPipeline, InvertFilter, GrayscaleFilter } from "./CanvasTools/CanvasTools.Filter";
-import { RegionComponent } from "./CanvasTools/Region/RegionComponent";
+import { RegionComponent } from "./CanvasTools/Region/Component/RegionComponent";
 import { Rect } from "./CanvasTools/Core/Rect";
 import { Point2D } from "./CanvasTools/Core/Point2D";
 import { RegionData } from "./CanvasTools/Core/RegionData";
