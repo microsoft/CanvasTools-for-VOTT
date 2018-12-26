@@ -97,6 +97,7 @@ export class AnchorsComponent extends RegionComponent {
                         display: "block",
                     });
                 });
+                this.onManipulationBegin();
             }
         });
     }
@@ -164,6 +165,7 @@ export class AnchorsComponent extends RegionComponent {
 
     protected onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
+        this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
 
         this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
         

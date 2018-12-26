@@ -7,7 +7,7 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 
 import { RegionComponent } from "../Component/RegionComponent";
 import { Region } from "../Region";
-import { AnchorsElement } from "./AnchorsElements";
+import { AnchorsElement } from "./AnchorsElement";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
