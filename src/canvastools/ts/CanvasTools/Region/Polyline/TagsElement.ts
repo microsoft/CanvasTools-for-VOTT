@@ -94,10 +94,6 @@ export class TagsElement extends TagsComponent {
                     rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
                     style: `fill:transparent;`,
                 },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
-                },
             ];
     
             this.styleLightMap = [
@@ -132,10 +128,6 @@ export class TagsElement extends TagsComponent {
                 {
                     rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
                     style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
                 },
                 {
                     rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
