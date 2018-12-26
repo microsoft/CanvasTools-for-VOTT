@@ -4,6 +4,7 @@ import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 
 import { PointSelector } from "./PointSelector";
 import { PolylineSelector } from "./PolylineSelector";
+import { PolygonSelector } from "./PolygonSelector";
 import { RectCopySelector } from "./RectCopySelector";
 import { RectSelector } from "./RectSelector";
 import { Selector } from "./Selector";
@@ -12,7 +13,7 @@ import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
 
 /* SELECTORS */
-export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE }
+export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }
 
 export class AreaSelector {
     public static DefaultTemplateSize: Rect = new Rect(20, 20);
@@ -30,6 +31,7 @@ export class AreaSelector {
     private rectCopySelector: RectCopySelector;
     private pointSelector: PointSelector;
     private polylineSelector: PolylineSelector;
+    private polygonSelector: PolygonSelector;
 
     private isEnabled: boolean = true;
     private isVisible: boolean = true;
@@ -106,6 +108,8 @@ export class AreaSelector {
             this.selector = this.pointSelector;
         } else if (selectionMode === SelectionMode.POLYLINE) {
             this.selector = this.polylineSelector;
+        } else if (selectionMode === SelectionMode.POLYGON) {
+            this.selector = this.polygonSelector;
         }
 
         // restore enablement status
@@ -125,21 +129,25 @@ export class AreaSelector {
         this.areaSelectorLayer.addClass("areaSelector");
 
         this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
-        this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect,
-                                                     new Rect(0, 0), this.callbacks);
+        this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), this.callbacks);
         this.pointSelector = new PointSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.polylineSelector = new PolylineSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
+        this.polygonSelector = new PolygonSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
 
         this.selector = this.rectSelector;
+
         this.rectSelector.enable();
         this.rectCopySelector.disable();
         this.pointSelector.disable();
         this.polylineSelector.disable();
+        this.polygonSelector.disable();
+
         this.selector.hide();
 
         this.areaSelectorLayer.add(this.rectSelector.node);
         this.areaSelectorLayer.add(this.rectCopySelector.node);
         this.areaSelectorLayer.add(this.pointSelector.node);
         this.areaSelectorLayer.add(this.polylineSelector.node);
+        this.areaSelectorLayer.add(this.polygonSelector.node);
     }
 }

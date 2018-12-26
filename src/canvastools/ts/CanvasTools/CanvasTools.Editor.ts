@@ -231,6 +231,17 @@ export class Editor {
             activate: false
         },
         {
+            type: ToolbarItemType.SELECTOR,
+            action: "polygon-select",
+            iconFile: "polygon-selection.svg",
+            tooltip: "Polygon-selection (O)",
+            keycode: 'KeyO',
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.POLYGON);
+            },
+            activate: false
+        },
+        {
             type: ToolbarItemType.SEPARATOR
         },
         {
@@ -244,7 +255,6 @@ export class Editor {
             },
             activate: false
         }
-
     ];
 
     public static RectToolbarSet: Array<ToolbarIconDescription> = [

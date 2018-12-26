@@ -5,6 +5,7 @@ import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";
 import { PointRegion } from "./Point/PointRegion";
+import { PolygonRegion } from "./Polygon/PolygonRegion";
 import { PolylineRegion } from "./Polyline/PolylineRegion";
 import { MenuElement } from "./RegionMenu";
 import { RegionData, RegionDataType } from "../Core/RegionData";
@@ -198,6 +199,8 @@ export class RegionsManager {
             this.addPolylineRegion(id, regionData, tagsDescriptor);
         } else if (regionData.type === RegionDataType.Rect) {
             this.addRectRegion(id, regionData, tagsDescriptor);
+        } else if (regionData.type === RegionDataType.Polygon) {
+            this.addPolygonRegion(id, regionData, tagsDescriptor);
         }
     }
 
@@ -230,6 +233,18 @@ export class RegionsManager {
         this.menu.hide();
 
         let region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,{
+            onChange: this.onRegionChange.bind(this),
+            onManipulationBegin: this.onManipulationBegin_local.bind(this),
+            onManipulationEnd: this.onManipulationEnd_local.bind(this)
+        }, this.tagsUpdateOptions);
+
+        this.registerRegion(region);
+    }
+
+    public addPolygonRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
+        this.menu.hide();
+
+        let region = new PolygonRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,{
             onChange: this.onRegionChange.bind(this),
             onManipulationBegin: this.onManipulationBegin_local.bind(this),
             onManipulationEnd: this.onManipulationEnd_local.bind(this)

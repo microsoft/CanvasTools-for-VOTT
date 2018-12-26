@@ -6,7 +6,7 @@ import { Point2D } from "./Point2D";
 import { Rect } from "./Rect";
 import { IPoint2D } from "../Interface/IPoint2D";
 
-export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline"}
+export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline", Polygon = "polygon"}
 
 /**
  * Represents region meta-data, including position, size, points and type 

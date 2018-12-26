@@ -163,6 +163,22 @@
     filter: url(#black-glow);
 }
 
+.primaryTagPolygonStyle {
+    fill: rgba(64, 64, 64, 0.2);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke:rgba(196, 196, 196, 0.6);
+}
+
+.regionStyle.selected .primaryTagPolygonStyle {
+    fill: rgba(96, 96, 96, 0.2);
+    filter: url(#black-glow);
+}
+
+.regionStyle:hover .primaryTagPolygonStyle {
+    fill: rgba(64, 64, 64, 0.4);
+}
+
 .anchorStyle {
     stroke-width: 2;
     stroke: #ccc;
@@ -327,6 +343,14 @@ svg:not(:root) .menuLayer {
         --> .polylinePointStyle
         .nextSegmentStyle
         .nextPointStyle
+-->.polygonSelector
+    --> .polygonStyle
+        .polygonGroupStyle
+        --> .polygonPointStyle
+        .nextSegmentStyle
+        .nextPointStyle
+*/
+
 */
 #selectionOverlay {
     position: relative;
@@ -398,6 +422,33 @@ svg:not(:root) .menuLayer {
     pointer-events: none;
 }
 .polylineSelector .nextPointStyle {
+    stroke-width:2;
+    r: 6px;
+    stroke: rgba(21, 127, 240, 1.0);
+    fill: transparent;
+    pointer-events: none;
+}
+
+.polygonSelector .polygonStyle {
+    fill: rgba(255,255,255, 0.2);
+    stroke-width: 2px;
+    stroke:  rgba(21, 127, 240, 0.5);
+    pointer-events: none;
+}
+
+.polygonSelector .polygonPointStyle {
+    fill:  rgba(21, 127, 240, 1.0);
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+.polygonSelector .nextSegmentStyle {
+    stroke-width:2;
+    stroke-dasharray: 3 3;
+    stroke: rgba(21, 127, 240, 1.0);
+    pointer-events: none;
+}
+.polygonSelector .nextPointStyle {
     stroke-width:2;
     r: 6px;
     stroke: rgba(21, 127, 240, 1.0);
