@@ -202,6 +202,8 @@ export class RegionsManager {
         } else if (regionData.type === RegionDataType.Polygon) {
             this.addPolygonRegion(id, regionData, tagsDescriptor);
         }
+        this.sortRegionsByArea();
+        this.redrawAllRegions();
     }
 
     // SETUP NEW REGION
