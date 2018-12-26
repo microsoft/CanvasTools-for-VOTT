@@ -250,4 +250,9 @@ export class PolylineSelector extends Selector {
             this.submitPolyline();
         }
     }
+
+    public disable() {
+        this.reset();
+        super.disable();
+    }
 }
