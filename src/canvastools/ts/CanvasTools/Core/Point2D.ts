@@ -70,8 +70,8 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
 
     /**
      * Shifts point location to specified delta
-     * @param dx - delta to be added to the `x`-coordinate
-     * @param dy - delta to be added to the `y`-coordinate
+     * @param dx - Delta to be added to the `x`-coordinate
+     * @param dy - Delta to be added to the `y`-coordinate
      */
     public shift(dx: number, dy: number): void {
         this.x += dx;
@@ -81,12 +81,43 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
     /**
      * Returns a new point created from bounding this one to the `Rect` object rovided
      * @remarks This method bounds the point to the rect with coordinates `[0, 0] x [r.width, r.height]`.
-     * @param r - a bounding box
+     * @param r - A bounding box
      * @returns A new `Point2D` object, with coordinates bounded to the box
      */
     public boundToRect(r: IRect): Point2D {
         return new Point2D((this.x < 0) ? 0 : ((this.x > r.width) ? r.width : this.x),
                            (this.y < 0) ? 0 : ((this.y > r.height) ? r.height : this.y));
+    }
+
+    /**
+     * Calculates the square of the distance between two points
+     * @param p - Second point
+     * @returns The square of the distance
+     */
+    public squareDistanceToPoint(p: Point2D): number {
+        return (this.x - p.x) * (this.x - p.x) + (this.y - p.y) *(this.y - p.y);
+    }
+
+    /**
+     * Calculates the square of the distance from this point to a line segment
+     * @param p1 - The first line segment point
+     * @param p2 - The second line segment point
+     * @returns The square of the distance
+     */
+    public squareDistanceToLine(p1: Point2D, p2: Point2D): number {
+        let lineLength2: number = p1.squareDistanceToPoint(p2);
+        let dist: number;
+
+        if (lineLength2 === 0.0) {
+            dist = this.squareDistanceToPoint(p1);
+        } else {
+            let t = ((this.x - p1.x) * (p2.x - p1.x) + (this.y - p1.y) * (p2.y - p1.y)) / lineLength2;
+            let k = Math.max(0, Math.min(1, t));
+
+            let p = new Point2D(p1.x + k * (p2.x - p1.x), p1.y + k * (p2.y - p1.y));
+            dist = this.squareDistanceToPoint(p);
+        }
+        return dist;
     }
 
     /**
