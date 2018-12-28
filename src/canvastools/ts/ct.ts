@@ -4,7 +4,7 @@ import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
 import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
 import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/AreaSelector";
-import { FilterPipeline, InvertFilter, GrayscaleFilter } from "./CanvasTools/CanvasTools.Filter";
+import { FilterPipeline, InvertFilter, GrayscaleFilter, BlurDiffFilter, ContrastFilter, BrightnessFilter, SaturationFilter } from "./CanvasTools/CanvasTools.Filter";
 import { RegionComponent } from "./CanvasTools/Region/Component/RegionComponent";
 import { Rect } from "./CanvasTools/Core/Rect";
 import { Point2D } from "./CanvasTools/Core/Point2D";
@@ -38,7 +38,11 @@ export module CanvasTools {
     
     export const Filters = {
         InvertFilter: InvertFilter,
-        GrayscaleFilter: GrayscaleFilter
+        GrayscaleFilter: GrayscaleFilter,
+        BlurDiffFilter: BlurDiffFilter,
+        ContrastFilter: ContrastFilter,
+        BrightnessFilter: BrightnessFilter,
+        SaturationFilter: SaturationFilter
     };
     export const Editor = CTEditor;
     export const Toolbar = CTToolbar;
