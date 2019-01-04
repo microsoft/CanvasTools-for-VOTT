@@ -6,8 +6,8 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
 * TagsElement 
@@ -61,79 +61,84 @@ export class TagsElement extends TagsComponent {
 
     protected initStyleMaps(tags: TagsDescriptor) {
         if (tags !== null) {
-            this.styleMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: ${tags.primary.colorShadow};
-                           stroke: ${tags.primary.colorDark};`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: ${tags.primary.colorAccent};
-                           stroke: ${tags.primary.colorDark};`
-                },
-                {
-                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
-                    style: `fill: ${tags.primary.colorShadow};
-                           stroke: ${tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
-                    style: `stroke: ${tags.primary.colorPure};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-            ];
-    
-            this.styleLightMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `fill: none;
-                           stroke: ${tags.primary.colorDark};`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                    style: `stroke: ${tags.primary.colorShadow};`
-                },
-                {
-                    rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
-                    style: `fill: none;
-                           stroke: ${tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.${this.styleId} .primaryTagPolylineStyle`,
-                    style: `stroke: ${tags.primary.colorPure};
-                           stroke-width: 1px;`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                    style: `opacity:0.25;`
-                }
-            ];
+            if (tags.primary !== null) {
+                this.styleMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                            stroke: ${tags.primary.colorDark};`
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorAccent};
+                            stroke: ${tags.primary.colorDark};`
+                    },
+                    {
+                        rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                            stroke: ${tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                        style: `stroke: ${tags.primary.colorPure};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                    fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill:transparent;`,
+                    },
+                ];
+        
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;
+                            stroke: ${tags.primary.colorDark};`
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `stroke: ${tags.primary.colorShadow};`
+                    },
+                    {
+                        rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                        style: `fill: none;
+                            stroke: ${tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                        style: `stroke: ${tags.primary.colorPure};
+                            stroke-width: 1px;`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                    fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill:transparent;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`
+                    }
+                ];
+            } else {
+                this.styleMap = [];
+                this.styleLightMap = [];
+            }            
 
             if (tags.secondary !== null && tags.secondary !== undefined) {
                 tags.secondary.forEach((tag) => {
@@ -157,7 +162,7 @@ export class TagsElement extends TagsComponent {
         this.secondaryTags = [];
         // If there are tags assigned
         if (this.tags) {
-            if (this.tags.primary !== undefined) {
+            if (this.tags.primary !== undefined && this.tags.primary !== null) {
                 // Primary Tag
 
             }

@@ -6,8 +6,8 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
  * TagsElement
@@ -59,91 +59,96 @@ export class TagsElement extends TagsComponent {
 
     protected initStyleMaps(tags: TagsDescriptor) {
         if (tags !== null) {
-            this.styleMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorShadow};
-                                stroke:${tags.primary.colorAccent};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorHighlight};
-                                stroke: #fff;`,
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorHighlight};
-                                stroke:${tags.primary.colorAccent};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                    style: `fill:${tags.primary.colorAccent};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
-                },
-            ];
-    
-            this.styleLightMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorNoColor};
-                                stroke:${tags.primary.colorAccent};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorHighlight};
-                                stroke: #fff;`,
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                    style: `fill: ${tags.primary.colorHighlight};
-                                stroke:${tags.primary.colorAccent};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                    style: `fill:${tags.primary.colorShadow};`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
-                    style: `opacity:0.25;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                    style: `opacity:0.25;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                    style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                    style: `stroke:#fff;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                    style: `fill:transparent;`,
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                    style: `fill:rgba(255,255,255,0.5);`,
-                },
-            ];
+            if (tags.primary !== null) {
+                this.styleMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                                    stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                    stroke: #fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                    stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                    fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill:transparent;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                        style: `fill:rgba(255,255,255,0.5);`,
+                    },
+                ];
+        
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                    stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                    stroke: #fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                    stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorShadow};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                    fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill:transparent;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                        style: `fill:rgba(255,255,255,0.5);`,
+                    },
+                ];
+            } else {
+                this.styleMap = [];
+                this.styleLightMap = [];
+            }            
 
             if (tags.secondary !== null && tags.secondary !== undefined) {
                 tags.secondary.forEach((tag) => {
@@ -178,7 +183,7 @@ export class TagsElement extends TagsComponent {
         
                     // Update primary tag text
                     if (rebuildTags) {
-                        this.primaryTagText.node.innerHTML = this.tags.primary.name;
+                        this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
                         this.textBox = this.primaryTagText.getBBox();
                     }
 

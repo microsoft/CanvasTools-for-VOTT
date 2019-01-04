@@ -6,9 +6,9 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
-import * as SNAPSVG_TYPE from "snapsvg";
+/* import * as SNAPSVG_TYPE from "snapsvg";
 
-declare var Snap: typeof SNAPSVG_TYPE;
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
  * TagsElement 
@@ -42,44 +42,49 @@ export class TagsElement extends TagsComponent {
 
     protected initStyleMaps(tags: TagsDescriptor) {
         if (tags !== null) {
-            this.styleMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorAccent};
-                                stroke:${tags.primary.colorHighlight};`
-                }
-            ];
-    
-            this.styleLightMap = [
-                {
-                    rule: `.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorNoColor};
-                                stroke:${tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorHighlight}; 
-                                stroke: #fff;`
-                },
-                {
-                    rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
-                    style: `fill: ${tags.primary.colorHighlight};
-                                stroke:${tags.primary.colorAccent};`
-                },
-                {
-                    rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                    style: `opacity:0.25;`
-                }
-            ];
+            if (tags.primary !== null) {
+                this.styleMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorHighlight}; 
+                                    stroke: #fff;`
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorAccent};
+                                    stroke:${tags.primary.colorHighlight};`
+                    }
+                ];
+        
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                    stroke:${tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorHighlight}; 
+                                    stroke: #fff;`
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                    stroke:${tags.primary.colorAccent};`
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`
+                    }
+                ];
+            } else {
+                this.styleMap = [];
+                this.styleLightMap = [];
+            }            
 
             if (tags.secondary !== null && tags.secondary !== undefined) {
                 tags.secondary.forEach((tag) => {
@@ -103,7 +108,7 @@ export class TagsElement extends TagsComponent {
         this.secondaryTags = [];
         // If there are tags assigned
         if (this.tags) {
-            if (this.tags.primary !== undefined) {
+            if (this.tags.primary !== undefined && this.tags.primary !== null) {
                 // Primary Tag
 
             }
