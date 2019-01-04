@@ -1,4 +1,5 @@
 import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { IFreezable } from "../../Interface/IFreezable";
@@ -7,9 +8,9 @@ import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { IRegionCallbacks, ChangeEventType } from "../../Interface/IRegionCallbacks";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-import { RegionData } from "../../Core/RegionData";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
     public node: Snap.Element;
