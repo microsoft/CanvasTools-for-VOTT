@@ -11,8 +11,8 @@ import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 type ToolbarIconDescription = {
     type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH,
@@ -429,8 +429,16 @@ export class Editor {
         return this.regionsManager;
     }
 
+    public get AS(): AreaSelector {
+        return this.areaSelector;
+    }
+
     public get FilterPipeline(): FilterPipeline {
         return this.filterPipeline;
+    }
+
+    public setSelectionMode(selectionMode: SelectionMode, options: { template?: Rect }) {
+        this.areaSelector.setSelectionMode(selectionMode, options);
     }
 
     public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
