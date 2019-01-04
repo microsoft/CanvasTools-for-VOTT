@@ -9,8 +9,8 @@ import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 import { CrossElement } from "./CrossElement";
 import { Selector } from "./Selector";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class PolylineSelector extends Selector {
     private parentNode: SVGSVGElement;

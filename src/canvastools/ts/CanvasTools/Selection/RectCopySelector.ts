@@ -10,9 +10,9 @@ import { CrossElement } from "./CrossElement";
 import { RectElement } from "./RectElement";
 import { Selector } from "./Selector";
 
-import * as SNAPSVG_TYPE from "snapsvg";
+/* import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
-
+ */
 export class RectCopySelector extends Selector {
     private parentNode: SVGSVGElement;
 

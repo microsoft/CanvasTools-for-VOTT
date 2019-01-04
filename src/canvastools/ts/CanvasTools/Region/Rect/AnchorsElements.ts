@@ -6,9 +6,9 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 
 import { AnchorsComponent } from "../Component/AnchorsComponent";
 
-import * as SNAPSVG_TYPE from "snapsvg";
+/* import * as SNAPSVG_TYPE from "snapsvg";
 
-declare var Snap: typeof SNAPSVG_TYPE;
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
  * AnchorsElement

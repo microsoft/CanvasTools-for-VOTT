@@ -11,8 +11,8 @@ import { MaskElement } from "./MaskElement";
 import { RectElement } from "./RectElement";
 import { Selector } from "./Selector";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export enum SelectionModificator { RECT, SQUARE }
 

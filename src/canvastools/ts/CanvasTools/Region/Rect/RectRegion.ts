@@ -11,9 +11,9 @@ import { AnchorsElement } from "./AnchorsElements";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
-import * as SNAPSVG_TYPE from "snapsvg";
+/* import * as SNAPSVG_TYPE from "snapsvg";
 
-declare var Snap: typeof SNAPSVG_TYPE;
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RectRegion extends Region {
     // Bound rects

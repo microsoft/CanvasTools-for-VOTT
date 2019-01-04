@@ -3,8 +3,8 @@ import { Rect } from "../Core/Rect";
 
 import { ElementPart } from "./ElementPart";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RectElement extends ElementPart {
     public rect: Rect;

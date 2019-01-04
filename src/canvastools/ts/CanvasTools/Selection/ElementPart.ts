@@ -2,8 +2,8 @@ import { Rect } from "../Core/Rect";
 import { IHideable } from "../Interface/IHideadble";
 import { IResizable } from "../Interface/IResizable";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export abstract class ElementPart implements IHideable, IResizable {
     public node: Snap.Element;

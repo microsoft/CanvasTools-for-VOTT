@@ -9,8 +9,8 @@ import { RectCopySelector } from "./RectCopySelector";
 import { RectSelector } from "./RectSelector";
 import { Selector } from "./Selector";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /* SELECTORS */
 export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }

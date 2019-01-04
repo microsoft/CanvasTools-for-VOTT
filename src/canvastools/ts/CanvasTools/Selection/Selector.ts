@@ -7,8 +7,8 @@ import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 
 import { ElementPart } from "./ElementPart";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export abstract class Selector extends ElementPart {
     public callbacks: ISelectorCallbacks;

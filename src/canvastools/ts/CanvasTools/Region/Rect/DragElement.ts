@@ -5,9 +5,9 @@ import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { DragComponent } from "../Component/DragComponent";
 
-import * as SNAPSVG_TYPE from "snapsvg";
+/* import * as SNAPSVG_TYPE from "snapsvg";
 
-declare var Snap: typeof SNAPSVG_TYPE;
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
  * DragElement

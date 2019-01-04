@@ -11,8 +11,8 @@ import { MenuElement } from "./RegionMenu";
 import { RegionData, RegionDataType } from "../Core/RegionData";
 import { Region } from "./Region";
 
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RegionsManager {
     private baseParent: SVGSVGElement;

@@ -5,7 +5,6 @@ import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
 import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/AreaSelector";
 import { FilterPipeline, InvertFilter, GrayscaleFilter, BlurDiffFilter, ContrastFilter, BrightnessFilter, SaturationFilter } from "./CanvasTools/CanvasTools.Filter";
-import { RegionComponent } from "./CanvasTools/Region/Component/RegionComponent";
 import { Rect } from "./CanvasTools/Core/Rect";
 import { Point2D } from "./CanvasTools/Core/Point2D";
 import { RegionData } from "./CanvasTools/Core/RegionData";
@@ -14,8 +13,8 @@ import { TagsDescriptor } from "./CanvasTools/Core/TagsDescriptor";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
 
 import "snapsvg-cjs";
-import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/* import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE; */
 
 export module CanvasTools {
     export const Core = {
