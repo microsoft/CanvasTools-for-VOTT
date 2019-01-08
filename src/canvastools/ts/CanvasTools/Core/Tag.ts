@@ -163,7 +163,7 @@ export class Tag implements ITag {
      */
     constructor(name: string, colorHue: number, id?: string);
     /**
-     * Creates a new `Tag` object with specified `name`, `colorHue` and `id`
+     * Creates a new `Tag` object with specified `name`, hue value of `cssColor` and `id`
      * @param name - `name` of the new tag
      * @param cssColor - CSS color (e.g. #FF03A3) for the new tag, *only hue value of the color will be used*
      * @param id - `id` of the new tag (optional, by default is "")

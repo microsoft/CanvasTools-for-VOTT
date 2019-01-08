@@ -32,9 +32,9 @@
         editor.onSelectionEnd = (regionData) => {
             let id = (incrementalRegionID++).toString();
             let tags = generateTagDescriptor();            
-            editor.RM.addRegion(id, regionData, tags);
+            editor.addRegion(id, regionData, tags);
             console.log(regionData.toString());
-        }
+        };
 
         let primaryTags = [
             new ct.Core.Tag("Awesome", 0),
@@ -62,7 +62,7 @@
 
             let tags;
             
-            /* if (rnd < 0.2) {
+            if (rnd < 0.2) {
                 tags = new ct.Core.TagsDescriptor(null, [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
             } else if (rnd < 0.4) {
                 tags = new ct.Core.TagsDescriptor(primaryTags[rnd3()], [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
@@ -71,17 +71,16 @@
             } else if (rnd < 0.8) {
                 tags = new ct.Core.TagsDescriptor([primaryTags[rnd3()]]);
             } else {
-            {
-                tags = null;
-            } */
+                tags = new ct.Core.TagsDescriptor(); // null
+            }
 
-            tags = new ct.Core.TagsDescriptor([primaryTags[rnd3()]]);
+           
             return tags;
-        }
+        };
         
         editor.onRegionMove = (id, regionData) => {
             //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
-        }
+        };
 
         //editor.FilterPipeline.addFilter(ct.Filters.ContrastFilter(100));
         //editor.FilterPipeline.addFilter(ct.Filters.BrightnessFilter(100));
@@ -96,6 +95,7 @@
             editor.addContentSource(e.target);
         });
         image.src = imagePath;
+
     });
 </script>
 
