@@ -56,6 +56,10 @@ export class TagsDescriptor {
     }
 
     /**
+     * Creates a new  empty`TagDescriptor` object
+     */
+    constructor();
+    /**
      * Creates a new `TagDescriptor` object with specified tags
      * @param tags - A tags array with the `tags[0]` used as `primaryTag`
      */
@@ -66,8 +70,12 @@ export class TagsDescriptor {
      * @param primaryTag - Primary `Tag` for the descriptor
      * @param secondaryTags - An array of secondary tags (optional)
      */
-    constructor(arg1: Tag|Tag[], arg2: Tag[] = []) {
-        if (arg1 instanceof Tag) {
+    constructor(arg1?: Tag|Tag[], arg2: Tag[] = []) {
+        // empty TagsDescriptor
+        if (arg1 === undefined) {
+            this.primaryTag = null;
+            this.allTags = [];
+        } else if (arg1 instanceof Tag) {
             // arg1 = primaryTag, arg2 = secondaryTag
             if (arg2 instanceof Array) {
                 this.allTags = new Array<Tag>(arg1, ...arg2);
@@ -83,7 +91,7 @@ export class TagsDescriptor {
             } else {
                 this.primaryTag = null;
             }
-        } else {
+        } else if (arg1 === null) {
             // arg1 = null | undefined, ignore
             if (arg2 instanceof Array) {
                 this.allTags = arg2.map((tag) => tag.copy());

@@ -18,6 +18,7 @@
         /* "outFile": "dist/ct.js" */
     },
     "include": [     
-        "src/canvastools/ts/*.ts"
+        "src/canvastools/ts/*.ts",
+        "src/canvastools/ts/*.d.ts"
     ]
 }

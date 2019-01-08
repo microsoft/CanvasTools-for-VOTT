@@ -154,13 +154,13 @@ export function BlurDiffFilter(factor: number): FilterFunction {
             /* bdata[4 * i + 0] = d;
             bdata[4 * i + 1] = d;
             bdata[4 * i + 2] = d; */
-            bdata[4 * i + 0] = (d < factor) ? Math.round(idata[4 * i + 0] / factor) * factor : idata[4 * i + 0];
+            /* bdata[4 * i + 0] = (d < factor) ? Math.round(idata[4 * i + 0] / factor) * factor : idata[4 * i + 0];
             bdata[4 * i + 1] = (d < factor) ? Math.round(idata[4 * i + 1] / factor) * factor : idata[4 * i + 1];
-            bdata[4 * i + 2] = (d < factor) ? Math.round(idata[4 * i + 2] / factor) * factor : idata[4 * i + 2];
+            bdata[4 * i + 2] = (d < factor) ? Math.round(idata[4 * i + 2] / factor) * factor : idata[4 * i + 2]; */
 
-            /* bdata[4 * i + 0] = (dr >= factor) ? 0 : 255 - Math.round(dr * alphaStep);
-            bdata[4 * i + 1] = (dg >= factor) ? 0 : 255 - Math.round(dg * alphaStep);
-            bdata[4 * i + 2] = (db >= factor) ? 0 : 255 - Math.round(db * alphaStep); */
+            bdata[4 * i + 0] = (dr >= 0.2126 * factor) ? idata[4 * i + 0] :  Math.round(idata[4 * i + 0] / factor) * factor;
+            bdata[4 * i + 1] = (dg >= 0.7152 * factor) ? idata[4 * i + 1] :  Math.round(idata[4 * i + 1] / factor) * factor;
+            bdata[4 * i + 2] = (db >= 0.0722 * factor) ? idata[4 * i + 2] :  Math.round(idata[4 * i + 2] / factor) * factor;
 
             /* bdata[4 * i + 0] = Math.round(idata[4 * i + 0] / 8) * 8;
             bdata[4 * i + 1] = Math.round(idata[4 * i + 1] / 8) * 8;

@@ -18,6 +18,6 @@
         /* "outFile": "./lib/ct.js" */
     },
     "include": [     
-        "./src/canvastools/ts/*.ts"
+        "./src/canvastools/ts/**/*.ts"
     ]
 }

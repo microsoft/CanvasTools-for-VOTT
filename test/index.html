@@ -36,38 +36,61 @@
             console.log(regionData.toString());
         }
 
-        let primaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "Awesome" : "Brilliante",
-                        Math.floor(Math.random() * 360.0));
-        let secondaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "Yes" : "No",
-                        Math.floor(Math.random() * 360.0));
-        let ternaryTag = new ct.Core.Tag(
-                        (Math.random() > 0.5) ? "one" : "two",
-                        Math.floor(Math.random() * 360.0));
+        let primaryTags = [
+            new ct.Core.Tag("Awesome", 0),
+            new ct.Core.Tag("Amazing", 30),
+            new ct.Core.Tag("Brilliante", 60),
+        ];
+
+        let secondaryTags = [
+            new ct.Core.Tag("Yes", 100),
+            new ct.Core.Tag("No", 130),
+            new ct.Core.Tag("Unknown", 160),
+        ];
+
+        let ternaryTags = [
+            new ct.Core.Tag("one", 200),
+            new ct.Core.Tag("two", 230),
+            new ct.Core.Tag("many", 260),
+        ]
 
         function generateTagDescriptor() {
             let rnd = Math.random();
+            let rnd3 = () => {
+                return Math.round(Math.random() * 2);
+            };
+
             let tags;
             
-            if (rnd < 0.25) {
-                tags = new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-            } else if (rnd < 0.5) {
-                tags = new ct.Core.TagsDescriptor(secondaryTag, [ternaryTag, primaryTag]);
-            } else if (rnd < 0.75) {
-                tags = new ct.Core.TagsDescriptor(ternaryTag, [primaryTag, secondaryTag]);
+            /* if (rnd < 0.2) {
+                tags = new ct.Core.TagsDescriptor(null, [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
+            } else if (rnd < 0.4) {
+                tags = new ct.Core.TagsDescriptor(primaryTags[rnd3()], [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
+            } else if (rnd < 0.6) {
+                tags = new ct.Core.TagsDescriptor(primaryTags[rnd3()]);
+            } else if (rnd < 0.8) {
+                tags = new ct.Core.TagsDescriptor([primaryTags[rnd3()]]);
             } else {
+            {
                 tags = null;
-            }
-            return tags
+            } */
+
+            tags = new ct.Core.TagsDescriptor([primaryTags[rnd3()]]);
+            return tags;
         }
         
         editor.onRegionMove = (id, regionData) => {
             //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
         }
 
+        //editor.FilterPipeline.addFilter(ct.Filters.ContrastFilter(100));
+        //editor.FilterPipeline.addFilter(ct.Filters.BrightnessFilter(100));
+        //editor.FilterPipeline.addFilter(ct.Filters.SaturationFilter(128));
+        //editor.FilterPipeline.addFilter(ct.Filters.BlurDiffFilter(4));
+        
+
         // Upload background image for selection 
-        let imagePath = "./../images/background-cat.jpg";
+        let imagePath = "./../images/background-snow.jpg";
         let image = new Image();
         image.addEventListener("load", (e) => {
             editor.addContentSource(e.target);
