@@ -19,13 +19,22 @@ export class Tag implements ITag {
 
     /**
      * Extracts the hue component from a provided CSS color string
-     * @param color - A CSS-color in "#RRGGBB" format
+     * @param color - A CSS-color in "#RRGGBB" or "#RGB" format
      * @returns A hue value for provided color
      */
     public static getHueFromColor(color: string): number {
-        const r = parseInt(color.substring(1, 3), 16) / 255;
-        const g = parseInt(color.substring(3, 5), 16) / 255;
-        const b = parseInt(color.substring(5, 7), 16) / 255;
+        let r: number;
+        let g: number;
+        let b: number;
+        if (color.length === 7) {
+            r = parseInt(color.substring(1, 3), 16) / 255;
+            g = parseInt(color.substring(3, 5), 16) / 255;
+            b = parseInt(color.substring(5, 7), 16) / 255;
+        } else if (color.length === 4) {
+            r = parseInt(color.charAt(1), 16) / 16;
+            g = parseInt(color.charAt(2), 16) / 16;
+            b = parseInt(color.charAt(3), 16) / 16;
+        }        
 
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
@@ -46,7 +55,7 @@ export class Tag implements ITag {
             h /= 6;
         }
 
-        return h;
+        return Math.round(h * 360);
     }
 
     private tagHue: number;
@@ -152,9 +161,30 @@ export class Tag implements ITag {
      * @param colorHue - `colorHue` of the new tag
      * @param id - `id` of the new tag (optional, by default is "")
      */
-    constructor(name: string, colorHue: number, id: string = "") {
+    constructor(name: string, colorHue: number, id?: string);
+    /**
+     * Creates a new `Tag` object with specified `name`, `colorHue` and `id`
+     * @param name - `name` of the new tag
+     * @param cssColor - CSS color (e.g. #FF03A3) for the new tag, *only hue value of the color will be used*
+     * @param id - `id` of the new tag (optional, by default is "")
+     */
+    constructor(name: string, cssColor: string, id?: string);
+    
+    constructor(name: string, color: number|string, id: string = "") {
         this.tagName = name;
-        this.tagHue = colorHue;
+
+        if (typeof color === "number") {
+            this.tagHue = color % 360;
+        } else if (typeof color === "string") {
+            // check pattern
+            let isValidColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
+            if (isValidColor) {
+                this.tagHue = Tag.getHueFromColor(color);
+            } else {
+                this.tagHue = 0;
+            }             
+        }
+        
         this.tagID = id;
     }
 
