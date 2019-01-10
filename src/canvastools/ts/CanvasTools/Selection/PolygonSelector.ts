@@ -25,7 +25,7 @@ export class PolygonSelector extends Selector {
     private polygon: Snap.Element;
 
     private points: Point2D[];
-    private lastPoint: Point2D;    
+    private lastPoint: Point2D;
 
     private pointRadius: number = 3;
 
@@ -62,6 +62,11 @@ export class PolygonSelector extends Selector {
         this.nextSegment.node.setAttribute("visibility", "visible");
         this.polygon.node.setAttribute("visibility", "visible");
         this.pointsGroup.node.setAttribute("visibility", "visible");
+    }
+
+    public disable() {
+        this.reset();
+        super.disable();
     }
 
     private buildUIElements() {
@@ -217,7 +222,7 @@ export class PolygonSelector extends Selector {
             } else {
                 this.moveLine(this.nextLN, p, p);
                 this.moveLine(this.nextL1, p, p);
-            }            
+            }
         });
 
         e.preventDefault();
@@ -242,10 +247,5 @@ export class PolygonSelector extends Selector {
         if (e.code === "Escape") {
             this.submitPolyline();
         }
-    }
-
-    public disable() {
-        this.reset();
-        super.disable();
     }
 }

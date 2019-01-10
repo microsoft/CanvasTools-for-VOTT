@@ -1,7 +1,7 @@
 import { IResizable } from "./IResizable";
 
 /**
- * Describes objects that can be bounded to specified box. 
+ * Describes objects that can be bounded to specified box.
  */
 export interface IBoundable<T> {
     /**

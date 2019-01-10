@@ -39,6 +39,24 @@ export class RectRegion extends Region {
         this.buildOn(paper);
     }
 
+    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
+        super.updateTags(tags, options);
+        this.tagsNode.updateTags(tags, options);
+        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
+    }
+
+    public resize(width: number, height: number) {
+        this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
+        super.resize(width, height);
+    }
+
+    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType,
+                    multiSelection: boolean = false) {
+        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
+                                      this.paperRects.host.height - regionData.height);
+        super.onChange(component, regionData, state, multiSelection);
+    }
+
     private buildOn(paper: Snap.Paper) {
         this.node = paper.g();
         this.node.addClass("regionStyle");
@@ -47,7 +65,7 @@ export class RectRegion extends Region {
         const callbacks = {
             onChange: this.onChange.bind(this),
             onManipulationBegin: this.onManipulationBegin.bind(this),
-            onManipulationEnd: this.onManipulationEnd.bind(this)
+            onManipulationEnd: this.onManipulationEnd.bind(this),
         };
 
         this.anchorsNode = new AnchorsElement(paper, this.paperRects.host, this.regionData, callbacks);
@@ -64,21 +82,5 @@ export class RectRegion extends Region {
         this.node.add(this.anchorsNode.node);
 
         this.UI.push(this.tagsNode, this.dragNode, this.anchorsNode);
-    }
-
-    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
-        super.updateTags(tags, options);
-        this.tagsNode.updateTags(tags, options);
-        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
-    }
-
-    public resize(width: number, height: number) {
-        this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
-        super.resize(width, height);
-    }
-
-    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
-        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width, this.paperRects.host.height - regionData.height);
-        super.onChange(component, regionData, state, multiSelection);
     }
 }

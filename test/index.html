@@ -32,7 +32,7 @@
         editor.onSelectionEnd = (regionData) => {
             let id = (incrementalRegionID++).toString();
             let tags = generateTagDescriptor();            
-            editor.addRegion(id, regionData, tags);
+            editor.RM.addRegion(id, regionData, tags);
             console.log(regionData.toString());
         };
 

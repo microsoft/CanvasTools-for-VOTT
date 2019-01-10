@@ -47,56 +47,99 @@ export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEl
 
 export function BlurDiffFilter(factor: number): FilterFunction {
     // http://blog.ivank.net/fastest-gaussian-blur.html
-    function boxesForGauss(sigma: number, n:number): number[]  // standard deviation, number of boxes
-    {
-        var wIdeal = Math.sqrt((12*sigma*sigma/n)+1);  // Ideal averaging filter width 
-        var wl = Math.floor(wIdeal);  if(wl%2==0) wl--;
-        var wu = wl+2;
-                    
-        var mIdeal = (12*sigma*sigma - n*wl*wl - 4*n*wl - 3*n)/(-4*wl - 4);
-        var m = Math.round(mIdeal);
+    function boxesForGauss(sigma: number, n: number): number[] {
+        const wIdeal = Math.sqrt((12 * sigma * sigma / n) + 1);  // Ideal averaging filter width
+        let wl = Math.floor(wIdeal);
+        if (wl % 2 === 0) {
+            wl--;
+        }
+        const wu = wl + 2;
+
+        const mIdeal = (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
+        const m = Math.round(mIdeal);
         // var sigmaActual = Math.sqrt( (m*wl*wl + (n-m)*wu*wu - n)/12 );
-                    
-        var sizes: number[] = [];  
-        for(var i=0; i<n; i++) sizes.push(i<m?wl:wu);
+        const sizes: number[] = [];
+
+        for (let i = 0; i < n; i++) {
+            sizes.push(i < m ? wl : wu);
+        }
         return sizes;
     }
 
-    function gaussBlur_4 (scl: Uint8ClampedArray, tcl:Uint8ClampedArray, w: number, h: number, r: number) {
-        var bxs = boxesForGauss(r, 3);
-        boxBlur_4 (scl, tcl, w, h, (bxs[0]-1)/2);
-        boxBlur_4 (tcl, scl, w, h, (bxs[1]-1)/2);
-        boxBlur_4 (scl, tcl, w, h, (bxs[2]-1)/2);
+    function gaussBlur_4(scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
+        const bxs = boxesForGauss(r, 3);
+        boxBlur_4 (scl, tcl, w, h, (bxs[0] - 1) / 2);
+        boxBlur_4 (tcl, scl, w, h, (bxs[1] - 1) / 2);
+        boxBlur_4 (scl, tcl, w, h, (bxs[2] - 1) / 2);
     }
-    function boxBlur_4 (scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
-        for(var i=0; i<scl.length; i++) tcl[i] = scl[i];
+    function boxBlur_4(scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
+        for (let i = 0; i < scl.length; i++) {
+            tcl[i] = scl[i];
+        }
         boxBlurH_4(tcl, scl, w, h, r);
         boxBlurT_4(scl, tcl, w, h, r);
     }
-    function boxBlurH_4 (scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
-        var iarr = 1 / (r+r+1);
-        for(var i=0; i<h; i++) {
-            var ti = i*w, li = ti, ri = ti+r;
-            var fv = scl[ti], lv = scl[ti+w-1], val = (r+1)*fv;
-            for(var j=0; j<r; j++) val += scl[ti+j];
-            for(var j=0  ; j<=r ; j++) { val += scl[ri++] - fv       ;   tcl[ti++] = Math.round(val*iarr); }
-            for(var j=r+1; j<w-r; j++) { val += scl[ri++] - scl[li++];   tcl[ti++] = Math.round(val*iarr); }
-            for(var j=w-r; j<w  ; j++) { val += lv        - scl[li++];   tcl[ti++] = Math.round(val*iarr); }
+    function boxBlurH_4(scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
+        const iarr = 1 / (r + r + 1);
+        for (let i = 0; i < h; i++) {
+            let ti = i * w;
+            let li = ti;
+            let ri = ti + r;
+            const fv = scl[ti];
+            const lv = scl[ti + w - 1];
+            let val = (r + 1) * fv;
+            for (let j = 0; j < r; j++) {
+                val += scl[ti + j];
+            }
+            for (let j = 0  ; j <= r ; j++) {
+                val += scl[ri++] - fv;
+                tcl[ti++] = Math.round(val * iarr);
+            }
+            for (let j = r + 1; j < w - r; j++) {
+                val += scl[ri++] - scl[li++];
+                tcl[ti++] = Math.round(val * iarr);
+            }
+            for (let j = w - r; j < w; j++) {
+                val += lv - scl[li++];
+                tcl[ti++] = Math.round(val * iarr);
+            }
         }
     }
-    function boxBlurT_4 (scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
-        var iarr = 1 / (r+r+1);
-        for(var i=0; i<w; i++) {
-            var ti = i, li = ti, ri = ti+r*w;
-            var fv = scl[ti], lv = scl[ti+w*(h-1)], val = (r+1)*fv;
-            for(var j=0; j<r; j++) val += scl[ti+j*w];
-            for(var j=0  ; j<=r ; j++) { val += scl[ri] - fv     ;  tcl[ti] = Math.round(val*iarr);  ri+=w; ti+=w; }
-            for(var j=r+1; j<h-r; j++) { val += scl[ri] - scl[li];  tcl[ti] = Math.round(val*iarr);  li+=w; ri+=w; ti+=w; }
-            for(var j=h-r; j<h  ; j++) { val += lv      - scl[li];  tcl[ti] = Math.round(val*iarr);  li+=w; ti+=w; }
+    function boxBlurT_4(scl: Uint8ClampedArray, tcl: Uint8ClampedArray, w: number, h: number, r: number) {
+        const iarr = 1 / (r + r + 1);
+        for (let i = 0; i < w; i++) {
+            let ti = i;
+            let li = ti;
+            let ri = ti + r * w;
+            const fv = scl[ti];
+            const lv = scl[ti + w * (h - 1)];
+            let val = (r + 1) * fv;
+            for (let j = 0; j < r; j++) {
+                val += scl[ti + j * w];
+            }
+            for (let j = 0; j <= r; j++) {
+                val += scl[ri] - fv;
+                tcl[ti] = Math.round(val * iarr);
+                ri += w;
+                ti += w;
+            }
+            for (let j = r + 1; j < h - r; j++) {
+                val += scl[ri] - scl[li];
+                tcl[ti] = Math.round(val * iarr);
+                li += w;
+                ri += w;
+                ti += w;
+            }
+            for (let j = h - r; j < h; j++) {
+                val += lv - scl[li];
+                tcl[ti] = Math.round(val * iarr);
+                li += w;
+                ti += w;
+            }
         }
     }
-        
-    return function (canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
+
+    return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -108,28 +151,28 @@ export function BlurDiffFilter(factor: number): FilterFunction {
         const idata = imageData.data;
         const bdata = bludData.data;
 
-        let pixelsNumber = canvas.width * canvas.height;
-        let dataR = new Uint8ClampedArray(pixelsNumber);
-        let dataG = new Uint8ClampedArray(pixelsNumber);
-        let dataB = new Uint8ClampedArray(pixelsNumber);
-        let dataA = new Uint8ClampedArray(pixelsNumber);
+        const pixelsNumber = canvas.width * canvas.height;
+        const dataR = new Uint8ClampedArray(pixelsNumber);
+        const dataG = new Uint8ClampedArray(pixelsNumber);
+        const dataB = new Uint8ClampedArray(pixelsNumber);
+        const dataA = new Uint8ClampedArray(pixelsNumber);
 
-        for (var i = 0; i < pixelsNumber; i++) {
+        for (let i = 0; i < pixelsNumber; i++) {
             dataR[i] = idata[4 * i];
             dataG[i] = idata[4 * i + 1];
             dataB[i] = idata[4 * i + 2];
             dataA[i] = idata[4 * i + 3];
         }
 
-        let blurR = new Uint8ClampedArray(pixelsNumber);
-        let blurG = new Uint8ClampedArray(pixelsNumber);
-        let blurB = new Uint8ClampedArray(pixelsNumber);
-        let blurR2 = new Uint8ClampedArray(pixelsNumber);
-        let blurG2 = new Uint8ClampedArray(pixelsNumber);
-        let blurB2 = new Uint8ClampedArray(pixelsNumber);
-        //let blurA = new Uint8ClampedArray(pixelsNumber);
+        const blurR = new Uint8ClampedArray(pixelsNumber);
+        const blurG = new Uint8ClampedArray(pixelsNumber);
+        const blurB = new Uint8ClampedArray(pixelsNumber);
+        const blurR2 = new Uint8ClampedArray(pixelsNumber);
+        const blurG2 = new Uint8ClampedArray(pixelsNumber);
+        const blurB2 = new Uint8ClampedArray(pixelsNumber);
+        // let blurA = new Uint8ClampedArray(pixelsNumber);
 
-        let halfFactor = factor/2;
+        const halfFactor = factor / 2;
         gaussBlur_4(dataR, blurR, buff.width, buff.height, halfFactor);
         gaussBlur_4(dataG, blurG, buff.width, buff.height, halfFactor);
         gaussBlur_4(dataB, blurB, buff.width, buff.height, halfFactor);
@@ -137,19 +180,18 @@ export function BlurDiffFilter(factor: number): FilterFunction {
         gaussBlur_4(dataG, blurG2, buff.width, buff.height, factor);
         gaussBlur_4(dataB, blurB2, buff.width, buff.height, factor);
 
-        let alphaStep = 127/factor;
+        const alphaStep = 127 / factor;
 
-        for (var i = 0; i < pixelsNumber; i++) {
-            let dr = Math.abs(blurR2[i] - blurR[i]);
-            let dg = Math.abs(blurG2[i] - blurG[i]);
-            let db = Math.abs(blurB2[i] - blurB[i]);
-            let d = 0.2126 * dr + 0.7152 * dg + 0.0722 * db;
+        for (let i = 0; i < pixelsNumber; i++) {
+            const dr = Math.abs(blurR2[i] - blurR[i]);
+            const dg = Math.abs(blurG2[i] - blurG[i]);
+            const db = Math.abs(blurB2[i] - blurB[i]);
+            const d = 0.2126 * dr + 0.7152 * dg + 0.0722 * db;
 
             /* let dr = Math.abs(blurR2[i] - idata[4 * i + 0]);
             let dg = Math.abs(blurG2[i] - idata[4 * i + 1]);
             let db = Math.abs(blurB2[i] - idata[4 * i + 2]); */
-            //let d = 255 - Math.min(Math.round(Math.max(dr + dg + db - 16, 0)/8) * 16, 255);
-            
+            // let d = 255 - Math.min(Math.round(Math.max(dr + dg + db - 16, 0)/8) * 16, 255);
 
             /* bdata[4 * i + 0] = d;
             bdata[4 * i + 1] = d;
@@ -158,9 +200,12 @@ export function BlurDiffFilter(factor: number): FilterFunction {
             bdata[4 * i + 1] = (d < factor) ? Math.round(idata[4 * i + 1] / factor) * factor : idata[4 * i + 1];
             bdata[4 * i + 2] = (d < factor) ? Math.round(idata[4 * i + 2] / factor) * factor : idata[4 * i + 2]; */
 
-            bdata[4 * i + 0] = (dr >= 0.2126 * factor) ? idata[4 * i + 0] :  Math.round(idata[4 * i + 0] / factor) * factor;
-            bdata[4 * i + 1] = (dg >= 0.7152 * factor) ? idata[4 * i + 1] :  Math.round(idata[4 * i + 1] / factor) * factor;
-            bdata[4 * i + 2] = (db >= 0.0722 * factor) ? idata[4 * i + 2] :  Math.round(idata[4 * i + 2] / factor) * factor;
+            bdata[4 * i + 0] = (dr >= 0.2126 * factor) ?
+                                idata[4 * i + 0] :  Math.round(idata[4 * i + 0] / factor) * factor;
+            bdata[4 * i + 1] = (dg >= 0.7152 * factor) ?
+                                idata[4 * i + 1] :  Math.round(idata[4 * i + 1] / factor) * factor;
+            bdata[4 * i + 2] = (db >= 0.0722 * factor) ?
+                                idata[4 * i + 2] :  Math.round(idata[4 * i + 2] / factor) * factor;
 
             /* bdata[4 * i + 0] = Math.round(idata[4 * i + 0] / 8) * 8;
             bdata[4 * i + 1] = Math.round(idata[4 * i + 1] / 8) * 8;
@@ -173,11 +218,11 @@ export function BlurDiffFilter(factor: number): FilterFunction {
         return new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(buff);
         });
-    }    
+    };
 }
 
-export function BrightnessFilter(brightness: number): FilterFunction {    
-    return function(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement>{
+export function BrightnessFilter(brightness: number): FilterFunction {
+    return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -188,9 +233,9 @@ export function BrightnessFilter(brightness: number): FilterFunction {
         const data = imageData.data;
 
         for (let i = 0; i < data.length; i += 4) {
-            data[i] = Math.max(0, Math.min(data[i + 0] + brightness, 255));
-            data[i+1] = Math.max(0, Math.min(data[i + 1] + brightness, 255));
-            data[i+2] = Math.max(0, Math.min(data[i + 2] + brightness, 255));
+            data[i + 0] = Math.max(0, Math.min(data[i + 0] + brightness, 255));
+            data[i + 1] = Math.max(0, Math.min(data[i + 1] + brightness, 255));
+            data[i + 2] = Math.max(0, Math.min(data[i + 2] + brightness, 255));
         }
 
         buff.getContext("2d").putImageData(imageData, 0, 0);
@@ -198,11 +243,11 @@ export function BrightnessFilter(brightness: number): FilterFunction {
         return new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(buff);
         });
-    }   
+    };
 }
 
-export function ContrastFilter(contrast: number): FilterFunction {    
-    return function(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement>{
+export function ContrastFilter(contrast: number): FilterFunction {
+    return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -211,12 +256,12 @@ export function ContrastFilter(contrast: number): FilterFunction {
         buff.height = canvas.height;
 
         const data = imageData.data;
-        let factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
         for (let i = 0; i < data.length; i += 4) {
-            data[i] = factor * (data[i] - 128) + 128;
-            data[i+1] = factor * (data[i+1] - 128) + 128;
-            data[i+2] = factor * (data[i+2] - 128) + 128;
+            data[i + 0] = factor * (data[i] - 128) + 128;
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;
         }
 
         buff.getContext("2d").putImageData(imageData, 0, 0);
@@ -224,11 +269,11 @@ export function ContrastFilter(contrast: number): FilterFunction {
         return new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(buff);
         });
-    }   
+    };
 }
 
 export function SaturationFilter(saturation: number): FilterFunction {
-    return function(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement>{
+    return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -236,17 +281,17 @@ export function SaturationFilter(saturation: number): FilterFunction {
         buff.width = canvas.width;
         buff.height = canvas.height;
 
-        let s = saturation / 255;
-        
+        const s = saturation / 255;
+
         const data = imageData.data;
         for (let i = 0; i < data.length; i += 4) {
-            let r = data[i + 0];
-            let g = data[i + 1];
-            let b = data[i + 2];
-            let gr = 0.213  * r + 0.715 * g + 0.072 * b;
-            let nr = gr + s * (+ 0.787 * r - 0.715 * g - 0.072 * b);
-            let ng = gr + s * (- 0.213 * r + 0.285 * g - 0.072 * b);
-            let nb = gr + s * (- 0.213 * r - 0.715 * g + 0.928 * b);
+            const r = data[i + 0];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const gr = 0.213  * r + 0.715 * g + 0.072 * b;
+            const nr = gr + s * (+ 0.787 * r - 0.715 * g - 0.072 * b);
+            const ng = gr + s * (- 0.213 * r + 0.285 * g - 0.072 * b);
+            const nb = gr + s * (- 0.213 * r - 0.715 * g + 0.928 * b);
 
             data[i] =  Math.round(nr);     // red
             data[i + 1] =  Math.round(ng);     // green
@@ -258,7 +303,7 @@ export function SaturationFilter(saturation: number): FilterFunction {
         return new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(buff);
         });
-    }
+    };
 }
 
 /*     convoluteFilter(canvas, weights, opaque) {

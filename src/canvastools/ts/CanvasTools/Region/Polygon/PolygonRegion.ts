@@ -24,7 +24,8 @@ export class PolygonRegion extends Region {
     // Bound rects
     private paperRects: { host: Rect, actual: Rect };
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData:RegionData, id: string, tagsDescriptor: TagsDescriptor, callbacks: IRegionCallbacks, tagsUpdateOptions?: ITagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string,
+                tagsDescriptor: TagsDescriptor, callbacks: IRegionCallbacks, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
 
         if (paperRect !== null) {
@@ -33,37 +34,14 @@ export class PolygonRegion extends Region {
                 host: paperRect,
             };
         }
-        
+
         this.buildOn(paper);
     }
 
-    private buildOn(paper: Snap.Paper) {
-        this.node = paper.g();
-        this.node.addClass("regionStyle");
-        this.node.addClass(this.styleID);
-
-        const callbacks = {
-            onChange: this.onChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin.bind(this),
-            onManipulationEnd: this.onManipulationEnd.bind(this)
-        };
-
-        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, callbacks);
-        this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
-        this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, callbacks);
-
-        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
-        this.node.append(<any>this.toolTip);
-
-        this.node.add(this.dragNode.node);
-        this.node.add(this.tagsNode.node);
-        this.node.add(this.anchorNode.node);
-
-        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode);
-    }
-
-    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType, multiSelection: boolean = false) {
-        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width, this.paperRects.host.height - regionData.height);
+    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType,
+                    multiSelection: boolean = false) {
+        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
+                                      this.paperRects.host.height - regionData.height);
 
         super.onChange(component, regionData, state, multiSelection);
     }
@@ -77,5 +55,31 @@ export class PolygonRegion extends Region {
     public resize(width: number, height: number) {
         this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
         super.resize(width, height);
+    }
+
+    private buildOn(paper: Snap.Paper) {
+        this.node = paper.g();
+        this.node.addClass("regionStyle");
+        this.node.addClass(this.styleID);
+
+        const callbacks = {
+            onChange: this.onChange.bind(this),
+            onManipulationBegin: this.onManipulationBegin.bind(this),
+            onManipulationEnd: this.onManipulationEnd.bind(this),
+        };
+
+        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, callbacks);
+        this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID,
+                                        this.styleSheet, this.tagsUpdateOptions);
+        this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, callbacks);
+
+        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
+        this.node.append(this.toolTip as any);
+
+        this.node.add(this.dragNode.node);
+        this.node.add(this.tagsNode.node);
+        this.node.add(this.anchorNode.node);
+
+        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode);
     }
 }

@@ -12,17 +12,24 @@ import { TagsElement } from "./TagsElement";
 /* import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
-
 export class PointRegion extends Region {
     // Region components
     private dragNode: DragElement;
     private tagsNode: TagsElement;
     private toolTip: Snap.Fragment;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string, tagsDescriptor: TagsDescriptor, callbacks: IRegionCallbacks, tagsUpdateOptions?: ITagsUpdateOptions) {
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string,
+                tagsDescriptor: TagsDescriptor, callbacks: IRegionCallbacks, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
 
         this.buildOn(paper);
+    }
+
+    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
+        super.updateTags(tags, options);
+
+        this.tagsNode.updateTags(tags, options);
+        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 
     private buildOn(paper: Snap.Paper) {
@@ -33,25 +40,19 @@ export class PointRegion extends Region {
         const callbacks = {
             onChange: this.onChange.bind(this),
             onManipulationBegin: this.onManipulationBegin.bind(this),
-            onManipulationEnd: this.onManipulationEnd.bind(this)
+            onManipulationEnd: this.onManipulationEnd.bind(this),
         };
 
         this.dragNode = new DragElement(paper, this.paperRect, this.regionData, callbacks);
-        this.tagsNode = new TagsElement(paper,this.paperRect,  this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.tagsNode = new TagsElement(paper, this.paperRect,  this.regionData, this.tags, this.styleID,
+                                        this.styleSheet, this.tagsUpdateOptions);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
-        this.node.append(<any>this.toolTip);
+        this.node.append(this.toolTip as any);
 
         this.node.add(this.dragNode.node);
         this.node.add(this.tagsNode.node);
 
         this.UI.push(this.tagsNode, this.dragNode);
-    }
-
-    public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
-        super.updateTags(tags, options);
-
-        this.tagsNode.updateTags(tags, options);
-        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 }

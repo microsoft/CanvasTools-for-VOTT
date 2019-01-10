@@ -69,7 +69,7 @@ export class Rect implements IResizable {
     public toJSON(): IRect {
         return {
             width: this.width,
-            height: this.height
+            height: this.height,
         };
     }
 }

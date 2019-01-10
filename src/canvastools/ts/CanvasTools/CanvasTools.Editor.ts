@@ -23,12 +23,163 @@ type ToolbarIconDescription = {
     actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector) => void,
     width?: number,
     height?: number,
-    activate: boolean
+    activate: boolean,
 } | {
     type: ToolbarItemType.SEPARATOR,
-}
+};
 
 export class Editor {
+    public static FullToolbarSet: ToolbarIconDescription[] = [
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "none-select",
+            iconFile: "none-selection.svg",
+            tooltip: "Regions Manipulation (M)",
+            keycode: "KeyM",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.NONE);
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "point-select",
+            iconFile: "point-selection.svg",
+            tooltip: "Point-selection (P)",
+            keycode: "KeyP",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.POINT);
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "rect-select",
+            iconFile: "rect-selection.svg",
+            tooltip: "Rectangular box (R)",
+            keycode: "KeyR",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.RECT);
+            },
+            activate: true,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "copy-select",
+            iconFile: "copy-t-selection.svg",
+            tooltip: "Template-based box (T)",
+            keycode: "KeyT",
+            actionCallback: (action, rm, sl) => {
+                const rs = rm.getSelectedRegionsBounds();
+                if (rs !== undefined && rs.length > 0) {
+                    const r = rs[0];
+                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
+                } else {
+                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
+                }
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "polyline-select",
+            iconFile: "polyline-selection.svg",
+            tooltip: "Polyline-selection (Y)",
+            keycode: "KeyY",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.POLYLINE);
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "polygon-select",
+            iconFile: "polygon-selection.svg",
+            tooltip: "Polygon-selection (O)",
+            keycode: "KeyO",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.POLYGON);
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
+            type: ToolbarItemType.SWITCH,
+            action: "selection-lock",
+            iconFile: "selection-lock.svg",
+            tooltip: "Lock/unlock regions (L)",
+            keycode: "KeyL",
+            actionCallback: (action, rm, sl) => {
+                rm.toggleFreezeMode();
+            },
+            activate: false,
+        },
+    ];
+
+    public static RectToolbarSet: ToolbarIconDescription[] = [
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "none-select",
+            iconFile: "none-selection.svg",
+            tooltip: "Regions Manipulation (M)",
+            keycode: "KeyM",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.NONE);
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "rect-select",
+            iconFile: "rect-selection.svg",
+            tooltip: "Rectangular box (R)",
+            keycode: "KeyR",
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode(SelectionMode.RECT);
+            },
+            activate: true,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "copy-select",
+            iconFile: "copy-t-selection.svg",
+            tooltip: "Template-based box (T)",
+            keycode: "KeyT",
+            actionCallback: (action, rm, sl) => {
+                const rs = rm.getSelectedRegionsBounds();
+                if (rs !== undefined && rs.length > 0) {
+                    const r = rs[0];
+                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
+                } else {
+                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
+                }
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
+            type: ToolbarItemType.SWITCH,
+            action: "selection-lock",
+            iconFile: "selection-lock.svg",
+            tooltip: "Lock/unlock regions (L)",
+            keycode: "KeyL",
+            actionCallback: (action, rm, sl) => {
+                rm.toggleFreezeMode();
+            },
+            activate: false,
+        },
+    ];
+
     private static SVGDefsTemplate = `
         <defs>
             <filter id="black-glow">
@@ -44,6 +195,8 @@ export class Editor {
             </filter>
         </defs>`;
 
+    public autoResize: boolean = true;
+
     private toolbar: Toolbar;
     private regionsManager: RegionsManager;
     private areaSelector: AreaSelector;
@@ -55,8 +208,6 @@ export class Editor {
     private editorDiv: HTMLDivElement;
 
     private isRMFrozen: boolean = false;
-
-    public autoResize: boolean = true;
 
     private sourceWidth: number;
     private sourceHeight: number;
@@ -118,23 +269,12 @@ export class Editor {
                     }
 
                     this.onSelectionEnd(regionData);
-                }
+                },
             });
 
         this.filterPipeline = new FilterPipeline();
 
         this.resize(editorZone.offsetWidth, editorZone.offsetHeight);
-    }
-
-    private createSVGElement(): SVGSVGElement {
-        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.innerHTML = Editor.SVGDefsTemplate;
-        return svg;
-    }
-
-    private createCanvasElement(): HTMLCanvasElement {
-        let canvas = document.createElement("canvas");
-        return canvas;
     }
 
     public onRegionManipulationBegin(region?: RegionComponent): void {
@@ -162,163 +302,11 @@ export class Editor {
     }
 
     public onSelectionEnd(commit): void {
-        // do something          
+        // do something
     }
 
-    public static FullToolbarSet: Array<ToolbarIconDescription> = [
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "none-select",
-            iconFile: "none-selection.svg",
-            tooltip: "Regions Manipulation (M)",
-            keycode: 'KeyM',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.NONE);
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SEPARATOR
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "point-select",
-            iconFile: "point-selection.svg",
-            tooltip: "Point-selection (P)",
-            keycode: 'KeyP',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POINT);
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "rect-select",
-            iconFile: "rect-selection.svg",
-            tooltip: "Rectangular box (R)",
-            keycode: 'KeyR',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.RECT);
-            },
-            activate: true
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "copy-select",
-            iconFile: "copy-t-selection.svg",
-            tooltip: "Template-based box (T)",
-            keycode: 'KeyT',
-            actionCallback: (action, rm, sl) => {
-                let rs = rm.getSelectedRegionsBounds();
-                if (rs !== undefined && rs.length > 0) {
-                    let r = rs[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
-                } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
-                }
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "polyline-select",
-            iconFile: "polyline-selection.svg",
-            tooltip: "Polyline-selection (Y)",
-            keycode: 'KeyY',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POLYLINE);
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "polygon-select",
-            iconFile: "polygon-selection.svg",
-            tooltip: "Polygon-selection (O)",
-            keycode: 'KeyO',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POLYGON);
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SEPARATOR
-        },
-        {
-            type: ToolbarItemType.SWITCH,
-            action: "selection-lock",
-            iconFile: "selection-lock.svg",
-            tooltip: "Lock/unlock regions (L)",
-            keycode: 'KeyL',
-            actionCallback: (action, rm, sl) => {
-                rm.toggleFreezeMode();
-            },
-            activate: false
-        }
-    ];
-
-    public static RectToolbarSet: Array<ToolbarIconDescription> = [
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "none-select",
-            iconFile: "none-selection.svg",
-            tooltip: "Regions Manipulation (M)",
-            keycode: 'KeyM',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.NONE);
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SEPARATOR
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "rect-select",
-            iconFile: "rect-selection.svg",
-            tooltip: "Rectangular box (R)",
-            keycode: 'KeyR',
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.RECT);
-            },
-            activate: true
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
-            action: "copy-select",
-            iconFile: "copy-t-selection.svg",
-            tooltip: "Template-based box (T)",
-            keycode: 'KeyT',
-            actionCallback: (action, rm, sl) => {
-                let rs = rm.getSelectedRegionsBounds();
-                if (rs !== undefined && rs.length > 0) {
-                    let r = rs[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
-                } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
-                }
-            },
-            activate: false
-        },
-        {
-            type: ToolbarItemType.SEPARATOR
-        },
-        {
-            type: ToolbarItemType.SWITCH,
-            action: "selection-lock",
-            iconFile: "selection-lock.svg",
-            tooltip: "Lock/unlock regions (L)",
-            keycode: 'KeyL',
-            actionCallback: (action, rm, sl) => {
-                rm.toggleFreezeMode();
-            },
-            activate: false
-        }
-
-    ];
-
-    public addToolbar(toolbarZone: HTMLDivElement, toolbarSet: Array<ToolbarIconDescription>, iconsPath: string) {
-        let svg = this.createSVGElement();
+    public addToolbar(toolbarZone: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string) {
+        const svg = this.createSVGElement();
         toolbarZone.append(svg);
 
         this.toolbar = new Toolbar(svg);
@@ -329,47 +317,45 @@ export class Editor {
 
         let activeSelector: string;
         toolbarSet.forEach((item) => {
-            if (item.type == ToolbarItemType.SEPARATOR) {
+            if (item.type === ToolbarItemType.SEPARATOR) {
                 this.toolbar.addSeparator();
-            } else if (item.type == ToolbarItemType.SELECTOR) {
+            } else if (item.type === ToolbarItemType.SELECTOR) {
                 this.toolbar.addSelector({
                     action: item.action,
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
                     keycode: item.keycode,
                     width: item.width,
-                    height: item.height
+                    height: item.height,
                 }, (action) => {
                     item.actionCallback(action, this.regionsManager, this.areaSelector);
-                })
+                });
 
                 if (item.activate) {
                     activeSelector = item.action;
                 }
-            } else if (item.type == ToolbarItemType.SWITCH) {
+            } else if (item.type === ToolbarItemType.SWITCH) {
                 this.toolbar.addSwitch({
                     action: item.action,
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
                     keycode: item.keycode,
                     width: item.width,
-                    height: item.height
+                    height: item.height,
                 }, (action) => {
                     item.actionCallback(action, this.regionsManager, this.areaSelector);
-                })
+                });
 
                 this.toolbar.setSwitch(item.action, item.activate);
             }
-
-
-        })
+        });
 
         this.toolbar.select(activeSelector);
     }
 
     public async addContentSource(source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement): Promise<void> {
-        let buffCnvs = document.createElement("canvas");
-        let context = buffCnvs.getContext("2d");
+        const buffCnvs = document.createElement("canvas");
+        const context = buffCnvs.getContext("2d");
 
         if (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement) {
             this.sourceWidth = source.width;
@@ -388,7 +374,7 @@ export class Editor {
             // Copy buffer to the canvas on screen
             this.contentCanvas.width = bcnvs.width;
             this.contentCanvas.height = bcnvs.height;
-            let imgContext = this.contentCanvas.getContext("2d");
+            const imgContext = this.contentCanvas.getContext("2d");
             imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
         }).then(() => {
             // resize the editor size to adjust to the new content size
@@ -400,8 +386,8 @@ export class Editor {
         this.frameWidth = containerWidth;
         this.frameHeight = containerHeight;
 
-        let imgRatio = this.contentCanvas.width / this.contentCanvas.height;
-        let containerRatio = containerWidth / containerHeight;
+        const imgRatio = this.contentCanvas.width / this.contentCanvas.height;
+        const containerRatio = containerWidth / containerHeight;
 
         let hpadding = 0;
         let vpadding = 0;
@@ -442,26 +428,37 @@ export class Editor {
     }
 
     public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
-        let sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        let sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
 
-        let xf = sw / this.frameWidth;
-        let yf = sh / this.frameHeight;
+        const xf = sw / this.frameWidth;
+        const yf = sh / this.frameHeight;
 
-        let rd = regionData.copy();
+        const rd = regionData.copy();
         rd.scale(xf, yf);
         return rd;
     }
 
     public scaleRegionToFrameSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
-        let sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        let sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
 
-        let xf = this.frameWidth / sw;
-        let yf = this.frameHeight / sh;
-        
-        let rd = regionData.copy();
+        const xf = this.frameWidth / sw;
+        const yf = this.frameHeight / sh;
+
+        const rd = regionData.copy();
         rd.scale(xf, yf);
         return rd;
+    }
+
+    private createSVGElement(): SVGSVGElement {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.innerHTML = Editor.SVGDefsTemplate;
+        return svg;
+    }
+
+    private createCanvasElement(): HTMLCanvasElement {
+        const canvas = document.createElement("canvas");
+        return canvas;
     }
 }

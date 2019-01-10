@@ -6,8 +6,14 @@
     "jsRules": {},
     "rules": {
         "max-line-length": {
-            "options": [120],
+            "options": [120]
         },
-    },    
+        "object-literal-sort-keys": false,
+        "no-console": false,
+        "no-shadowed-variable": false,
+        "ordered-imports": false,
+        "no-string-literal": false,
+        "unified-signatures": false
+    },
     "rulesDirectory": []
 }

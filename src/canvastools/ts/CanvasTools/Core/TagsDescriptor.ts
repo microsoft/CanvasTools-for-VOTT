@@ -6,17 +6,18 @@ import { ITagsDescriptor } from "../Interface/ITagsDescriptor";
  */
 export class TagsDescriptor {
     /**
-     * Creates a new `TagDescriptor` object based on extracting specific properties from any provided object 
+     * Creates a new `TagDescriptor` object based on extracting specific properties from any provided object
      * @remarks The `TagDescriptor` object is *immutable*. All public properties return copies of objects.
-     * @param data - An `ITagDescriptor` object with the `primary` and `secondary` properties implementing `ITag` and `ITag[]` interfaces
+     * @param data - An `ITagDescriptor` object with the `primary` and `secondary`
+     * properties implementing `ITag` and `ITag[]` interfaces
      * @returns A new `TagDescriptor` object
      */
     public static BuildFromJSON(data: ITagsDescriptor): TagsDescriptor {
         let p = null;
         if (data.primary !== null && data.primary !== undefined) {
-            Tag.BuildFromJSON(data.primary);
+            p = Tag.BuildFromJSON(data.primary);
         }
-        let s = (data.secondary === undefined) ? [] : data.secondary.map((tag) => Tag.BuildFromJSON(tag));
+        const s = (data.secondary === undefined) ? [] : data.secondary.map((tag) => Tag.BuildFromJSON(tag));
 
         return new TagsDescriptor(p, s);
     }
@@ -39,7 +40,7 @@ export class TagsDescriptor {
             return this.primaryTag.copy();
         } else {
             return null;
-        }        
+        }
     }
 
     /**
@@ -49,10 +50,10 @@ export class TagsDescriptor {
         if (this.primaryTag !== null) {
             return this.all.filter((tag) => {
                 return (tag.name !== this.primary.name);
-            })
+            });
         } else {
             return this.all;
-        }        
+        }
     }
 
     /**
@@ -81,7 +82,7 @@ export class TagsDescriptor {
                 this.allTags = new Array<Tag>(arg1, ...arg2);
             } else {
                 this.allTags = [arg1];
-            }            
+            }
             this.primaryTag = arg1;
         } else if (arg1 instanceof Array) {
             // arg1 = tags, ignore arg2
@@ -130,14 +131,13 @@ export class TagsDescriptor {
         if (this.primaryTag !== null) {
             return {
                 primary: this.primaryTag.toJSON(),
-                secondary: this.secondary.map((tag) => tag.toJSON())
-            }
+                secondary: this.secondary.map((tag) => tag.toJSON()),
+            };
         } else {
             return {
                 primary: null,
-                secondary: this.secondary.map((tag) => tag.toJSON())
-            }
+                secondary: this.secondary.map((tag) => tag.toJSON()),
+            };
         }
-        
     }
 }

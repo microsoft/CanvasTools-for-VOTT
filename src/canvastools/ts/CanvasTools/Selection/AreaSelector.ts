@@ -129,7 +129,8 @@ export class AreaSelector {
         this.areaSelectorLayer.addClass("areaSelector");
 
         this.rectSelector = new RectSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
-        this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect, new Rect(0, 0), this.callbacks);
+        this.rectCopySelector = new RectCopySelector(this.parentNode, this.paper, this.boundRect,
+                                                     new Rect(0, 0), this.callbacks);
         this.pointSelector = new PointSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.polylineSelector = new PolylineSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.polygonSelector = new PolygonSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);

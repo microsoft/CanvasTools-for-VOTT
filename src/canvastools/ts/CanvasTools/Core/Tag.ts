@@ -2,8 +2,8 @@ import { ITag } from "../Interface/ITag";
 
 /**
  * Represents meta-data for a tag
- * @remarks 
- * 1. To represent the color Tag class uses only the hue component 
+ * @remarks
+ * 1. To represent the color Tag class uses only the hue component
  * and generates a number of color variations based on that value.
  * 2. The `Tag` object is *immutable*, all public properties are readonly.
  */
@@ -34,7 +34,7 @@ export class Tag implements ITag {
             r = parseInt(color.charAt(1), 16) / 16;
             g = parseInt(color.charAt(2), 16) / 16;
             b = parseInt(color.charAt(3), 16) / 16;
-        }        
+        }
 
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
@@ -66,15 +66,15 @@ export class Tag implements ITag {
      */
     public get colorHue(): number {
         return this.tagHue;
-    };
+    }
 
     /**
      * The `name` of the tag. *Readonly*
      */
-
     public get name(): string {
         return this.tagName;
     }
+
     /**
      * The `id` of the tag. *Readonly*
      */
@@ -110,7 +110,7 @@ export class Tag implements ITag {
         }
         return this.tagColorAccent;
     }
-    
+
     /**
      * Returns the highlight color variation of the tag's color
      * @returns String hsla(H, 80%, 40%, 0.3)
@@ -121,7 +121,7 @@ export class Tag implements ITag {
         }
         return this.tagColorHighlight;
     }
-    
+
     /**
      * Returns the shadow color variation of the tag's color
      * @returns String hsla(H, 50%, 30%, 0.2)
@@ -143,7 +143,7 @@ export class Tag implements ITag {
         }
         return this.tagColorDark;
     }
-    
+
     /**
      * Returns the fully transparent color variation of the tag's color
      * @returns String hsla(0, 0%, 0%, 0.0)
@@ -169,7 +169,7 @@ export class Tag implements ITag {
      * @param id - `id` of the new tag (optional, by default is "")
      */
     constructor(name: string, cssColor: string, id?: string);
-    
+
     constructor(name: string, color: number|string, id: string = "") {
         this.tagName = name;
 
@@ -177,14 +177,13 @@ export class Tag implements ITag {
             this.tagHue = color % 360;
         } else if (typeof color === "string") {
             // check pattern
-            let isValidColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
+            const isValidColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
             if (isValidColor) {
                 this.tagHue = Tag.getHueFromColor(color);
             } else {
                 this.tagHue = 0;
-            }             
+            }
         }
-        
         this.tagID = id;
     }
 
@@ -204,7 +203,7 @@ export class Tag implements ITag {
         return {
             name: this.tagName,
             colorHue: this.tagHue,
-            id: this.tagID
-        }
+            id: this.tagID,
+        };
     }
 }

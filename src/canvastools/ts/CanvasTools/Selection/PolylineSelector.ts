@@ -62,6 +62,11 @@ export class PolylineSelector extends Selector {
         this.pointsGroup.node.setAttribute("visibility", "visible");
     }
 
+    public disable() {
+        this.reset();
+        super.disable();
+    }
+
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("polylineSelector");
@@ -249,10 +254,5 @@ export class PolylineSelector extends Selector {
         if (e.code === "Escape") {
             this.submitPolyline();
         }
-    }
-
-    public disable() {
-        this.reset();
-        super.disable();
     }
 }

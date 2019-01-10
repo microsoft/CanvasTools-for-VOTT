@@ -9,7 +9,7 @@ import { DragComponent } from "../Component/DragComponent";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
- * DragElement 
+ * DragElement
  * Used internally to drag the region
 */
 export class DragElement extends DragComponent {
@@ -30,7 +30,7 @@ export class DragElement extends DragComponent {
                 x: this.x,
                 y: this.y,
                 width: this.width,
-                height: this.height
+                height: this.height,
             });
         });
     }

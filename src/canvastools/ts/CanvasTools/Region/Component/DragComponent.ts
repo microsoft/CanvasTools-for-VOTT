@@ -10,12 +10,13 @@ import { RegionComponent } from "./RegionComponent";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
- * DragElement 
+ * DragElement
  * Used internally to drag the region
 */
 export abstract class DragComponent extends RegionComponent {
     protected dragNode: Snap.Element;
     protected isDragged: boolean = false;
+    protected dragOrigin: Point2D;
 
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -23,26 +24,29 @@ export abstract class DragComponent extends RegionComponent {
         this.node.addClass("dragLayer");
     }
 
-    protected dragOrigin: Point2D;
+    public freeze() {
+        super.freeze();
+        this.dragNode.undrag();
+        this.onManipulationEnd();
+    }
 
     protected onDragBegin() {
         this.dragOrigin = new Point2D(this.x, this.y);
     }
 
     protected onDragMove(dx: number, dy: number) {
-        if (dx != 0 && dy != 0) {
+        if (dx !== 0 && dy !== 0) {
             let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
 
             if (this.paperRect !== null) {
                 p = p.boundToRect(this.paperRect);
             }
 
-            let rd = this.regionData.copy();
+            const rd = this.regionData.copy();
             rd.move(p);
-            
             this.onChange(this, rd, ChangeEventType.MOVING);
         }
-    };
+    }
 
     protected onDragEnd() {
         this.dragOrigin = null;
@@ -81,8 +85,7 @@ export abstract class DragComponent extends RegionComponent {
         this.dragNode.node.addEventListener("pointerdown", (e) => {
             if (!this.isFrozen) {
                 this.dragNode.node.setPointerCapture(e.pointerId);
-                let multiselection = e.shiftKey;
-
+                const multiselection = e.shiftKey;
                 this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
             }
         });
@@ -90,16 +93,9 @@ export abstract class DragComponent extends RegionComponent {
         this.dragNode.node.addEventListener("pointerup", (e) => {
             if (!this.isFrozen) {
                 this.dragNode.node.releasePointerCapture(e.pointerId);
-                let multiselection = e.shiftKey;
-                
+                const multiselection = e.shiftKey;
                 this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
             }
         });
-    }
-
-    public freeze() {
-        super.freeze();
-        this.dragNode.undrag();
-        this.onManipulationEnd();
     }
 }

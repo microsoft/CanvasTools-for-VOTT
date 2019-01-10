@@ -16,16 +16,13 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     public node: Snap.Element;
     public regionData: RegionData;
 
-    // Manipulation notifiers
-    private callbacks: IRegionCallbacks;
-
     public isVisible: boolean = true;
     public isFrozen: boolean = false;
     public isSelected: boolean = false;
 
     protected paper: Snap.Paper;
     protected paperRect: Rect;
-    
+
     public get x(): number {
         return this.regionData.x;
     }
@@ -46,9 +43,12 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         return this.regionData.area;
     }
 
-    public get boundRect() : Rect {
+    public get boundRect(): Rect {
         return this.regionData.boundRect;
     }
+
+    // Manipulation notifiers
+    private callbacks: IRegionCallbacks;
 
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, callbacks: IRegionCallbacks = null) {
         this.paper = paper;
@@ -58,7 +58,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         this.callbacks = {
             onChange: null,
             onManipulationBegin: null,
-            onManipulationEnd: null
+            onManipulationEnd: null,
         };
 
         if (callbacks !== null && callbacks !== undefined) {
@@ -68,31 +68,31 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
             if (callbacks.onManipulationEnd !== undefined) {
                 this.callbacks.onManipulationEnd = callbacks.onManipulationEnd;
             }
-    
+
             if (callbacks.onChange !== undefined) {
                 this.callbacks.onChange = callbacks.onChange;
             }
         }
     }
 
-    public onChange(region: RegionComponent, regionData: RegionData, eventType?: ChangeEventType, multiSelection?: boolean) {
+    public onChange(region: RegionComponent, regionData: RegionData, eventType?: ChangeEventType,
+                    multiSelection?: boolean) {
         if (this.callbacks.onChange !== null && this.callbacks.onChange !== undefined) {
             this.callbacks.onChange(region, regionData, eventType, multiSelection);
         }
-    };
+    }
+
     public onManipulationBegin(region?: RegionComponent) {
         if (this.callbacks.onManipulationBegin !== null && this.callbacks.onManipulationBegin !== undefined) {
-            //let r = (region !== undefined) ? region : this;
             this.callbacks.onManipulationBegin(region);
         }
-    };
-    
+    }
+
     public onManipulationEnd(region?: RegionComponent) {
         if (this.callbacks.onManipulationEnd !== null && this.callbacks.onManipulationEnd !== undefined) {
-            //let r = (region !== undefined) ? region : this;
             this.callbacks.onManipulationEnd(region);
         }
-    };
+    }
 
     public hide() {
         this.node.node.setAttribute("visibility", "hidden");
@@ -131,6 +131,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     public redraw(): void {
+        // do nothings
     }
 
     public resize(width: number, height: number) {

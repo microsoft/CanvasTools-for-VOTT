@@ -11,18 +11,18 @@ import { RegionComponent } from "./RegionComponent";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 /*
- * TagsElement 
+ * TagsElement
  * Used internally to draw labels and map colors for the region
 */
 export abstract class TagsComponent extends RegionComponent {
+    // Tags
+    public tags: TagsDescriptor;
+
     // Elements
     protected primaryTagNode: Snap.Element;
 
     protected secondaryTagsNode: Snap.Element;
-    protected secondaryTags: Array<Snap.Element>;
-
-    // Tags
-    public tags: TagsDescriptor;
+    protected secondaryTags: Snap.Element[];
 
     // Styling
     protected styleId: string;
@@ -30,10 +30,11 @@ export abstract class TagsComponent extends RegionComponent {
     protected tagsUpdateOptions: ITagsUpdateOptions;
 
     // Style rules
-    protected styleMap: { rule: string, style: string }[] = [];
-    protected styleLightMap: { rule: string, style: string }[] = [];
-    
-    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
+    protected styleMap: Array<{ rule: string, style: string }> = [];
+    protected styleLightMap: Array<{ rule: string, style: string }> = [];
+
+    constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor,
+                styleId: string, styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, null);
 
         this.styleId = styleId;
@@ -46,9 +47,6 @@ export abstract class TagsComponent extends RegionComponent {
         this.node.addClass("tagsLayer");
     }
 
-    protected initStyleMaps(tags: TagsDescriptor) {
-    }
-
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
         this.tags = tags;
         this.tagsUpdateOptions = options;
@@ -57,11 +55,16 @@ export abstract class TagsComponent extends RegionComponent {
         this.clearStyleMaps();
         this.initStyleMaps(tags);
 
-        let showBackground = (options !== undefined) ? options.showRegionBackground : true;
+        const showBackground = (options !== undefined) ? options.showRegionBackground : true;
         this.applyStyleMaps(showBackground);
     }
 
+    protected initStyleMaps(tags: TagsDescriptor) {
+        // do nothing
+    }
+
     protected rebuildTagLabels() {
+        // do nothing
     }
 
     protected clearStyleMaps() {
@@ -75,9 +78,8 @@ export abstract class TagsComponent extends RegionComponent {
         // Map primary tag color
         if (this.tags && this.tags.primary !== undefined) {
             window.requestAnimationFrame(() => {
-                let sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
-                for (let i = 0; i < sm.length; i++) {
-                    let r = sm[i];
+                const sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
+                for (const r of sm) {
                     this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                 }
             });

@@ -30,16 +30,12 @@ export class AnchorsElement extends AnchorsComponent {
             this.anchorsNode.add(anchor);
 
             this.subscribeAnchorToEvents(anchor, index);
-        })
-    }
-
-    private getActiveAnchor(): string {
-        return (this.activeAnchorIndex >= 0) ? this.anchorStyles[this.activeAnchorIndex] : "";
+        });
     }
 
     protected updateRegion(p: Point2D) {
-        let x1: number = p.x;
-        let y1: number = p.y;
+        const x1: number = p.x;
+        const y1: number = p.y;
         let x2: number;
         let y2: number;
         let flipX: boolean = false;
@@ -91,10 +87,10 @@ export class AnchorsElement extends AnchorsComponent {
             this.ghostAnchor.addClass(newAA);
         }
 
-        let p1 = new Point2D(Math.min(x1, x2), Math.min(y1, y2)).boundToRect(this.paperRect);
-        let p2 = new Point2D(Math.max(x1, x2), Math.max(y1, y2)).boundToRect(this.paperRect);
+        const p1 = new Point2D(Math.min(x1, x2), Math.min(y1, y2)).boundToRect(this.paperRect);
+        const p2 = new Point2D(Math.max(x1, x2), Math.max(y1, y2)).boundToRect(this.paperRect);
 
-        let rd = this.regionData.copy();
+        const rd = this.regionData.copy();
         rd.setPoints([p1, new Point2D(p2.x, p1.y), p2, new Point2D(p1.x, p2.y)]);
 
         this.onChange(this, rd, ChangeEventType.MOVING);
@@ -108,6 +104,10 @@ export class AnchorsElement extends AnchorsComponent {
     protected onGhostPointerLeave(e: PointerEvent) {
         this.ghostAnchor.removeClass(this.getActiveAnchor());
         super.onGhostPointerLeave(e);
+    }
+
+    private getActiveAnchor(): string {
+        return (this.activeAnchorIndex >= 0) ? this.anchorStyles[this.activeAnchorIndex] : "";
     }
 
 }

@@ -9,7 +9,7 @@ import { IPoint2D } from "../Interface/IPoint2D";
 export enum RegionDataType {Point = "point", Rect = "rect", Polyline = "polyline", Polygon = "polygon"}
 
 /**
- * Represents region meta-data, including position, size, points and type 
+ * Represents region meta-data, including position, size, points and type
  */
 export class RegionData implements IMovable, IResizable {
     /**
@@ -23,7 +23,8 @@ export class RegionData implements IMovable, IResizable {
     }
 
     /**
-     * Creates a new `RegionData` object with `rect`-type at provided `x`, `y` coordinates and of provided `width` and `height`
+     * Creates a new `RegionData` object with `rect`-type at provided `x`, `y`
+     * coordinates and of provided `width` and `height`
      * @param x - `x`-coordinate
      * @param y - `y`-coordinate
      * @param width - `width` of the rect
@@ -32,7 +33,8 @@ export class RegionData implements IMovable, IResizable {
      */
     public static BuildRectRegionData(x: number, y: number, width: number, height: number): RegionData {
         return new RegionData(x, y, width, height,
-            [new Point2D(x, y), new Point2D(x + width, y), new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Rect);
+            [new Point2D(x, y), new Point2D(x + width, y),
+             new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Rect);
     }
 
     /**
@@ -107,7 +109,7 @@ export class RegionData implements IMovable, IResizable {
      */
     public get area(): number {
         let area: number;
-        
+
         if (this.regionType === RegionDataType.Point) {
             area = 1.0;
         } else {
@@ -131,13 +133,13 @@ export class RegionData implements IMovable, IResizable {
     }
 
     /**
-     * Gets the array of region points. 
+     * Gets the array of region points.
      */
     public get points(): Point2D[] {
         return this.regionPoints.map((p) => p.copy());
     }
 
-    /** 
+    /**
      * Sets the array of region points. *Region will be resized and repositioned automatically*
      */
     public set points(points: Point2D[]) {
@@ -149,7 +151,7 @@ export class RegionData implements IMovable, IResizable {
      */
     public get type(): RegionDataType {
         return this.regionType;
-    };
+    }
 
     protected corner: Point2D;
     protected regionRect: Rect;
@@ -252,7 +254,8 @@ export class RegionData implements IMovable, IResizable {
 
     /**
      * Updates the collection of internal points
-     * @param points - `IPoint2D` collection for the region to serve as the source for the internal *copy* in the `points` collection
+     * @param points - `IPoint2D[]` collection for the region to serve as the source for the
+     * internal *copy* in the `points` collection
      */
     public setPoints(points: IPoint2D[]) {
         let xmin = Number.MAX_VALUE;
@@ -303,7 +306,8 @@ export class RegionData implements IMovable, IResizable {
         const width = brCorner.x - tlCorner.x;
         const height = brCorner.y - brCorner.y;
 
-        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType);
+        return new RegionData(tlCorner.x, tlCorner.y, width, height,
+                              this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType);
     }
 
     /**
@@ -311,19 +315,18 @@ export class RegionData implements IMovable, IResizable {
      * @param xfactor - Horizontal scaling factor
      * @param yfactor - Vertical scaling factor
      */
-    public scale(xfactor: number, yfactor: number):void;
-
+    public scale(xfactor: number, yfactor: number): void;
     /**
      * Scale region coordinates, points and size by `factor`
      * @param factor - Horizontal & vertical scaling factor
      */
-    public scale(factor: number):void;    
-    public scale(f1: number, f2?: number):void {
-        let xf = f1;
-        let yf = (f2 !== undefined) ? f2: f1;
+    public scale(factor: number): void;
+    public scale(f1: number, f2?: number): void {
+        const xf = f1;
+        const yf = (f2 !== undefined) ? f2 : f1;
 
-        this.corner = new Point2D(this.x * xf, this.y * xf);
-        this.regionRect = new Rect(this.width * xf, this.height * xf);
+        this.corner = new Point2D(this.x * xf, this.y * yf);
+        this.regionRect = new Rect(this.width * xf, this.height * yf);
         this.regionPoints =  this.regionPoints.map((p) => new Point2D(p.x * xf, p.y * yf));
     }
 
@@ -332,11 +335,13 @@ export class RegionData implements IMovable, IResizable {
      * @returns A new `RegionData` object with copied properties
      */
     public copy(): RegionData {
-        return new RegionData(this.x, this.y, this.width, this.height, this.regionPoints.map((p) => p.copy()), this.regionType);
+        return new RegionData(this.x, this.y, this.width, this.height,
+                              this.regionPoints.map((p) => p.copy()), this.regionType);
     }
 
     /**
-     * Returns a string representation of the region in the format `"{x, y} x [width, height]: {{x1, y1}, ..., {xn, yn}}"`.
+     * Returns a string representation of the region in the format
+     * `"{x, y} x [width, height]: {{x1, y1}, ..., {xn, yn}}"`.
      * @returns A string representation of the rect
      */
     public toString(): string {
@@ -356,7 +361,7 @@ export class RegionData implements IMovable, IResizable {
             points: this.regionPoints.map((point) => {
                 return { x: point.x, y: point.y };
             }),
-            type: this.regionType
-        }
+            type: this.regionType,
+        };
     }
 }

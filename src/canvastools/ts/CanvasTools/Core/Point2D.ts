@@ -95,7 +95,7 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
      * @returns The square of the distance
      */
     public squareDistanceToPoint(p: Point2D): number {
-        return (this.x - p.x) * (this.x - p.x) + (this.y - p.y) *(this.y - p.y);
+        return (this.x - p.x) * (this.x - p.x) + (this.y - p.y) * (this.y - p.y);
     }
 
     /**
@@ -105,16 +105,16 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
      * @returns The square of the distance
      */
     public squareDistanceToLine(p1: Point2D, p2: Point2D): number {
-        let lineLength2: number = p1.squareDistanceToPoint(p2);
+        const lineLength2: number = p1.squareDistanceToPoint(p2);
         let dist: number;
 
         if (lineLength2 === 0.0) {
             dist = this.squareDistanceToPoint(p1);
         } else {
-            let t = ((this.x - p1.x) * (p2.x - p1.x) + (this.y - p1.y) * (p2.y - p1.y)) / lineLength2;
-            let k = Math.max(0, Math.min(1, t));
+            const t = ((this.x - p1.x) * (p2.x - p1.x) + (this.y - p1.y) * (p2.y - p1.y)) / lineLength2;
+            const k = Math.max(0, Math.min(1, t));
 
-            let p = new Point2D(p1.x + k * (p2.x - p1.x), p1.y + k * (p2.y - p1.y));
+            const p = new Point2D(p1.x + k * (p2.x - p1.x), p1.y + k * (p2.y - p1.y));
             dist = this.squareDistanceToPoint(p);
         }
         return dist;
@@ -143,7 +143,7 @@ export class Point2D implements IMovable, IBoundable<Point2D> {
     public toJSON(): IPoint2D {
         return {
             x: this.x,
-            y: this.y
+            y: this.y,
         };
     }
 }

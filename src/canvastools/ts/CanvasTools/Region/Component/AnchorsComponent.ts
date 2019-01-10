@@ -22,7 +22,7 @@ export class AnchorsComponent extends RegionComponent {
     protected ghostAnchor: Snap.Element;
 
     protected activeAnchorIndex: number = -1;
-   
+
     protected dragOrigin: Point2D;
 
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
@@ -36,7 +36,7 @@ export class AnchorsComponent extends RegionComponent {
 
         this.ghostAnchor = this.createAnchor(paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
         this.ghostAnchor.attr({
-            display: "none"
+            display: "none",
         });
 
         this.node.add(this.anchorsNode);
@@ -53,16 +53,6 @@ export class AnchorsComponent extends RegionComponent {
         this.subscribeToEvents(listeners);
     }
 
-    protected buildPointAnchors() {
-        this.regionData.points.forEach((point, index) => {
-            const anchor = this.createAnchor(this.paper, point.x, point.y);
-            this.anchors.push(anchor);
-            this.anchorsNode.add(anchor);
-
-            this.subscribeAnchorToEvents(anchor, index);
-        })
-    }
-
     public redraw() {
         if (this.regionData.points !== null && this.regionData.points.length > 0) {
             window.requestAnimationFrame(() => {
@@ -72,7 +62,7 @@ export class AnchorsComponent extends RegionComponent {
                         cy: p.y,
                     });
                 });
-            })
+            });
         }
     }
 
@@ -80,6 +70,16 @@ export class AnchorsComponent extends RegionComponent {
         super.freeze();
         this.ghostAnchor.undrag();
         this.onManipulationEnd();
+    }
+
+    protected buildPointAnchors() {
+        this.regionData.points.forEach((point, index) => {
+            const anchor = this.createAnchor(this.paper, point.x, point.y);
+            this.anchors.push(anchor);
+            this.anchorsNode.add(anchor);
+
+            this.subscribeAnchorToEvents(anchor, index);
+        });
     }
 
     protected subscribeAnchorToEvents(anchor: Snap.Element, index: number) {
@@ -102,7 +102,8 @@ export class AnchorsComponent extends RegionComponent {
         });
     }
 
-    protected createAnchor(paper: Snap.Paper, x: number, y: number, style?: string, r: number = AnchorsComponent.DEFAULT_ANCHOR_RADIUS): Snap.Element {
+    protected createAnchor(paper: Snap.Paper, x: number, y: number, style?: string,
+                           r: number = AnchorsComponent.DEFAULT_ANCHOR_RADIUS): Snap.Element {
         const a = paper.circle(x, y, r);
         a.addClass("anchorStyle");
         if (style !== undefined && style !== "") {
@@ -112,6 +113,7 @@ export class AnchorsComponent extends RegionComponent {
     }
 
     protected updateRegion(p: Point2D) {
+        // do nothing
     }
 
     protected anchorDragBegin() {
@@ -168,15 +170,14 @@ export class AnchorsComponent extends RegionComponent {
         this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
 
         this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
-        
     }
 
     protected onGhostPointerMove(e: PointerEvent) {
+        // do nothing
     }
 
     protected onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-        
         this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
     }
 }
