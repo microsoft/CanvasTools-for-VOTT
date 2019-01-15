@@ -221,7 +221,13 @@ export class Editor {
     private frameWidth: number;
     private frameHeight: number;
 
-    constructor(editorZone: HTMLDivElement) {
+    constructor(editorZone: HTMLDivElement);
+    constructor(editorZone: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager);
+    constructor(editorZone: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
+                filterPipeline: FilterPipeline);
+
+    constructor(editorZone: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
+                filterPipeline?: FilterPipeline) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
@@ -239,7 +245,8 @@ export class Editor {
             }
         });
 
-        this.regionsManager = new RegionsManager(this.editorSVG, {
+        // Init regionsManager
+        const rmCallbacks = {
             onChange: null,
             onManipulationBegin: (region?: RegionComponent) => {
                 this.areaSelector.hide();
@@ -249,7 +256,14 @@ export class Editor {
                 this.areaSelector.show();
                 this.onRegionManipulationEnd(region);
             },
-        });
+        };
+
+        if (regionsManager !== null && regionsManager !== undefined) {
+            this.regionsManager = regionsManager;
+            regionsManager.callbacks = rmCallbacks;
+        } else {
+            this.regionsManager = new RegionsManager(this.editorSVG, rmCallbacks);
+        }
 
         this.regionsManager.onRegionSelected = (id: string, multiselection: boolean) => {
             this.onRegionSelected(id, multiselection);
@@ -263,28 +277,40 @@ export class Editor {
             this.onRegionDelete(id);
         };
 
-        this.areaSelector = new AreaSelector(this.editorSVG,
-            {
-                onSelectionBegin: () => {
-                    this.isRMFrozen = this.regionsManager.isFrozen;
-                    this.regionsManager.freeze();
+        // Init areaSeletor
+        const asCallbacks = {
+            onSelectionBegin: () => {
+                this.isRMFrozen = this.regionsManager.isFrozen;
+                this.regionsManager.freeze();
 
-                    this.onSelectionBegin();
-                },
-                onSelectionEnd: (regionData: RegionData) => {
-                    if (!this.isRMFrozen) {
-                        this.regionsManager.unfreeze();
-                    }
+                this.onSelectionBegin();
+            },
+            onSelectionEnd: (regionData: RegionData) => {
+                if (!this.isRMFrozen) {
+                    this.regionsManager.unfreeze();
+                }
 
-                    this.onSelectionEnd(regionData);
-                },
-            });
+                this.onSelectionEnd(regionData);
+            },
+        };
+        if (areaSelector !== null && areaSelector !== undefined) {
+            this.areaSelector = areaSelector;
+            this.areaSelector.callbacks = asCallbacks;
+        } else {
+            this.areaSelector = new AreaSelector(this.editorSVG, asCallbacks);
+        }
 
-        this.filterPipeline = new FilterPipeline();
+        // Init filterPipeline
+        if (filterPipeline !== undefined && filterPipeline !== null) {
+            this.filterPipeline = filterPipeline;
+        } else {
+            this.filterPipeline = new FilterPipeline();
+        }
 
+        // Adjust editor size
         this.resize(editorZone.offsetWidth, editorZone.offsetHeight);
 
-        // add proxies to regionsManager, areaSelector and filterPipeline;
+        // Add proxy to regionsManager, areaSelector and filterPipeline;
         this.mergedAPI = new Proxy(this, {
             get: (target, prop) => {
                 let p: any;
