@@ -77,7 +77,7 @@ Add container elements to host SVG elements for the toolbar and the editor.
 </div>
 ```
 
-Initiate Editor-object from the CanvasTools.
+Initiate the `Editor`-object from the `CanvasTools`.
 
 ```js
 var sz = document.getElementById("editorDiv");
