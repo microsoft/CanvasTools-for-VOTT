@@ -7,11 +7,11 @@
 </head>
 
 <body>
-    <div id="ctZone">
-        <div id="toolbarzone">
+    <div id="canvasToolsDiv">
+        <div id="toolbarDiv">
         </div>
-        <div id="selectionzone">
-            <div id="editorzone"></div>
+        <div id="selectionDiv">
+            <div id="editorDiv"></div>
         </div>
     </div>
 
@@ -34,20 +34,19 @@
 <script src="./js/ct.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
-        var ct = CanvasTools;
-        var sz = document.getElementById("editorzone");
-        var tz = document.getElementById("toolbarzone");
+        let ct = CanvasTools;
+        let sz = document.getElementById("editorDiv");
+        let tz = document.getElementById("toolbarDiv");
 
-        var editor = new ct.Editor(sz).api;
+        let editor = new ct.Editor(sz).api;
         editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 
-        var incrementalRegionID = 100;
+        let incrementalRegionID = 100;
 
         editor.onSelectionEnd = (regionData) => {
             let id = (incrementalRegionID++).toString();
             let tags = generateTagDescriptor();            
             editor.addRegion(id, regionData, tags);
-            console.log(regionData.toString());
         };        
 
         let primaryTags = [

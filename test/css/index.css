@@ -7,7 +7,7 @@ body {
     margin: 20px 0;
 }
 
-#ctZone {        
+#canvasToolsDiv {        
     display: grid;
     width: calc(100% - 40px);
     height: 600px;
@@ -18,13 +18,13 @@ body {
     background: rgb(64,64,64);
 }
 
-#toolbarzone {
+#toolbarDiv {
     grid-row: 1;
     grid-column: 1/2;
     z-index: 10;
 }
 
-#toolbarzone svg {
+#toolbarDiv svg {
     width: 64px;
     height: 100%;
     margin-right:5px;
@@ -32,7 +32,7 @@ body {
     box-shadow: 0 0 0.5px #999, 5px 0px 10px -5px rgb(0,0,0);
 }
 
-#selectionzone {
+#selectionDiv {
     grid-row: 1;
     grid-column: 2/3;
     justify-self: center;
@@ -43,6 +43,6 @@ body {
     background: rgb(64,64,64);   
 }
 
-#editorzone svg {
+#editorDiv svg {
     box-shadow: 0px 0px 0.25px #999, 0px 0px 10px rgb(0,0,0);
 }
