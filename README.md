@@ -145,7 +145,7 @@ image.src = imagePath;
 
 ### Changelog
 
-##2.1.4
+## 2.1.4
 
 1. Added a new `api` proxy to the `Editor` class. It wraps accessing to all the public methods of `Editor`, `RegionsManager`, `AreaSelector` and `FilterPipeline`. So instead of writing `editor.RM.addRegion(...)`, you can use the following approach:
 ```js
@@ -160,5 +160,4 @@ editor.setSelectionMode(...)
 ```js
 let editor = new ct.Editor(sz, null, regionsManager);
 ```
-
-\Note: editor will override the `callbacks` properties for `AreaSelector` and `RegionsManager` to ensure they crossreference and can work together.\
+/Note: editor will override the `callbacks` properties for `AreaSelector` and `RegionsManager` to ensure they crossreference and can work together./
