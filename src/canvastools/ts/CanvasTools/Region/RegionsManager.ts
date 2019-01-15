@@ -1,6 +1,6 @@
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
-import { ManipulationFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
+import { ManipulationFunction, ChangeEventType, IRegionCallbacks } from "../Interface/IRegionCallbacks";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";
@@ -15,12 +15,11 @@ import { Region } from "./Region";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RegionsManager {
-    public onManipulationBegin: ManipulationFunction;
-    public onManipulationEnd: ManipulationFunction;
-
     public onRegionSelected: (id: string, multiselection?: boolean) => void;
     public onRegionMove: (id: string, regionData: RegionData) => void;
     public onRegionDelete: (id: string) => void;
+
+    private callbacks: IRegionCallbacks;
 
     private baseParent: SVGSVGElement;
     private paper: Snap.Paper;
@@ -47,15 +46,32 @@ export class RegionsManager {
         showRegionBackground: true,
     };
 
-    constructor(svgHost: SVGSVGElement, onManipulationBegin: ManipulationFunction,
-                onManipulationEnd: ManipulationFunction) {
+    constructor(svgHost: SVGSVGElement, callbacks: IRegionCallbacks) {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
 
         this.regions = new Array<Region>();
-        this.onManipulationBegin = onManipulationBegin;
-        this.onManipulationEnd = onManipulationEnd;
+
+        if (callbacks !== undefined) {
+            this.callbacks = callbacks;
+
+            if (typeof callbacks.onChange === "function") {
+                this.callbacks.onChange = (region: Region, regionData: RegionData, state: ChangeEventType,
+                                           multiSelection: boolean = false) => {
+                    this.onRegionChange(region, regionData, state, multiSelection);
+                    callbacks.onChange(region, regionData, state, multiSelection);
+                };
+            } else {
+                this.callbacks.onChange = this.onRegionChange.bind(this);
+            }
+        } else {
+            this.callbacks = {
+                onChange: this.onRegionChange.bind(this),
+                onManipulationBegin: null,
+                onManipulationEnd: null,
+            };
+        }
 
         this.buildOn(this.paper);
         this.subscribeToEvents();
@@ -79,11 +95,8 @@ export class RegionsManager {
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
-            onChange: this.onRegionChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin_local.bind(this),
-            onManipulationEnd: this.onManipulationEnd_local.bind(this),
-        }, this.tagsUpdateOptions);
+        const region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
+                                      this.callbacks, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -91,11 +104,8 @@ export class RegionsManager {
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
-            onChange: this.onRegionChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin_local.bind(this),
-            onManipulationEnd: this.onManipulationEnd_local.bind(this),
-        }, this.tagsUpdateOptions);
+        const region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
+                                       this.callbacks, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -103,11 +113,8 @@ export class RegionsManager {
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
-            onChange: this.onRegionChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin_local.bind(this),
-            onManipulationEnd: this.onManipulationEnd_local.bind(this),
-        }, this.tagsUpdateOptions);
+        const region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
+                                          this.callbacks, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -115,11 +122,8 @@ export class RegionsManager {
     public addPolygonRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolygonRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor, {
-            onChange: this.onRegionChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin_local.bind(this),
-            onManipulationEnd: this.onManipulationEnd_local.bind(this),
-        }, this.tagsUpdateOptions);
+        const region = new PolygonRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
+                                         this.callbacks, this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -176,7 +180,10 @@ export class RegionsManager {
             this.deleteRegion(region);
         }
         this.menu.hide();
-        this.onManipulationEnd();
+
+        if (this.callbacks.onManipulationEnd !== null) {
+            this.callbacks.onManipulationEnd();
+        }
     }
 
     public deleteAllRegions() {
@@ -361,7 +368,9 @@ export class RegionsManager {
 
         this.menu.hide();
         this.selectNextRegion();
-        this.onManipulationEnd();
+        if (this.callbacks.onManipulationEnd !== null) {
+            this.callbacks.onManipulationEnd();
+        }
     }
 
     // REGIONS SELECTION
@@ -457,13 +466,6 @@ export class RegionsManager {
         this.menu.showOnRegion(regions[0]);
     }
 
-    private onManipulationBegin_local(region: Region) {
-        this.onManipulationBegin();
-    }
-    private onManipulationEnd_local(region: Region) {
-        this.onManipulationEnd();
-    }
-
     private onRegionChange(region: Region, regionData: RegionData, state: ChangeEventType,
                            multiSelection: boolean = false) {
         // resize or drag begin
@@ -534,11 +536,7 @@ export class RegionsManager {
 
         this.menuLayer = paper.g();
         this.menuLayer.addClass("menuManager");
-        this.menu = new MenuElement(paper, this.paperRect, new RegionData(0, 0, 0, 0), {
-            onChange: null,
-            onManipulationBegin: this.onManipulationBegin_local.bind(this),
-            onManipulationEnd: this.onManipulationEnd_local.bind(this),
-        });
+        this.menu = new MenuElement(paper, this.paperRect, new RegionData(0, 0, 0, 0), this.callbacks);
 
         this.menu.addAction("delete", "trash", (region: Region) => {
             this.deleteRegion(region);
@@ -551,11 +549,15 @@ export class RegionsManager {
 
     private subscribeToEvents() {
         this.regionManagerLayer.mouseover((e: MouseEvent) => {
-            this.onManipulationBegin();
+            if (this.callbacks.onManipulationBegin !== null) {
+                this.callbacks.onManipulationBegin();
+            }
         });
 
         this.regionManagerLayer.mouseout((e: MouseEvent) => {
-            this.onManipulationEnd();
+            if (this.callbacks.onManipulationEnd !== null) {
+                this.callbacks.onManipulationEnd();
+            }
         });
 
         window.addEventListener("keyup", (e) => {
