@@ -47,76 +47,83 @@ lib/
 
 ### Add library to the app
 
-Add the `ct.js` file to your web-app (e.g., an Electron-based app).
+1. Add the `ct.js` file to your web-app (e.g., an Electron-based app).
 
-```html
-<script src="ct.js"></script>
-<!-- OR -->
-<script src="ct.min.js"></script>
+    ```html
+    <script src="ct.js"></script>
+    <!-- OR -->
+    <script src="ct.min.js"></script>
 
-```
+    ```
 
-Copy toolbar icons from the [`src` folder](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
+2. Copy toolbar icons from the [`src` folder](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
 
-Create a reference to the `CanvasTools` (or use directrly the `CanvasTools` object).
+3. Create a reference to the `CanvasTools` (or use directrly the `CanvasTools` object).
 
-```js
-let ct = CanvasTools;
-```
+    ```js
+    let ct = CanvasTools;
+    ```
 
 ### Add Editor to the page
 
-Add container elements to host SVG elements for the toolbar and the editor.
+1. Add container elements to host SVG elements for the toolbar and the editor.
 
-```html
-<div id="canvasTiilsDiv">
-    <div id="toolbarDiv"></div>
-    <div id="selectionDiv">
-        <div id="editorDiv"></div>
+    ```html
+    <div id="canvasTiilsDiv">
+        <div id="toolbarDiv"></div>
+        <div id="selectionDiv">
+            <div id="editorDiv"></div>
+        </div>
     </div>
-</div>
-```
+    ```
 
-Initiate the `Editor`-object from the `CanvasTools`.
+2. Initiate the `Editor`-object from the `CanvasTools`.
 
-```js
-var sz = document.getElementById("editorDiv");
-var tz = document.getElementById("toolbarDiv");
+    ```js
+    var sz = document.getElementById("editorDiv");
+    var tz = document.getElementById("toolbarDiv");
 
-var editor = new ct.Editor(sz).api;
-editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
-```
+    var editor = new ct.Editor(sz).api;
+    editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
+    ```
 
-The editor will auto-adjust to available space in provided container block.
-`FullToolbarSet` icons set is used by default and exposes all available tools. The `RectToolbarSet` set contains only box-creation tools.
-Correct the path to toolbar icons based on the structure of your project.
+    The editor will auto-adjust to available space in provided container block.
+    `FullToolbarSet` icons set is used by default and exposes all available tools. The `RectToolbarSet` set contains only box-creation tools. Correct the path to toolbar icons based on the structure of your project.
 
 ### Add callbacks to the Editor
 
-Add a callback for the `onSelectionEnd` event to define what should happen when a new region is selected (created). Usually at the end of processing the new `regionData` you also want to add it to the screen with some tags applyed. Use the `addRegion` method for that.
+1. Add a callback for the `onSelectionEnd` event to define what should happen when a new region is selected (created). Usually at the end of processing the new `regionData` you also want to add it to the screen with some tags applyed. Use the `addRegion` method for that.
 
-```js
-// Create some ID for regions
-let incrementalRegionID = 100;
+    ```js
+    // Create some ID for regions
+    let incrementalRegionID = 100;
 
-// Set callback for onSelectionEnd
-editor.onSelectionEnd = (regionData) => {
-    let id = (incrementalRegionID++).toString();
-    let tags = getTagDescriptor();            
-    editor.addRegion(id, regionData, tags);
-};        
+    // Set callback for onSelectionEnd
+    editor.onSelectionEnd = (regionData) => {
+        let id = (incrementalRegionID++).toString();
+        let tags = getTagDescriptor();            
+        editor.addRegion(id, regionData, tags);
+    };        
 
-// Generate tags
-function getTagDescriptor() {
-    // use hue value
-    let primaryTag = new ct.Core.Tag("Awesome", 300);
-    // use string color to automatically extract hue value
-    let secondaryTag = new ct.Core.Tag("Yes", "#e53");
-    // extract hue value from string color 
-    let ternaryTag = new ct.Core.Tag("one", ct.Core.Tag.getHueFromColor("#3fef66"));
-    return new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-}
-```
+    // Generate tags
+    function getTagDescriptor() {
+        // use hue value
+        let primaryTag = new ct.Core.Tag("Awesome", 300);
+        // use string color to automatically extract hue value
+        let secondaryTag = new ct.Core.Tag("Yes", "#e53");
+        // extract hue value from string color 
+        let ternaryTag = new ct.Core.Tag("one", ct.Core.Tag.getHueFromColor("#3fef66"));
+        return new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+    }
+    ```
+
+2. Add a callback for the `onRegionMove` event to track region changes.
+
+    ```js
+    editor.onRegionMove = (id, regionData) => {
+        console.log(`Moved ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+    };
+    ```
 
 ### Update background
 Once the background image for tagging task is loaded (or a video element is ready, or a canvas element is created), pass it to the editor as a new content source.
