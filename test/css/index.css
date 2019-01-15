@@ -1,5 +1,10 @@
 body {
-    margin: 0;   
+    margin: 20px;   
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#controls div {
+    margin: 20px 0;
 }
 
 #ctZone {        
@@ -9,7 +14,7 @@ body {
     grid-template-columns: 64px 1fr;
     grid-template-rows: 1fr;
 
-    margin:20px;
+    margin:0;
     background: rgb(64,64,64);
 }
 

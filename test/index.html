@@ -15,7 +15,21 @@
         </div>
     </div>
 
-    <div>Some text <input type="text" /></div>
+    <div id="controls">
+        <div>
+            <label for="imageSelect" >Choose image: </label>
+            <select id="imageSelect">
+            </select>
+        </div>
+        <div>
+            <label for="filterSelect" >Add filter: </label>
+            <select id="filterSelect">
+            </select>
+            <br />
+            <label for="filterPipeline">Filter pipeline: </label><br />
+            <textarea id="filterPipeline" disabled></textarea>
+        </div>
+    </div>
 </body>
 <script src="./js/ct.js"></script>
 <script>
@@ -82,21 +96,151 @@
             //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
         };
 
-        //editor.FilterPipeline.addFilter(ct.Filters.ContrastFilter(100));
-        //editor.FilterPipeline.addFilter(ct.Filters.BrightnessFilter(100));
-        //editor.FilterPipeline.addFilter(ct.Filters.SaturationFilter(128));
-        //editor.FilterPipeline.addFilter(ct.Filters.BlurDiffFilter(4));
-        
+        // Init image selector
+        let images = [
+            {
+                path: "./../images/background-cat-hd.jpg",
+                title: "Cat (HD)"
+            },
+            {
+                path: "./../images/background-cat2.jpg",
+                title: "Cat - Grumpy"
+            },
+            {
+                path: "./../images/background-cat3.jpg",
+                title: "Cat - Inspiring"
+            },                                   
+            {
+                path: "./../images/background-city.jpg",
+                title: "City"
+            },
+            {
+                path: "./../images/background-forest-hd.jpg",
+                title: "Forest (HD)"
+            },
+            {
+                path: "./../images/background-glass.jpg",
+                title: "Cafe"
+            },
+            {
+                path: "./../images/background-sea-hd.jpg",
+                title: "Sea (HD)"
+            },
+            {
+                path: "./../images/background-snow.jpg",
+                title: "Snow"
+            }, 
+        ];
 
-        // Upload background image for selection 
-        let imagePath = "./../images/background-snow.jpg";
-        let image = new Image();
-        image.addEventListener("load", (e) => {
-            editor.addContentSource(e.target);
+        function loadImage(path) {
+            let image = new Image();
+            image.addEventListener("load", (e) => {
+                editor.addContentSource(e.target);
+            });
+            image.src = path;
+        }
+
+        let imageIndex = 0;
+        initImageSelect(images, (index, path) => {
+            imageIndex = index;
+            loadImage(path);
         });
-        image.src = imagePath;
+        loadImage(images[imageIndex].path);
 
+        // Init filter selector
+        let filters = [
+            {
+                title: "= Clear filters = ",
+                filter: null,
+            },
+            {
+                title: "Blur Difference 4",
+                filter: ct.Filters.BlurDiffFilter(4),
+            },
+            {
+                title: "Blur Difference 8",
+                filter: ct.Filters.BlurDiffFilter(8),
+            },
+            {
+                title: "Brightness -100",
+                filter: ct.Filters.BrightnessFilter(-100),
+            },
+            {
+                title: "Brightness 100",
+                filter: ct.Filters.BrightnessFilter(100),
+            },
+            {
+                title: "Contrast 100",
+                filter: ct.Filters.ContrastFilter(100),
+            },
+            {
+                title: "Contrast 200",
+                filter: ct.Filters.ContrastFilter(200),
+            },            
+            {
+                title: "Grayscale",
+                filter: ct.Filters.GrayscaleFilter,
+            },
+            {
+                title: "Invert",
+                filter: ct.Filters.InvertFilter,
+            },
+            {
+                title: "Saturation 50%",
+                filter: ct.Filters.SaturationFilter(128),
+            },     
+        ];
+        
+        let filterPipeline = document.getElementById("filterPipeline");
+        initFilterSelect(filters, (index, filter) => {            
+            if (filter === null) {
+                filterPipeline.value = "";
+                editor.FilterPipeline.clearPipeline();
+            } else {
+                //editor.FilterPipeline.clearPipeline();
+                filterPipeline.value += filters[index].title + "\n";
+                editor.FilterPipeline.addFilter(filter);
+            }
+
+            loadImage(images[imageIndex].path);
+        });
     });
+
+    function initImageSelect(images, onSelect) {
+        var imageSelect = document.getElementById("imageSelect");
+
+        images.forEach((image) => {
+            let o = document.createElement("option");
+            o.text = image.title;
+            imageSelect.add(o);
+        })
+        imageSelect.selectedIndex = 0;
+
+        imageSelect.addEventListener("change", (e) => {
+            let index = imageSelect.selectedIndex;
+            if (index >= 0 && index < images.length) {
+                onSelect(index, images[index].path);
+            }
+        });
+    }
+
+    function initFilterSelect(filters, onSelect) {
+        var filterSelect = document.getElementById("filterSelect");
+
+        filters.forEach((filter) => {
+            let o = document.createElement("option");
+            o.text = filter.title;
+            filterSelect.add(o);
+        });
+        filterSelect.selectedIndex = 0;
+
+        filterSelect.addEventListener("change", (e) => {
+            let index = filterSelect.selectedIndex;
+            if (index >= 0 && index < filters.length) {
+                onSelect(index, filters[index].filter);
+            }
+        });
+    }
 </script>
 
 </html>

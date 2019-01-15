@@ -186,7 +186,8 @@ export function BlurDiffFilter(factor: number): FilterFunction {
             const dr = Math.abs(blurR2[i] - blurR[i]);
             const dg = Math.abs(blurG2[i] - blurG[i]);
             const db = Math.abs(blurB2[i] - blurB[i]);
-            const d = 0.2126 * dr + 0.7152 * dg + 0.0722 * db;
+            // const d = 0.2126 * dr + 0.7152 * dg + 0.0722 * db;
+            const d = 0.2358 * dr + 0.0700 * dg + 0.6742 * db;
 
             /* let dr = Math.abs(blurR2[i] - idata[4 * i + 0]);
             let dg = Math.abs(blurG2[i] - idata[4 * i + 1]);
@@ -196,21 +197,31 @@ export function BlurDiffFilter(factor: number): FilterFunction {
             /* bdata[4 * i + 0] = d;
             bdata[4 * i + 1] = d;
             bdata[4 * i + 2] = d; */
+
             /* bdata[4 * i + 0] = (d < factor) ? Math.round(idata[4 * i + 0] / factor) * factor : idata[4 * i + 0];
             bdata[4 * i + 1] = (d < factor) ? Math.round(idata[4 * i + 1] / factor) * factor : idata[4 * i + 1];
             bdata[4 * i + 2] = (d < factor) ? Math.round(idata[4 * i + 2] / factor) * factor : idata[4 * i + 2]; */
 
-            bdata[4 * i + 0] = (dr >= 0.2126 * factor) ?
+            /* bdata[4 * i + 0] = (dr >= 0.2126 * factor) ?
                                 idata[4 * i + 0] :  Math.round(idata[4 * i + 0] / factor) * factor;
             bdata[4 * i + 1] = (dg >= 0.7152 * factor) ?
                                 idata[4 * i + 1] :  Math.round(idata[4 * i + 1] / factor) * factor;
             bdata[4 * i + 2] = (db >= 0.0722 * factor) ?
-                                idata[4 * i + 2] :  Math.round(idata[4 * i + 2] / factor) * factor;
+                                idata[4 * i + 2] :  Math.round(idata[4 * i + 2] / factor) * factor; */
+
+            const g = Math.round(0.2358 * idata[4 * i + 0] + 0.0700 * idata[4 * i + 1] + 0.6742 * idata[4 * i + 2]);
+
+            bdata[4 * i + 0] = (dr >= 0.2358 * halfFactor) ?
+                                idata[4 * i + 0] :  Math.round(g / factor) * factor;
+            bdata[4 * i + 1] = (dg >= 0.0700 * halfFactor) ?
+                                idata[4 * i + 1] :  Math.round(g / factor) * factor;
+            bdata[4 * i + 2] = (db >= 0.6742 * halfFactor) ?
+                                idata[4 * i + 2] :  Math.round(g / factor) * factor;
 
             /* bdata[4 * i + 0] = Math.round(idata[4 * i + 0] / 8) * 8;
             bdata[4 * i + 1] = Math.round(idata[4 * i + 1] / 8) * 8;
             bdata[4 * i + 2] = Math.round(idata[4 * i + 2] / 8) * 8; */
-            bdata[4 * i + 3] = (d >= factor) ? 255 : Math.round(d * alphaStep);
+            bdata[4 * i + 3] = (d >= factor) ? 255 : 0 + Math.round(d * alphaStep);
         }
 
         buff.getContext("2d").putImageData(bludData, 0, 0);
