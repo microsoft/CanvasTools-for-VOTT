@@ -197,6 +197,12 @@ export class Editor {
 
     public autoResize: boolean = true;
 
+    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline {
+        return this.mergedAPI;
+    }
+
+    private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline;
+
     private toolbar: Toolbar;
     private regionsManager: RegionsManager;
     private areaSelector: AreaSelector;
@@ -233,15 +239,17 @@ export class Editor {
             }
         });
 
-        this.regionsManager = new RegionsManager(this.editorSVG,
-            (region?: RegionComponent) => {
+        this.regionsManager = new RegionsManager(this.editorSVG, {
+            onChange: null,
+            onManipulationBegin: (region?: RegionComponent) => {
                 this.areaSelector.hide();
                 this.onRegionManipulationBegin(region);
             },
-            (region?: RegionComponent) => {
+            onManipulationEnd: (region?: RegionComponent) => {
                 this.areaSelector.show();
                 this.onRegionManipulationEnd(region);
-            });
+            },
+        });
 
         this.regionsManager.onRegionSelected = (id: string, multiselection: boolean) => {
             this.onRegionSelected(id, multiselection);
@@ -275,6 +283,38 @@ export class Editor {
         this.filterPipeline = new FilterPipeline();
 
         this.resize(editorZone.offsetWidth, editorZone.offsetHeight);
+
+        // add proxies to regionsManager, areaSelector and filterPipeline;
+        this.mergedAPI = new Proxy(this, {
+            get: (target, prop) => {
+                let p: any;
+                let t: any;
+
+                if (prop in target) {
+                    t = target;
+                    p = t[prop];
+                } else if (prop in target.regionsManager) {
+                    t = target.RM;
+                    p = t[prop];
+                } else if (prop in target.areaSelector) {
+                    t = target.AS;
+                    p = t[prop];
+                } else if (prop in target.filterPipeline) {
+                    t = target.FilterPipeline;
+                    p = t[prop];
+                } else {
+                    p = undefined;
+                }
+
+                if (typeof p === "function") {
+                    return (...args) => {
+                        p.apply(t, args);
+                    };
+                } else {
+                    return p;
+                }
+            },
+        }) as any;
     }
 
     public onRegionManipulationBegin(region?: RegionComponent): void {
@@ -301,7 +341,7 @@ export class Editor {
         // do something
     }
 
-    public onSelectionEnd(commit): void {
+    public onSelectionEnd(regionData: RegionData): void {
         // do something
     }
 
@@ -421,10 +461,6 @@ export class Editor {
 
     public get FilterPipeline(): FilterPipeline {
         return this.filterPipeline;
-    }
-
-    public setSelectionMode(selectionMode: SelectionMode, options: { template?: Rect }) {
-        this.areaSelector.setSelectionMode(selectionMode, options);
     }
 
     public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
