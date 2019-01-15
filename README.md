@@ -1,6 +1,6 @@
 # CanvasTools librarary for VoTT
 
-CanvasTools is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelements the following core features:
+`CanvasTools` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelements the following core features:
 
 * Region (box) selection & manipulation
 * Filters pipeline for underlaying canvas element
@@ -8,7 +8,7 @@ CanvasTools is one of the UI modules used in the [VoTT project](https://github.c
 
 ## Dependencies
 
-* CanvasTools heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with CanvasTools into one `ct.js` file, including also styles.
+* `CanvasTools` heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with `CanvasTools` into one `ct.js` file, including also styles.
 * Current version of the library depends on some features (e.g., masks-support in SVG) that are not fully cross-browser, but targeting Electron (Chromium).
 
 ## How to use
@@ -58,7 +58,7 @@ Add the `ct.js` file to your web-app (e.g., an Electron-based app).
 
 Copy toolbar icons from the [`src` folder](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
 
-Create a reference to the CanvasTools (or use directrly the `CanvasTools` object).
+Create a reference to the `CanvasTools` (or use directrly the `CanvasTools` object).
 
 ```js
 let ct = CanvasTools;
