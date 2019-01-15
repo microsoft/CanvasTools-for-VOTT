@@ -143,21 +143,21 @@ image.addEventListener("load", (e) => {
 image.src = imagePath;
 ```
 
-### Changelog
+## Changelog
 
-## 2.1.4
+### 2.1.4
 
 1. Added a new `api` proxy to the `Editor` class. It wraps accessing to all the public methods of `Editor`, `RegionsManager`, `AreaSelector` and `FilterPipeline`. So instead of writing `editor.RM.addRegion(...)`, you can use the following approach:
-```js
-var editor = new ct.Editor(editorDiv).api;
-editor.addRegion(...)
-editor.setSelectionMode(...)
-```
+    ```js
+    var editor = new ct.Editor(editorDiv).api;
+    editor.addRegion(...)
+    editor.setSelectionMode(...)
+    ```
 
 2. Removed from the `Editor` class itself the `setSelectionMode` method. Use instead the approach above or `editor.AS.setSelectionMode(...)`.
 
 3. Added new overloads for the `Editor` class `constructor`. You can now also provide custom components (`AreaSelector`, `RegionsManager` or `FilterPipeline`). E.g., to create `Editor` with custom `RegionsManager`:
-```js
-let editor = new ct.Editor(sz, null, regionsManager);
-```
-/Note: editor will override the `callbacks` properties for `AreaSelector` and `RegionsManager` to ensure they crossreference and can work together./
+    ```js
+    let editor = new ct.Editor(sz, null, regionsManager);
+    ```
+    Note: editor will override the `callbacks` properties for `AreaSelector` and `RegionsManager` to ensure they crossreference and can work together.  
