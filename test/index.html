@@ -38,7 +38,7 @@
         var sz = document.getElementById("editorzone");
         var tz = document.getElementById("toolbarzone");
 
-        var editor = new ct.Editor(sz);
+        var editor = new ct.Editor(sz).api;
         editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
 
         var incrementalRegionID = 100;
@@ -46,9 +46,9 @@
         editor.onSelectionEnd = (regionData) => {
             let id = (incrementalRegionID++).toString();
             let tags = generateTagDescriptor();            
-            editor.RM.addRegion(id, regionData, tags);
+            editor.addRegion(id, regionData, tags);
             console.log(regionData.toString());
-        };
+        };        
 
         let primaryTags = [
             new ct.Core.Tag("Awesome", 0),
@@ -195,11 +195,11 @@
         initFilterSelect(filters, (index, filter) => {            
             if (filter === null) {
                 filterPipeline.value = "";
-                editor.FilterPipeline.clearPipeline();
+                editor.clearFilters();
             } else {
                 //editor.FilterPipeline.clearPipeline();
                 filterPipeline.value += filters[index].title + "\n";
-                editor.FilterPipeline.addFilter(filter);
+                editor.addFilter(filter);
             }
 
             loadImage(images[imageIndex].path);
