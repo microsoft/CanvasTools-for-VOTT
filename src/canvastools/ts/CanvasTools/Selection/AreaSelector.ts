@@ -17,7 +17,8 @@ export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }
 
 export class AreaSelector {
     public static DefaultTemplateSize: Rect = new Rect(20, 20);
-    public callbacks: ISelectorCallbacks;
+
+    private callbacks: ISelectorCallbacks;
 
     private parentNode: SVGSVGElement;
     private paper: Snap.Paper;
