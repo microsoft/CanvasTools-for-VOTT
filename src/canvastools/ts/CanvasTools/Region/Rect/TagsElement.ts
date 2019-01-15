@@ -77,6 +77,12 @@ export class TagsElement extends TagsComponent {
                         });
                     }
                 } else {
+                    this.primaryTagRect.attr({
+                        height: this.height,
+                        width: this.width,
+                        x: this.x,
+                        y: this.y,
+                    });
                     this.primaryTagTextBG.attr({
                         height: 0,
                         width: 0,
