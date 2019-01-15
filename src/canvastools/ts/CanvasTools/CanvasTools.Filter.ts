@@ -376,7 +376,7 @@ export class FilterPipeline {
         this.pipeline.push(filter);
     }
 
-    public clearPipeline() {
+    public clearFilters() {
         this.pipeline = new Array<FilterFunction>();
     }
 
