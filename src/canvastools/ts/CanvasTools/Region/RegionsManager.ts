@@ -19,7 +19,7 @@ export class RegionsManager {
     public onRegionMove: (id: string, regionData: RegionData) => void;
     public onRegionDelete: (id: string) => void;
 
-    private callbacks: IRegionCallbacks;
+    public callbacks: IRegionCallbacks;
 
     private baseParent: SVGSVGElement;
     private paper: Snap.Paper;
