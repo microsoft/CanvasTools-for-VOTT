@@ -139,7 +139,11 @@ image.src = imagePath;
 
 ## Changelog
 
-### 2.1.4
+### 2.1.15-16
+
+Updated `README` and sample under the `/test` folder.
+
+### 2.1.14
 
 1. Added a new `api` proxy to the `Editor` class. It wraps accessing to all the public methods of `Editor`, `RegionsManager`, `AreaSelector` and `FilterPipeline`. So instead of writing `editor.RM.addRegion(...)`, you can use the following approach:
     ```js
