@@ -1,5 +1,6 @@
 import { ToolbarItemType } from "./CanvasTools/Toolbar/ToolbarIcon";
 import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
+import { Timeline as CTTimeline } from "./CanvasTools/Timeline/Timeline";
 import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
 import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
@@ -11,6 +12,8 @@ import { Point2D } from "./CanvasTools/Core/Point2D";
 import { RegionData } from "./CanvasTools/Core/RegionData";
 import { Tag } from "./CanvasTools/Core/Tag";
 import { TagsDescriptor } from "./CanvasTools/Core/TagsDescriptor";
+import { TimelineData } from "./CanvasTools/Core/TimelineData";
+import { TimelineEventData } from "./CanvasTools/Core/TimelineEventData";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
 
 import "snapsvg-cjs";
@@ -24,6 +27,8 @@ export class CanvasTools {
         RegionData,
         TagsDescriptor,
         Tag,
+        TimelineData,
+        TimelineEventData,
     };
 
     public static Selection = {
@@ -48,6 +53,7 @@ export class CanvasTools {
 
     public static Editor = CTEditor;
     public static Toolbar = CTToolbar;
+    public static Timeline = CTTimeline;
 }
 
 /* CSS */
