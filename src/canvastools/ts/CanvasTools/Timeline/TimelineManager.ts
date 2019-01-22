@@ -19,7 +19,7 @@ export class TimelineManager {
             </filter>
         </defs>`;
 
-    private static DEFAULT_TIMELINE_HEIGHT: number = 20;
+    private static DEFAULT_TIMELINE_HEIGHT: number = 30;
 
     private timelineDiv: HTMLDivElement;
     private svgHost: SVGSVGElement;
