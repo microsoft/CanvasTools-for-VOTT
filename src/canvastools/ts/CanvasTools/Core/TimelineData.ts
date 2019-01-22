@@ -1,3 +1,5 @@
+import { TimelineChangeListener } from "./../Interface/ITimelineChangeListener";
+
 export class TimelineData {
     public get begin(): number {
         return this.beginTime;
@@ -15,12 +17,26 @@ export class TimelineData {
         this.shift(this.beginTime, endTime);
     }
 
+    public get duration(): number {
+        return this.endTime - this.beginTime;
+    }
+
     public get current(): number {
         return this.currentTime;
     }
 
     public set current(currentTime: number) {
         this.currentTime = Math.max(Math.min(this.endTime, currentTime), this.beginTime);
+        this.notifyOnChanges();
+    }
+
+    public get progress(): number {
+        return (this.currentTime - this.beginTime) / (this.endTime - this.beginTime);
+    }
+
+    public set progress(progress: number) {
+        progress = Math.min(Math.max(progress, 0), 1);
+        this.current = this.beginTime + progress * (this.endTime - this.beginTime);
     }
 
     public get rate(): number {
@@ -54,6 +70,8 @@ export class TimelineData {
 
     private frameRate: number;
 
+    private changeListeners: TimelineChangeListener[];
+
     constructor(beginTime: number, endTime: number, frameRate: number);
     constructor(beginTime: number, endTime: number, frameRate: number, zeroTime?: number);
     constructor(beginTime: number, endTime: number, frameRate: number, zeroTime?: number) {
@@ -62,12 +80,16 @@ export class TimelineData {
         this.frameRate = frameRate;
         this.currentTime = beginTime;
         this.zeroTime = zeroTime;
+
+        this.changeListeners = [];
     }
 
     public shift(beginTime: number, endTime: number) {
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.current = this.currentTime;
+
+        this.notifyOnChanges();
     }
 
     public nextFrame() {
@@ -86,5 +108,29 @@ export class TimelineData {
     public virtualFrame(time: number) {
         const ctime = (this.zeroTime !== undefined) ? time - this.zeroTime : time - this.beginTime;
         return Math.floor(ctime * this.frameRate);
+    }
+
+    public addChangeListener(listener: TimelineChangeListener) {
+        const exists: boolean = this.changeListeners.indexOf(listener) >= 0;
+        if (!exists) {
+            this.changeListeners.push(listener);
+        }
+    }
+
+    public removeChangeListener(listener: TimelineChangeListener) {
+        const index: number = this.changeListeners.indexOf(listener);
+        if (index >= 0) {
+            this.changeListeners.splice(index, 1);
+        }
+    }
+
+    public copy(): TimelineData {
+        return new TimelineData(this.beginTime, this.endTime, this.frameRate, this.zeroTime);
+    }
+
+    private notifyOnChanges() {
+        this.changeListeners.forEach((listener) => {
+            listener(this);
+        });
     }
 }
