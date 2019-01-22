@@ -577,3 +577,12 @@ svg:not(:root) .menuLayer {
     fill: rgba(21, 127, 240, 0.9);
     stroke: #aaa;
 }
+
+.CanvasToolsTimeline .timelineElement .tlRangeGhostMarker {
+    fill: rgba(0, 0, 0, 0);
+}
+
+.CanvasToolsTimeline .timelineElement .tlRangeGhostMarker:hover {
+    fill: rgba(21, 127, 240, 0.9);
+}
+
