@@ -1,6 +1,6 @@
 import { ToolbarItemType } from "./CanvasTools/Toolbar/ToolbarIcon";
 import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
-import { Timeline as CTTimeline } from "./CanvasTools/Timeline/Timeline";
+import { TimelineManager as CTTimelineManager } from "./CanvasTools/Timeline/TimelineManager";
 import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
 import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
@@ -53,7 +53,7 @@ export class CanvasTools {
 
     public static Editor = CTEditor;
     public static Toolbar = CTToolbar;
-    public static Timeline = CTTimeline;
+    public static TimelineManager = CTTimelineManager;
 }
 
 /* CSS */
