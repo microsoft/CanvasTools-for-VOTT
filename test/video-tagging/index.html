@@ -13,14 +13,10 @@
         <div id="selectionDiv">
             <div id="editorDiv"></div>
         </div>
+        <div id="timelineDiv"></div>
     </div>
 
     <div id="controls">
-        <div>
-            <label for="imageSelect" >Choose image: </label>
-            <select id="imageSelect">
-            </select>
-        </div>
         <div>
             <label for="filterSelect" >Add filter: </label>
             <select id="filterSelect">
@@ -36,10 +32,10 @@
     document.addEventListener("DOMContentLoaded", (e) => {
         let ct = CanvasTools;
         let sz = document.getElementById("editorDiv");
-        let tz = document.getElementById("toolbarDiv");
-
+        let tbz = document.getElementById("toolbarDiv");
+        
         let editor = new ct.Editor(sz).api;
-        editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
+        editor.addToolbar(tbz, ct.Editor.FullToolbarSet, "./images/icons/");
 
         let incrementalRegionID = 100;
 
@@ -95,56 +91,29 @@
             //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
         };
 
-        // Init image selector
-        let images = [
-            {
-                path: "./../images/background-cat-hd.jpg",
-                title: "Cat (HD)"
-            },
-            {
-                path: "./../images/background-cat2.jpg",
-                title: "Cat - Grumpy"
-            },
-            {
-                path: "./../images/background-cat3.jpg",
-                title: "Cat - Inspiring"
-            },                                   
-            {
-                path: "./../images/background-city.jpg",
-                title: "City"
-            },
-            {
-                path: "./../images/background-forest-hd.jpg",
-                title: "Forest (HD)"
-            },
-            {
-                path: "./../images/background-glass.jpg",
-                title: "Cafe"
-            },
-            {
-                path: "./../images/background-sea-hd.jpg",
-                title: "Sea (HD)"
-            },
-            {
-                path: "./../images/background-snow.jpg",
-                title: "Snow"
-            }, 
-        ];
+        // Init video
+        let videoPath = "./../video/sintel_trailer-720p.mp4";
 
-        function loadImage(path) {
-            let image = new Image();
-            image.addEventListener("load", (e) => {
+        function loadVideo(path) {
+            let video = document.createElement('video');
+            video.autoplay = false;
+            video.addEventListener("loadeddata", (e) => {
                 editor.addContentSource(e.target);
             });
-            image.src = path;
+
+            video.addEventListener("canplay", (e) => {
+                editor.addContentSource(e.target);
+            });
+
+            video.addEventListener("loadedmetadata", (e) => {
+                initTimeline(e.target);
+            })
+            video.src = path;
+
+            return video;
         }
 
-        let imageIndex = 0;
-        initImageSelect(images, (index, path) => {
-            imageIndex = index;
-            loadImage(path);
-        });
-        loadImage(images[imageIndex].path);
+        let video = loadVideo(videoPath);
 
         // Init filter selector
         let filters = [
@@ -201,26 +170,31 @@
                 editor.addFilter(filter);
             }
 
-            loadImage(images[imageIndex].path);
+            editor.addContentSource(video);
         });
     });
 
-    function initImageSelect(images, onSelect) {
-        var imageSelect = document.getElementById("imageSelect");
+    function initTimeline(video) {
+        let tlz = document.getElementById("timelineDiv");
 
-        images.forEach((image) => {
-            let o = document.createElement("option");
-            o.text = image.title;
-            imageSelect.add(o);
-        })
-        imageSelect.selectedIndex = 0;
-
-        imageSelect.addEventListener("change", (e) => {
-            let index = imageSelect.selectedIndex;
-            if (index >= 0 && index < images.length) {
-                onSelect(index, images[index].path);
-            }
+        // Timeline init
+        let timelineManager = new CanvasTools.TimelineManager(tlz, true);
+        let timeline = new CanvasTools.Core.TimelineData(0, video.duration, 24);
+        timeline.addChangeListener((data) => {
+            console.log(`T1: [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+            video.currentTime = data.current;
         });
+
+        timeline.current = 0;        
+        timelineManager.addTimelineRange(timeline);
+
+        /* let timeline2 = new CanvasTools.Core.TimelineData(10, 20, 30, 0);
+        timeline2.addChangeListener((data) => {
+            console.log(`T2 [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+        });
+
+        timeline2.current = 15;        
+        timelineManager.addTimeline(timeline2); */
     }
 
     function initFilterSelect(filters, onSelect) {
