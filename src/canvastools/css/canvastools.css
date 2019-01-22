@@ -520,3 +520,60 @@ svg:not(:root) .menuLayer {
     stroke: #333;
     stroke-width: 0.5px;
 }
+
+/* Timeline */
+.CanvasToolsTimeline {
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+}
+
+.CanvasToolsTimeline * {
+    box-sizing: content-box;
+}
+
+.CanvasToolsTimeline .timelineManager {
+    fill: #666;
+}
+
+.CanvasToolsTimeline .timelineElement {
+    
+}
+
+.CanvasToolsTimeline .timelineElement .tlElementBGRect {
+    fill: #333;
+}
+
+.CanvasToolsTimeline .timelineElement .tlLine {
+    stroke-width: 1px;
+    stroke: #999;
+}
+
+.CanvasToolsTimeline .timelineElement .tlMarker {
+    fill: #666;
+    stroke-width: 1px;
+    stroke: #999;
+    filter: url(#black-glow);
+}
+
+.CanvasToolsTimeline .timelineElement .tlMarker:hover {
+    fill: #999;
+    stroke: #aaa;
+}
+
+.CanvasToolsTimeline .timelineElement .tlRangeBGRect {
+    fill: rgba(21, 127, 240, 0.2);
+    stroke-width: 0;
+}
+
+.CanvasToolsTimeline .timelineElement .tlRangeMarker {
+    fill: rgba(21, 127, 240, 0.5);
+    stroke-width: 1px;
+    stroke: #999;
+    filter: url(#black-glow);
+}
+
+.CanvasToolsTimeline .timelineElement .tlRangeMarker:hover {
+    fill: rgba(21, 127, 240, 0.9);
+    stroke: #aaa;
+}
