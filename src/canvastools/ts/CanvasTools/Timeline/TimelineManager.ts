@@ -66,7 +66,7 @@ export class TimelineManager {
         this.redraw();
     }
 
-    public addTimelineRange(timeline: TimelineData) {
+    public addTimelineRange(timeline: TimelineData): TimelineData {
         const tlH = (this.responsiveTimelineHeight) ? this.height / (this.timelines.length + 1) :
                                                       TimelineManager.DEFAULT_TIMELINE_HEIGHT;
 
@@ -75,6 +75,8 @@ export class TimelineManager {
         this.timelines.push(tlElement);
 
         this.redraw();
+
+        return tlElement.range;
     }
 
     public redraw() {

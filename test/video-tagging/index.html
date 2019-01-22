@@ -178,23 +178,22 @@
         let tlz = document.getElementById("timelineDiv");
 
         // Timeline init
-        let timelineManager = new CanvasTools.TimelineManager(tlz, true);
+        let timelineManager = new CanvasTools.TimelineManager(tlz, false);
         let timeline = new CanvasTools.Core.TimelineData(0, video.duration, 24);
         timeline.addChangeListener((data) => {
-            console.log(`T1: [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+            console.log(`T: [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
             video.currentTime = data.current;
         });
 
         timeline.current = 0;        
-        timelineManager.addTimelineRange(timeline);
+        let range = timelineManager.addTimelineRange(timeline);
 
-        /* let timeline2 = new CanvasTools.Core.TimelineData(10, 20, 30, 0);
-        timeline2.addChangeListener((data) => {
-            console.log(`T2 [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+        range.addChangeListener((data) => {
+            console.log(`R [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+            timeline.current = range.current;
         });
-
-        timeline2.current = 15;        
-        timelineManager.addTimeline(timeline2); */
+      
+        timelineManager.addTimeline(range);
     }
 
     function initFilterSelect(filters, onSelect) {
