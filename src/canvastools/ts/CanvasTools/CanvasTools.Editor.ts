@@ -438,10 +438,12 @@ export class Editor {
 
         return this.filterPipeline.applyToCanvas(buffCnvs).then((bcnvs) => {
             // Copy buffer to the canvas on screen
-            this.contentCanvas.width = bcnvs.width;
-            this.contentCanvas.height = bcnvs.height;
-            const imgContext = this.contentCanvas.getContext("2d");
-            imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+            window.requestAnimationFrame((e) => {
+                this.contentCanvas.width = bcnvs.width;
+                this.contentCanvas.height = bcnvs.height;
+                const imgContext = this.contentCanvas.getContext("2d");
+                imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+            });
         }).then(() => {
             // resize the editor size to adjust to the new content size
             this.resize(this.editorDiv.offsetWidth, this.editorDiv.offsetHeight);
