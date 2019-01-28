@@ -22,9 +22,16 @@ export class TimelineRangeElement extends TimelineElement {
 
         this.range = new TimelineData(this.timelineData.begin, this.timelineData.end,
                                       this.timelineData.rate, this.timelineData.begin);
+        this.range.current = this.timelineData.current;
 
         this.range.addChangeListener((data) => {
             this.updateRangePosition();
+        });
+        this.timelineData.addChangeListener((data) => {
+            const c = Math.max(this.range.begin, Math.min(data.current, this.range.end));
+            // TODO bound current to range
+            this.range.current = c;
+            this.timelineData.current = c;
         });
 
         this.rangeMarkerHeight = Math.min(TimelineRangeElement.DEFAULT_RANGE_MARKER_HEIGHT +
@@ -92,6 +99,23 @@ export class TimelineRangeElement extends TimelineElement {
         this.rangeGroup.add(this.rangeBeginMarker);
         this.rangeGroup.add(this.rangeEndMarker);
         this.rangeGroup.add(this.rangeGhostMarker);
+
+        this.rangeGroup.node.addEventListener("wheel", (e) => {
+            const ct = this.range.current;
+            const cb = ct - this.range.begin;
+            const ce = this.range.end - ct;
+
+            let k: number;
+            if (e.deltaY < 0) {
+                k = 1.1;
+            } else {
+                k = 1 / 1.1;
+            }
+
+            const bt = Math.max(ct - cb * k, this.timelineData.begin);
+            const et = Math.min(ct + ce * k, this.timelineData.end);
+            this.range.shift(bt, et);
+        });
     }
 
     private createRangeMarker(activeMarker: "begin" | "end"): Snap.Element {
