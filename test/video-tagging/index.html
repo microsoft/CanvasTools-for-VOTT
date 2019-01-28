@@ -181,7 +181,7 @@
         let timelineManager = new CanvasTools.TimelineManager(tlz, false);
         let timeline = new CanvasTools.Core.TimelineData(0, video.duration, 24);
         timeline.addChangeListener((data) => {
-            console.log(`T: [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+            //console.log(`T: [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
             video.currentTime = data.current;
         });
 
@@ -189,11 +189,15 @@
         let range = timelineManager.addTimelineRange(timeline);
 
         range.addChangeListener((data) => {
-            console.log(`R [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
+            //console.log(`R [${data.begin}, ${data.end}] -> ${data.current}s, ${data.frame}fr`);
             timeline.current = range.current;
         });
       
-        timelineManager.addTimeline(range);
+        // timelineManager.addTimeline(range);
+
+        timelineManager.addTimelineWithFrames(range);
+        timelineManager.addTimelineWithFrames(range);
+        timelineManager.addTimelineWithFrames(range);
     }
 
     function initFilterSelect(filters, onSelect) {
