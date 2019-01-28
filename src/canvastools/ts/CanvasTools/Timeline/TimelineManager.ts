@@ -1,5 +1,5 @@
-
 import { TimelineElement } from "./TimelineElement";
+import { TimelineFramedElement } from "./TimelineFramedElement";
 import { TimelineRangeElement } from "./TimelineRangeElement";
 import { TimelineData } from "../Core/TimelineData";
 
@@ -45,9 +45,10 @@ export class TimelineManager {
         this.node = this.paper.g();
         this.node.addClass("timelineManager");
 
-        this.timelineDiv.addEventListener("resize", (e) => {
+        window.addEventListener("resize", (e) => {
             this.resize(this.timelineDiv.offsetWidth, this.timelineDiv.offsetHeight);
         });
+
         this.width = this.timelineDiv.offsetWidth;
         this.height = this.timelineDiv.offsetHeight;
 
@@ -77,6 +78,17 @@ export class TimelineManager {
         this.redraw();
 
         return tlElement.range;
+    }
+
+    public addTimelineWithFrames(timeline: TimelineData) {
+        const tlH = (this.responsiveTimelineHeight) ? this.height / (this.timelines.length + 1) :
+                                                      TimelineManager.DEFAULT_TIMELINE_HEIGHT;
+
+        const tlElement = new TimelineFramedElement(this.paper, this.width, tlH, timeline);
+        this.node.add(tlElement.node);
+        this.timelines.push(tlElement);
+
+        this.redraw();
     }
 
     public redraw() {
