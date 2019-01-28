@@ -586,3 +586,9 @@ svg:not(:root) .menuLayer {
     fill: rgba(21, 127, 240, 0.9);
 }
 
+.CanvasToolsTimeline .timelineElement .tlFrame {
+    fill: rgba(21, 127, 240, 0.2);
+    stroke: #999;
+    stroke-width: 0.5;
+}
+
