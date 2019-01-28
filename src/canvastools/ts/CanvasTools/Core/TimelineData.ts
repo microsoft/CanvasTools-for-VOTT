@@ -21,13 +21,19 @@ export class TimelineData {
         return this.endTime - this.beginTime;
     }
 
+    public get frameDuration(): number {
+        return 1 / this.rate;
+    }
+
     public get current(): number {
         return this.currentTime;
     }
 
     public set current(currentTime: number) {
-        this.currentTime = Math.max(Math.min(this.endTime, currentTime), this.beginTime);
-        this.notifyOnChanges();
+        if (currentTime !== this.currentTime) {
+            this.currentTime = Math.max(Math.min(this.endTime, currentTime), this.beginTime);
+            this.notifyOnChanges();
+        }
     }
 
     public get progress(): number {
@@ -85,11 +91,13 @@ export class TimelineData {
     }
 
     public shift(beginTime: number, endTime: number) {
-        this.beginTime = beginTime;
-        this.endTime = endTime;
-        this.current = this.currentTime;
+        if (this.beginTime !== beginTime || this.endTime !== endTime) {
+            this.beginTime = beginTime;
+            this.endTime = endTime;
+            this.currentTime = Math.max(Math.min(this.endTime, this.currentTime), this.beginTime);
 
-        this.notifyOnChanges();
+            this.notifyOnChanges();
+        }
     }
 
     public nextFrame() {
@@ -125,12 +133,15 @@ export class TimelineData {
     }
 
     public copy(): TimelineData {
-        return new TimelineData(this.beginTime, this.endTime, this.frameRate, this.zeroTime);
+        const c = new TimelineData(this.beginTime, this.endTime, this.frameRate, this.zeroTime);
+        c.currentTime = this.currentTime;
+
+        return c;
     }
 
     private notifyOnChanges() {
         this.changeListeners.forEach((listener) => {
-            listener(this);
+            listener(this.copy());
         });
     }
 }
