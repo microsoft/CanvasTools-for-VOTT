@@ -91,8 +91,16 @@
             return tags;
         };
         
+        editor.onRegionMoveBegin = (id, regionData) => {
+            console.log(`Move Begin ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
         editor.onRegionMove = (id, regionData) => {
-            //console.log(`Moved ${id}: {${x}, ${y}} x {${width}, ${height}}`);
+            console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onRegionMoveEnd = (id, regionData) => {
+            console.log(`Move End ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
         };
 
         // Init image selector

@@ -201,6 +201,16 @@ export class Editor {
         return this.mergedAPI;
     }
 
+    public onRegionSelected: (id: string, multiselection: boolean) => void;
+    public onRegionMove: (id: string, regionData: RegionData) => void;
+    public onRegionMoveBegin: (id: string, regionData: RegionData) => void;
+    public onRegionMoveEnd: (id: string, regionData: RegionData) => void;
+    public onRegionDelete: (id: string) => void;
+    public onSelectionBegin: () => void;
+    public onSelectionEnd: (regionData: RegionData) => void;
+    public onManipulationBegin: (region?: RegionComponent) => void;
+    public onManipulationEnd: (region?: RegionComponent) => void;
+
     private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline;
 
     private toolbar: Toolbar;
@@ -250,11 +260,40 @@ export class Editor {
             onChange: null,
             onManipulationBegin: (region?: RegionComponent) => {
                 this.areaSelector.hide();
-                this.onRegionManipulationBegin(region);
+                if (typeof this.onManipulationBegin === "function") {
+                    this.onManipulationBegin(region);
+                }
             },
             onManipulationEnd: (region?: RegionComponent) => {
                 this.areaSelector.show();
-                this.onRegionManipulationEnd(region);
+                if (typeof this.onManipulationEnd === "function") {
+                    this.onManipulationEnd(region);
+                }
+            },
+            onRegionSelected: (id: string, multiselection: boolean) => {
+                if (typeof this.onRegionSelected === "function") {
+                    this.onRegionSelected(id, multiselection);
+                }
+            },
+            onRegionMove: (id: string, regionData: RegionData) => {
+                if (typeof this.onRegionMove === "function") {
+                    this.onRegionMove(id, regionData);
+                }
+            },
+            onRegionMoveBegin: (id: string, regionData: RegionData) => {
+                if (typeof this.onRegionMoveBegin === "function") {
+                    this.onRegionMoveBegin(id, regionData);
+                }
+            },
+            onRegionMoveEnd: (id: string, regionData: RegionData) => {
+                if (typeof this.onRegionMoveEnd === "function") {
+                    this.onRegionMoveEnd(id, regionData);
+                }
+            },
+            onRegionDelete: (id: string) => {
+                if (typeof this.onRegionDelete === "function") {
+                    this.onRegionDelete(id);
+                }
             },
         };
 
@@ -265,32 +304,24 @@ export class Editor {
             this.regionsManager = new RegionsManager(this.editorSVG, rmCallbacks);
         }
 
-        this.regionsManager.onRegionSelected = (id: string, multiselection: boolean) => {
-            this.onRegionSelected(id, multiselection);
-        };
-
-        this.regionsManager.onRegionMove = (id: string, regionData: RegionData) => {
-            this.onRegionMove(id, regionData);
-        };
-
-        this.regionsManager.onRegionDelete = (id: string) => {
-            this.onRegionDelete(id);
-        };
-
         // Init areaSeletor
         const asCallbacks = {
             onSelectionBegin: () => {
                 this.isRMFrozen = this.regionsManager.isFrozen;
                 this.regionsManager.freeze();
 
-                this.onSelectionBegin();
+                if (typeof this.onSelectionBegin === "function") {
+                    this.onSelectionBegin();
+                }
             },
             onSelectionEnd: (regionData: RegionData) => {
                 if (!this.isRMFrozen) {
                     this.regionsManager.unfreeze();
                 }
 
-                this.onSelectionEnd(regionData);
+                if (typeof this.onSelectionEnd === "function") {
+                    this.onSelectionEnd(regionData);
+                }
             },
         };
         if (areaSelector !== null && areaSelector !== undefined) {
@@ -341,34 +372,6 @@ export class Editor {
                 }
             },
         }) as any;
-    }
-
-    public onRegionManipulationBegin(region?: RegionComponent): void {
-        // do something
-    }
-
-    public onRegionManipulationEnd(region?: RegionComponent): void {
-        // do something
-    }
-
-    public onRegionSelected(id: string, multiselection: boolean) {
-        // do something
-    }
-
-    public onRegionMove(id: string, regionData: RegionData) {
-        // do something
-    }
-
-    public onRegionDelete(id: string) {
-        // do something
-    }
-
-    public onSelectionBegin(): void {
-        // do something
-    }
-
-    public onSelectionEnd(regionData: RegionData): void {
-        // do something
     }
 
     public addToolbar(toolbarZone: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string) {

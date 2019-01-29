@@ -139,6 +139,24 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.17
+
+Added `onRegionMoveBegin` and `onRegionMoveEnd` callbacks to the `Editor` and the `RegionsManager` classes. Usage:
+
+```js
+        editor.onRegionMoveBegin = (id, regionData) => {
+            console.log(`Move Begin ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onRegionMove = (id, regionData) => {
+            console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onRegionMoveEnd = (id, regionData) => {
+            console.log(`Move End ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+```
+
 ### 2.1.15-16
 
 Updated `README` and sample under the `/test` folder.

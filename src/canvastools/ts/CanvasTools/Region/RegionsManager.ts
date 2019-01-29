@@ -15,10 +15,6 @@ import { Region } from "./Region";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RegionsManager {
-    public onRegionSelected: (id: string, multiselection?: boolean) => void;
-    public onRegionMove: (id: string, regionData: RegionData) => void;
-    public onRegionDelete: (id: string) => void;
-
     public callbacks: IRegionCallbacks;
 
     private baseParent: SVGSVGElement;
@@ -355,8 +351,8 @@ export class RegionsManager {
             return r !== region;
         });
 
-        if ((typeof this.onRegionDelete) === "function") {
-            this.onRegionDelete(region.ID);
+        if ((typeof this.callbacks.onRegionDelete) === "function") {
+            this.callbacks.onRegionDelete(region.ID);
         }
     }
 
@@ -380,8 +376,8 @@ export class RegionsManager {
             region.select();
 
             this.menu.showOnRegion(region);
-            if ((typeof this.onRegionSelected) === "function") {
-                this.onRegionSelected(region.ID);
+            if ((typeof this.callbacks.onRegionSelected) === "function") {
+                this.callbacks.onRegionSelected(region.ID);
             }
         }
     }
@@ -392,8 +388,8 @@ export class RegionsManager {
             r = region;
             r.select();
 
-            if ((typeof this.onRegionSelected) === "function") {
-                this.onRegionSelected(r.ID);
+            if ((typeof this.callbacks.onRegionSelected) === "function") {
+                this.callbacks.onRegionSelected(r.ID);
             }
         }
         if (r != null) {
@@ -474,14 +470,17 @@ export class RegionsManager {
                 this.unselectRegions(region);
             }
             this.menu.hide();
-            if ((typeof this.onRegionSelected) === "function") {
-                this.onRegionSelected(region.ID);
+            if ((typeof this.callbacks.onRegionSelected) === "function") {
+                this.callbacks.onRegionSelected(region.ID);
+            }
+            if ((typeof this.callbacks.onRegionMoveBegin) === "function") {
+                this.callbacks.onRegionMoveBegin(region.ID, regionData);
             }
             this.justManipulated = false;
             // resizing or dragging
         } else if (state === ChangeEventType.MOVING) {
-            if ((typeof this.onRegionMove) === "function") {
-                this.onRegionMove(region.ID, regionData);
+            if ((typeof this.callbacks.onRegionMove) === "function") {
+                this.callbacks.onRegionMove(region.ID, regionData);
             }
             this.justManipulated = true;
             // resize or drag end
@@ -491,6 +490,10 @@ export class RegionsManager {
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
+
+                if ((typeof this.callbacks.onRegionMoveEnd) === "function") {
+                    this.callbacks.onRegionMoveEnd(region.ID, regionData);
+                }
             }
         } else if (state === ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {
             // select
@@ -500,15 +503,15 @@ export class RegionsManager {
                 }
                 region.select();
                 this.menu.showOnRegion(region);
-                if ((typeof this.onRegionSelected) === "function") {
-                    this.onRegionSelected(region.ID);
+                if ((typeof this.callbacks.onRegionSelected) === "function") {
+                    this.callbacks.onRegionSelected(region.ID);
                 }
                 // unselect
             } else {
                 region.unselect();
                 this.menu.hide();
-                if ((typeof this.onRegionSelected) === "function") {
-                    this.onRegionSelected("");
+                if ((typeof this.callbacks.onRegionSelected) === "function") {
+                    this.callbacks.onRegionSelected("");
                 }
             }
         }
