@@ -1,6 +1,7 @@
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
-import { ManipulationFunction, ChangeEventType, IRegionCallbacks } from "../Interface/IRegionCallbacks";
+import { ManipulationFunction, ChangeEventType } from "../Interface/IRegionCallbacks";
+import { IRegionsManagerCallbacks } from "../Interface/IRegionsManagerCallbacks";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { RectRegion } from "./Rect/RectRegion";
@@ -15,7 +16,7 @@ import { Region } from "./Region";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class RegionsManager {
-    public callbacks: IRegionCallbacks;
+    public callbacks: IRegionsManagerCallbacks;
 
     private baseParent: SVGSVGElement;
     private paper: Snap.Paper;
@@ -42,7 +43,7 @@ export class RegionsManager {
         showRegionBackground: true,
     };
 
-    constructor(svgHost: SVGSVGElement, callbacks: IRegionCallbacks) {
+    constructor(svgHost: SVGSVGElement, callbacks: IRegionsManagerCallbacks) {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
