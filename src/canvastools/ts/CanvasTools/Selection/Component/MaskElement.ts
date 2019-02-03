@@ -1,16 +1,32 @@
-import { Rect } from "../Core/Rect";
-
-import { ElementPart } from "./ElementPart";
+import { Rect } from "../../Core/Rect";
+import { Element } from "./Element";
 import { RectElement } from "./RectElement";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-export class MaskElement extends ElementPart {
+/**
+ * The mask element for selectors
+ */
+export class MaskElement extends Element {
+    /**
+     * Internal mask composition element.
+     */
     private mask: RectElement;
+
+    /**
+     * Internal layer for the mask cover.
+     */
     private maskIn: RectElement;
+
+    /**
+     * External layer for the mask filter.
+     */
     private maskOut: { node: Snap.Element };
 
+    /**
+     * Creates a new `MaskElement`.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param boundRect - The parent bounding box for selection.
+     * @param maskOut - The element to be used as mask filter.
+     */
     constructor(paper: Snap.Paper, boundRect: Rect, maskOut: { node: Snap.Element }) {
         super(paper, boundRect);
         this.maskOut = maskOut;
@@ -19,12 +35,20 @@ export class MaskElement extends ElementPart {
         this.hide();
     }
 
+    /**
+     * Resize the element to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.mask.resize(width, height);
         this.maskIn.resize(width, height);
     }
 
+    /**
+     * Builds the visual presentation of the element.
+     */
     private buildUIElements() {
         this.mask = this.createMask();
 
