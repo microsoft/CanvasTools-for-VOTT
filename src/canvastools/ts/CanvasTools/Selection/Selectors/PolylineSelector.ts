@@ -1,28 +1,27 @@
-import { Point2D } from "../Core/Point2D";
-import { Rect } from "../Core/Rect";
-import { RegionData, RegionDataType } from "../Core/RegionData";
+import { Point2D } from "../../Core/Point2D";
+import { Rect } from "../../Core/Rect";
+import { RegionData, RegionDataType } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { IMovable } from "../Interface/IMovable";
-import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
+import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { IMovable } from "../../Interface/IMovable";
+import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
-import { CrossElement } from "./CrossElement";
+import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
+import { IPoint2D } from "../../Interface/IPoint2D";
 
 /* import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
-export class PolygonSelector extends Selector {
+export class PolylineSelector extends Selector {
     private parentNode: SVGSVGElement;
 
     private crossA: CrossElement;
     private nextPoint: Snap.Element;
-    private nextL1: Snap.Element;
-    private nextLN: Snap.Element;
     private nextSegment: Snap.Element;
 
     private pointsGroup: Snap.Element;
-    private polygon: Snap.Element;
+    private polyline: Snap.Element;
 
     private points: Point2D[];
     private lastPoint: Point2D;
@@ -51,7 +50,7 @@ export class PolygonSelector extends Selector {
         this.crossA.hide();
         this.nextPoint.node.setAttribute("visibility", "hidden");
         this.nextSegment.node.setAttribute("visibility", "hidden");
-        this.polygon.node.setAttribute("visibility", "hidden");
+        this.polyline.node.setAttribute("visibility", "hidden");
         this.pointsGroup.node.setAttribute("visibility", "hidden");
     }
 
@@ -60,7 +59,7 @@ export class PolygonSelector extends Selector {
         this.crossA.show();
         this.nextPoint.node.setAttribute("visibility", "visible");
         this.nextSegment.node.setAttribute("visibility", "visible");
-        this.polygon.node.setAttribute("visibility", "visible");
+        this.polyline.node.setAttribute("visibility", "visible");
         this.pointsGroup.node.setAttribute("visibility", "visible");
     }
 
@@ -71,27 +70,22 @@ export class PolygonSelector extends Selector {
 
     private buildUIElements() {
         this.node = this.paper.g();
-        this.node.addClass("polygonSelector");
+        this.node.addClass("polylineSelector");
 
         this.crossA = new CrossElement(this.paper, this.boundRect);
         this.nextPoint = this.paper.circle(0, 0, this.pointRadius);
         this.nextPoint.addClass("nextPointStyle");
 
-        this.nextSegment = this.paper.g();
-        this.nextL1 = this.paper.line(0, 0, 0, 0);
-        this.nextLN = this.paper.line(0, 0, 0, 0);
-        this.nextL1.addClass("nextSegmentStyle");
-        this.nextLN.addClass("nextSegmentStyle");
-        this.nextSegment.add(this.nextL1);
-        this.nextSegment.add(this.nextLN);
+        this.nextSegment = this.paper.line(0, 0, 0, 0);
+        this.nextSegment.addClass("nextSegmentStyle");
 
         this.pointsGroup = this.paper.g();
-        this.pointsGroup.addClass("polygonGroupStyle");
+        this.pointsGroup.addClass("polylineGroupStyle");
 
-        this.polygon = this.paper.polygon([]);
-        this.polygon.addClass("polygonStyle");
+        this.polyline = this.paper.polyline([]);
+        this.polyline.addClass("polylineStyle");
 
-        this.node.add(this.polygon);
+        this.node.add(this.polyline);
         this.node.add(this.pointsGroup);
         this.node.add(this.crossA.node);
         this.node.add(this.nextSegment);
@@ -119,7 +113,7 @@ export class PolygonSelector extends Selector {
             ps = this.pointsGroup.children();
         }
 
-        this.polygon.attr({
+        this.polyline.attr({
             points: "",
         });
 
@@ -128,8 +122,8 @@ export class PolygonSelector extends Selector {
         }
     }
 
-    private moveCross(cross: CrossElement, pointTo: IMovable, square: boolean = false, refCross: IMovable = null) {
-        cross.moveCross(pointTo, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, pointTo: IPoint2D, square: boolean = false, refCross: IMovable = null) {
+        cross.move(pointTo, this.boundRect, square, refCross);
     }
 
     private movePoint(element: Snap.Element, pointTo: Point2D) {
@@ -152,7 +146,7 @@ export class PolygonSelector extends Selector {
         this.points.push(new Point2D(x, y));
 
         const point = this.paper.circle(x, y, this.pointRadius);
-        point.addClass("polygonPointStyle");
+        point.addClass("polylinePointStyle");
 
         this.pointsGroup.add(point);
 
@@ -161,7 +155,7 @@ export class PolygonSelector extends Selector {
             pointsStr += `${p.x},${p.y},`;
         });
 
-        this.polygon.attr({
+        this.polyline.attr({
             points: pointsStr.substr(0, pointsStr.length - 1),
         });
     }
@@ -217,11 +211,9 @@ export class PolygonSelector extends Selector {
             this.movePoint(this.nextPoint, p);
 
             if (this.lastPoint != null) {
-                this.moveLine(this.nextLN, this.lastPoint, p);
-                this.moveLine(this.nextL1, this.points[0], p);
+                this.moveLine(this.nextSegment, this.lastPoint, p);
             } else {
-                this.moveLine(this.nextLN, p, p);
-                this.moveLine(this.nextL1, p, p);
+                this.moveLine(this.nextSegment, p, p);
             }
         });
 
@@ -234,12 +226,28 @@ export class PolygonSelector extends Selector {
 
     private submitPolyline() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
-            const box = this.polygon.getBBox();
+            const box = this.polyline.getBBox();
 
             this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height,
-                                          this.points.map((p) => p.copy()), RegionDataType.Polygon));
+                                          this.getPolylinePoints(), RegionDataType.Polyline));
         }
         this.reset();
+    }
+
+    private getPolylinePoints(close: boolean = true, threshold: number = 5) {
+        const points = this.points.map((p) => p.copy());
+
+        if (points.length >= 3 && close) {
+            const fp = points[0];
+            const lp = points[points.length - 1];
+
+            const distanceSquare = (fp.x - lp.x) * (fp.x - lp.x) + (fp.y - lp.y) * (fp.y - lp.y);
+            if (distanceSquare <= threshold * threshold) {
+                points[points.length - 1] = fp.copy();
+            }
+        }
+
+        return points;
     }
 
     private onKeyUp(e: KeyboardEvent) {

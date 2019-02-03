@@ -1,14 +1,15 @@
-import { Point2D } from "../Core/Point2D";
-import { Rect } from "../Core/Rect";
-import { RegionData } from "../Core/RegionData";
+import { Point2D } from "../../Core/Point2D";
+import { Rect } from "../../Core/Rect";
+import { RegionData } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../Interface/IEventDescriptor";
-import { IMovable } from "../Interface/IMovable";
-import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
+import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { IMovable } from "../../Interface/IMovable";
+import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
-import { CrossElement } from "./CrossElement";
-import { RectElement } from "./RectElement";
+import { CrossElement } from "../Component/CrossElement";
+import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
+import { IPoint2D } from "../../Interface/IPoint2D";
 
 /* import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE;
@@ -75,8 +76,8 @@ export class RectCopySelector extends Selector {
         this.subscribeToEvents(listeners);
     }
 
-    private moveCross(cross: CrossElement, p: IMovable, square: boolean = false, refCross: IMovable = null) {
-        cross.moveCross(p, this.boundRect, square, refCross);
+    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: IMovable = null) {
+        cross.move(p, this.boundRect, square, refCross);
     }
 
     private moveCopyRect(copyRect: RectElement, crossA: CrossElement) {

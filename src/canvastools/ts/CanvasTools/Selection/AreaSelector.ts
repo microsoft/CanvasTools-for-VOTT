@@ -2,11 +2,11 @@ import { Rect } from "../Core/Rect";
 
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 
-import { PointSelector } from "./PointSelector";
-import { PolylineSelector } from "./PolylineSelector";
-import { PolygonSelector } from "./PolygonSelector";
-import { RectCopySelector } from "./RectCopySelector";
-import { RectSelector } from "./RectSelector";
+import { PointSelector } from "./Selectors/PointSelector";
+import { PolylineSelector } from "./Selectors/PolylineSelector";
+import { PolygonSelector } from "./Selectors/PolygonSelector";
+import { RectCopySelector } from "./Selectors/RectCopySelector";
+import { RectSelector } from "./Selectors/RectSelector";
 import { Selector } from "./Selector";
 
 /* import * as SNAPSVG_TYPE from "snapsvg";
