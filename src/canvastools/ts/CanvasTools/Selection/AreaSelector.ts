@@ -7,7 +7,7 @@ import { PolylineSelector } from "./Selectors/PolylineSelector";
 import { PolygonSelector } from "./Selectors/PolygonSelector";
 import { RectCopySelector } from "./Selectors/RectCopySelector";
 import { RectSelector } from "./Selectors/RectSelector";
-import { Selector } from "./Selector";
+import { Selector } from "./Selectors/Selector";
 
 /* import * as SNAPSVG_TYPE from "snapsvg";
 declare var Snap: typeof SNAPSVG_TYPE; */
