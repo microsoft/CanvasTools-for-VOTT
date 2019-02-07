@@ -6,6 +6,8 @@ import { IResizable } from "../../Interface/IResizable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
 import { Element } from "../Component/Element";
+import { IPoint2D } from "../../Interface/IPoint2D";
+import { CrossElement } from "../Component/CrossElement";
 
 /**
  * The abstract class to define region selectors.
@@ -22,13 +24,20 @@ export abstract class Selector extends Element {
     protected isEnabled: boolean = true;
 
     /**
+     * The reference to hosting SVG element.
+     */
+    protected parentNode: SVGSVGElement;
+
+    /**
      * Creates new selector.
+     * @param parent - The parent (host) SVG-element.
      * @param paper - The `Snap.Paper` element to draw on.
      * @param boundRect - The bounding box for selector.
      * @param callbacks - The collection of callbacks.
      */
-    constructor(paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
+    constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
         super(paper, boundRect);
+        this.parentNode = parent;
 
         if (callbacks !== undefined) {
             this.callbacks = callbacks;
@@ -89,10 +98,14 @@ export abstract class Selector extends Element {
      * Shows all the elements in specified array.
      * @param elements - The array of elements to show.
      */
-    protected showAll(elements: IHideable[]) {
+    protected showAll(elements: Array<IHideable|Snap.Element>) {
         window.requestAnimationFrame(() => {
             elements.forEach((element) => {
-                element.show();
+                if ((element as IHideable).show !== undefined) {
+                    (element as IHideable).show();
+                } else {
+                    (element as Snap.Element).node.setAttribute("visibility", "visible");
+                }
             });
         });
     }
@@ -101,10 +114,14 @@ export abstract class Selector extends Element {
      * Hides all the elements in specified array.
      * @param elements - The array of elements to hide.
      */
-    protected hideAll(elements: IHideable[]) {
+    protected hideAll(elements: Array<IHideable|Snap.Element>) {
         window.requestAnimationFrame(() => {
             elements.forEach((element) => {
-                element.hide();
+                if ((element as IHideable).hide !== undefined) {
+                    (element as IHideable).hide();
+                } else {
+                    (element as Snap.Element).node.setAttribute("visibility", "hidden");
+                }
             });
         });
     }
@@ -118,6 +135,43 @@ export abstract class Selector extends Element {
             elements.forEach((element) => {
                 element.resize(this.boundRect.width, this.boundRect.height);
             });
+        });
+    }
+
+    /**
+     * Helper function to move the cross element to specified position.
+     * @param cross - The cross element to move.
+     * @param pointTo - The new position of the cross element.
+     * @param square - The flag that movement should be related to reference point of a square
+     */
+    protected moveCross(cross: CrossElement, pointTo: IPoint2D, square: boolean = false, ref: IPoint2D = null) {
+        cross.move(pointTo, this.boundRect, square, ref);
+    }
+
+    /**
+     * Helper function to move a point element to specified position
+     * @param point - The point element to move.
+     * @param pointTo - The new position of the point.
+     */
+    protected movePoint(point: Snap.Element, pointTo: IPoint2D) {
+        point.attr({
+            cx: pointTo.x,
+            cy: pointTo.y,
+        });
+    }
+
+    /**
+     * Helper function to move a line element to specified begin and end positions
+     * @param line - The line element to move.
+     * @param pointFrom - The begin point.
+     * @param pointTo - The end point.
+     */
+    protected moveLine(line: Snap.Element, pointFrom: IPoint2D, pointTo: IPoint2D) {
+        line.attr({
+            x1: pointFrom.x,
+            x2: pointTo.x,
+            y1: pointFrom.y,
+            y2: pointTo.y,
         });
     }
 }

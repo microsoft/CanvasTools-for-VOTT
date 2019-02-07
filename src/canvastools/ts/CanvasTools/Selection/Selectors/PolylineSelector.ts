@@ -14,8 +14,6 @@ import { IPoint2D } from "../../Interface/IPoint2D";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class PolylineSelector extends Selector {
-    private parentNode: SVGSVGElement;
-
     private crossA: CrossElement;
     private nextPoint: Snap.Element;
     private nextSegment: Snap.Element;
@@ -32,8 +30,7 @@ export class PolylineSelector extends Selector {
     private capturePointerId: number;
 
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
-        super(paper, boundRect, callbacks);
-        this.parentNode = parent;
+        super(parent, paper, boundRect, callbacks);
 
         this.buildUIElements();
         this.reset();
@@ -120,26 +117,6 @@ export class PolylineSelector extends Selector {
         if (this.isCapturing) {
             this.isCapturing = false;
         }
-    }
-
-    private moveCross(cross: CrossElement, pointTo: IPoint2D, square: boolean = false, refCross: IMovable = null) {
-        cross.move(pointTo, this.boundRect, square, refCross);
-    }
-
-    private movePoint(element: Snap.Element, pointTo: Point2D) {
-        element.attr({
-            cx: pointTo.x,
-            cy: pointTo.y,
-        });
-    }
-
-    private moveLine(element: Snap.Element, pointFrom: Point2D, pointTo: Point2D) {
-        element.attr({
-            x1: pointFrom.x,
-            x2: pointTo.x,
-            y1: pointFrom.y,
-            y2: pointTo.y,
-        });
     }
 
     private addPoint(x: number, y: number) {

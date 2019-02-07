@@ -15,8 +15,6 @@ import { IPoint2D } from "../../Interface/IPoint2D";
 declare var Snap: typeof SNAPSVG_TYPE;
  */
 export class RectCopySelector extends Selector {
-    private parentNode: SVGSVGElement;
-
     private copyRect: Rect;
 
     private crossA: CrossElement;
@@ -24,8 +22,7 @@ export class RectCopySelector extends Selector {
 
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, copyRect: Rect,
                 callbacks?: ISelectorCallbacks) {
-        super(paper, boundRect, callbacks);
-        this.parentNode = parent;
+        super(parent, paper, boundRect, callbacks);
         this.copyRect = copyRect;
         this.buildUIElements();
         this.hide();
@@ -74,10 +71,6 @@ export class RectCopySelector extends Selector {
         ];
 
         this.subscribeToEvents(listeners);
-    }
-
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: IMovable = null) {
-        cross.move(p, this.boundRect, square, refCross);
     }
 
     private moveCopyRect(copyRect: RectElement, crossA: CrossElement) {

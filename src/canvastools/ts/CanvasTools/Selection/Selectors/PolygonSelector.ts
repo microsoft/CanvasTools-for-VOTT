@@ -10,12 +10,10 @@ import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * The selector to define a polygon region.
+ */
 export class PolygonSelector extends Selector {
-    private parentNode: SVGSVGElement;
-
     private crossA: CrossElement;
     private nextPoint: Snap.Element;
     private nextL1: Snap.Element;
@@ -34,8 +32,7 @@ export class PolygonSelector extends Selector {
     private capturePointerId: number;
 
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
-        super(paper, boundRect, callbacks);
-        this.parentNode = parent;
+        super(parent, paper, boundRect, callbacks);
 
         this.buildUIElements();
         this.reset();
@@ -49,20 +46,12 @@ export class PolygonSelector extends Selector {
 
     public hide() {
         super.hide();
-        this.crossA.hide();
-        this.nextPoint.node.setAttribute("visibility", "hidden");
-        this.nextSegment.node.setAttribute("visibility", "hidden");
-        this.polygon.node.setAttribute("visibility", "hidden");
-        this.pointsGroup.node.setAttribute("visibility", "hidden");
+        this.hideAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
     }
 
     public show() {
         super.show();
-        this.crossA.show();
-        this.nextPoint.node.setAttribute("visibility", "visible");
-        this.nextSegment.node.setAttribute("visibility", "visible");
-        this.polygon.node.setAttribute("visibility", "visible");
-        this.pointsGroup.node.setAttribute("visibility", "visible");
+        this.showAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
     }
 
     public disable() {
@@ -99,13 +88,93 @@ export class PolygonSelector extends Selector {
         this.node.add(this.nextPoint);
 
         const listeners: IEventDescriptor[] = [
-            { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
-            { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
-            { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },
-            { event: "click", listener: this.onClick, base: this.parentNode, bypass: false },
-            { event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false },
-            { event: "dblclick", listener: this.onDoubleClick, base: this.parentNode, bypass: false },
-            { event: "keyup", listener: this.onKeyUp, base: window, bypass: true },
+            {
+                event: "pointerenter",
+                base: this.parentNode,
+                listener: () => this.show(),
+                bypass: false,
+            },
+            {
+                event: "pointerleave",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    if (!this.isCapturing) {
+                       this.hide();
+                    } else {
+                        const rect = this.parentNode.getClientRects();
+                        const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                        this.moveCross(this.crossA, p);
+                        this.movePoint(this.nextPoint, p);
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerdown",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    if (!this.isCapturing) {
+                        this.isCapturing = true;
+
+                        if (typeof this.callbacks.onSelectionBegin === "function") {
+                            this.callbacks.onSelectionBegin();
+                        }
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "click",
+                base: this.parentNode,
+                listener: (e: MouseEvent) => {
+                    if (e.detail <= 1) {
+                        window.requestAnimationFrame(() => {
+                            const p = new Point2D(this.crossA.x, this.crossA.y);
+                            this.addPoint(p.x, p.y);
+                            this.lastPoint = p;
+                        });
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointermove",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    window.requestAnimationFrame(() => {
+                        const rect = this.parentNode.getClientRects();
+                        const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                        this.show();
+                        this.moveCross(this.crossA, p);
+                        this.movePoint(this.nextPoint, p);
+                        if (this.lastPoint != null) {
+                            this.moveLine(this.nextLN, this.lastPoint, p);
+                            this.moveLine(this.nextL1, this.points[0], p);
+                        } else {
+                            this.moveLine(this.nextLN, p, p);
+                            this.moveLine(this.nextL1, p, p);
+                        }
+                    });
+                    e.preventDefault();
+                },
+                bypass: false,
+            },
+            {
+                event: "dblclick",
+                base: this.parentNode,
+                listener: () => this.submitPolyline(),
+                bypass: false,
+            },
+            {
+                event: "keyup",
+                base: window,
+                listener: (e: KeyboardEvent) => {
+                    if (e.code === "Escape") {
+                        this.submitPolyline();
+                    }
+                },
+                bypass: true,
+            },
         ];
 
         this.subscribeToEvents(listeners);
@@ -129,26 +198,6 @@ export class PolygonSelector extends Selector {
         }
     }
 
-    private moveCross(cross: CrossElement, pointTo: IPoint2D, square: boolean = false, refCross: IMovable = null) {
-        cross.move(pointTo, this.boundRect, square, refCross);
-    }
-
-    private movePoint(element: Snap.Element, pointTo: Point2D) {
-        element.attr({
-            cx: pointTo.x,
-            cy: pointTo.y,
-        });
-    }
-
-    private moveLine(element: Snap.Element, pointFrom: Point2D, pointTo: Point2D) {
-        element.attr({
-            x1: pointFrom.x,
-            x2: pointTo.x,
-            y1: pointFrom.y,
-            y2: pointTo.y,
-        });
-    }
-
     private addPoint(x: number, y: number) {
         this.points.push(new Point2D(x, y));
 
@@ -167,72 +216,6 @@ export class PolygonSelector extends Selector {
         });
     }
 
-    private onPointerEnter(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            this.show();
-        });
-    }
-
-    private onPointerLeave(e: PointerEvent) {
-        if (!this.isCapturing) {
-            window.requestAnimationFrame(() => {
-                this.hide();
-            });
-        } else {
-            const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-
-            this.moveCross(this.crossA, p);
-            this.movePoint(this.nextPoint, p);
-        }
-    }
-
-    private onPointerDown(e: PointerEvent) {
-        if (!this.isCapturing) {
-            this.isCapturing = true;
-
-            if (typeof this.callbacks.onSelectionBegin === "function") {
-                this.callbacks.onSelectionBegin();
-            }
-        }
-    }
-
-    private onClick(e: MouseEvent) {
-        if (e.detail <= 1) {
-            window.requestAnimationFrame(() => {
-                const p = new Point2D(this.crossA.x, this.crossA.y);
-                this.addPoint(p.x, p.y);
-
-                this.lastPoint = p;
-            });
-        }
-    }
-
-    private onPointerMove(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-
-            this.show();
-            this.moveCross(this.crossA, p);
-            this.movePoint(this.nextPoint, p);
-
-            if (this.lastPoint != null) {
-                this.moveLine(this.nextLN, this.lastPoint, p);
-                this.moveLine(this.nextL1, this.points[0], p);
-            } else {
-                this.moveLine(this.nextLN, p, p);
-                this.moveLine(this.nextL1, p, p);
-            }
-        });
-
-        e.preventDefault();
-    }
-
-    private onDoubleClick(e: MouseEvent) {
-        this.submitPolyline();
-    }
-
     private submitPolyline() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
@@ -241,12 +224,5 @@ export class PolygonSelector extends Selector {
                                           this.points.map((p) => p.copy()), RegionDataType.Polygon));
         }
         this.reset();
-    }
-
-    private onKeyUp(e: KeyboardEvent) {
-        // Holding shift key enable square drawing mode
-        if (e.code === "Escape") {
-            this.submitPolyline();
-        }
     }
 }

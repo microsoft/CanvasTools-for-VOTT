@@ -3,7 +3,6 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
 import { CrossElement } from "../Component/CrossElement";
@@ -14,110 +13,122 @@ import { IPoint2D } from "../../Interface/IPoint2D";
  * The selector to define a point-region.
  */
 export class PointSelector extends Selector {
-    private parentNode: SVGSVGElement;
+    /**
+     * Default radius for the point element. Can be redefined through css styles.
+     */
+    private static DEFAULT_POINT_RADIUS: number = 6;
 
+    /**
+     * The `CrossElement` to define point position
+     */
     private crossA: CrossElement;
+
+    /**
+     * The temporary point element.
+     */
     private point: Snap.Element;
 
-    private pointRadius: number = 6;
-
+    /**
+     * Creates new `PointSelector` object.
+     * @param parent - The parent SVG-element.
+     * @param paper - The `Snap.Paper` element to draw on.
+     * @param boundRect - The bounding box.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
-        super(paper, boundRect, callbacks);
-        this.parentNode = parent;
+        super(parent, paper, boundRect, callbacks);
         this.buildUIElements();
         this.hide();
     }
 
+    /**
+     * Resizes the selector to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.crossA.resize(width, height);
     }
 
+    /**
+     * Hides the selector.
+     */
     public hide() {
         super.hide();
-        this.crossA.hide();
-        this.point.node.setAttribute("visibility", "hidden");
+        this.hideAll([this.crossA, this.point]);
     }
 
+    /**
+     * Shows the selector.
+     */
     public show() {
         super.show();
-        this.crossA.show();
-        this.point.node.setAttribute("visibility", "visible");
+        this.showAll([this.crossA, this.point]);
     }
 
+    /** Builds the visual presentstion of selector. */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("pointSelector");
 
         this.crossA = new CrossElement(this.paper, this.boundRect);
-        this.point = this.paper.circle(0, 0, this.pointRadius);
+        this.point = this.paper.circle(0, 0, PointSelector.DEFAULT_POINT_RADIUS);
         this.point.addClass("pointStyle");
 
         this.node.add(this.crossA.node);
         this.node.add(this.point);
 
         const listeners: IEventDescriptor[] = [
-            { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
-            { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
-            { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },
-            { event: "pointerup", listener: this.onPointerUp, base: this.parentNode, bypass: false },
-            { event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false },
+            {
+                event: "pointerenter",
+                base: this.parentNode,
+                listener: () => this.show(),
+                bypass: false,
+            },
+            {
+                event: "pointerleave",
+                base: this.parentNode,
+                listener: () => this.hide(),
+                bypass: false,
+            },
+            {
+                event: "pointerdown",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    this.show();
+                    this.movePoint(this.point, this.crossA);
+                    if (typeof this.callbacks.onSelectionBegin === "function") {
+                        this.callbacks.onSelectionBegin();
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerup",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    if (typeof this.callbacks.onSelectionEnd === "function") {
+                        this.callbacks.onSelectionEnd(RegionData.BuildPointRegionData(this.crossA.x, this.crossA.y));
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointermove",
+                base: this.parentNode,
+                listener: (e: PointerEvent) => {
+                    const rect = this.parentNode.getClientRects();
+                    const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+                    this.show();
+                    this.moveCross(this.crossA, p);
+                    this.movePoint(this.point, this.crossA);
+                    e.preventDefault();
+                },
+                bypass: false,
+            },
         ];
 
         this.subscribeToEvents(listeners);
-    }
-
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: IMovable = null) {
-        cross.move(p, this.boundRect, square, refCross);
-    }
-
-    private movePoint(point: Snap.Element, crossA: IPoint2D) {
-        point.attr({
-            cx: crossA.x,
-            cy: crossA.y,
-        });
-    }
-
-    private onPointerEnter(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            this.show();
-        });
-    }
-
-    private onPointerLeave(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            this.hide();
-        });
-    }
-
-    private onPointerDown(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            this.show();
-            this.movePoint(this.point, this.crossA);
-            if (typeof this.callbacks.onSelectionBegin === "function") {
-                this.callbacks.onSelectionBegin();
-            }
-        });
-    }
-
-    private onPointerUp(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            if (typeof this.callbacks.onSelectionEnd === "function") {
-                this.callbacks.onSelectionEnd(RegionData.BuildPointRegionData(this.crossA.x, this.crossA.y));
-            }
-        });
-    }
-
-    private onPointerMove(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-
-            this.show();
-            this.moveCross(this.crossA, p);
-            this.movePoint(this.point, this.crossA);
-        });
-
-        e.preventDefault();
     }
 }

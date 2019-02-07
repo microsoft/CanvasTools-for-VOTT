@@ -18,7 +18,6 @@ declare var Snap: typeof SNAPSVG_TYPE; */
 export enum SelectionModificator { RECT, SQUARE }
 
 export class RectSelector extends Selector {
-    private parentNode: SVGSVGElement;
     private crossA: CrossElement;
     private crossB: CrossElement;
     private selectionBox: RectElement;
@@ -30,8 +29,7 @@ export class RectSelector extends Selector {
     private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
-        super(paper, boundRect, callbacks);
-        this.parentNode = parent;
+        super(parent, paper, boundRect, callbacks);
         this.buildUIElements();
         this.hide();
     }
@@ -76,10 +74,6 @@ export class RectSelector extends Selector {
         ];
 
         this.subscribeToEvents(listeners);
-    }
-
-    private moveCross(cross: CrossElement, p: IPoint2D, square: boolean = false, refCross: CrossElement = null) {
-        cross.move(p, this.boundRect, square, refCross);
     }
 
     private moveSelectionBox(box: RectElement, crossA: CrossElement, crossB: CrossElement) {
