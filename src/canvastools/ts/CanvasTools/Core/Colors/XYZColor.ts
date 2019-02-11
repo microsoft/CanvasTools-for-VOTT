@@ -2,8 +2,8 @@ import { RGBColor } from "./RGBColor";
 import { LABColor } from "./LABColor";
 
 export class XYZColor {
-    public static D65 = new XYZColor(0.95047, 1.0, 1.08883);
-    public static D50 = new XYZColor(0.966797, 1.0, 0.825188);
+    public static D65 = new XYZColor(0.95047, 1.000, 1.08883);
+    public static D50 = new XYZColor(0.966797, 1.000, 0.825188);
 
     public get x(): number {
         return this.values[0];
@@ -49,6 +49,6 @@ export class XYZColor {
             }
         });
 
-        return new LABColor(116 * xyz[1] - 16, 500 * (xyz[0] - xyz[1]), 200 * (xyz[1] - xyz[2]));
+        return new LABColor((116 * xyz[1] - 16) / 100, 5 * (xyz[0] - xyz[1]), 2 * (xyz[1] - xyz[2]));
     }
 }
