@@ -44,6 +44,7 @@
             <label for="swatchesRange">Swatches #</label>
             <input type="range" id="swatchesRange" name="swatches" min="0" max="20" value="10" step="1">
             <span id="swatchesRangeValue">10 / [0, 20]</span>
+            <button id="addMoreSwatches" >Add 5 more colors</button>
         </div>
     </div>
 </body>
@@ -74,12 +75,16 @@
         const minGraynessRange = document.getElementById("minGraynessRange");
         const maxGraynessRange = document.getElementById("maxGraynessRange");
         const swatchesRange = document.getElementById("swatchesRange");
+        const addMoreColors = document.getElementById("addMoreSwatches");
 
         const lightnessRangeValueSpan = document.getElementById("lightnessRangeValue");
         const lightnessVariationRangeValueSpan = document.getElementById("lightnessVariationRangeValue");
         const minGraynessRangeValueSpan = document.getElementById("minGraynessRangeValue");
         const maxGraynessRangeValueSpan = document.getElementById("maxGraynessRangeValue");
         const swatchesRangeValueSpan = document.getElementById("swatchesRangeValue");
+
+        let palette;
+        let swatches;
 
         function redrawPalette() {
             const lightness = Number.parseFloat(lightnessRange.value);
@@ -97,16 +102,16 @@
                 abRange: 1.3,
             };
 
-            const palette = new Palette(paletteSettings);
-            palette.ready().then((gamut) => {
+            palette = new Palette(paletteSettings);
+            palette.gamut().then((gamut) => {
                 initRulers(paletteCanvas);
                 drawGamut(paletteCanvas, gamut);
             });
 
             palette.swatches(swatchesCount).then((gamut) => {
-                console.log(gamut);
+                swatches = gamut;
                 initRulers(swatchesCanvas);
-                drawGamut(swatchesCanvas, gamut);
+                drawGamut(swatchesCanvas, swatches, 14);
             });
         }
 
@@ -143,6 +148,13 @@
             swatchesRangeValueSpan.innerHTML = `${swatchesRange.value} / [${swatchesRange.min}, ${swatchesRange.max}]`;
         });
 
+        addMoreColors.addEventListener("click", (e) => {
+            palette.more(swatches, 5).then((gamut) => {
+                swatches = swatches.concat(gamut);
+                drawGamut(swatchesCanvas, gamut, 14);
+            });
+        });
+
         redrawPalette();
     });
 
@@ -167,7 +179,7 @@
         context.strokeRect(cx / 3, cy / 3, width * 2 / 3, height * 2 / 3);
     }
 
-    function drawGamut(canvas, gamut) {
+    function drawGamut(canvas, gamut, rs = 7) {
         const width = canvas.width;
         const height = canvas.height;
         const context = canvas.getContext("2d");
@@ -183,7 +195,6 @@
             const y = cy - height / 3 * b;
 
             context.fillStyle = color.rgb.toHex();
-            const rs = 7;
             context.fillRect(x - rs, y - rs, rs * 2, rs * 2);
         });
     }
