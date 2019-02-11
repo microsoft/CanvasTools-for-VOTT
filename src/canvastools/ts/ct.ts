@@ -12,6 +12,11 @@ import { RegionData } from "./CanvasTools/Core/RegionData";
 import { Tag } from "./CanvasTools/Core/Tag";
 import { TagsDescriptor } from "./CanvasTools/Core/TagsDescriptor";
 import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
+import { RGBColor } from "./CanvasTools/Core/Colors/RGBColor";
+import { LABColor } from "./CanvasTools/Core/Colors/LABColor";
+import { XYZColor } from "./CanvasTools/Core/Colors/XYZColor";
+import { HSLColor } from "./CanvasTools/Core/Colors/HSLColor";
+import { Palette } from "./CanvasTools/Core/Colors/Palette";
 
 import "snapsvg-cjs";
 /* import * as SNAPSVG_TYPE from "snapsvg";
@@ -24,6 +29,13 @@ export class CanvasTools {
         RegionData,
         TagsDescriptor,
         Tag,
+        Colors: {
+            RGBColor,
+            LABColor,
+            XYZColor,
+            HSLColor,
+            Palette,
+        },
     };
 
     public static Selection = {
