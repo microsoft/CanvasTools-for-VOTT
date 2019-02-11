@@ -147,10 +147,12 @@ export class RGBColor {
     }
 
     private to255(): number[] {
-        return this.values.map((v) => Math.round(255 * v));
+        const rgb = this.truncate();
+        return rgb.values.map((v) => Math.round(255 * v));
     }
 
     private toFF(): string[] {
-        return this.values.map((v) => Math.round(v * 255).toString(16));
+        const rgb = this.truncate();
+        return rgb.values.map((v) => Math.round(255 * v).toString(16).padStart(2, "0"));
     }
 }
