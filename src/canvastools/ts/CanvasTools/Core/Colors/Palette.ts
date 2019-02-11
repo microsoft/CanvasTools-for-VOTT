@@ -7,9 +7,18 @@ interface IColorPoint {
     b: number;
 }
 
-interface IColorGamutPoint {
+export interface IColorGamutPoint {
     rgb: RGBColor;
     lab: LABColor;
+}
+
+export interface IPaletteSettings {
+    lightness: number;
+    lightnessVariation: number;
+    minGrayness: number;
+    maxGrayness: number;
+    granularity: number;
+    abRange: number;
 }
 
 export class Palette {
@@ -17,8 +26,25 @@ export class Palette {
 
     private generateClusterPromise: Promise<IColorGamutPoint[]>;
 
-    public constructor(ligthness: number, minGrayness: number = 0, maxGrayness: number = 1) {
-        this.generateClusterPromise = this.generateGamutClusterAsync(ligthness, minGrayness, maxGrayness);
+    private settings: IPaletteSettings;
+
+    public constructor(settings: IPaletteSettings) {
+        this.settings = {
+            lightness: (settings.lightness === undefined) ?
+                        0.65 : Math.max(0, Math.min(1, settings.lightness)),
+            lightnessVariation: (settings.lightnessVariation === undefined) ?
+                        0 : Math.max(0, Math.min(1, settings.lightnessVariation)),
+            minGrayness: (settings.minGrayness === undefined) ?
+                        0 : Math.max(0, Math.min(1, settings.minGrayness)),
+            maxGrayness: (settings.maxGrayness === undefined) ?
+                        2 : Math.max(0, Math.min(2, settings.maxGrayness)),
+            granularity: (settings.granularity === undefined) ?
+                        50 : Math.max(10, settings.granularity),
+            abRange: (settings.abRange === undefined) ?
+                        1.3 : Math.max(0, Math.min(2, settings.abRange)),
+        };
+
+        this.generateClusterPromise = this.generateGamutClusterAsync();
     }
 
     public ready(): Promise<IColorGamutPoint[]> {
@@ -81,28 +107,33 @@ export class Palette {
         return candidate;
     }
 
-    private generateGamutClusterAsync(ligthness: number, minGrayness: number = 0, maxGrayness: number = 1):
-                  Promise<IColorGamutPoint[]> {
+    private generateGamutClusterAsync(): Promise<IColorGamutPoint[]> {
         const promise = new Promise<IColorGamutPoint[]>((resolve) => {
-            this.gamutCluster = this.generateGamutCluster(ligthness, minGrayness, maxGrayness);
+            this.gamutCluster = this.generateGamutCluster();
             resolve(this.gamutCluster);
         });
         return promise;
     }
 
-    private generateGamutCluster(ligthness: number, minGrayness: number = 0 , maxGrayness: number = 1):
-                  IColorGamutPoint[] {
-        let cluster = this.generatePointsCluster(25);
+    private generateGamutCluster(): IColorGamutPoint[] {
+        let cluster = this.generatePointsCluster(this.settings.granularity);
         cluster = cluster.filter((p) => {
             const d = this.distanceToGray(p);
-            return d >= minGrayness && d <= maxGrayness;
+            return d >= this.settings.minGrayness && d <= this.settings.maxGrayness;
         });
 
         const colorSpace = new Array<IColorGamutPoint>();
 
         cluster.forEach((p) => {
-            const labcolor = new LABColor(ligthness, p.a, p.b);
+            let lightness = this.settings.lightness;
+            if (this.settings.lightnessVariation > 0) {
+                lightness += this.settings.lightnessVariation * (Math.random() - 0.5);
+                lightness = Math.max(0, Math.min(1, lightness));
+            }
+
+            const labcolor = new LABColor(lightness, p.a, p.b);
             const rgbcolor = labcolor.toRGB();
+
             if (rgbcolor.isValidRGB()) {
                 colorSpace.push({
                     rgb: rgbcolor,
@@ -110,7 +141,6 @@ export class Palette {
                 });
             }
         });
-
         return colorSpace;
     }
 
@@ -118,15 +148,17 @@ export class Palette {
         return Math.sqrt(p.a * p.a + p.b * p.b);
     }
 
-    private generatePointsCluster(steps: number = 100): IColorPoint[] {
+    private generatePointsCluster(steps): IColorPoint[] {
         steps = Math.round(steps);
         const cluster = new Array<IColorPoint>(steps * steps);
+
+        const range = this.settings.abRange;
 
         for (let i = 0; i < steps; i++) {
             for (let j = 0; j < steps; j++) {
                 cluster[i * steps + j] = {
-                    a: 2.0 * i / (steps - 1) - 1.0,
-                    b: 2.0 * j / (steps - 1) - 1.0,
+                    a: range * 2 * i / (steps - 1) - range,
+                    b: range * 2 * j / (steps - 1) - range,
                 };
             }
         }
