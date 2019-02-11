@@ -1,17 +1,14 @@
-import { LABColor } from "./LABColor";
+import { LABColor, ILabColorPoint } from "./LABColor";
 import { RGBColor } from "./RGBColor";
-import { color } from "snapsvg";
 
-interface IColorPoint {
-    a: number;
-    b: number;
-}
-
-export interface IColorGamutPoint {
+export interface ILABRGBGamutPoint {
     rgb: RGBColor;
     lab: LABColor;
 }
 
+/**
+ * Palette settings.
+ */
 export interface IPaletteSettings {
     lightness: number;
     lightnessVariation: number;
@@ -21,13 +18,18 @@ export interface IPaletteSettings {
     abRange: number;
 }
 
+/**
+ * The `Palette` class to generate a palette with specified settings
+ * and extract a subset as color swatches.
+ */
 export class Palette {
-    private gamutCluster: IColorGamutPoint[];
+    private gamutCluster: ILABRGBGamutPoint[];
 
-    private generateClusterPromise: Promise<IColorGamutPoint[]>;
+    private generateClusterPromise: Promise<ILABRGBGamutPoint[]>;
 
     private settings: IPaletteSettings;
 
+    /** Creates a new palette with provided settings */
     public constructor(settings: IPaletteSettings) {
         this.settings = {
             lightness: (settings.lightness === undefined) ?
@@ -47,7 +49,10 @@ export class Palette {
         this.generateClusterPromise = this.generateGamutClusterAsync();
     }
 
-    public ready(): Promise<IColorGamutPoint[]> {
+    /**
+     * Returns a promise with Gamut points resolved when all points are calculated.
+     */
+    public async gamut(): Promise<ILABRGBGamutPoint[]> {
         if (this.gamutCluster !== undefined && this.gamutCluster !== null) {
             return new Promise((resolve) => resolve(this.gamutCluster));
         } else {
@@ -58,9 +63,13 @@ export class Palette {
         }
     }
 
-    public swatches(colorsCount: number): Promise<IColorGamutPoint[]> {
-        return this.ready().then((cluster) => {
-            const swatches = new Array<IColorGamutPoint>();
+    /**
+     * Generates a random set of swatches within the palette's gamut.
+     * @param colorsCount - The number of colors to be generated.
+     */
+    public async swatches(colorsCount: number): Promise<ILABRGBGamutPoint[]> {
+        return this.gamut().then((cluster) => {
+            const swatches = new Array<ILABRGBGamutPoint>();
             const first = Math.round(Math.random() * cluster.length);
             swatches.push(cluster[first]);
 
@@ -72,10 +81,15 @@ export class Palette {
         });
     }
 
-    public more(swatches: IColorGamutPoint[], colorsCount: number): Promise<IColorGamutPoint[]> {
+    /**
+     * Expands provided set of swatches within the palette's gamut.
+     * @param swatches - The original set of swatches.
+     * @param colorsCount - The number of new colors to be generated.
+     */
+    public async more(swatches: ILABRGBGamutPoint[], colorsCount: number): Promise<ILABRGBGamutPoint[]> {
         if (swatches.length > 0) {
-            return this.ready().then((cluster) => {
-                const newSwatches = new Array<IColorGamutPoint>();
+            return this.gamut().then((cluster) => {
+                const newSwatches = new Array<ILABRGBGamutPoint>();
                 const allSwatches = swatches.map((sw) => sw);
                 for (let i = 0; i < colorsCount; i++) {
                     const swatch = this.findNextColor(allSwatches, cluster);
@@ -89,8 +103,14 @@ export class Palette {
         }
     }
 
-    private findNextColor(swatches: IColorGamutPoint[], cluster: IColorGamutPoint[]): IColorGamutPoint {
-        let candidate: IColorGamutPoint = cluster[0];
+    /**
+     * Finds the next color to expand the swatches set within the palette's gamut.
+     * Returns the point with maximum distance to all the colors in swatches.
+     * @param swatches - The original set of swatches.
+     * @param cluster - The cluster to look with-in.
+     */
+    private findNextColor(swatches: ILABRGBGamutPoint[], cluster: ILABRGBGamutPoint[]): ILABRGBGamutPoint {
+        let candidate: ILABRGBGamutPoint = cluster[0];
         let maxDistanceSQ: number = 0;
 
         cluster.forEach((colorPoint) => {
@@ -107,22 +127,34 @@ export class Palette {
         return candidate;
     }
 
-    private generateGamutClusterAsync(): Promise<IColorGamutPoint[]> {
-        const promise = new Promise<IColorGamutPoint[]>((resolve) => {
+    /**
+     * Wraps the `generateGamutCluster` method into a Promise.
+     */
+    private generateGamutClusterAsync(): Promise<ILABRGBGamutPoint[]> {
+        const promise = new Promise<ILABRGBGamutPoint[]>((resolve) => {
             this.gamutCluster = this.generateGamutCluster();
             resolve(this.gamutCluster);
         });
         return promise;
     }
 
-    private generateGamutCluster(): IColorGamutPoint[] {
+    /**
+     * Generates a gamut cluster of paired colors in CIELAB (LAB) and RGB,
+     * filtered by color points valid in RGB space and grayness constrains
+     * (withing the range of [`minGrainess`, `maxGrayness`]).
+     *
+     * This method augments the `generatePointsCluster` method with lightness settings,
+     * putting lightness equal to a random value within the range
+     * [`lightness` - `lightnessVariation`/2, `lightness` + `lightnessVariation`/2].
+     */
+    private generateGamutCluster(): ILABRGBGamutPoint[] {
         let cluster = this.generatePointsCluster(this.settings.granularity);
         cluster = cluster.filter((p) => {
             const d = this.distanceToGray(p);
             return d >= this.settings.minGrayness && d <= this.settings.maxGrayness;
         });
 
-        const colorSpace = new Array<IColorGamutPoint>();
+        const colorSpace = new Array<ILABRGBGamutPoint>();
 
         cluster.forEach((p) => {
             let lightness = this.settings.lightness;
@@ -144,21 +176,30 @@ export class Palette {
         return colorSpace;
     }
 
-    private distanceToGray(p: IColorPoint) {
+    /**
+     * Calculate distance from color point to a zero-point (`a = b = 0`).
+     * @param p - Origin point.
+     */
+    private distanceToGray(p: ILabColorPoint) {
         return Math.sqrt(p.a * p.a + p.b * p.b);
     }
 
-    private generatePointsCluster(steps): IColorPoint[] {
-        steps = Math.round(steps);
-        const cluster = new Array<IColorPoint>(steps * steps);
+    /**
+     * Generate a grid of color points in AB-subspace, centered at `a = b = 0` and
+     * the grid size [-`abRage`, +`abRange`] in each dimension.
+     * @param granularity - Number of grid steps in each dimension.
+     */
+    private generatePointsCluster(granularity: number): ILabColorPoint[] {
+        granularity = Math.round(granularity);
+        const cluster = new Array<ILabColorPoint>(granularity * granularity);
 
         const range = this.settings.abRange;
 
-        for (let i = 0; i < steps; i++) {
-            for (let j = 0; j < steps; j++) {
-                cluster[i * steps + j] = {
-                    a: range * 2 * i / (steps - 1) - range,
-                    b: range * 2 * j / (steps - 1) - range,
+        for (let i = 0; i < granularity; i++) {
+            for (let j = 0; j < granularity; j++) {
+                cluster[i * granularity + j] = {
+                    a: range * 2 * i / (granularity - 1) - range,
+                    b: range * 2 * j / (granularity - 1) - range,
                 };
             }
         }
