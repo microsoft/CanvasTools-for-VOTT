@@ -1,7 +1,12 @@
 import { RGBColor } from "./RGBColor";
 import { XYZColor } from "./XYZColor";
 
-export class LABColor {
+export interface ILabColorPoint {
+    a: number;
+    b: number;
+}
+
+export class LABColor implements ILabColorPoint {
     public get l(): number {
         return this.values[0];
     }
@@ -36,6 +41,10 @@ export class LABColor {
         const deltaHkhsh = deltaH / (sh);
         const i = deltaLKlsl * deltaLKlsl + deltaCkcsc * deltaCkcsc + deltaHkhsh * deltaHkhsh;
         return i < 0 ? 0 : Math.sqrt(i);
+    }
+
+    public distanceToGray(): number {
+        return Math.sqrt(this.a * this.a + this.b * this.b);
     }
 
     public toArray(): number[] {
