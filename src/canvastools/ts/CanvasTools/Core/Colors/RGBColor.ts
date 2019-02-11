@@ -1,5 +1,6 @@
 import { HSLColor } from "./HSLColor";
 import { XYZColor } from "./XYZColor";
+import { LABColor } from "./LABColor";
 
 export class RGBColor {
     public static ParseHex(hex: string): RGBColor {
@@ -57,6 +58,18 @@ export class RGBColor {
      */
     constructor(r: number, g: number, b: number) {
         this.values = [r, g, b];
+    }
+
+    public isValidRGB(): boolean {
+        return (this.r >= 0) && (this.r <= 1) &&
+               (this.g >= 0) && (this.g <= 1) &&
+               (this.b >= 0) && (this.b <= 1);
+    }
+
+    public truncate(): RGBColor {
+        return new RGBColor(Math.min(1, Math.max(0, this.r)),
+                            Math.min(1, Math.max(0, this.g)),
+                            Math.min(1, Math.max(0, this.b)));
     }
 
     public toArray(): number[] {
@@ -127,6 +140,10 @@ export class RGBColor {
                 return 1.055 / (v ** 2.4) - 0.055;
             }
         });
+    }
+
+    public toLAB(): LABColor {
+        return this.toXYZ().toLAB();
     }
 
     private to255(): number[] {
