@@ -32,14 +32,14 @@ var webpackSettings = {
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
     },
-    'test-editor': {
+    'test': {
         minimize: false,
         mode: 'development',
-        path: path.resolve(__dirname, './samples/js'),
+        path: path.resolve(__dirname, './samples/shared/js'),
         filename: `${libraryFileName}.js`,
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
-    }
+    },
 }
 
 var settings = webpackSettings[yargs.argv.set];
