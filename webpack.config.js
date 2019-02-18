@@ -43,7 +43,7 @@ var webpackSettings = {
     'test-palette': {
         minimize: false,
         mode: 'development',
-        path: path.resolve(__dirname, './test/palette/js'),
+        path: path.resolve(__dirname, './samples/palette/js'),
         filename: `${libraryFileName}.js`,
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
