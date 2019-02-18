@@ -2,14 +2,14 @@
 
 `CanvasTools` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelements the following core features:
 
-* Region (box) selection & manipulation
+* Region (box, point, polyline & polygon) selection & manipulation
 * Filters pipeline for underlaying canvas element
 * Toolbar for all available tools
 
 ## Dependencies
 
 * `CanvasTools` heavily uses the [Snap.Svg](https://github.com/adobe-webplatform/Snap.svg) library. In the webpack-eged version it is bundled with `CanvasTools` into one `ct.js` file, including also styles.
-* Current version of the library depends on some features (e.g., masks-support in SVG) that are not fully cross-browser, but targeting Electron (Chromium).
+* Current version of the library depends on some features (e.g., masks-support in SVG) that are not fully cross-browser, but are targeting Electron (Chromium).
 
 ## How to use
 
