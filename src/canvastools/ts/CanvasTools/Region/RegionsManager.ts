@@ -92,8 +92,8 @@ export class RegionsManager {
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                      this.callbacks, this.tagsUpdateOptions);
+        const region = new RectRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                      this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -101,8 +101,8 @@ export class RegionsManager {
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                       this.callbacks, this.tagsUpdateOptions);
+        const region = new PointRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                       this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -110,8 +110,8 @@ export class RegionsManager {
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                          this.callbacks, this.tagsUpdateOptions);
+        const region = new PolylineRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                          this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -119,8 +119,8 @@ export class RegionsManager {
     public addPolygonRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolygonRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                         this.callbacks, this.tagsUpdateOptions);
+        const region = new PolygonRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                         this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
