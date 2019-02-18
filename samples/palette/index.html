@@ -3,7 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="css/index.css" />
-    <title>CanvasTools - Palette with Tags Tests</title>
+    <title>CanvasTools Samples - Core Editor</title>
 </head>
 
 <body>
@@ -23,7 +23,7 @@
         </div>
     </div>
 </body>
-<script src="./js/ct.js"></script>
+<script src="./../shared/js/ct.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", (e) => {
         let ct = CanvasTools;
@@ -31,7 +31,7 @@
         let tz = document.getElementById("toolbarDiv");
 
         let editor = new ct.Editor(sz).api;
-        editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
+        editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./../shared/media/icons/");
 
         let incrementalRegionID = 100;
 
@@ -98,35 +98,35 @@
         // Init image selector
         let images = [
             {
-                path: "./images/background-cat-hd.jpg",
+                path: "./../shared/media/background-cat-hd.jpg",
                 title: "Cat (HD)"
             },
             {
-                path: "./images/background-cat2.jpg",
+                path: "./../shared/media/background-cat2.jpg",
                 title: "Cat - Grumpy"
             },
             {
-                path: "./images/background-cat3.jpg",
+                path: "./../shared/media/background-cat3.jpg",
                 title: "Cat - Inspiring"
             },                                   
             {
-                path: "./images/background-city.jpg",
+                path: "./../shared/media/background-city.jpg",
                 title: "City"
             },
             {
-                path: "./images/background-forest-hd.jpg",
+                path: "./../shared/media/background-forest-hd.jpg",
                 title: "Forest (HD)"
             },
             {
-                path: "./images/background-glass.jpg",
+                path: "./../shared/media/background-glass.jpg",
                 title: "Cafe"
             },
             {
-                path: "./images/background-sea-hd.jpg",
+                path: "./../shared/media/background-sea-hd.jpg",
                 title: "Sea (HD)"
             },
             {
-                path: "./images/background-snow.jpg",
+                path: "./../shared/media/background-snow.jpg",
                 title: "Snow"
             }, 
         ];
@@ -145,7 +145,6 @@
             loadImage(path);
         });
         loadImage(images[imageIndex].path);
-        
     });
 
     function initImageSelect(images, onSelect) {
@@ -165,7 +164,6 @@
             }
         });
     }
-
 </script>
 
 </html>
