@@ -139,6 +139,23 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.18
+
+*Docs*
+* Added jsdocs for all classes and interfaces.
+
+*CT Library Changes*
+* `Editor` class now exposes the internal `filterPipeline` object as `FP` instead of `FilterPipeline` to follow other shortcuts namings (like `RM` and `AS`). 
+* For `PointRegion`, `PolygonRegion`, `PolylineRegion` and `RectRegion`classes aligned the constructor signature with the `Region` class.
+* Small refactorings for internal methods and classes naming.
+
+*Samples*
+* Moved the `/test` folder to a new `samples` folder to better reflect that those are usage samples, not tests.
+* Splitted original sample into 1) `/editor` and 2) `/filters`. Extracted common media and js files into `/shared` folder.
+* Extracted new sample without toolbar under the `/editor-no-toolbar` folder.
+* Updated `package.json` and `webpack.config.js` to reflect changes.
+
+
 ### 2.1.17
 
 Added `onRegionMoveBegin` and `onRegionMoveEnd` callbacks to the `Editor` and the `RegionsManager` classes. Usage:
