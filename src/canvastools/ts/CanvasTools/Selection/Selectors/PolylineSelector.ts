@@ -10,25 +10,62 @@ import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * The selector to define a polyline-region.
+ */
 export class PolylineSelector extends Selector {
+    /**
+     * The `CrossElement` to define point position
+     */
     private crossA: CrossElement;
+
+    /**
+     * The element to add a new point.
+     */
     private nextPoint: Snap.Element;
+
+    /**
+     * The line segment to add a new point.
+     */
     private nextSegment: Snap.Element;
 
+    /**
+     * The grouping element for polyline points.
+     */
     private pointsGroup: Snap.Element;
+
+    /**
+     * The polyline element.
+     */
     private polyline: Snap.Element;
 
+    /**
+     * Collection of points composing polyline data.
+     */
     private points: Point2D[];
+
+    /**
+     * The last point.
+     */
     private lastPoint: Point2D;
 
+    /**
+     * Default point radius.
+     */
     private pointRadius: number = 3;
 
+    /**
+     * Current state of selector.
+     */
     private isCapturing: boolean = false;
-    private capturePointerId: number;
 
+    /**
+     * Creates new `PolylineSelector` object.
+     * @param parent - The parent SVG-element.
+     * @param paper - The `Snap.Paper` element to draw on.
+     * @param boundRect - The bounding box.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
         super(parent, paper, boundRect, callbacks);
 
@@ -37,11 +74,19 @@ export class PolylineSelector extends Selector {
         this.hide();
     }
 
+    /**
+     * Resizes the selector to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.crossA.resize(width, height);
     }
 
+    /**
+     * Hides the selector.
+     */
     public hide() {
         super.hide();
         this.crossA.hide();
@@ -51,6 +96,9 @@ export class PolylineSelector extends Selector {
         this.pointsGroup.node.setAttribute("visibility", "hidden");
     }
 
+    /**
+     * Shows the selector.
+     */
     public show() {
         super.show();
         this.crossA.show();
@@ -60,11 +108,17 @@ export class PolylineSelector extends Selector {
         this.pointsGroup.node.setAttribute("visibility", "visible");
     }
 
+    /**
+     * Disables and hides this selector.
+     */
     public disable() {
         this.reset();
         super.disable();
     }
 
+    /**
+     * Builds selector's UI.
+     */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("polylineSelector");
@@ -101,6 +155,9 @@ export class PolylineSelector extends Selector {
         this.subscribeToEvents(listeners);
     }
 
+    /**
+     * Resets the selector.
+     */
     private reset() {
         this.points = new Array<Point2D>();
         this.lastPoint = null;
@@ -119,6 +176,11 @@ export class PolylineSelector extends Selector {
         }
     }
 
+    /**
+     * Adds a new point to polyline at specified coordinates
+     * @param x - x-coordinate of the new point.
+     * @param y - y-coordinate of the new point.
+     */
     private addPoint(x: number, y: number) {
         this.points.push(new Point2D(x, y));
 
@@ -137,12 +199,20 @@ export class PolylineSelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer enter event.
+     * @param e PointerEvent
+     */
     private onPointerEnter(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             this.show();
         });
     }
 
+    /**
+     * Listener for the pointer leave event.
+     * @param e PointerEvent
+     */
     private onPointerLeave(e: PointerEvent) {
         if (!this.isCapturing) {
             window.requestAnimationFrame(() => {
@@ -157,6 +227,10 @@ export class PolylineSelector extends Selector {
         }
     }
 
+    /**
+     * Listener for the pointer down event.
+     * @param e PointerEvent
+     */
     private onPointerDown(e: PointerEvent) {
         if (!this.isCapturing) {
             this.isCapturing = true;
@@ -167,6 +241,10 @@ export class PolylineSelector extends Selector {
         }
     }
 
+    /**
+     * Listener for the mouse click event.
+     * @param e MouseEvent
+     */
     private onClick(e: MouseEvent) {
         if (e.detail <= 1) {
             window.requestAnimationFrame(() => {
@@ -178,6 +256,10 @@ export class PolylineSelector extends Selector {
         }
     }
 
+    /**
+     * Listener for the pointer move event.
+     * @param e PointerEvent
+     */
     private onPointerMove(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
@@ -197,10 +279,17 @@ export class PolylineSelector extends Selector {
         e.preventDefault();
     }
 
+    /**
+     * Listener for the mouse double click event.
+     * @param e MouseEvent
+     */
     private onDoubleClick(e: MouseEvent) {
         this.submitPolyline();
     }
 
+    /**
+     * Submits the new polygon region to the callback function.
+     */
     private submitPolyline() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polyline.getBBox();
@@ -211,6 +300,11 @@ export class PolylineSelector extends Selector {
         this.reset();
     }
 
+    /**
+     * Returns the polyline points, closes it if required.
+     * @param close - A flag to "close" the polyline if last point is near to the first one.
+     * @param threshold - The threshold to calculate what is "near".
+     */
     private getPolylinePoints(close: boolean = true, threshold: number = 5) {
         const points = this.points.map((p) => p.copy());
 
@@ -227,6 +321,10 @@ export class PolylineSelector extends Selector {
         return points;
     }
 
+    /**
+     * Listener for the key up event.
+     * @param e KeyboardEvent
+     */
     private onKeyUp(e: KeyboardEvent) {
         // Holding shift key enable square drawing mode
         if (e.code === "Escape") {

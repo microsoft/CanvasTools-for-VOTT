@@ -67,7 +67,9 @@ export class PointSelector extends Selector {
         this.showAll([this.crossA, this.point]);
     }
 
-    /** Builds the visual presentstion of selector. */
+    /**
+     * Builds selector's UI.
+     */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("pointSelector");

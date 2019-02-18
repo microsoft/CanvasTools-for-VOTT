@@ -11,15 +11,33 @@ import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE;
+/**
+ * The selector to define a rect-region using a template.
  */
 export class RectCopySelector extends Selector {
+    /**
+     * Current template for selection.
+     */
     private copyRect: Rect;
 
+    /**
+     * The `CrossElement` to define rect center.
+     */
     private crossA: CrossElement;
+
+    /**
+     * The `RectElement` to show current rect.
+     */
     private copyRectEl: RectElement;
 
+    /**
+     * Creates new `RectCopySelector` object.
+     * @param parent - The parent SVG-element.
+     * @param paper - The `Snap.Paper` element to draw on.
+     * @param boundRect - The bounding box.
+     * @param copyRect - The template rect for selection.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, copyRect: Rect,
                 callbacks?: ISelectorCallbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -28,6 +46,10 @@ export class RectCopySelector extends Selector {
         this.hide();
     }
 
+    /**
+     * Updates the template for selector.
+     * @param copyRect - New template rect.
+     */
     public setTemplate(copyRect: Rect) {
         this.copyRect = copyRect;
 
@@ -35,21 +57,35 @@ export class RectCopySelector extends Selector {
         this.moveCopyRect(this.copyRectEl, this.crossA);
     }
 
+    /**
+     * Resizes the selector to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.crossA.resize(width, height);
     }
 
+    /**
+     * Hides the selector.
+     */
     public hide() {
         super.hide();
         this.hideAll([this.crossA, this.copyRectEl]);
     }
 
+    /**
+     * Shows the selector.
+     */
     public show() {
         super.show();
         this.showAll([this.crossA, this.copyRectEl]);
     }
 
+    /**
+     * Builds selector's UI.
+     */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectCopySelector");
@@ -73,12 +109,21 @@ export class RectCopySelector extends Selector {
         this.subscribeToEvents(listeners);
     }
 
-    private moveCopyRect(copyRect: RectElement, crossA: CrossElement) {
-        const x = crossA.x - copyRect.rect.width / 2;
-        const y = crossA.y - copyRect.rect.height / 2;
+    /**
+     * Helper function to move rect to specified point.
+     * @param copyRect - The rect element to move.
+     * @param p - The new location.
+     */
+    private moveCopyRect(copyRect: RectElement, p: IPoint2D) {
+        const x = p.x - copyRect.rect.width / 2;
+        const y = p.y - copyRect.rect.height / 2;
         copyRect.move(new Point2D(x, y));
     }
 
+    /**
+     * Listener for the pointer enter event.
+     * @param e PointerEvent
+     */
     private onPointerEnter(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             this.crossA.show();
@@ -86,12 +131,20 @@ export class RectCopySelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer leave event.
+     * @param e PointerEvent
+     */
     private onPointerLeave(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             this.hide();
         });
     }
 
+    /**
+     * Listener for the pointer down event.
+     * @param e PointerEvent
+     */
     private onPointerDown(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             this.show();
@@ -102,6 +155,10 @@ export class RectCopySelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer up event.
+     * @param e PointerEvent
+     */
     private onPointerUp(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             if (typeof this.callbacks.onSelectionEnd === "function") {
@@ -116,6 +173,10 @@ export class RectCopySelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer move event.
+     * @param e PointerEvent
+     */
     private onPointerMove(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
@@ -131,6 +192,10 @@ export class RectCopySelector extends Selector {
         e.preventDefault();
     }
 
+    /**
+     * Listener for the wheel event.
+     * @param e WheelEvent
+     */
     private onWheel(e: WheelEvent) {
         let width = this.copyRect.width;
         let height = this.copyRect.height;
