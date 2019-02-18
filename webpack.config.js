@@ -32,10 +32,10 @@ var webpackSettings = {
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
     },
-    'test': {
+    'test-editor': {
         minimize: false,
         mode: 'development',
-        path: path.resolve(__dirname, './test/js'),
+        path: path.resolve(__dirname, './samples/js'),
         filename: `${libraryFileName}.js`,
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"

@@ -114,6 +114,10 @@ export class MenuElement extends RegionComponent {
         });
     }
 
+    public redraw() {
+        // do nothing
+    }
+
     // IHideable -> hide()
     public hide() {
         window.requestAnimationFrame(() => {

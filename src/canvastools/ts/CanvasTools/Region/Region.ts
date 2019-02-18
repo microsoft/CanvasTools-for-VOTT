@@ -70,8 +70,6 @@ export abstract class Region extends RegionComponent {
     }
 
     public redraw() {
-        super.redraw();
-
         this.UI.forEach((element) => {
             element.redraw();
         });
