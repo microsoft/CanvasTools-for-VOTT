@@ -66,12 +66,18 @@ export class MaskElement extends Element {
         this.node = this.mask.node;
     }
 
+    /**
+     * Helper function to build the mask rect.
+     */
     private createMask(): RectElement {
         const r: RectElement = new RectElement(this.paper, this.boundRect, this.boundRect);
         r.node.addClass("maskStyle");
         return r;
     }
 
+    /**
+     * Helper function to build the mask-in rect.
+     */
     private createMaskIn(): RectElement {
         const r: RectElement = new RectElement(this.paper, this.boundRect, this.boundRect);
         r.node.addClass("maskInStyle");

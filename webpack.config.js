@@ -35,19 +35,11 @@ var webpackSettings = {
     'test': {
         minimize: false,
         mode: 'development',
-        path: path.resolve(__dirname, './test/js'),
+        path: path.resolve(__dirname, './samples/shared/js'),
         filename: `${libraryFileName}.js`,
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
     },
-    'test-palette': {
-        minimize: false,
-        mode: 'development',
-        path: path.resolve(__dirname, './samples/palette/js'),
-        filename: `${libraryFileName}.js`,
-        devtool: "inline-source-map",
-        tsconfig: "tsconfig.test.json"
-    }
 }
 
 var settings = webpackSettings[yargs.argv.set];

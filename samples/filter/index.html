@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" />
+    <title>CanvasTools Samples - Filters</title>
+</head>
+
+<body>
+    <div id="canvasToolsDiv">
+        <div id="toolbarDiv">
+        </div>
+        <div id="selectionDiv">
+            <div id="editorDiv"></div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div>
+            <label for="imageSelect" >Choose image: </label>
+            <select id="imageSelect">
+            </select>
+        </div>
+        <div>
+            <label for="filterSelect" >Add filter: </label>
+            <select id="filterSelect">
+            </select>
+            <br />
+            <label for="filterPipeline">Filter pipeline: </label><br />
+            <textarea id="filterPipeline" disabled></textarea>
+        </div>
+    </div>
+</body>
+<script src="./../shared/js/ct.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", (e) => {
+        let ct = CanvasTools;
+        let sz = document.getElementById("editorDiv");
+        let tz = document.getElementById("toolbarDiv");
+
+        let editor = new ct.Editor(sz).api;
+        editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./../shared/media/icons/");
+
+        let incrementalRegionID = 100;
+
+        editor.onSelectionEnd = (regionData) => {
+            let id = (incrementalRegionID++).toString();
+            let tags = generateTagDescriptor();            
+            editor.addRegion(id, regionData, tags);
+        };        
+
+        let primaryTags = [
+            new ct.Core.Tag("Awesome", 0),
+            new ct.Core.Tag("Amazing", "#e53"),
+            new ct.Core.Tag("Brilliante", 60),
+        ];
+
+        let secondaryTags = [
+            new ct.Core.Tag("Yes", 100),
+            new ct.Core.Tag("No", 130),
+            new ct.Core.Tag("Unknown", 160),
+        ];
+
+        let ternaryTags = [
+            new ct.Core.Tag("one", 200),
+            new ct.Core.Tag("two", 230),
+            new ct.Core.Tag("many", 260),
+        ]
+
+        function generateTagDescriptor() {
+            let rnd = Math.random();
+            let rnd3 = () => {
+                return Math.round(Math.random() * 2);
+            };
+
+            let tags;
+            
+            if (rnd < 0.2) {
+                tags = new ct.Core.TagsDescriptor(null, [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
+            } else if (rnd < 0.4) {
+                tags = new ct.Core.TagsDescriptor(primaryTags[rnd3()], [secondaryTags[rnd3()], ternaryTags[rnd3()]]);
+            } else if (rnd < 0.6) {
+                tags = new ct.Core.TagsDescriptor(primaryTags[rnd3()]);
+            } else if (rnd < 0.8) {
+                tags = new ct.Core.TagsDescriptor([primaryTags[rnd3()]]);
+            } else {
+                tags = new ct.Core.TagsDescriptor(); // null
+            }
+
+           
+            return tags;
+        };
+        
+        editor.onRegionMoveBegin = (id, regionData) => {
+            console.log(`Move Begin ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onRegionMove = (id, regionData) => {
+            console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onRegionMoveEnd = (id, regionData) => {
+            console.log(`Move End ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        // Init image selector
+        let images = [
+            {
+                path: "./../shared/media/background-cat-hd.jpg",
+                title: "Cat (HD)"
+            },
+            {
+                path: "./../shared/media/background-cat2.jpg",
+                title: "Cat - Grumpy"
+            },
+            {
+                path: "./../shared/media/background-cat3.jpg",
+                title: "Cat - Inspiring"
+            },                                   
+            {
+                path: "./../shared/media/background-city.jpg",
+                title: "City"
+            },
+            {
+                path: "./../shared/media/background-forest-hd.jpg",
+                title: "Forest (HD)"
+            },
+            {
+                path: "./../shared/media/background-glass.jpg",
+                title: "Cafe"
+            },
+            {
+                path: "./../shared/media/background-sea-hd.jpg",
+                title: "Sea (HD)"
+            },
+            {
+                path: "./../shared/media/background-snow.jpg",
+                title: "Snow"
+            }, 
+        ];
+
+        function loadImage(path) {
+            let image = new Image();
+            image.addEventListener("load", (e) => {
+                editor.addContentSource(e.target);
+            });
+            image.src = path;
+        }
+
+        let imageIndex = 0;
+        initImageSelect(images, (index, path) => {
+            imageIndex = index;
+            loadImage(path);
+        });
+        loadImage(images[imageIndex].path);
+
+        // Init filter selector
+        let filters = [
+            {
+                title: "= Clear filters = ",
+                filter: null,
+            },
+            {
+                title: "Blur Difference 4",
+                filter: ct.Filters.BlurDiffFilter(4),
+            },
+            {
+                title: "Blur Difference 8",
+                filter: ct.Filters.BlurDiffFilter(8),
+            },
+            {
+                title: "Brightness -100",
+                filter: ct.Filters.BrightnessFilter(-100),
+            },
+            {
+                title: "Brightness 100",
+                filter: ct.Filters.BrightnessFilter(100),
+            },
+            {
+                title: "Contrast 100",
+                filter: ct.Filters.ContrastFilter(100),
+            },
+            {
+                title: "Contrast 200",
+                filter: ct.Filters.ContrastFilter(200),
+            },            
+            {
+                title: "Grayscale",
+                filter: ct.Filters.GrayscaleFilter,
+            },
+            {
+                title: "Invert",
+                filter: ct.Filters.InvertFilter,
+            },
+            {
+                title: "Saturation 50%",
+                filter: ct.Filters.SaturationFilter(128),
+            },     
+        ];
+        
+        let filterPipeline = document.getElementById("filterPipeline");
+        initFilterSelect(filters, (index, filter) => {            
+            if (filter === null) {
+                filterPipeline.value = "";
+                editor.clearFilters();
+            } else {
+                //editor.FilterPipeline.clearPipeline();
+                filterPipeline.value += filters[index].title + "\n";
+                editor.addFilter(filter);
+            }
+
+            loadImage(images[imageIndex].path);
+        });
+    });
+
+    function initImageSelect(images, onSelect) {
+        var imageSelect = document.getElementById("imageSelect");
+
+        images.forEach((image) => {
+            let o = document.createElement("option");
+            o.text = image.title;
+            imageSelect.add(o);
+        })
+        imageSelect.selectedIndex = 0;
+
+        imageSelect.addEventListener("change", (e) => {
+            let index = imageSelect.selectedIndex;
+            if (index >= 0 && index < images.length) {
+                onSelect(index, images[index].path);
+            }
+        });
+    }
+
+    function initFilterSelect(filters, onSelect) {
+        var filterSelect = document.getElementById("filterSelect");
+
+        filters.forEach((filter) => {
+            let o = document.createElement("option");
+            o.text = filter.title;
+            filterSelect.add(o);
+        });
+        filterSelect.selectedIndex = 0;
+
+        filterSelect.addEventListener("change", (e) => {
+            let index = filterSelect.selectedIndex;
+            if (index >= 0 && index < filters.length) {
+                onSelect(index, filters[index].filter);
+            }
+        });
+    }
+</script>
+
+</html>

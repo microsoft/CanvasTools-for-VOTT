@@ -108,7 +108,7 @@ export abstract class AnchorsComponent extends RegionComponent {
     }
 
     /**
-     * Switches the component to the unfrozen state.
+     * Creates collection of anchor points.
      */
     protected buildPointAnchors() {
         this.regionData.points.forEach((point, index) => {

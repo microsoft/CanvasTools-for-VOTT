@@ -12,43 +12,92 @@ import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * Enum to specify selection mode.
+ */
 export enum SelectionModificator { RECT, SQUARE }
 
+/**
+ * The selector to define a rect-region.
+ */
 export class RectSelector extends Selector {
+    /**
+     * The `CrossElement` to set the first corner of the rect.
+     */
     private crossA: CrossElement;
+
+    /**
+     * The `CrossElement` to set the opposite corner of the rect.
+     */
     private crossB: CrossElement;
+
+    /**
+     * The `RectElement` to draw selection box.
+     */
     private selectionBox: RectElement;
+
+    /**
+     * The `MaskElement` to hide rest of the source image.
+     */
     private mask: MaskElement;
 
+    /**
+     * Internal flag for selection state.
+     */
     private capturingState: boolean = false;
+
+    /**
+     * Internal flag for selection mode.
+     */
     private isTwoPoints: boolean = false;
 
+    /**
+     * Internal flag for selection type.
+     */
     private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
+    /**
+     * Creates new `RectSelector` object.
+     * @param parent - The parent SVG-element.
+     * @param paper - The `Snap.Paper` element to draw on.
+     * @param boundRect - The bounding box.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
         super(parent, paper, boundRect, callbacks);
         this.buildUIElements();
         this.hide();
     }
 
+    /**
+     * Resizes the selector to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.resizeAll([this.mask, this.crossA, this.crossB]);
     }
 
+    /**
+     * Hides the selector.
+     */
     public hide() {
         super.hide();
         this.hideAll([this.crossA, this.crossB, this.mask]);
     }
 
+    /**
+     * Shows the selector.
+     */
     public show() {
         super.show();
         this.crossA.show();
     }
 
+    /**
+     * Builds selector's UI.
+     */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectSelector");
@@ -76,23 +125,36 @@ export class RectSelector extends Selector {
         this.subscribeToEvents(listeners);
     }
 
-    private moveSelectionBox(box: RectElement, crossA: CrossElement, crossB: CrossElement) {
-        const x = (crossA.x < crossB.x) ? crossA.x : crossB.x;
-        const y = (crossA.y < crossB.y) ? crossA.y : crossB.y;
-        const w = Math.abs(crossA.x - crossB.x);
-        const h = Math.abs(crossA.y - crossB.y);
+    /**
+     * Helper function to move the rect element to specified locations.
+     * @param box - The box to move.
+     * @param pa - The first corner point.
+     * @param pb - The opposite corner point.
+     */
+    private moveSelectionBox(box: RectElement, pa: IPoint2D, pb: IPoint2D) {
+        const x = (pa.x < pb.x) ? pa.x : pb.x;
+        const y = (pa.y < pb.y) ? pa.y : pb.y;
+        const w = Math.abs(pa.x - pb.x);
+        const h = Math.abs(pa.y - pb.y);
 
         box.move(new Point2D(x, y));
         box.resize(w, h);
     }
 
-    // Events
+    /**
+     * Listener for the pointer enter event.
+     * @param e PointerEvent
+     */
     private onPointerEnter(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             this.crossA.show();
         });
     }
 
+    /**
+     * Listener for the pointer leave event.
+     * @param e PointerEvent
+     */
     private onPointerLeave(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
@@ -108,6 +170,10 @@ export class RectSelector extends Selector {
 
     }
 
+    /**
+     * Listener for the pointer down event.
+     * @param e PointerEvent
+     */
     private onPointerDown(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             if (!this.isTwoPoints) {
@@ -126,6 +192,10 @@ export class RectSelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer up event.
+     * @param e PointerEvent
+     */
     private onPointerUp(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
@@ -173,6 +243,10 @@ export class RectSelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the pointer move event.
+     * @param e PointerEvent
+     */
     private onPointerMove(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
@@ -203,6 +277,10 @@ export class RectSelector extends Selector {
         e.preventDefault();
     }
 
+    /**
+     * Listener for the key down event.
+     * @param e KeyboardEvent
+     */
     private onKeyDown(e: KeyboardEvent) {
         // Holding shift key enable square drawing mode
         if (e.shiftKey) {
@@ -214,6 +292,10 @@ export class RectSelector extends Selector {
         }
     }
 
+    /**
+     * Listener for the key up event.
+     * @param e KeyboardEvent
+     */
     private onKeyUp(e: KeyboardEvent) {
         // Holding shift key enable square drawing mode
         if (!e.shiftKey) {

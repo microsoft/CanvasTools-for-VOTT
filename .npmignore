@@ -2,7 +2,9 @@
 src
 node_modules
 test
+samples
 .gitignore
 .gitattributes
 webpack.*
 tsconfig.*
+tslint.*

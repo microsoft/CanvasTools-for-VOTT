@@ -23,6 +23,9 @@ import "snapsvg-cjs";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class CanvasTools {
+    /**
+     * Core internal classes.
+     */
     public static Core = {
         Rect,
         Point2D,
@@ -38,17 +41,26 @@ export class CanvasTools {
         },
     };
 
+    /**
+     * Classes for new region selection (creation).
+     */
     public static Selection = {
         AreaSelector,
         SelectionMode,
     };
 
+    /**
+     * Classes for regions management.
+     */
     public static Region = {
         RegionsManager,
         PointRegion,
         RectRegion,
     };
 
+    /**
+     * Classes and functions to apply filters to the source image.
+     */
     public static Filters = {
         InvertFilter,
         GrayscaleFilter,
@@ -58,7 +70,14 @@ export class CanvasTools {
         SaturationFilter,
     };
 
+    /**
+     * The Editor component.
+     */
     public static Editor = CTEditor;
+
+    /**
+     * The Toolbar component.
+     */
     public static Toolbar = CTToolbar;
 }
 

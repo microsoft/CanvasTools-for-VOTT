@@ -6,21 +6,26 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 
 import { AnchorsComponent } from "../Component/AnchorsComponent";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-/*
- * AnchorsElement
- * Used internally to draw anchors to resize the region
-*/
+/**
+ * `AnchorsComponent` for the `RectRegion` class.
+ */
 export class AnchorsElement extends AnchorsComponent {
     private anchorStyles: string[];
 
+    /**
+     * Creates a new `AnchorsElement` object.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param callbacks - The external callbacks collection.
+     */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
         super(paper, paperRect, regionData, callbacks);
     }
 
+    /**
+     * Creates collection of anchor points.
+     */
     protected buildPointAnchors() {
         this.anchorStyles = ["TL", "TR", "BR", "BL"];
 
@@ -33,6 +38,10 @@ export class AnchorsElement extends AnchorsComponent {
         });
     }
 
+    /**
+     * Updated the `regionData` based on the new ghost anchor location. Should be redefined in child classes.
+     * @param p - The new ghost anchor location.
+     */
     protected updateRegion(p: Point2D) {
         const x1: number = p.x;
         const y1: number = p.y;
@@ -96,16 +105,27 @@ export class AnchorsElement extends AnchorsComponent {
         this.onChange(this, rd, ChangeEventType.MOVING);
     }
 
+    /**
+     * Callback for the pointerenter event for the ghost anchor.
+     * @param e - PointerEvent object.
+     */
     protected onGhostPointerEnter(e: PointerEvent) {
         this.ghostAnchor.addClass(this.getActiveAnchor());
         super.onGhostPointerEnter(e);
     }
 
+    /**
+     * Callback for the pointerleave event for the ghost anchor.
+     * @param e - PointerEvent object.
+     */
     protected onGhostPointerLeave(e: PointerEvent) {
         this.ghostAnchor.removeClass(this.getActiveAnchor());
         super.onGhostPointerLeave(e);
     }
 
+    /**
+     * Internal helper function to get active anchor.
+     */
     private getActiveAnchor(): string {
         return (this.activeAnchorIndex >= 0) ? this.anchorStyles[this.activeAnchorIndex] : "";
     }

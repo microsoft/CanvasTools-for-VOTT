@@ -6,22 +6,45 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-/*
-* TagsElement
-* Used internally to draw labels and map colors for the region
-*/
+/**
+ * `TagsComponent` for the `PolylineRegion` class.
+ */
 export class TagsElement extends TagsComponent {
+    /**
+     * Default (visual) radius for primary tag.
+     */
     public static DEFAULT_PRIMARY_TAG_RADIUS: number = 3;
+
+    /**
+     * Default (visual) size for secondary tag boxes.
+     */
     public static DEFAULT_SECONDARY_TAG_SIZE: number = 6;
+
+    /**
+     * Default (visual) vertical shift for secondary tag boxes.
+     */
     public static DEFAULT_SECONDARY_TAG_DY: number = 6;
 
-    // Elements
+    /**
+     * Reference to the bounding rect (background) object.
+     */
     private primaryTagBoundRect: Snap.Element;
+
+    /**
+     * Reference to the polygon line object.
+     */
     private primaryTagPolyline: Snap.Element;
 
+    /**
+     * Creates a new `TagsElement` object.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param tags - The `TagsDescriptor` object presenting colors and names for region tags.
+     * @param styleId - The unique css style id for region.
+     * @param styleSheet - The regerence to the stylesheet object for rules insection.
+     * @param tagsUpdateOptions - The settings for redrawing tags.
+     */
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string,
                 styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -29,6 +52,9 @@ export class TagsElement extends TagsComponent {
         this.buildOn(paper, tags);
     }
 
+    /**
+     * Redraws the componnent.
+     */
     public redraw() {
         const pointsData = [];
         this.regionData.points.forEach((p) => {
@@ -67,6 +93,9 @@ export class TagsElement extends TagsComponent {
         });
     }
 
+    /**
+     * Inits style maps.
+     */
     protected initStyleMaps(tags: TagsDescriptor) {
         if (tags !== null) {
             if (tags.primary !== null) {
@@ -162,6 +191,9 @@ export class TagsElement extends TagsComponent {
         }
     }
 
+    /**
+     * Internal function to recreate tag labels.
+     */
     protected rebuildTagLabels() {
         // Clear secondary tags -> redraw from scratch
         for (const tag of this.secondaryTags) {
@@ -197,6 +229,11 @@ export class TagsElement extends TagsComponent {
         }
     }
 
+    /**
+     * Internal function to create tag labels
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param tags - The `TagsDescriptor` object defining tags.
+     */
     private buildOn(paper: Snap.Paper, tags: TagsDescriptor) {
         this.primaryTagNode = paper.g();
 

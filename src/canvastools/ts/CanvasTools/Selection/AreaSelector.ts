@@ -9,34 +9,89 @@ import { RectCopySelector } from "./Selectors/RectCopySelector";
 import { RectSelector } from "./Selectors/RectSelector";
 import { Selector } from "./Selectors/Selector";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-/* SELECTORS */
+/**
+ * Enum to define current selectio mode
+ */
 export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }
 
+/**
+ * The region selection manager.
+ * @remarks The naming of the class is historical per the idea to specify the
+ * region area to be selected. Thus AreaSelector.
+ * @todo Consider renaming.
+ */
 export class AreaSelector {
+    /**
+     * Default template size for the `RectCopySelector`.
+     * @todo Move to the `RectCopySelector` class.
+     */
     public static DefaultTemplateSize: Rect = new Rect(20, 20);
 
+    /**
+     * The collection of selector's callbacks.
+     */
     public callbacks: ISelectorCallbacks;
 
+    /**
+     * The reference to the host SVG element.
+     */
     private parentNode: SVGSVGElement;
+
+    /**
+     * The reference to the `Snap.Paper` element to draw on.
+     */
     private paper: Snap.Paper;
+
+    /**
+     * The bounding rect for selectors.
+     */
     private boundRect: Rect;
 
+    /**
+     * The grouping element for selectors.
+     */
     private areaSelectorLayer: Snap.Element;
 
+    /**
+     * Reference to the current selector.
+     */
     private selector: Selector;
 
+    /**
+     * Reference to a `RectSelector` object.
+     */
     private rectSelector: RectSelector;
+
+    /**
+     * Reference to a `RectCopySelector` object.
+     */
     private rectCopySelector: RectCopySelector;
+
+    /**
+     * Reference to a `PointSelector` object.
+     */
     private pointSelector: PointSelector;
+
+    /**
+     * Reference to a `PolylineSelector` object.
+     */
     private polylineSelector: PolylineSelector;
+
+    /**
+     * Reference to a `PolygonSelector` object.
+     */
     private polygonSelector: PolygonSelector;
 
-    private isEnabled: boolean = true;
+    /**
+     * Internal flag to track selector visibility.
+     */
     private isVisible: boolean = true;
 
+    /**
+     * Creates a new `AreaSelector` manager.
+     * @param svgHost - The host SVG element.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(svgHost: SVGSVGElement, callbacks?: ISelectorCallbacks) {
         this.parentNode = svgHost;
         if (callbacks !== undefined) {
@@ -53,6 +108,11 @@ export class AreaSelector {
         this.buildUIElements();
     }
 
+    /**
+     * Resizes selectors to specified `width` and `height`.
+     * @param width - The new `width` for selector.
+     * @param height - The new `height` for selector.
+     */
     public resize(width: number, height: number): void {
         if (width !== undefined && height !== undefined) {
             this.boundRect.resize(width, height);
@@ -65,31 +125,46 @@ export class AreaSelector {
         }
     }
 
+    /**
+     * Enables the current selector.
+     */
     public enable() {
         if (this.selector !== null) {
             this.selector.enable();
-            this.isEnabled = true;
             this.selector.resize(this.boundRect.width, this.boundRect.height);
         }
     }
 
+    /**
+     * Disables the current selector.
+     */
     public disable() {
         if (this.selector !== null) {
             this.selector.disable();
-            this.isEnabled = false;
         }
     }
 
+    /**
+     * Makes current selector visible and enabled.
+     */
     public show() {
         this.enable();
         this.isVisible = true;
     }
 
+    /**
+     * Makes current selector hidden and disabled.
+     */
     public hide() {
         this.disable();
         this.isVisible = false;
     }
 
+    /**
+     * Sets new selection mode (changes active selector).
+     * @param selectionMode - The new selection mode.
+     * @param options - Options for choosen selector if applicable.
+     */
     public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
         this.disable();
 
@@ -122,6 +197,9 @@ export class AreaSelector {
         }
     }
 
+    /**
+     * Creates UI of the AreaSelector.
+     */
     private buildUIElements() {
         this.paper = Snap(this.parentNode);
         this.boundRect = new Rect(this.parentNode.width.baseVal.value, this.parentNode.height.baseVal.value);

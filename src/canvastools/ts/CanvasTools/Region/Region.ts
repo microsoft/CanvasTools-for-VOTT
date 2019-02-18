@@ -12,20 +12,51 @@ import { RegionComponent } from "./Component/RegionComponent";
 declare var Snap: typeof SNAPSVG_TYPE; */
 
 export abstract class Region extends RegionComponent {
-    // Region data
+    /**
+     * Reference to the tags descriptor object.
+     */
     public tags: TagsDescriptor;
-    // Region ID
+
+    /**
+     * External region ID. E.g., used in the `RegionsManager`.
+     */
     public ID: string;
+
+    /**
+     * Internal region ID. Used to simplify debugging and for styling.
+     */
     public regionID: string;
 
+    /**
+     * Building blocks of the region component.
+     */
     protected UI: RegionComponent[];
-    // Region styles
+
+    /**
+     * Internal id to insert/track stylesheets.
+     */
     protected styleID: string;
+
+    /**
+     * The reference to the CSSStyleSheet object.
+     */
     protected styleSheet: CSSStyleSheet = null;
 
-    // Styling options
+    /**
+     * Configuration to draw/redraw tags.
+     */
     protected tagsUpdateOptions: ITagsUpdateOptions;
 
+    /**
+     * Creates new `Region` object.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param callbacks - The external callbacks collection.
+     * @param id - The region `id` used to identify regions in `RegionsManager`.
+     * @param tagsDescriptor - The descriptor of region tags.
+     * @param tagsUpdateOptions - The drawing options for tags.
+     */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
                 id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks);
@@ -41,10 +72,20 @@ export abstract class Region extends RegionComponent {
         this.UI = [];
     }
 
+    /**
+     * Clear region styles.
+     */
     public removeStyles() {
         document.getElementById(this.styleID).remove();
     }
 
+    /**
+     * The callback function fot internal components.
+     * @param component - Reference to the UI component.
+     * @param regionData - New RegionData object.
+     * @param state - New state of the region.
+     * @param multiSelection - Flag for multiselection.
+     */
     public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType,
                     multiSelection: boolean = false) {
         this.regionData.initFrom(regionData);
@@ -52,29 +93,55 @@ export abstract class Region extends RegionComponent {
         super.onChange(this, this.regionData.copy(), state, multiSelection);
     }
 
+    /**
+     * Updates region tags.
+     * @param tags - The new tags descriptor object.
+     * @param options - The tags drawing options.
+     */
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
         this.tags = tags;
         this.tagsUpdateOptions = options;
     }
 
+    /**
+     * Move region to specified location.
+     * @param point - New region location.
+     */
     public move(point: IMovable): void;
+
+    /**
+     * Move region to specified coordinates.
+     * @param x - New x-coordinate.
+     * @param y - New y-coordinate.
+     */
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any) {
         super.move(arg1, arg2);
         this.redraw();
     }
 
+    /**
+     * Resizes the region to specified `width` and `height`.
+     * @param width - The new region width.
+     * @param height - The new region height.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.redraw();
     }
 
+    /**
+     * Redraws the region component.
+     */
     public redraw() {
         this.UI.forEach((element) => {
             element.redraw();
         });
     }
 
+    /**
+     * Visually freeze the region.
+     */
     public freeze() {
         super.freeze();
         this.node.addClass("old");
@@ -83,6 +150,9 @@ export abstract class Region extends RegionComponent {
         });
     }
 
+    /**
+     * Visually unfreeze the region.
+     */
     public unfreeze() {
         super.unfreeze();
         this.node.removeClass("old");
@@ -91,12 +161,16 @@ export abstract class Region extends RegionComponent {
         });
     }
 
-    // Helper function to generate random id;
+    /**
+     * Internal helper function to generate random id.
+     */
     protected s8() {
         return Math.floor((1 + Math.random()) * 0x100000000).toString(16).substring(1);
     }
 
-    // Helper function to insert a new stylesheet into the document
+    /**
+     * Helper function to insert a new stylesheet into the document.
+     */
     private insertStyleSheet(): CSSStyleSheet {
         const style = document.createElement("style");
         style.setAttribute("id", this.styleID);

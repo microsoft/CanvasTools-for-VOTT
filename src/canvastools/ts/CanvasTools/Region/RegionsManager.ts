@@ -12,37 +12,84 @@ import { MenuElement } from "./RegionMenu";
 import { RegionData, RegionDataType } from "../Core/RegionData";
 import { Region } from "./Region";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * The manager for visual region objects.
+ */
 export class RegionsManager {
+    /**
+     * Reference to external callbacks.
+     */
     public callbacks: IRegionsManagerCallbacks;
 
+    /**
+     * Reference to the host SVG element.
+     */
     private baseParent: SVGSVGElement;
+
+    /**
+     * Reference to the `Snap.Paper` object to draw on.
+     */
     private paper: Snap.Paper;
+
+    /**
+     * The paper bounding box.
+     */
     private paperRect: Rect;
 
+    /**
+     * Collection of regions.
+     */
     private regions: Region[];
 
+    /**
+     * Grouping element for menu element.
+     */
     private menuLayer: Snap.Element;
+
+    /**
+     * Reference to the `MenuElement` object.
+     */
     private menu: MenuElement;
 
+    /**
+     * Grouping layer for the manager.
+     */
     private regionManagerLayer: Snap.Element;
 
+    /**
+     * Global freezing state.
+     */
     private isFrozenState: boolean = false;
 
+    /**
+     * Internal manipulation flag.
+     */
     private justManipulated = false;
 
+    /**
+     * Returns current freezing state.
+     */
     public get isFrozen(): boolean {
         return this.isFrozenState;
     }
 
+    /**
+     * Additional CSS class to be added when manager is frozen.
+     */
     private frozenNuance: string;
 
+    /**
+     * Tags create/redraw options.
+     */
     private tagsUpdateOptions: ITagsUpdateOptions = {
         showRegionBackground: true,
     };
 
+    /**
+     * Creates new `RegionsManager`.
+     * @param svgHost - The hosting SVG element.
+     * @param callbacks - Reference to the callbacks collection.
+     */
     constructor(svgHost: SVGSVGElement, callbacks: IRegionsManagerCallbacks) {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
@@ -74,6 +121,12 @@ export class RegionsManager {
         this.subscribeToEvents();
     }
 
+    /**
+     * Add new region to the manager. Automatically defines region type based on the `type` property.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
     public addRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         if (regionData.type === RegionDataType.Point) {
             this.addPointRegion(id, regionData, tagsDescriptor);
@@ -88,39 +141,62 @@ export class RegionsManager {
         this.redrawAllRegions();
     }
 
-    // SETUP NEW REGION
+    /**
+     * Add new rect region to the manager.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new RectRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                      this.callbacks, this.tagsUpdateOptions);
+        const region = new RectRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                      this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
 
+    /**
+     * Add new point region to the manager.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PointRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                       this.callbacks, this.tagsUpdateOptions);
+        const region = new PointRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                       this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
 
+    /**
+     * Add new polyline region to the manager.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolylineRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                          this.callbacks, this.tagsUpdateOptions);
+        const region = new PolylineRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                          this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
 
+    /**
+     * Add new polygon region to the manager.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
     public addPolygonRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolygonRegion(this.paper, this.paperRect, regionData, id, tagsDescriptor,
-                                         this.callbacks, this.tagsUpdateOptions);
+        const region = new PolygonRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                         this.tagsUpdateOptions);
 
         this.registerRegion(region);
     }
@@ -146,7 +222,9 @@ export class RegionsManager {
         //this.menu.showOnRegion(region);
     } */
 
-    // REDRAW ALL REGIONS (corrects z-order changes)
+    /**
+     * Redraws all regions. Reinserts regions in actual order.
+     */
     public redrawAllRegions() {
         // re-add all elements to DOM based on new order
         window.requestAnimationFrame((e) => {
@@ -157,6 +235,10 @@ export class RegionsManager {
         });
     }
 
+    /**
+     * Returns bounding boxes of the selected regions.
+     * @deprecated
+     */
     public getSelectedRegionsBounds() {
         const regions = this.lookupSelectedRegions().map((region) => {
             return {
@@ -170,6 +252,10 @@ export class RegionsManager {
         return regions;
     }
 
+    /**
+     * Deletes a region with specified `id`.
+     * @param id - Id of the region to delete.
+     */
     public deleteRegionById(id: string) {
         const region = this.lookupRegionByID(id);
 
@@ -183,6 +269,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Deletes all the regions from the manager.
+     */
     public deleteAllRegions() {
         for (const region of this.regions) {
             region.removeStyles();
@@ -192,7 +281,11 @@ export class RegionsManager {
         this.menu.hide();
     }
 
-    // REGIONS TAGS UPDATE
+    /**
+     * Updates tags of the specified region.
+     * @param id - The `id` of the region to update.
+     * @param tagsDescriptor - The new tags descriptor object.
+     */
     public updateTagsById(id: string, tagsDescriptor: TagsDescriptor) {
         const region = this.lookupRegionByID(id);
 
@@ -201,6 +294,10 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Updates tags for all selected regions.
+     * @param tagsDescriptor - The new tags descriptor object.
+     */
     public updateTagsForSelectedRegions(tagsDescriptor: TagsDescriptor) {
         const regions = this.lookupSelectedRegions();
 
@@ -209,12 +306,20 @@ export class RegionsManager {
         });
     }
 
+    /**
+     * Selects the region specified by `id`.
+     * @param id - The `id` of the region to select.
+     */
     public selectRegionById(id: string) {
         const region = this.lookupRegionByID(id);
         this.selectRegion(region);
     }
 
-    // MANAGER RESIZE
+    /**
+     * Resizes the manager to specified `width` and `height`.
+     * @param width - The new manager width.
+     * @param height - The new manager height.
+     */
     public resize(width: number, height: number) {
         const tw = width / this.paperRect.width;
         const th = height / this.paperRect.height;
@@ -230,6 +335,10 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Freezes the manager and all its current regions.
+     * @param nuance - [optional] Additional css-class to add to the manager.
+     */
     public freeze(nuance?: string) {
         this.regionManagerLayer.addClass("frozen");
         if (nuance !== undefined) {
@@ -246,6 +355,9 @@ export class RegionsManager {
         this.isFrozenState = true;
     }
 
+    /**
+     * Unfreezes the manager and all its regions.
+     */
     public unfreeze() {
         this.regionManagerLayer.removeClass("frozen");
         if (this.frozenNuance !== "") {
@@ -265,6 +377,9 @@ export class RegionsManager {
         this.isFrozenState = false;
     }
 
+    /**
+     * Toggles freezing mode.
+     */
     public toggleFreezeMode() {
         if (this.isFrozen) {
             this.unfreeze();
@@ -273,7 +388,10 @@ export class RegionsManager {
         }
     }
 
-    // REGIONS LOOKUP
+    /**
+     * Finds the region by specified `id`.
+     * @param id - The `id` to look for.
+     */
     private lookupRegionByID(id: string): Region {
         let region: Region = null;
         let i = 0;
@@ -286,7 +404,9 @@ export class RegionsManager {
         return region;
     }
 
-    // QUICKSORT REGIONS BY AREA DESCENDING
+    /**
+     * Internal helper function to sort regions by their area.
+     */
     private sortRegionsByArea() {
         function quickSort(arr: Region[], left: number, right: number) {
             let pivot: number;
@@ -329,6 +449,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Finds all selected regions.
+     */
     private lookupSelectedRegions(): Region[] {
         const collection = Array<Region>();
 
@@ -341,7 +464,10 @@ export class RegionsManager {
         return collection;
     }
 
-    // REGIONS DELETE
+    /**
+     * Deletes provided region.
+     * @param region - The region to delete.
+     */
     private deleteRegion(region: Region) {
         // remove style
         region.removeStyles();
@@ -357,6 +483,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Deletes all selected regions.
+     */
     private deleteSelectedRegions() {
         const collection = this.lookupSelectedRegions();
         for (const region of collection) {
@@ -370,7 +499,10 @@ export class RegionsManager {
         }
     }
 
-    // REGIONS SELECTION
+    /**
+     * Selects specified region.
+     * @param region - The region to select.
+     */
     private selectRegion(region: Region) {
         if (region != null) {
             this.unselectRegions(region);
@@ -383,6 +515,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Selects all the regions.
+     */
     private selectAllRegions() {
         let r = null;
         for (const region of this.regions) {
@@ -398,6 +533,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Selects the next region (based on current order, e.g., sorted by area).
+     */
     private selectNextRegion() {
         let region = null;
         let i = 0;
@@ -421,7 +559,15 @@ export class RegionsManager {
         this.selectRegion(region);
     }
 
-    // REGIONS MOVE/RESIZE
+    /**
+     * Moves or changes region size
+     * @param region - The region to be changed.
+     * @param dx - x-coordinate shift.
+     * @param dy - y-coordinate shift.
+     * @param dw - width-shift.
+     * @param dh - height-shift.
+     * @param inverse - flag if the change is inverted.
+     */
     private reshapeRegion(region: Region, dx: number, dy: number, dw: number, dh: number, inverse: boolean = false) {
         let w: number;
         let h: number;
@@ -447,6 +593,11 @@ export class RegionsManager {
         region.resize(p2.x - p1.x, p2.y - p1.y);
     }
 
+    /**
+     * Moves the selected region with specified shift in coordinates
+     * @param dx - x-coordinate shift.
+     * @param dy - y-coordinate shift.
+     */
     private moveSelectedRegions(dx: number, dy: number) {
         const regions = this.lookupSelectedRegions();
         regions.forEach((r) => {
@@ -455,6 +606,12 @@ export class RegionsManager {
         this.menu.showOnRegion(regions[0]);
     }
 
+    /**
+     * Resizes the selected region with specified width and height shifts.
+     * @param dw - width-shift.
+     * @param dh - height-shift.
+     * @param inverse - flag if the change is inverted.
+     */
     private resizeSelectedRegions(dw: number, dh: number, inverse: boolean = false) {
         const regions = this.lookupSelectedRegions();
         regions.forEach((r) => {
@@ -463,6 +620,13 @@ export class RegionsManager {
         this.menu.showOnRegion(regions[0]);
     }
 
+    /**
+     * The callback function fot internal components.
+     * @param component - Reference to the UI component.
+     * @param regionData - New RegionData object.
+     * @param state - New state of the region.
+     * @param multiSelection - Flag for multiselection.
+     */
     private onRegionChange(region: Region, regionData: RegionData, state: ChangeEventType,
                            multiSelection: boolean = false) {
         // resize or drag begin
@@ -518,6 +682,10 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Unselects all the regions, naybe except the one specified.
+     * @param except - Region to ignore.
+     */
     private unselectRegions(except?: Region) {
         for (const region of this.regions) {
             if (region !== except) {
@@ -526,6 +694,9 @@ export class RegionsManager {
         }
     }
 
+    /**
+     * Changes the tags drawing setting to draw background or make it transparent.
+     */
     private toggleBackground() {
         this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
 
@@ -534,6 +705,10 @@ export class RegionsManager {
         });
     }
 
+    /**
+     * Inits regions manager UI.
+     * @param paper - The `Snap.Paper` element to draw on.
+     */
     private buildOn(paper: Snap.Paper) {
         this.regionManagerLayer = paper.g();
         this.regionManagerLayer.addClass("regionManager");
@@ -551,6 +726,9 @@ export class RegionsManager {
         this.menu.hide();
     }
 
+    /**
+     * Helper function to subscribe manager to pointer and keyboard events.
+     */
     private subscribeToEvents() {
         this.regionManagerLayer.mouseover((e: MouseEvent) => {
             if (this.callbacks.onManipulationBegin !== null) {
@@ -663,6 +841,10 @@ export class RegionsManager {
         });
     }
 
+    /**
+     * Registers the provided region in the manager.
+     * @param region - The new region to register.
+     */
     private registerRegion(region: Region) {
         this.unselectRegions();
         region.select();

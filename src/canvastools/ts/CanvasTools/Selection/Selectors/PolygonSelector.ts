@@ -11,26 +11,71 @@ import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
 /**
- * The selector to define a polygon region.
+ * The selector to define a polygon-region.
  */
 export class PolygonSelector extends Selector {
+    /**
+     * The `CrossElement` to define point position
+     */
     private crossA: CrossElement;
+
+    /**
+     * The element to add a new point.
+     */
     private nextPoint: Snap.Element;
-    private nextL1: Snap.Element;
-    private nextLN: Snap.Element;
+
+    /**
+     * The line segment to add a new point.
+     */
     private nextSegment: Snap.Element;
 
+    /**
+     * The line to the new point from the first point.
+     */
+    private nextL1: Snap.Element;
+
+    /**
+     * The line to the new point from the last point.
+     */
+    private nextLN: Snap.Element;
+
+    /**
+     * The grouping element for polyline points.
+     */
     private pointsGroup: Snap.Element;
+
+    /**
+     * The polygon element.
+     */
     private polygon: Snap.Element;
 
+    /**
+     * Collection of points composing polyline data.
+     */
     private points: Point2D[];
+
+    /**
+     * The last point.
+     */
     private lastPoint: Point2D;
 
+    /**
+     * Default point radius.
+     */
     private pointRadius: number = 3;
 
+    /**
+     * Current state of selector.
+     */
     private isCapturing: boolean = false;
-    private capturePointerId: number;
 
+    /**
+     * Creates new `PolygonSelector` object.
+     * @param parent - The parent SVG-element.
+     * @param paper - The `Snap.Paper` element to draw on.
+     * @param boundRect - The bounding box.
+     * @param callbacks - The collection of callbacks.
+     */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
         super(parent, paper, boundRect, callbacks);
 
@@ -39,26 +84,43 @@ export class PolygonSelector extends Selector {
         this.hide();
     }
 
+    /**
+     * Resizes the selector to specified `width` and `height`.
+     * @param width - The new `width`.
+     * @param height - The new `height`.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
         this.crossA.resize(width, height);
     }
 
+    /**
+     * Hides the selector.
+     */
     public hide() {
         super.hide();
         this.hideAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
     }
 
+    /**
+     * Shows the selector.
+     */
     public show() {
         super.show();
         this.showAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
     }
 
+    /**
+     * Disables and hides this selector.
+     */
     public disable() {
         this.reset();
         super.disable();
     }
 
+    /**
+     * Builds selector's UI.
+     */
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("polygonSelector");
@@ -162,7 +224,7 @@ export class PolygonSelector extends Selector {
             {
                 event: "dblclick",
                 base: this.parentNode,
-                listener: () => this.submitPolyline(),
+                listener: () => this.submitPolygon(),
                 bypass: false,
             },
             {
@@ -170,7 +232,7 @@ export class PolygonSelector extends Selector {
                 base: window,
                 listener: (e: KeyboardEvent) => {
                     if (e.code === "Escape") {
-                        this.submitPolyline();
+                        this.submitPolygon();
                     }
                 },
                 bypass: true,
@@ -180,6 +242,9 @@ export class PolygonSelector extends Selector {
         this.subscribeToEvents(listeners);
     }
 
+    /**
+     * Resets the selector.
+     */
     private reset() {
         this.points = new Array<Point2D>();
         this.lastPoint = null;
@@ -198,6 +263,11 @@ export class PolygonSelector extends Selector {
         }
     }
 
+    /**
+     * Adds a new point to polygon at specified coordinates
+     * @param x - x-coordinate of the new point.
+     * @param y - y-coordinate of the new point.
+     */
     private addPoint(x: number, y: number) {
         this.points.push(new Point2D(x, y));
 
@@ -216,7 +286,10 @@ export class PolygonSelector extends Selector {
         });
     }
 
-    private submitPolyline() {
+    /**
+     * Submits the new polygon region to the callback function.
+     */
+    private submitPolygon() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
 
