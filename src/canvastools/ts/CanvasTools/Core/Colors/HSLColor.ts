@@ -1,18 +1,33 @@
 import { RGBColor } from "./RGBColor";
 
+/**
+ * Represents the HSL color space.
+ */
 export class HSLColor {
+    /**
+     * The hue value of the color.
+     */
     public get h(): number {
         return this.values[0];
     }
 
+    /**
+     * The saturation value of the color.
+     */
     public get s(): number {
         return this.values[1];
     }
 
+    /**
+     * The lightness value of the color.
+     */
     public get l(): number {
         return this.values[2];
     }
 
+    /**
+     * Array of color components as [h, s, l].
+     */
     private values: number[];
 
     /**
@@ -25,15 +40,28 @@ export class HSLColor {
         this.values = [h, s, l];
     }
 
+    /**
+     * Return a copy of color values in array format as [h, s, l].
+     */
     public toArray(): number[] {
         // copy
         return this.values.map((v) => v);
     }
 
+    /**
+     * Return an array of color values mapped to the ranges used in CSS:
+     * hue - [0, 360]
+     * saturation - [0, 100] %
+     * lightness - [0, 100] %
+     */
     public toCSSValues(): number[] {
         return [this.h * 360, this.s * 100, this.l * 100];
     }
 
+    /**
+     * Composes the CSS color string using the hsl() or hsla() format.
+     * @param alpha - The alpha value for hsla() format.
+     */
     public toCSSString(alpha?: number): string {
         const [h, s, l] = this.toCSSValues();
 
@@ -46,6 +74,9 @@ export class HSLColor {
         }
     }
 
+    /**
+     * Trasforms color to the RGB format.
+     */
     public toRGB(): RGBColor {
         /* https://www.w3.org/TR/css-color-3/
         HOW TO RETURN hsl.to.rgb(h, s, l):
@@ -74,6 +105,9 @@ export class HSLColor {
         return new RGBColor(r, g, b);
     }
 
+    /**
+     * Internal helper function for the `toRGB` method.
+     */
     private hue2rgb(m1: number, m2: number, h: number): number {
         /* https://www.w3.org/TR/css-color-3/
         HOW TO RETURN hue.to.rgb(m1, m2, h):

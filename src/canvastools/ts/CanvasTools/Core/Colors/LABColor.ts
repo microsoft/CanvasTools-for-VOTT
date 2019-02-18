@@ -1,30 +1,62 @@
 import { RGBColor } from "./RGBColor";
 import { XYZColor } from "./XYZColor";
 
+/**
+ * The AB-subspace for the LAB color space.
+ */
 export interface ILabColorPoint {
     a: number;
     b: number;
 }
 
+/**
+ * Represents the CIE LAB color space.
+ */
 export class LABColor implements ILabColorPoint {
+    /**
+     * The lightness value of the color.
+     */
     public get l(): number {
         return this.values[0];
     }
 
+    /**
+     * The a-component of the color (green to red).
+     */
     public get a(): number {
         return this.values[1];
     }
 
+    /**
+     * The b-component of the color (blue to yellow).
+     */
     public get b(): number {
         return this.values[2];
     }
 
+    /**
+     * Array of color components as [l, a, b].
+     */
     private values: number[];
 
+    /**
+     * Creates new CIE LAB color.
+     * @param l - Lightness component in the range [0, 1].
+     * @param a - A-component in the range [0, 1].
+     * @param b - B-component in the range [0, 1].
+     */
     constructor(l: number, a: number, b: number) {
         this.values = [l, a, b];
     }
 
+    /**
+     * Computes color difference using the CIE94 formula as defined here:
+     * https://en.wikipedia.org/wiki/Color_difference.
+     * @remarks It is better to use the CIE DE2000 formula, but it requires significantly more computations.
+     * E.g., check this reveiw: http://www.color.org/events/colorimetry/Melgosa_CIEDE2000_Workshop-July4.pdf.
+     * @param color - A color to compare.
+     * @returns The distance between this and provided colors.
+     */
     public distanceTo(color: LABColor): number {
         const deltaL = this.values[0] - color.values[0];
         const deltaA = this.values[1] - color.values[1];
@@ -43,15 +75,24 @@ export class LABColor implements ILabColorPoint {
         return i < 0 ? 0 : Math.sqrt(i);
     }
 
+    /**
+     * Computes the distance to a=b=0 in the AB-subspace.
+     */
     public distanceToGray(): number {
         return Math.sqrt(this.a * this.a + this.b * this.b);
     }
 
+    /**
+     * Return a copy of color values in array format as [l, a, b].
+     */
     public toArray(): number[] {
         // copy
         return this.values.map((v) => v);
     }
 
+    /**
+     * Trasforms color to the XYZ format.
+     */
     public toXYZ(): XYZColor {
         let y = (this.l * 100 + 16) / 116;
         let x = this.a / 5 + y;
@@ -65,6 +106,9 @@ export class LABColor implements ILabColorPoint {
         return new XYZColor(x * XYZColor.D65.x, y * XYZColor.D65.y, z * XYZColor.D65.z);
     }
 
+    /**
+     * Trasforms color to the RGB format.
+     */
     public toRGB(): RGBColor {
         return this.toXYZ().toRGB();
     }

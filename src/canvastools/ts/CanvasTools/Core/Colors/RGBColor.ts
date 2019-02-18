@@ -2,7 +2,14 @@ import { HSLColor } from "./HSLColor";
 import { XYZColor } from "./XYZColor";
 import { LABColor } from "./LABColor";
 
+/**
+ * Represents the RGB color space.
+ */
 export class RGBColor {
+    /**
+     * Parses the hex-string representation of the RGB color.
+     * @param hex - Color string in the format "#RGB" or "#RRGGBB".
+     */
     public static ParseHex(hex: string): RGBColor {
         const isValidColor = /#([a-f0-9]{3}){1,2}\b/i.test(hex);
         if (!isValidColor) {
@@ -25,6 +32,12 @@ export class RGBColor {
         return new RGBColor(r, g, b);
     }
 
+    /**
+     * Convert sRGB-color values into linear RGB format
+     * @param sr - R-component in the range [0, 1].
+     * @param sg - G-component in the range [0, 1].
+     * @param sb - B-component in the range [0, 1].
+     */
     public static FromSRGB(sr: number, sg: number, sb: number): RGBColor {
         const [r, g, b] = [sr, sg, sb].map((v) => {
             if (v < 0.04045) {
@@ -36,18 +49,30 @@ export class RGBColor {
         return new RGBColor(r, g, b);
     }
 
+    /**
+     * The red-component of the color.
+     */
     public get r(): number {
         return this.values[0];
     }
 
+    /**
+     * The green-component of the color.
+     */
     public get g(): number {
         return this.values[1];
     }
 
+    /**
+     * The blue-component of the color.
+     */
     public get b(): number {
         return this.values[2];
     }
 
+    /**
+     * Array of color components as [r, g, b].
+     */
     private values: number[];
 
     /**
@@ -60,23 +85,36 @@ export class RGBColor {
         this.values = [r, g, b];
     }
 
+    /**
+     * Checks if the color values are in the range [0, 1].
+     */
     public isValidRGB(): boolean {
         return (this.r >= 0) && (this.r <= 1) &&
                (this.g >= 0) && (this.g <= 1) &&
                (this.b >= 0) && (this.b <= 1);
     }
 
+    /**
+     * Truncates the color values to the range [0, 1].
+     */
     public truncate(): RGBColor {
         return new RGBColor(Math.min(1, Math.max(0, this.r)),
                             Math.min(1, Math.max(0, this.g)),
                             Math.min(1, Math.max(0, this.b)));
     }
 
+    /**
+     * Return a copy of color values in array format as [r, g, b].
+     */
     public toArray(): number[] {
         // copy
         return this.values.map((v) => v);
     }
 
+    /**
+     * Composes the CSS color string using the rgb() or rgba() format.
+     * @param alpha - The alpha value for rgba() format.
+     */
     public toCSSString(alpha?: number): string {
         const [r, g, b] = this.to255();
         if (alpha !== undefined) {
@@ -88,6 +126,10 @@ export class RGBColor {
         }
     }
 
+    /**
+     * Composes the CSS color string using the "#RRGGBB" or "#RRGGBBAA" format.
+     * @param alpha - The alpha value for the #RRGGBBAA format.
+     */
     public toHex(alpha?: number): string {
         const [r, g, b] = this.toFF();
         if (alpha !== undefined) {
@@ -100,6 +142,9 @@ export class RGBColor {
         }
     }
 
+    /**
+     * Trasforms color to the HSL format.
+     */
     public toHSL(): HSLColor {
         const [r, g, b] = this.values;
         const max: number = Math.max(r, g, b);
@@ -124,6 +169,9 @@ export class RGBColor {
         return new HSLColor(h, s, l);
     }
 
+    /**
+     * Trasforms color to the XYZ format.
+     */
     public toXYZ(): XYZColor {
         const [r, g, b] = this.values;
         const x = 0.4124 * r + 0.3576 * g + 0.1805 * b;
@@ -132,6 +180,9 @@ export class RGBColor {
         return new XYZColor(x, y, z);
     }
 
+    /**
+     * Trasforms color to the sRGB values.
+     */
     public toSRGB(): number[] {
         return this.values.map((v) => {
             if (v < 0.0031308) {
@@ -142,15 +193,24 @@ export class RGBColor {
         });
     }
 
+    /**
+     * Trasforms color to the CIE LAB format.
+     */
     public toLAB(): LABColor {
         return this.toXYZ().toLAB();
     }
 
+    /**
+     * Internal helper function to map color values into [0, 255] range.
+     */
     private to255(): number[] {
         const rgb = this.truncate();
         return rgb.values.map((v) => Math.round(255 * v));
     }
 
+    /**
+     * Internal helper function to map color values into hex-format "FF".
+     */
     private toFF(): string[] {
         const rgb = this.truncate();
         return rgb.values.map((v) => Math.round(255 * v).toString(16).padStart(2, "0"));
