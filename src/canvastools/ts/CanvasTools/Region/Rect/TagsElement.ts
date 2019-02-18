@@ -6,22 +6,40 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-/*
- * TagsElement
- * Used internally to draw labels and map colors for the region
-*/
+/**
+ * `TagsComponent` for the `RectRegion` class.
+ */
 export class TagsElement extends TagsComponent {
-    // Region size
+    /**
+     * Reference to the primary tag text-box object (storyng box size).
+     */
     private textBox: Snap.BBox;
 
-    // Elements
+    /**
+     * Reference to the primary tag rect object (covers the region).
+     */
     private primaryTagRect: Snap.Element;
+
+    /**
+     * Reference to the primary tag text object.
+     */
     private primaryTagText: Snap.Element;
+
+    /**
+     * Reference to the primary tag text background object.
+     */
     private primaryTagTextBG: Snap.Element;
 
+    /**
+     * Creates a new `TagsElement` object.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param tags - The `TagsDescriptor` object presenting colors and names for region tags.
+     * @param styleId - The unique css style id for region.
+     * @param styleSheet - The regerence to the stylesheet object for rules insection.
+     * @param tagsUpdateOptions - The settings for redrawing tags.
+     */
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor, styleId: string,
                 styleSheet: CSSStyleSheet, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -29,6 +47,9 @@ export class TagsElement extends TagsComponent {
         this.buildOn(paper, tags);
     }
 
+    /**
+     * Redraws the componnent.
+     */
     public redraw(rebuildTags: boolean = false) {
         // If there are tags assigned
         if (this.tags) {
@@ -155,6 +176,9 @@ export class TagsElement extends TagsComponent {
         }
     }
 
+    /**
+     * Inits style maps.
+     */
     protected initStyleMaps(tags: TagsDescriptor) {
         if (tags !== null) {
             if (tags.primary !== null) {
@@ -262,10 +286,18 @@ export class TagsElement extends TagsComponent {
         }
     }
 
+    /**
+     * Internal function to recreate tag labels.
+     */
     protected rebuildTagLabels() {
         this.redraw(true);
     }
 
+    /**
+     * Internal function to create tag labels
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param tags - The `TagsDescriptor` object defining tags.
+     */
     private buildOn(paper: Snap.Paper, tags: TagsDescriptor) {
         this.primaryTagNode = paper.g();
 

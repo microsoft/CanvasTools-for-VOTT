@@ -5,14 +5,15 @@ import { IMovable } from "../Interface/IMovable";
 import { IRegionCallbacks } from "../Interface/IRegionCallbacks";
 
 import { RegionComponent } from "./Component/RegionComponent";
+import { Region } from "./Region";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
-/* MenuElement
- * Used internally to show actions menu for the region
-*/
+/**
+ * The region menu element.
+ */
 export class MenuElement extends RegionComponent {
+    /**
+     * The SVG path for x-button (close).
+     */
     public static PathCollection = {
         delete: {
             iconSize: 96,
@@ -21,33 +22,85 @@ export class MenuElement extends RegionComponent {
         },
     };
 
-    // Menu group
+    /**
+     * Menu group object.
+     */
     public menuGroup: Snap.Paper;
+
+    /**
+     * Menu background rect.
+     */
     public menuRect: Snap.Element;
+
+    /**
+     * Reference to the grouping object for menu items.
+     */
     public menuItemsGroup: Snap.Element;
+
+    /**
+     * Menu items collection.
+     */
     public menuItems: Snap.Element[];
 
-    // Menu Item Size
+    /**
+     * Default menu item size.
+     */
     private menuItemSize: number = 20;
-    // Menu position;
-    private mx: number;
-    private my: number;
-    private mw: number = this.menuItemSize + 10;
-    private mh: number = 60;
 
-    // threshold for positioning menu inside/outside
+    /**
+     * Menu x-coordinate.
+     */
+    private mx: number;
+
+    /**
+     * Menu y-coordinate.
+     */
+    private my: number;
+
+    /**
+     * Default menu width.
+     */
+    private mw: number = this.menuItemSize + 10;
+
+    /**
+     * Default menu height.
+     */
+    private mh: number = this.menuItemSize + 10;
+
+    /**
+     * Threshold for positioning menu inside/outside
+     */
     private dh: number = 20;
-    // threshold for positioning menu left/right
+
+    /**
+     * Threshold for positioning menu left/right
+     */
     private dw: number = 5;
 
+    /**
+     * Reference to the host region element.
+     */
     private region: RegionComponent;
 
+    /**
+     * Creates the menu component.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param callbacks - The external callbacks collection.
+     */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
         super(paper, paperRect, regionData, callbacks);
-        this.buildOn(this.paper);
+        this.buildUI();
     }
 
-    public addAction(action: string, icon: string, actor: (RegionComponent) => void) {
+    /**
+     * Add a new icon with action to menu.
+     * @param action - Item action description.
+     * @param icon - Item SVG-path string.
+     * @param actor - The callback function.
+     */
+    public addAction(action: string, icon: string, actor: (component: RegionComponent, action?: string) => void) {
         const item = this.menuGroup.g();
         const itemBack = this.menuGroup.rect(5, 5, this.menuItemSize, this.menuItemSize, 5, 5);
         itemBack.addClass("menuItemBack");
@@ -66,14 +119,18 @@ export class MenuElement extends RegionComponent {
         item.add(itemRect);
 
         item.click((e) => {
-            actor(this.region);
+            actor(this.region, action);
         });
 
         this.menuItemsGroup.add(item);
         this.menuItems.push(item);
     }
 
-    public attachTo(region: RegionComponent) {
+    /**
+     * Attach the menu to specified region element.
+     * @param region - The host region element.
+     */
+    public attachTo(region: Region) {
         this.region = region;
         this.regionData.initFrom(region.regionData);
         this.rearrangeMenuPosition();
@@ -86,7 +143,19 @@ export class MenuElement extends RegionComponent {
         });
     }
 
+    /**
+     * Move menu according to new region location
+     * @remarks This method moves the virtual shadow of the region and then rearranges menu position.
+     * @param point - New region location.
+     */
     public move(point: IMovable): void;
+
+    /**
+     * Move menu according to new region coordinates.
+     * @remarks This method moves the virtual shadow of the region and then rearranges menu position.
+     * @param x - New region x-coordinate.
+     * @param y - New region y-coordinate.
+     */
     public move(x: number, y: number): void;
     public move(arg1: any, arg2?: any): void {
         super.move(arg1, arg2);
@@ -101,6 +170,12 @@ export class MenuElement extends RegionComponent {
         });
     }
 
+    /**
+     * Move menu according to new region size.
+     * @remarks This method moves the virtual shadow of the region and then rearranges menu position.
+     * @param width - New region width.
+     * @param height - New region height.
+     */
     public resize(width: number, height: number) {
         super.resize(width, height);
 
@@ -114,11 +189,16 @@ export class MenuElement extends RegionComponent {
         });
     }
 
+    /**
+     * Redraw menu element.
+     */
     public redraw() {
         // do nothing
     }
 
-    // IHideable -> hide()
+    /**
+     * Visually hide menu element.
+     */
     public hide() {
         window.requestAnimationFrame(() => {
             this.menuGroup.attr({
@@ -128,7 +208,9 @@ export class MenuElement extends RegionComponent {
 
     }
 
-    // IHideable -> show()
+    /**
+     * Visually show menu element.
+     */
     public show() {
         window.requestAnimationFrame(() => {
             this.menuGroup.attr({
@@ -137,12 +219,19 @@ export class MenuElement extends RegionComponent {
         });
     }
 
-    public showOnRegion(region: RegionComponent) {
+    /**
+     * Show menu element on the specified region.
+     * @param region - The host region element.
+     */
+    public showOnRegion(region: Region) {
         this.attachTo(region);
         this.show();
     }
 
-    private buildOn(paper: Snap.Paper) {
+    /**
+     * Creates the menu element UI.
+     */
+    private buildUI() {
         const menuSVG = this.paper.svg(this.mx, this.my, this.mw, this.mh,
                                      this.mx, this.my, this.mw, this.mh) as SVGGraphicsElement;
 
@@ -172,6 +261,9 @@ export class MenuElement extends RegionComponent {
         });
     }
 
+    /**
+     * Updates menu position.
+     */
     private rearrangeMenuPosition() {
         /* // position menu inside
         if (this.mh <= this.boundRect.height - this.dh) {

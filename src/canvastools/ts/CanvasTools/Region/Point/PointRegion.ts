@@ -9,22 +9,47 @@ import { Region } from "../Region";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * The point-type region class.
+ */
 export class PointRegion extends Region {
-    // Region components
+    /**
+     * Reference to the internal DragElement.
+     */
     private dragNode: DragElement;
+
+    /**
+     * Reference to the internal TagsElement.
+     */
     private tagsNode: TagsElement;
+
+    /**
+     * Reference to the tooltip element.
+     */
     private toolTip: Snap.Fragment;
 
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, id: string,
-                tagsDescriptor: TagsDescriptor, callbacks: IRegionCallbacks, tagsUpdateOptions?: ITagsUpdateOptions) {
+    /**
+     * Creates new `PointRegion` object.
+     * @param paper - The `Snap.Paper` object to draw on.
+     * @param paperRect - The parent bounding box for created component.
+     * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
+     * @param callbacks - The external callbacks collection.
+     * @param id - The region `id` used to identify regions in `RegionsManager`.
+     * @param tagsDescriptor - The descriptor of region tags.
+     * @param tagsUpdateOptions - The drawing options for tags.
+     */
+    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
+                id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
 
         this.buildOn(paper);
     }
 
+    /**
+     * Updates region tags.
+     * @param tags - The new tags descriptor object.
+     * @param options - The tags drawing options.
+     */
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
         super.updateTags(tags, options);
 
@@ -32,6 +57,10 @@ export class PointRegion extends Region {
         this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
 
+    /**
+     * Creates the UI of the region component.
+     * @param paper - The `Snap.Paper` element to draw on.
+     */
     private buildOn(paper: Snap.Paper) {
         this.node = paper.g();
         this.node.addClass("regionStyle");
