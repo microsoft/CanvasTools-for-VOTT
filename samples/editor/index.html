@@ -3,7 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="css/index.css" />
-    <title>CanvasTools Demo</title>
+    <title>CanvasTools Samples - Core Editor</title>
 </head>
 
 <body>
@@ -20,14 +20,6 @@
             <label for="imageSelect" >Choose image: </label>
             <select id="imageSelect">
             </select>
-        </div>
-        <div>
-            <label for="filterSelect" >Add filter: </label>
-            <select id="filterSelect">
-            </select>
-            <br />
-            <label for="filterPipeline">Filter pipeline: </label><br />
-            <textarea id="filterPipeline" disabled></textarea>
         </div>
     </div>
 </body>
@@ -153,64 +145,6 @@
             loadImage(path);
         });
         loadImage(images[imageIndex].path);
-
-        // Init filter selector
-        let filters = [
-            {
-                title: "= Clear filters = ",
-                filter: null,
-            },
-            {
-                title: "Blur Difference 4",
-                filter: ct.Filters.BlurDiffFilter(4),
-            },
-            {
-                title: "Blur Difference 8",
-                filter: ct.Filters.BlurDiffFilter(8),
-            },
-            {
-                title: "Brightness -100",
-                filter: ct.Filters.BrightnessFilter(-100),
-            },
-            {
-                title: "Brightness 100",
-                filter: ct.Filters.BrightnessFilter(100),
-            },
-            {
-                title: "Contrast 100",
-                filter: ct.Filters.ContrastFilter(100),
-            },
-            {
-                title: "Contrast 200",
-                filter: ct.Filters.ContrastFilter(200),
-            },            
-            {
-                title: "Grayscale",
-                filter: ct.Filters.GrayscaleFilter,
-            },
-            {
-                title: "Invert",
-                filter: ct.Filters.InvertFilter,
-            },
-            {
-                title: "Saturation 50%",
-                filter: ct.Filters.SaturationFilter(128),
-            },     
-        ];
-        
-        let filterPipeline = document.getElementById("filterPipeline");
-        initFilterSelect(filters, (index, filter) => {            
-            if (filter === null) {
-                filterPipeline.value = "";
-                editor.clearFilters();
-            } else {
-                //editor.FilterPipeline.clearPipeline();
-                filterPipeline.value += filters[index].title + "\n";
-                editor.addFilter(filter);
-            }
-
-            loadImage(images[imageIndex].path);
-        });
     });
 
     function initImageSelect(images, onSelect) {
@@ -227,24 +161,6 @@
             let index = imageSelect.selectedIndex;
             if (index >= 0 && index < images.length) {
                 onSelect(index, images[index].path);
-            }
-        });
-    }
-
-    function initFilterSelect(filters, onSelect) {
-        var filterSelect = document.getElementById("filterSelect");
-
-        filters.forEach((filter) => {
-            let o = document.createElement("option");
-            o.text = filter.title;
-            filterSelect.add(o);
-        });
-        filterSelect.selectedIndex = 0;
-
-        filterSelect.addEventListener("change", (e) => {
-            let index = filterSelect.selectedIndex;
-            if (index >= 0 && index < filters.length) {
-                onSelect(index, filters[index].filter);
             }
         });
     }
