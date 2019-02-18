@@ -11,9 +11,9 @@ import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
+/**
+ * Internal type to describe toolbar presets
+ */
 type ToolbarIconDescription = {
     type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH,
     action: string,
@@ -28,7 +28,13 @@ type ToolbarIconDescription = {
     type: ToolbarItemType.SEPARATOR,
 };
 
+/**
+ * Wraps internal CanvasTools components into one Editor experience.
+ */
 export class Editor {
+    /**
+     * The toolbar icons preset with all available features.
+     */
     public static FullToolbarSet: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.SELECTOR,
@@ -121,6 +127,9 @@ export class Editor {
         },
     ];
 
+    /**
+     * The toolbar icons preset with only rect-related features.
+     */
     public static RectToolbarSet: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.SELECTOR,
@@ -180,6 +189,9 @@ export class Editor {
         },
     ];
 
+    /**
+     * Internal SVG template to define shadow filter.
+     */
     private static SVGDefsTemplate = `
         <defs>
             <filter id="black-glow">
@@ -195,54 +207,163 @@ export class Editor {
             </filter>
         </defs>`;
 
+    /**
+     * Auto-resize flag to automatically update editor internals when the container (window) size is changed.
+     */
     public autoResize: boolean = true;
 
+    /**
+     * A proxi wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
+     * `FilterPipeline` (`FP`).
+     * @remarks As of now those apis do not overlap, so all methods/properties might be mapped from unified API.
+     */
     public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline {
         return this.mergedAPI;
     }
 
+    /**
+     * Callback for `RegionsManager` called when some region is selected or unselected.
+     */
     public onRegionSelected: (id: string, multiselection: boolean) => void;
+
+    /**
+     * Callback for `RegionsManager` called when some region is moving.
+     */
     public onRegionMove: (id: string, regionData: RegionData) => void;
+
+    /**
+     * Callback for `RegionsManager` called when some region began moving.
+     */
     public onRegionMoveBegin: (id: string, regionData: RegionData) => void;
+
+    /**
+     * Callback for `RegionsManager` called when some region ended moving.
+     */
     public onRegionMoveEnd: (id: string, regionData: RegionData) => void;
+
+    /**
+     * Callback for `RegionsManager` called when some region is deleted from UI.
+     */
     public onRegionDelete: (id: string) => void;
-    public onSelectionBegin: () => void;
-    public onSelectionEnd: (regionData: RegionData) => void;
+
+    /**
+     * Callback for `RegionsManager` called when pointer entered manipulation area.
+     */
     public onManipulationBegin: (region?: RegionComponent) => void;
+
+    /**
+     * Callback for `RegionsManager` called when pointer leaved manipulation area.
+     */
     public onManipulationEnd: (region?: RegionComponent) => void;
 
+    /**
+     * Callback for `AreaSelector` called when user began selecting (creating) new region.
+     */
+    public onSelectionBegin: () => void;
+
+    /**
+     * Callback for `AreaSelector` called when user ended selecting (creating) new region.
+     */
+    public onSelectionEnd: (regionData: RegionData) => void;
+
+    /**
+     * Internal reference to the proxi of APIs.
+     */
     private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline;
 
+    /**
+     * Internal reference to the `Toolbar` component.
+     */
     private toolbar: Toolbar;
+
+    /**
+     * Internal reference to the `RegionsManager` component.
+     */
     private regionsManager: RegionsManager;
+
+    /**
+     * Internal reference to the `AresSelector` component.
+     */
     private areaSelector: AreaSelector;
+
+    /**
+     * Internal reference to the `FilterPipeline` component.
+     */
     private filterPipeline: FilterPipeline;
 
+    /**
+     * Reference to the host SVG element.
+     */
     private editorSVG: SVGSVGElement;
+
+    /**
+     * Reference to the host canvas element.
+     */
     private contentCanvas: HTMLCanvasElement;
 
+    /**
+     * Reference to the host div element (contains SVG and Canvas elements).
+     */
     private editorDiv: HTMLDivElement;
 
+    /**
+     * Internal reference to the RegionsManager freezing state.
+     */
     private isRMFrozen: boolean = false;
 
+    /**
+     * The width of the source content.
+     */
     private sourceWidth: number;
+
+    /**
+     * The height of the source content.
+     */
     private sourceHeight: number;
 
+    /**
+     * The current frame width.
+     */
     private frameWidth: number;
+
+    /**
+     * The current frame height.
+     */
     private frameHeight: number;
 
-    constructor(editorZone: HTMLDivElement);
-    constructor(editorZone: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager);
-    constructor(editorZone: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
+    /**
+     * Creates a new `Editor` in specified div-container.
+     * @param container - The div-container for the editor.
+     */
+    constructor(container: HTMLDivElement);
+
+    /**
+     * Creates a new `Editor` in specified div-container and with custom building components.
+     * @remarks - Originally created for testing purposes.
+     * @param container - The div-container for the editor.
+     * @param areaSelector - The `AresSelector` component to use.
+     * @param regionsManager - The `RegionsManager` component to use.
+     */
+    constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager);
+
+    /**
+     * Creates a new `Editor` in specified div-container and with custom building components.
+     * @remarks - Originally created for testing purposes.
+     * @param container - The div-container for the editor.
+     * @param areaSelector - The `AresSelector` component to use.
+     * @param regionsManager - The `RegionsManager` component to use.
+     * @param filterPipeline - The `FilterPipeline` component to use.
+     */
+    constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
                 filterPipeline: FilterPipeline);
 
-    constructor(editorZone: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
+    constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
                 filterPipeline?: FilterPipeline) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
 
-        this.editorDiv = editorZone;
+        this.editorDiv = container;
 
         this.editorDiv.classList.add("CanvasToolsEditor");
         this.editorDiv.append(this.contentCanvas);
@@ -339,7 +460,7 @@ export class Editor {
         }
 
         // Adjust editor size
-        this.resize(editorZone.offsetWidth, editorZone.offsetHeight);
+        this.resize(container.offsetWidth, container.offsetHeight);
 
         // Add proxy to regionsManager, areaSelector and filterPipeline;
         this.mergedAPI = new Proxy(this, {
@@ -357,7 +478,7 @@ export class Editor {
                     t = target.AS;
                     p = t[prop];
                 } else if (prop in target.filterPipeline) {
-                    t = target.FilterPipeline;
+                    t = target.FP;
                     p = t[prop];
                 } else {
                     p = undefined;
@@ -374,9 +495,15 @@ export class Editor {
         }) as any;
     }
 
-    public addToolbar(toolbarZone: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string) {
+    /**
+     * Creates a new toolbar in specified div-container
+     * @param container - The div-container for the toolbar.
+     * @param toolbarSet - Icons set for the toolbar.
+     * @param iconsPath - Path to the toolbar icons.
+     */
+    public addToolbar(container: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string) {
         const svg = this.createSVGElement();
-        toolbarZone.append(svg);
+        container.append(svg);
 
         this.toolbar = new Toolbar(svg);
 
@@ -422,6 +549,11 @@ export class Editor {
         this.toolbar.select(activeSelector);
     }
 
+    /**
+     * Updates the content source for the editor.
+     * @param source - Content source.
+     * @returns A new `Promise` resolved when content is drawn and Editor is resized.
+     */
     public async addContentSource(source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement): Promise<void> {
         const buffCnvs = document.createElement("canvas");
         const context = buffCnvs.getContext("2d");
@@ -451,6 +583,12 @@ export class Editor {
         });
     }
 
+    /**
+     * Resize editor to new width and height.
+     * @remarks - Use if the `autoResize` is `false`.
+     * @param containerWidth - The new container width.
+     * @param containerHeight - The new container height.
+     */
     public resize(containerWidth: number, containerHeight: number) {
         this.frameWidth = containerWidth;
         this.frameHeight = containerHeight;
@@ -480,18 +618,34 @@ export class Editor {
         this.regionsManager.resize(this.frameWidth, this.frameHeight);
     }
 
+    /**
+     * Short reference to the `RegionsManager` component.
+     */
     public get RM(): RegionsManager {
         return this.regionsManager;
     }
 
+    /**
+     * Short reference to the `AreaSelector` component.
+     */
     public get AS(): AreaSelector {
         return this.areaSelector;
     }
 
-    public get FilterPipeline(): FilterPipeline {
+    /**
+     * Short reference to the `FilterPipeline` component.
+     */
+    public get FP(): FilterPipeline {
         return this.filterPipeline;
     }
 
+    /**
+     * Scales the `RegionData` object from frame to source size.
+     * @param regionData - The `RegionData` object.
+     * @param sourceWidth - [Optional] The source width.
+     * @param sourceHeight - [Optional] The source height.
+     * @returns Resized `RegionData` object.
+     */
     public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
         const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
         const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
@@ -504,6 +658,13 @@ export class Editor {
         return rd;
     }
 
+    /**
+     * Scales the `RegionData` object from source to frame size.
+     * @param regionData - The `RegionData` object.
+     * @param sourceWidth - [Optional] The source width.
+     * @param sourceHeight - [Optional] The source height.
+     * @returns Resized `RegionData` object.
+     */
     public scaleRegionToFrameSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
         const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
         const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
@@ -516,12 +677,18 @@ export class Editor {
         return rd;
     }
 
+    /**
+     * Internal helper to create a new SVG element.
+     */
     private createSVGElement(): SVGSVGElement {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.innerHTML = Editor.SVGDefsTemplate;
         return svg;
     }
 
+    /**
+     * Internal helper to create a new HTMLCanvas element.
+     */
     private createCanvasElement(): HTMLCanvasElement {
         const canvas = document.createElement("canvas");
         return canvas;

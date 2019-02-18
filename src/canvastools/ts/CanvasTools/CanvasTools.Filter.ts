@@ -1,5 +1,13 @@
+/**
+ * Filter function Interface. Transformas provided canvas element into a new `Promise`
+ * that returns some new canvas element.
+ */
 export type FilterFunction = (canvas: HTMLCanvasElement) => Promise<HTMLCanvasElement>;
 
+/**
+ * Invertion filter.
+ * @param canvas - Source HTMLCanvas element.
+ */
 export function InvertFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -22,6 +30,10 @@ export function InvertFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEleme
     });
 }
 
+/**
+ * Grayscale filter.
+ * @param canvas - Source HTMLCanvas element.
+ */
 export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -45,6 +57,10 @@ export function GrayscaleFilter(canvas: HTMLCanvasElement): Promise<HTMLCanvasEl
     });
 }
 
+/**
+ * Experimental blur difference filter.
+ * @param factor - Bluring factor (in pixels).
+ */
 export function BlurDiffFilter(factor: number): FilterFunction {
     // http://blog.ivank.net/fastest-gaussian-blur.html
     function boxesForGauss(sigma: number, n: number): number[] {
@@ -232,6 +248,10 @@ export function BlurDiffFilter(factor: number): FilterFunction {
     };
 }
 
+/**
+ * Brightness filter.
+ * @param brightness - The brightness value in the range [0, 255] to be added to pixels.
+ */
 export function BrightnessFilter(brightness: number): FilterFunction {
     return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
@@ -257,6 +277,10 @@ export function BrightnessFilter(brightness: number): FilterFunction {
     };
 }
 
+/**
+ * Contrast filter.
+ * @param contrast - The contrast factor in the range [-255, 255] to be applied to pixels.
+ */
 export function ContrastFilter(contrast: number): FilterFunction {
     return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
@@ -283,6 +307,10 @@ export function ContrastFilter(contrast: number): FilterFunction {
     };
 }
 
+/**
+ * Saturation filter
+ * @param saturation - The saturation factor in the range [0, 255] to be applied to pixels.
+ */
 export function SaturationFilter(saturation: number): FilterFunction {
     return (canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
@@ -365,21 +393,43 @@ export function SaturationFilter(saturation: number): FilterFunction {
         return output;
     } */
 
+/**
+ * The `FilterPipeline` class used to create a pipeline of canvas data transformations
+ * before displaying it to the user.
+ */
 export class FilterPipeline {
+    /**
+     * Array of filters.
+     */
     private pipeline: FilterFunction[];
 
+    /**
+     * Creates new instance of the `FilterPipeline`.
+     */
     constructor() {
         this.pipeline = new Array<FilterFunction>();
     }
 
+    /**
+     * Add new filter function to pipeline.
+     * @param filter - A new filter function.
+     */
     public addFilter(filter: FilterFunction) {
         this.pipeline.push(filter);
     }
 
+    /**
+     * Clear all the filters in pipeline.
+     */
     public clearFilters() {
         this.pipeline = new Array<FilterFunction>();
     }
 
+    /**
+     * Apply filters pipeline to provided source canvas.
+     * @param canvas - The source HTML Canvas element.
+     * @returns A new `Promise` resolved when all filters are applyed.
+     */
     public applyToCanvas(canvas: HTMLCanvasElement): Promise<HTMLCanvasElement> {
         let promise = new Promise<HTMLCanvasElement>((resolve, reject) => {
             return resolve(canvas);
