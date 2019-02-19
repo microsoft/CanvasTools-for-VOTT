@@ -1,4 +1,5 @@
 import { ITag } from "../Interface/ITag";
+import { Color } from "../Core/Colors/Color";
 
 /**
  * Represents meta-data for a tag
@@ -21,41 +22,11 @@ export class Tag implements ITag {
      * Extracts the hue component from a provided CSS color string
      * @param color - A CSS-color in "#RRGGBB" or "#RGB" format
      * @returns A hue value for provided color
+     * @deprecated Use the Color class instead.
      */
     public static getHueFromColor(color: string): number {
-        let r: number;
-        let g: number;
-        let b: number;
-        if (color.length === 7) {
-            r = parseInt(color.substring(1, 3), 16) / 255;
-            g = parseInt(color.substring(3, 5), 16) / 255;
-            b = parseInt(color.substring(5, 7), 16) / 255;
-        } else if (color.length === 4) {
-            r = parseInt(color.charAt(1), 16) / 16;
-            g = parseInt(color.charAt(2), 16) / 16;
-            b = parseInt(color.charAt(3), 16) / 16;
-        }
-
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        let h = 0;
-        let s = 0;
-        const l = (max + min) / 2;
-
-        if (max === min) {
-            h = s = 0; // achromatic
-        } else {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch (max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
-            }
-            h /= 6;
-        }
-
-        return Math.round(h * 360);
+        const c = new Color(color);
+        return c.HSL.h * 360;
     }
 
     private tagHue: number;
