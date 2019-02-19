@@ -1,11 +1,6 @@
 import { LABColor, ILabColorPoint } from "./LABColor";
-import { RGBColor } from "./RGBColor";
 import { SRGBColor } from "./SRGBColor";
-
-export interface ILABRGBGamutPoint {
-    srgb: SRGBColor;
-    lab: LABColor;
-}
+import { Color } from "./Color";
 
 /**
  * Palette settings.
@@ -24,9 +19,9 @@ export interface IPaletteSettings {
  * and extract a subset as color swatches.
  */
 export class Palette {
-    private gamutCluster: ILABRGBGamutPoint[];
+    private gamutCluster: Color[];
 
-    private generateClusterPromise: Promise<ILABRGBGamutPoint[]>;
+    private generateClusterPromise: Promise<Color[]>;
 
     private settings: IPaletteSettings;
 
@@ -53,7 +48,7 @@ export class Palette {
     /**
      * Returns a promise with Gamut points resolved when all points are calculated.
      */
-    public async gamut(): Promise<ILABRGBGamutPoint[]> {
+    public async gamut(): Promise<Color[]> {
         if (this.gamutCluster !== undefined && this.gamutCluster !== null) {
             return new Promise((resolve) => resolve(this.gamutCluster));
         } else {
@@ -68,9 +63,9 @@ export class Palette {
      * Generates a random set of swatches within the palette's gamut.
      * @param colorsCount - The number of colors to be generated.
      */
-    public async swatches(colorsCount: number): Promise<ILABRGBGamutPoint[]> {
+    public async swatches(colorsCount: number): Promise<Color[]> {
         return this.gamut().then((cluster) => {
-            const swatches = new Array<ILABRGBGamutPoint>();
+            const swatches = new Array<Color>();
             const first = Math.round(Math.random() * cluster.length);
             swatches.push(cluster[first]);
 
@@ -87,10 +82,10 @@ export class Palette {
      * @param swatches - The original set of swatches.
      * @param colorsCount - The number of new colors to be generated.
      */
-    public async more(swatches: ILABRGBGamutPoint[], colorsCount: number): Promise<ILABRGBGamutPoint[]> {
+    public async more(swatches: Color[], colorsCount: number): Promise<Color[]> {
         if (swatches.length > 0) {
             return this.gamut().then((cluster) => {
-                const newSwatches = new Array<ILABRGBGamutPoint>();
+                const newSwatches = new Array<Color>();
                 const allSwatches = swatches.map((sw) => sw);
                 for (let i = 0; i < colorsCount; i++) {
                     const swatch = this.findNextColor(allSwatches, cluster);
@@ -110,13 +105,13 @@ export class Palette {
      * @param swatches - The original set of swatches.
      * @param cluster - The cluster to look with-in.
      */
-    private findNextColor(swatches: ILABRGBGamutPoint[], cluster: ILABRGBGamutPoint[]): ILABRGBGamutPoint {
-        let candidate: ILABRGBGamutPoint = cluster[0];
+    private findNextColor(swatches: Color[], cluster: Color[]): Color {
+        let candidate: Color = cluster[0];
         let maxDistanceSQ: number = 0;
 
         cluster.forEach((colorPoint) => {
             const distances = swatches.map((swatchPoint) => {
-                return colorPoint.lab.distanceTo(swatchPoint.lab);
+                return colorPoint.LAB.distanceTo(swatchPoint.LAB);
             });
             const minDistanceSQ = Math.min(...distances);
             if (minDistanceSQ > maxDistanceSQ) {
@@ -131,8 +126,8 @@ export class Palette {
     /**
      * Wraps the `generateGamutCluster` method into a Promise.
      */
-    private generateGamutClusterAsync(): Promise<ILABRGBGamutPoint[]> {
-        const promise = new Promise<ILABRGBGamutPoint[]>((resolve) => {
+    private generateGamutClusterAsync(): Promise<Color[]> {
+        const promise = new Promise<Color[]>((resolve) => {
             this.gamutCluster = this.generateGamutCluster();
             resolve(this.gamutCluster);
         });
@@ -148,14 +143,14 @@ export class Palette {
      * putting lightness equal to a random value within the range
      * [`lightness` - `lightnessVariation`/2, `lightness` + `lightnessVariation`/2].
      */
-    private generateGamutCluster(): ILABRGBGamutPoint[] {
+    private generateGamutCluster(): Color[] {
         let cluster = this.generatePointsCluster(this.settings.granularity);
         cluster = cluster.filter((p) => {
             const d = this.distanceToGray(p);
             return d >= this.settings.minGrayness && d <= this.settings.maxGrayness;
         });
 
-        const colorSpace = new Array<ILABRGBGamutPoint>();
+        const colorSpace = new Array<Color>();
 
         cluster.forEach((p) => {
             let lightness = this.settings.lightness;
@@ -165,13 +160,10 @@ export class Palette {
             }
 
             const labcolor = new LABColor(lightness, p.a, p.b);
-            const rgbcolor = labcolor.toSRGB();
+            const color = new Color(labcolor);
 
-            if (rgbcolor.isValidColor()) {
-                colorSpace.push({
-                    srgb: rgbcolor,
-                    lab: labcolor,
-                });
+            if (color.sRGB.isValidColor()) {
+                colorSpace.push(color);
             }
         });
         return colorSpace;
