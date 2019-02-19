@@ -21,3 +21,24 @@ canvas {
 #swatchesDiv {
     grid-column: 2/3;
 }
+
+#controls div {
+    display: grid;
+    grid-template-columns: 1fr 20px 1fr 20px 1fr;
+}
+
+#controls div * {
+    display: inline-block;
+}
+
+#controls div label {
+    grid-column: 1/2;
+}
+
+#controls div input {
+    grid-column: 3/4;
+}
+
+#controls div span {
+    grid-column: 5/6;
+}
