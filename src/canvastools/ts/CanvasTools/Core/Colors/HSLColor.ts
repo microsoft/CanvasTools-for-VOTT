@@ -102,7 +102,7 @@ export class HSLColor {
         const g = this.hue2rgb(m1, m2, h);
         const b = this.hue2rgb(m1, m2, h - 1 / 3);
 
-        return new RGBColor(r, g, b);
+        return new SRGBColor(r, g, b);
     }
 
     /**
