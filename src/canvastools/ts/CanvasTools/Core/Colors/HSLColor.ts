@@ -1,4 +1,4 @@
-import { RGBColor } from "./RGBColor";
+import { SRGBColor } from "./SRGBColor";
 
 /**
  * Represents the HSL color space.
@@ -77,7 +77,7 @@ export class HSLColor {
     /**
      * Trasforms color to the RGB format.
      */
-    public toRGB(): RGBColor {
+    public toSRGB(): SRGBColor {
         /* https://www.w3.org/TR/css-color-3/
         HOW TO RETURN hsl.to.rgb(h, s, l):
             SELECT:
