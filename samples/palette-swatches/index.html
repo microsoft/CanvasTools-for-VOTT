@@ -194,7 +194,7 @@
             const x = cx + width / 3 * a;
             const y = cy - height / 3 * b;
 
-            context.fillStyle = color.rgb.toHex();
+            context.fillStyle = color.srgb.toHex();
             context.fillRect(x - rs, y - rs, rs * 2, rs * 2);
         });
     }

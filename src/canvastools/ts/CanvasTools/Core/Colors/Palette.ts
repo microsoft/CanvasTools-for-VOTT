@@ -1,8 +1,9 @@
 import { LABColor, ILabColorPoint } from "./LABColor";
 import { RGBColor } from "./RGBColor";
+import { SRGBColor } from "./SRGBColor";
 
 export interface ILABRGBGamutPoint {
-    rgb: RGBColor;
+    srgb: SRGBColor;
     lab: LABColor;
 }
 
@@ -164,11 +165,11 @@ export class Palette {
             }
 
             const labcolor = new LABColor(lightness, p.a, p.b);
-            const rgbcolor = labcolor.toRGB();
+            const rgbcolor = labcolor.toSRGB();
 
-            if (rgbcolor.isValidRGB()) {
+            if (rgbcolor.isValidColor()) {
                 colorSpace.push({
-                    rgb: rgbcolor,
+                    srgb: rgbcolor,
                     lab: labcolor,
                 });
             }

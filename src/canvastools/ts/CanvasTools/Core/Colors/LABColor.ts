@@ -1,4 +1,5 @@
 import { RGBColor } from "./RGBColor";
+import { SRGBColor } from "./SRGBColor";
 import { XYZColor } from "./XYZColor";
 
 /**
@@ -111,5 +112,12 @@ export class LABColor implements ILabColorPoint {
      */
     public toRGB(): RGBColor {
         return this.toXYZ().toRGB();
+    }
+
+    /**
+     * Trasforms color to the sRGB format.
+     */
+    public toSRGB(): SRGBColor {
+        return this.toXYZ().toRGB().toSRGB();
     }
 }
