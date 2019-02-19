@@ -69,7 +69,7 @@ export class RGBColor {
             if (v < 0.0031308) {
                 return 12.92 * v;
             } else {
-                return 1.055 / (v ** 2.4) - 0.055;
+                return 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
             }
         });
 
