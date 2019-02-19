@@ -121,7 +121,7 @@ export class SRGBColor {
             // cast to [0, 1]
             alpha = Math.min(1, Math.max(0, alpha));
             const alphaFF = Math.round(alpha * 255).toString(16);
-            return `#${r}${g}${b}${alphaFF})`;
+            return `#${r}${g}${b}${alphaFF}`;
         } else {
             return `#${r}${g}${b}`;
         }
