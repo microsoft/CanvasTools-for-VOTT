@@ -114,7 +114,9 @@ export class Palette {
             swatches.push(nextColor);
             distance = nextColor.LAB.distanceTo(lastColor.LAB);
             lastColor = nextColor;
-            yield nextColor;
+            if (distance > 0) {
+                yield nextColor;
+            }
         }
     }
 
