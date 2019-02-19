@@ -99,6 +99,25 @@ export class Palette {
         }
     }
 
+    public async* swatchIterator() {
+        const gamut = await this.gamut();
+        const firstIndex: number = Math.round(Math.random() * gamut.length);
+        const firstColor: Color = gamut[firstIndex];
+
+        yield firstColor;
+
+        const swatches: Color[] = [firstColor];
+        let lastColor = firstColor;
+        let distance = 1.0;
+        while ((distance) > 0) {
+            const nextColor = this.findNextColor(swatches, gamut);
+            swatches.push(nextColor);
+            distance = nextColor.LAB.distanceTo(lastColor.LAB);
+            lastColor = nextColor;
+            yield nextColor;
+        }
+    }
+
     /**
      * Finds the next color to expand the swatches set within the palette's gamut.
      * Returns the point with maximum distance to all the colors in swatches.
