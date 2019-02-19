@@ -99,7 +99,10 @@ export class Palette {
         }
     }
 
-    public async* swatchIterator() {
+    /**
+     * Iteratively generates new swatches within the palette's gamut.
+     */
+    public async* swatchIterator(): AsyncIterableIterator<Color> {
         const gamut = await this.gamut();
         const firstIndex: number = Math.round(Math.random() * gamut.length);
         const firstColor: Color = gamut[firstIndex];
