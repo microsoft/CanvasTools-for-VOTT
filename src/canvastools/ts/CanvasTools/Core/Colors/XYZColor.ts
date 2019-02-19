@@ -1,4 +1,5 @@
 import { RGBColor } from "./RGBColor";
+import { SRGBColor } from "./SRGBColor";
 import { LABColor } from "./LABColor";
 
 /**
@@ -68,6 +69,13 @@ export class XYZColor {
         const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
         const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
         return new RGBColor(r, g, b);
+    }
+
+    /**
+     * Trasforms color to the sRGB format.
+     */
+    public toSRGB(): SRGBColor {
+        return this.toRGB().toSRGB();
     }
 
     /**
