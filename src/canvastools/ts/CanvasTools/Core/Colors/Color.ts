@@ -4,6 +4,12 @@ import { XYZColor } from "./XYZColor";
 import { LABColor } from "./LABColor";
 import { HSLColor } from "./HSLColor";
 
+/**
+ * A wrapper `Color` class to represent various color formats
+ * and manage conversions between them.
+ * @remarks The current work on defining color management in web (including conversion algorithms)
+ * can be tracked in this draft: https://drafts.csswg.org/css-color/
+ */
 export class Color {
     public get sRGB(): SRGBColor {
         return this.srgbColor;
@@ -52,6 +58,7 @@ export class Color {
     constructor(hsl: HSLColor);
     constructor(xyz: XYZColor);
     constructor(lab: LABColor);
+    constructor(srgbCSSString: string);
     constructor(r: number, g: number, b: number);
     constructor(...args) {
         if (args.length === 1) {
@@ -73,6 +80,8 @@ export class Color {
                 this.xyzColor = c.toXYZ();
                 this.rgbColor = this.xyzColor.toRGB();
                 this.srgbColor = this.rgbColor.toSRGB();
+            } else if (typeof c === "string") {
+                this.srgbColor = SRGBColor.ParseHex(c);
             } else {
                 throw new Error("Wrong arg type. Expected one of the '***Color' types.");
             }
