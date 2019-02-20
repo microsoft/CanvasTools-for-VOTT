@@ -139,6 +139,14 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.x - Color-lab
+
+*CT Library Changes*
+* Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string
+when creating new tags.
+* Updated styling of regions to use new `Color` infrastructure.
+* Partially refactored the `canvastools.css` file to use variables to define cursors and colors.
+
 ### 2.1.19
 
 Changed compiler options for `lib` to preserve comments.
