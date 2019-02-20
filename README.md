@@ -139,6 +139,10 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.20
+
+Fix to expose the `multiselection` flag in the `onRegionSelected` callback.
+
 ### 2.1.19
 
 Changed compiler options for `lib` to preserve comments.
