@@ -76,6 +76,71 @@ export class LABColor implements ILabColorPoint {
         return i < 0 ? 0 : Math.sqrt(i);
     }
 
+    public distanceTo_00(color: LABColor): number {
+        const [L1, a1, b1] = this.values;
+        const [L2, a2, b2] = color.values;
+
+        const kL = 1.0;
+        const kC = 1.0;
+        const kH = 1.0;
+        const K1 = 0.045;
+        const K2 = 0.015;
+
+        const deg2rad = Math.PI / 180.0;
+        const rad2deg = 180.0 / Math.PI;
+
+        const deltaL = L2 - L1;
+        const midL = (L1 + L2) / 2;
+        const C1 = Math.sqrt(a1 * a1 + b1 * b1);
+        const C2 = Math.sqrt(a2 * a2 + b2 * b2);
+        const midC = (C1 + C2) / 2;
+        const midC7 = midC ** 7;
+        const midC7Root = Math.sqrt(midC7 / (midC7 + 25 ** 7));
+        const a1t = a1 + 0.5 * a1 * (1 - midC7Root);
+        const a2t = a2 + 0.5 * a2 * (1 - midC7Root);
+        const C1t = Math.sqrt(a1t * a1t + b1 * b1);
+        const C2t = Math.sqrt(a2t * a2t + b2 * b2);
+        const midCt = (C1t + C2t) / 2;
+        const deltaCt = C2t - C1t;
+        const h1 = (b1 === 0 && a1t === 0) ? 0 : (Math.atan2(b1, a1t) * rad2deg) % 360;
+        const h2 = (b2 === 0 && a2t === 0) ? 0 : (Math.atan2(b2, a2t) * rad2deg) % 360;
+
+        let deltah = h2 - h1;
+        const absDeltah = Math.abs(deltah);
+        if (h2 <= h1 && absDeltah > 180) {
+            deltah += 360;
+        }
+        if (h2 > h1 && absDeltah > 180) {
+            deltah -= 360;
+        }
+
+        const deltaH = 2 * Math.sqrt(C1t * C2t) * Math.sin(0.5 * deltah * deg2rad);
+        let H = (h1 + h2) / 2;
+        if (absDeltah > 180 && h1 + h2 < 360) {
+            H += 180;
+        }
+        if (absDeltah > 180 && h1 + h2 >= 360) {
+            H -= 180;
+        }
+
+        const T = 1 - 0.17 * Math.cos((H - 30) * deg2rad)
+                    + 0.24 * Math.cos((2 * H) * deg2rad)
+                    + 0.32 * Math.cos((3 * H + 6) * deg2rad)
+                    - 0.20 * Math.cos((4 * H - 63) * deg2rad);
+
+        const SL = 1 + (K2 * (midL - 50)) / (Math.sqrt(20 + (midL - 50) * (midL - 50)));
+        const SC = 1 + K1 * midCt;
+        const SH = 1 + K2 * midCt * T;
+        const RT = - 2 * midC7Root * Math.sin((60 * Math.exp(- ((H - 275) / 25) * ((H - 275) / 25))) * deg2rad);
+
+        const diff = Math.sqrt((deltaL / (kL * SL)) ** 2
+                             + (deltaCt / (kC * SC)) ** 2
+                             + (deltaH / (kH * SH)) ** 2
+                             + RT * (deltaCt / (kC * SC)) * (deltaH / (kH * SH)));
+
+        return diff;
+    }
+
     /**
      * Computes the distance to a=b=0 in the AB-subspace.
      */
