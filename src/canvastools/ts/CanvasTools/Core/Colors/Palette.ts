@@ -115,7 +115,7 @@ export class Palette {
         while ((distance) > 0) {
             const nextColor = this.findNextColor(swatches, gamut);
             swatches.push(nextColor);
-            distance = nextColor.LAB.distanceTo(lastColor.LAB);
+            distance = nextColor.LAB.distanceTo_00(lastColor.LAB);
             lastColor = nextColor;
             if (distance > 0) {
                 yield nextColor;
@@ -135,7 +135,7 @@ export class Palette {
 
         cluster.forEach((colorPoint) => {
             const distances = swatches.map((swatchPoint) => {
-                return colorPoint.LAB.distanceTo(swatchPoint.LAB);
+                return colorPoint.LAB.distanceTo_00(swatchPoint.LAB);
             });
             const minDistanceSQ = Math.min(...distances);
             if (minDistanceSQ > maxDistanceSQ) {
