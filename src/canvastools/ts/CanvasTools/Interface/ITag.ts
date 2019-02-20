@@ -4,9 +4,14 @@
 export interface ITag {
     /**
      * The color hue value of the object.
-     * @remarks Only hue value is used to automatically generate use pallete of shades.
+     * @deprecated Use the `color` property instead
      */
-    colorHue: number;
+    colorHue?: number;
+
+    /**
+     * The color value of the object in hex format.
+     */
+    color: string;
 
     /**
      * The `name` of the tag.

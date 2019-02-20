@@ -17,7 +17,12 @@ export class Tag implements ITag {
      * @returns A new `Tag` object
      */
     public static BuildFromJSON(data: ITag): Tag {
-        return new Tag(data.name, data.colorHue, (data.id === undefined) ? "" : data.id);
+        if (data.color !== undefined) {
+            return new Tag(data.name, new Color(data.color), (data.id === undefined) ? "" : data.id);
+        } else if (data.colorHue !== undefined) {
+            return new Tag(data.name, new Color(new HSLColor((data.colorHue % 360) / 360.0, 1, 0.5)),
+                           (data.id === undefined) ? "" : data.id);
+        }
     }
 
     /**
@@ -33,11 +38,19 @@ export class Tag implements ITag {
 
     private tagName: string;
     private tagID: string;
+
     /**
      * The hue-value of the tag's color. *Readonly*
      */
     public get colorHue(): number {
-        return this.color.HSL.h * 360;
+        return this.colorObj.HSL.h * 360;
+    }
+
+    /**
+     * The tag's color in hex format. *Readonly*
+     */
+    public get color(): string {
+        return this.colorObj.sRGB.toHex();
     }
 
     /**
@@ -61,7 +74,7 @@ export class Tag implements ITag {
     private tagColorNoColor: string = "";
     private tagColorDark: string = "";
 
-    private color: Color;
+    private colorObj: Color;
 
     /**
      * Returns the pure color variation of the tag's color
@@ -69,7 +82,7 @@ export class Tag implements ITag {
      */
     public get colorPure(): string {
         if (this.tagColorPure === "") {
-            this.tagColorPure = this.color.sRGB.toHex();
+            this.tagColorPure = this.colorObj.sRGB.toHex();
             // OLD: `hsl(${this.tagHue.toString()}, 100%, 50%)`;
         }
         return this.tagColorPure;
@@ -82,7 +95,7 @@ export class Tag implements ITag {
      */
     public get colorAccent(): string {
         if (this.tagColorAccent === "") {
-            this.tagColorAccent = this.color.sRGB.toHex(0.8);
+            this.tagColorAccent = this.colorObj.sRGB.toHex(0.8);
             // OLD: `hsla(${this.tagHue.toString()}, 100%, 50%, 0.5)`;
         }
         return this.tagColorAccent;
@@ -95,7 +108,7 @@ export class Tag implements ITag {
      */
     public get colorHighlight(): string {
         if (this.tagColorHighlight === "") {
-            const lab = this.color.LAB.toArray();
+            const lab = this.colorObj.LAB.toArray();
             const highlight = new LABColor(lab[0] * 0.7, lab[1] * 0.7, lab[2] * 0.7);
             this.tagColorHighlight = highlight.toSRGB().truncate().toHex(0.4);
             // OLD: `hsla(${this.tagHue.toString()}, 80%, 40%, 0.3)`;
@@ -110,7 +123,7 @@ export class Tag implements ITag {
      */
     public get colorShadow(): string {
         if (this.tagColorShadow === "") {
-            const lab = this.color.LAB.toArray();
+            const lab = this.colorObj.LAB.toArray();
             const shadow = new LABColor(lab[0] * 0.6, lab[1] * 0.6, lab[2] * 0.6);
             this.tagColorShadow = shadow.toSRGB().truncate().toHex(0.2);
             // OLD: `hsla(${this.tagHue.toString()}, 50%, 30%, 0.2)`;
@@ -125,7 +138,7 @@ export class Tag implements ITag {
      */
     public get colorDark(): string {
         if (this.tagColorDark === "") {
-            const lab = this.color.LAB.toArray();
+            const lab = this.colorObj.LAB.toArray();
             const dark = new LABColor(lab[0] * 0.5, lab[1] * 0.5, lab[2] * 0.5);
             this.tagColorDark = dark.toSRGB().truncate().toHex(0.8);
             // OLD: `hsla(${this.tagHue.toString()}, 50%, 30%, 0.8)`;
@@ -171,11 +184,11 @@ export class Tag implements ITag {
         this.tagName = name;
 
         if (typeof color === "number") {
-            this.color = new Color(new HSLColor((color % 360) / 360.0, 1, 0.5));
+            this.colorObj = new Color(new HSLColor((color % 360) / 360.0, 1, 0.5));
         } else if (typeof color === "string") {
-            this.color = new Color(color);
+            this.colorObj = new Color(color);
         } else if (color instanceof Color) {
-            this.color = color;
+            this.colorObj = color;
         }
         this.tagID = id;
     }
@@ -185,7 +198,7 @@ export class Tag implements ITag {
      * @returns A new `Tag` object with copied properties
      */
     public copy(): Tag {
-        return new Tag(this.tagName, this.color, this.tagID);
+        return new Tag(this.tagName, this.colorObj, this.tagID);
     }
 
     /**
@@ -196,6 +209,7 @@ export class Tag implements ITag {
         return {
             name: this.tagName,
             colorHue: this.colorHue,
+            color: this.colorObj.sRGB.toHex(),
             id: this.tagID,
         };
     }
