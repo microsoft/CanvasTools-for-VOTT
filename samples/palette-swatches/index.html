@@ -56,17 +56,11 @@
     document.addEventListener("DOMContentLoaded", (e) => {
         // Create canvas element to draw the palette.
         const paletteCanvasDiv = document.getElementById("paletteDiv");
-        const paletteCanvas = document.createElement("canvas");
-        paletteCanvas.width = 800;
-        paletteCanvas.height = 800;
-        paletteCanvasDiv.appendChild(paletteCanvas);
+        const paletteCanvas = createCanvas(paletteCanvasDiv, 800, 800);
 
         // Create canvas element to draw the swatches.
         const swatchesCanvasDiv = document.getElementById("swatchesDiv");
-        const swatchesCanvas = document.createElement("canvas");
-        swatchesCanvas.width = 800;
-        swatchesCanvas.height = 800;
-        swatchesCanvasDiv.appendChild(swatchesCanvas);
+        const swatchesCanvas = createCanvas(swatchesCanvasDiv, 800, 800);
         
         // Init references to UI elements.
         const lightnessRange = document.getElementById("lightnessRange");
@@ -93,19 +87,12 @@
         let swatches;
 
         function redrawPalette() {
-            // Get settings from the UI.
-            const lightness = Number.parseFloat(lightnessRange.value);
-            const lightnessVariation = Number.parseFloat(lightnessVariationRange.value);
-            const minGrayness = Number.parseFloat(minGraynessRange.value);
-            const maxGrayness = Number.parseFloat(maxGraynessRange.value);
-            const swatchesCount = Number.parseInt(swatchesRange.value);
-
             // Define palette settings.
             const paletteSettings = {
-                lightness: lightness,
-                lightnessVariation: lightnessVariation,
-                minGrayness: minGrayness,
-                maxGrayness: maxGrayness,
+                lightness: getValue(lightnessRange),
+                lightnessVariation: getValue(lightnessVariationRange),
+                minGrayness: getValue(minGraynessRange),
+                maxGrayness: getValue(maxGraynessRange),
                 granularity: 50,
                 abRange: 1.3,
             };
@@ -115,14 +102,12 @@
 
             // Draw palette gamut when it is ready.
             palette.gamut().then((gamut) => {
-                initRulers(paletteCanvas);
                 drawGamut(paletteCanvas, gamut);
             });
 
             // Generate new swatches
-            palette.swatches(swatchesCount).then((gamut) => {
+            palette.swatches(getValue(swatchesRange)).then((gamut) => {
                 swatches = gamut;
-                initRulers(swatchesCanvas);
                 drawGamut(swatchesCanvas, swatches, 14);
             });
         }
@@ -130,37 +115,37 @@
         // Generate new palette when lightness is changed.
         lightnessRange.addEventListener("change", (e) => {
             redrawPalette();
-            lightnessRangeValueSpan.innerHTML = `${lightnessRange.value} / [${lightnessRange.min}, ${lightnessRange.max}]`;
+            updateInputLegend(lightnessRange, lightnessRangeValueSpan);
         });
 
         // Generate new palette when lightness variation is changed.
         lightnessVariationRange.addEventListener("change", (e) => {
             redrawPalette();
-            lightnessVariationRangeValueSpan.innerHTML = `${lightnessVariationRange.value} / [${lightnessVariationRange.min}, ${lightnessVariationRange.max}]`;
+            updateInputLegend(lightnessVariationRange, lightnessVariationRangeValueSpan);
         });
 
         // Generate new palette when min grayness is changed.
         minGraynessRange.addEventListener("change", (e) => {
-            if (minGraynessRange.value >= maxGraynessRange.value) {
-                maxGraynessRange.value = Number.parseFloat(minGraynessRange.value) + 0.025;
+            if (getValue(minGraynessRange) >= getValue(maxGraynessRange)) {
+                maxGraynessRange.value = getValue(minGraynessRange) + 0.025;
             } 
             redrawPalette();
-            minGraynessRangeValueSpan.innerHTML = `${minGraynessRange.value} [${minGraynessRange.min}, ${minGraynessRange.max}]`;
+            updateInputLegend(minGraynessRange, minGraynessRangeValueSpan);
         });
 
         // Generate new palette when max grayness is changed.
         maxGraynessRange.addEventListener("change", (e) => {
-            if (maxGraynessRange.value <= minGraynessRange.value) {
-                minGraynessRange.value = Number.parseFloat(maxGraynessRange.value) - 0.025;
+            if (getValue(maxGraynessRange) <= getValue(minGraynessRange)) {
+                minGraynessRange.value = getValue(maxGraynessRange) - 0.025;
             }
             redrawPalette();
-            maxGraynessRangeValueSpan.innerHTML = `${maxGraynessRange.value} [${maxGraynessRange.min}, ${maxGraynessRange.max}]`;
+            updateInputLegend(maxGraynessRange, maxGraynessRangeValueSpan);
         });
 
         // Generate new pallete when initial swatches number is changed.
         swatchesRange.addEventListener("change", (e) => {
             redrawPalette();
-            swatchesRangeValueSpan.innerHTML = `${swatchesRange.value} / [${swatchesRange.min}, ${swatchesRange.max}]`;
+            updateInputLegend(swatchesRange, swatchesRangeValueSpan);
         });
 
         // Add 5 more swatches to already generated ones.
@@ -168,12 +153,37 @@
             // Returns a promise resolved when new swatches are generated.
             palette.more(swatches, 5).then((gamut) => {
                 swatches = swatches.concat(gamut);
-                drawGamut(swatchesCanvas, gamut, 14);
+                drawGamut(swatchesCanvas, swatches, 14);
             });
         });
 
         redrawPalette();
     });
+
+    /**
+     * Creates new canvas element and appends it to the host element
+     */
+     function createCanvas(host, width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        host.appendChild(canvas);
+        return canvas;
+    } 
+
+    /**
+     * Extracts numeric value from the input.
+     */
+     function getValue(input) {
+        return Number.parseFloat(input.value);
+    }
+
+    /**
+     * Updates helper span content based on the input value, min and max.
+     */
+     function updateInputLegend(input, span) {
+        span.innerHTML = `${input.value} [${input.min}, ${input.max}]`;
+    }
 
     /**
      * Inits rules and axes on the canvas
@@ -190,6 +200,7 @@
         // Clear canvas
         context.fillStyle = "#ffffff";
         context.fillRect(0, 0, width, height);
+
         // Draw axes
         context.strokeStyle = "#000000";
         context.beginPath(); 
@@ -207,6 +218,9 @@
      * Draws a collection of points (gamut) on the canvas, using "rs" as rect size for each point.
      */
     function drawGamut(canvas, gamut, rs = 7) {
+        // Clear canvas
+        initRulers(canvas);
+
         const width = canvas.width;
         const height = canvas.height;
         const context = canvas.getContext("2d");
