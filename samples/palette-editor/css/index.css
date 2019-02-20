@@ -46,3 +46,22 @@ body {
 #editorDiv svg {
     box-shadow: 0px 0px 0.25px #999, 0px 0px 10px rgb(0,0,0);
 }
+
+#tags {
+    text-align: center;
+}
+
+.tagButton {
+    color: white;
+    border: 2px solid transparent;
+    border-radius: 1em;
+    height: 2em;
+    margin: 0.5em;
+    outline-color: transparent;
+    box-shadow: 0 0 5px black;
+}
+
+.tagButton.active {
+    border: 2px solid black;
+    
+}
