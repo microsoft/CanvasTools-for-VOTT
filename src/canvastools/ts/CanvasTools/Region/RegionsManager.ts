@@ -262,7 +262,6 @@ export class RegionsManager {
         if (region != null) {
             this.deleteRegion(region);
         }
-        this.menu.hide();
 
         if (this.callbacks.onManipulationEnd !== null) {
             this.callbacks.onManipulationEnd();
@@ -478,8 +477,10 @@ export class RegionsManager {
             return r !== region;
         });
 
+        this.menu.hide();
+
         if ((typeof this.callbacks.onRegionDelete) === "function") {
-            this.callbacks.onRegionDelete(region.ID);
+            this.callbacks.onRegionDelete(region.ID, region.regionData);
         }
     }
 
@@ -492,7 +493,6 @@ export class RegionsManager {
             this.deleteRegion(region);
         }
 
-        this.menu.hide();
         this.selectNextRegion();
         if (this.callbacks.onManipulationEnd !== null) {
             this.callbacks.onManipulationEnd();
