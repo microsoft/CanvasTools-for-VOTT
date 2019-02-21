@@ -149,10 +149,11 @@ image.src = imagePath;
 
 *CT Library Changes*
 * Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string when creating new tags.
-* Updated styling of regions to use new `Color` infrastructure.
+* Updated styling of regions to use the new `Color` infrastructure.
 * Partially refactored the `canvastools.css` file to use variables to define cursors and colors.
-* Added `regionData` for the `onRegionDeleted` callback.
-* Fixed a bug with menu positioning when region is deleted.
+* Added `regionData` to the `onRegionDeleted` callback.
+* Fixed a bug with the menu positioning when a region is deleted.
+* Changed the shift-key to the ctrl-key for multiselection.
 
 ### 2.1.20
 
