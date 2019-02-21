@@ -138,7 +138,9 @@ image.src = imagePath;
 
 ## Changelog
 
-### 2.1.x - Color-lab
+### 2.1.21 - New color infrastructure from the v3-color-lab branch
+
+*New color infrastructure*
 
 *CT Library Changes*
 * Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string
@@ -147,6 +149,10 @@ when creating new tags.
 * Partially refactored the `canvastools.css` file to use variables to define cursors and colors.
 * Added `regionData` for the `onRegionDeleted` callback.
 * Fixed a bug with menu positioning when region is deleted.
+
+### 2.1.20
+
+Fix to expose the `multiselection` flag in the `onRegionSelected` callback.
 
 ### 2.1.19
 
