@@ -17,6 +17,7 @@ import { LABColor } from "./CanvasTools/Core/Colors/LABColor";
 import { XYZColor } from "./CanvasTools/Core/Colors/XYZColor";
 import { HSLColor } from "./CanvasTools/Core/Colors/HSLColor";
 import { Palette } from "./CanvasTools/Core/Colors/Palette";
+import { Color } from "./CanvasTools/Core/Colors/Color";
 
 import "snapsvg-cjs";
 /* import * as SNAPSVG_TYPE from "snapsvg";
@@ -38,6 +39,7 @@ export class CanvasTools {
             XYZColor,
             HSLColor,
             Palette,
+            Color,
         },
     };
 
