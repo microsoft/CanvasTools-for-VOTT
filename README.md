@@ -141,11 +141,11 @@ image.src = imagePath;
 ### 2.1.21 - New color infrastructure from the v3-color-lab branch
 
 *New color infrastructure*
-* Implementation of core color spaces: sRGB, RGB, HSL, XYZ and CIE LAB, including conversion between formats. Added new classes under `CanvasTools.Core.Colors.*`: `SRGBColor`, `RGBColor`, `HSLColor`, `XYZColor` and `LABColor`. The `Color` class is a wrapper around vaious formats.
-* Implementation for color difference algorithms in the CIE LAB color space.
-* New `Palette` class to generate color swatches or expand color swatches in specified lightness plane of color space.
-* New samples to use color infrastructure: `palette-swatches`, `palette-swatch-iterator` and `palette-editor`.
-* Updated readme and basic `editor-*` samples to use new infrastructure.
+* Implementation of core color spaces: sRGB, RGB, HSL, XYZ and CIE LAB, including conversion between formats. Added new classes under `CanvasTools.Core.Colors.*`: `SRGBColor`, `RGBColor`, `HSLColor`, `XYZColor` and `LABColor`. The `Color` class is a wrapper around various formats.
+* Implementation for the color difference algorithms in the CIE LAB color space.
+* New `Palette` class to generate color swatches or expand color swatches in a specified lightness plane of the LAB color space.
+* New samples to use the color infrastructure: `palette-swatches`, `palette-swatch-iterator` and `palette-editor`.
+* Updated readme and basic `editor-*` samples to use the new infrastructure.
 
 *CT Library Changes*
 * Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string when creating new tags.
