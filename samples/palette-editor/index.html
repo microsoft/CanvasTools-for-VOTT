@@ -61,9 +61,11 @@
                     "Unbelievable", "Wonderful", "Shocking", "Surprising", "Startling"];
 
     document.addEventListener("DOMContentLoaded", (e) => {
+        // Get references for editor and toolbar containers
         let editorContainer = document.getElementById("editorDiv");
         let toolbarContainer = document.getElementById("toolbarDiv");
 
+        // Init the editor with toolbar.
         let editor = new CanvasTools.Editor(editorContainer).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
