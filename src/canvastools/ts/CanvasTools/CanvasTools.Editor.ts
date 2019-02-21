@@ -3,6 +3,10 @@ import { FilterPipeline } from "./CanvasTools.Filter";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
 
+import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
+import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
+import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
+
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 
@@ -224,47 +228,47 @@ export class Editor {
     /**
      * Callback for `RegionsManager` called when some region is selected or unselected.
      */
-    public onRegionSelected: (id: string, multiselection: boolean) => void;
+    public onRegionSelected: RegionSelectionFunction;
 
     /**
      * Callback for `RegionsManager` called when some region is moving.
      */
-    public onRegionMove: (id: string, regionData: RegionData) => void;
+    public onRegionMove: RegionUpdateFunction;
 
     /**
      * Callback for `RegionsManager` called when some region began moving.
      */
-    public onRegionMoveBegin: (id: string, regionData: RegionData) => void;
+    public onRegionMoveBegin: RegionUpdateFunction;
 
     /**
      * Callback for `RegionsManager` called when some region ended moving.
      */
-    public onRegionMoveEnd: (id: string, regionData: RegionData) => void;
+    public onRegionMoveEnd: RegionUpdateFunction;
 
     /**
      * Callback for `RegionsManager` called when some region is deleted from UI.
      */
-    public onRegionDelete: (id: string, regionData: RegionData) => void;
+    public onRegionDelete: RegionUpdateFunction;
 
     /**
      * Callback for `RegionsManager` called when pointer entered manipulation area.
      */
-    public onManipulationBegin: (region?: RegionComponent) => void;
+    public onManipulationBegin: RegionManipulationFunction;
 
     /**
      * Callback for `RegionsManager` called when pointer leaved manipulation area.
      */
-    public onManipulationEnd: (region?: RegionComponent) => void;
+    public onManipulationEnd: RegionManipulationFunction;
 
     /**
      * Callback for `AreaSelector` called when user began selecting (creating) new region.
      */
-    public onSelectionBegin: () => void;
+    public onSelectionBegin: SelectionNotifyFunction;
 
     /**
      * Callback for `AreaSelector` called when user ended selecting (creating) new region.
      */
-    public onSelectionEnd: (regionData: RegionData) => void;
+    public onSelectionEnd: SelectionConfirmFunction;
 
     /**
      * Internal reference to the proxi of APIs.
