@@ -11,16 +11,30 @@ body {
     display: grid;
     width: calc(100% - 40px);
     height: 600px;
-    grid-template-columns: 1fr;
+    grid-template-columns: 64px 1fr;
     grid-template-rows: 1fr;
 
     margin:0;
     background: rgb(64,64,64);
 }
 
-#selectionDiv {
+#toolbarDiv {
     grid-row: 1;
     grid-column: 1/2;
+    z-index: 10;
+}
+
+#toolbarDiv svg {
+    width: 64px;
+    height: 100%;
+    margin-right:5px;
+    background: #666;
+    box-shadow: 0 0 0.5px #999, 5px 0px 10px -5px rgb(0,0,0);
+}
+
+#selectionDiv {
+    grid-row: 1;
+    grid-column: 2/3;
     justify-self: center;
     align-self: center;
     margin: 5px;
@@ -31,4 +45,23 @@ body {
 
 #editorDiv svg {
     box-shadow: 0px 0px 0.25px #999, 0px 0px 10px rgb(0,0,0);
+}
+
+#tags {
+    text-align: center;
+}
+
+.tagButton {
+    color: white;
+    border: 2px solid transparent;
+    border-radius: 1em;
+    height: 2em;
+    margin: 0.5em;
+    outline-color: transparent;
+    box-shadow: 0 0 5px black;
+}
+
+.tagButton.active {
+    border: 2px solid black;
+    
 }

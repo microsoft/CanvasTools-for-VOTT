@@ -103,17 +103,15 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.${this.styleId} .primaryTagBoundRectStyle`,
                         style: `fill: ${tags.primary.colorShadow};
-                                stroke: ${tags.primary.colorDark};`,
+                                stroke: ${tags.primary.colorAccent};`,
                     },
                     {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                        style: `fill: ${tags.primary.colorAccent};
-                                stroke: ${tags.primary.colorDark};`,
+                        style: `fill: ${tags.primary.colorHighlight};`,
                     },
                     {
                         rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
-                                stroke: ${tags.primary.colorAccent};`,
+                        style: `fill: ${tags.primary.colorHighlight};`,
                     },
                     {
                         rule: `.${this.styleId} .primaryTagPolygonStyle`,
@@ -148,15 +146,6 @@ export class TagsElement extends TagsComponent {
                 this.styleLightMap = [
                     {
                         rule: `.${this.styleId} .primaryTagBoundRectStyle`,
-                        style: `fill: none;
-                                stroke: ${tags.primary.colorDark};`,
-                    },
-                    {
-                        rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
-                        style: `stroke: ${tags.primary.colorShadow};`,
-                    },
-                    {
-                        rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
                         style: `fill: none;
                                 stroke: ${tags.primary.colorAccent};`,
                     },

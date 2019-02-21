@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" />
+    <title>CanvasTools Samples - Palatte in the Editor</title>
+</head>
+
+<body>
+    <h1>CanvasTools Samples - Palatte in the Editor</h1>
+    <div id="canvasToolsDiv">
+        <div id="toolbarDiv">
+        </div>
+        <div id="selectionDiv">
+            <div id="editorDiv"></div>
+        </div>
+    </div>
+
+    <div id="tagsDiv"></div>
+</body>
+<script src="./../shared/js/ct.js"></script>
+<script>
+    // The list of images
+    const images = [
+            {
+                path: "./../shared/media/background-cat-hd.jpg",
+                title: "Cat (HD)"
+            },
+            {
+                path: "./../shared/media/background-cat2.jpg",
+                title: "Cat - Grumpy"
+            },
+            {
+                path: "./../shared/media/background-cat3.jpg",
+                title: "Cat - Inspiring"
+            },                                   
+            {
+                path: "./../shared/media/background-city.jpg",
+                title: "City"
+            },
+            {
+                path: "./../shared/media/background-forest-hd.jpg",
+                title: "Forest (HD)"
+            },
+            {
+                path: "./../shared/media/background-glass.jpg",
+                title: "Cafe"
+            },
+            {
+                path: "./../shared/media/background-sea-hd.jpg",
+                title: "Sea (HD)"
+            },
+            {
+                path: "./../shared/media/background-snow.jpg",
+                title: "Snow"
+            }, 
+        ];
+
+    // The list of tag names
+    const tagNames = ["Awesome", "Amazing", "Brilliante", "Incredible", "Marvelous",
+                    "Unbelievable", "Wonderful", "Shocking", "Surprising", "Startling"];
+
+    document.addEventListener("DOMContentLoaded", (e) => {
+        // Get references for editor and toolbar containers
+        const editorContainer = document.getElementById("editorDiv");
+        const toolbarContainer = document.getElementById("toolbarDiv");
+
+        // Init the editor with toolbar.
+        const editor = new CanvasTools.Editor(editorContainer).api;
+        editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
+
+        let incrementalRegionId = 100;
+
+        // Add new region to the editor when new region is created
+        editor.onSelectionEnd = (regionData) => {
+            const id = (incrementalRegionId++).toString();
+
+            // Use active tag to create TagsDescriptor object
+            const tags = new CanvasTools.Core.TagsDescriptor(getActiveTag());            
+            editor.addRegion(id, regionData, tags);
+        };        
+
+        // Freeze and disable editor till swatches are ready
+        editor.freeze();
+        editor.disable();
+        
+        // Define palette settings
+        const paletteSettings = {
+            lightness: 0.6,
+            lightnessVariation: 0.1,
+            minGrayness: 0.2,
+            maxGrayness: 0.6,
+            granularity: 100,
+            abRange: 1.3,
+        };
+
+        // Create new pallete
+        const palette = new CanvasTools.Core.Colors.Palette(paletteSettings);
+
+        // Define the number of swatches
+        const swatchesCount = tagNames.length;
+
+        // Request swatches from the pallete
+        palette.swatches(swatchesCount).then((gamut) => {
+            // Create collection of tags using names and generated colors
+            const tags = gamut.map((color, index) => {
+                return new CanvasTools.Core.Tag(tagNames[index], color);
+            });
+
+            // Populate tags buttons to the UI
+            const tagsContainer = document.getElementById("tagsDiv");
+            populateTags(tagsContainer, tags);
+
+            // When swatches are ready enable the editor
+            editor.unfreeze();
+            editor.enable();
+        });
+
+        // Load backgorund image
+        let imageIndex = 1;
+        loadImage(images[imageIndex].path, (image) => {
+            editor.addContentSource(image);
+        });
+    });
+
+    // Current active tag
+    let activeTag;
+
+    // Add buttons for the tags to the container element
+    function populateTags(container, tags) {
+        tags.forEach((tag) => {
+            // Create a button
+            const tagButton = document.createElement("button");
+            tagButton.classList.add("tagButton");
+
+            // Use tag properties to "style" the button
+            tagButton.innerHTML = tag.name;
+            tagButton.style.backgroundColor = tag.color;
+            
+            // Add listener for button click
+            tagButton.addEventListener("click", (e) => {
+                // Clear active tags
+                container.querySelectorAll("button").forEach((button) => button.classList.remove("active"));
+                // Make this tag active
+                tagButton.classList.add("active");
+                activeTag = tag;
+            });
+
+            // Append button to the container
+            container.append(tagButton);
+        });
+
+        // set the first tag active
+        container.querySelector("button").classList.add("active");
+        activeTag = tags[0];
+    }
+
+    function getActiveTag() {
+        return activeTag;
+    }
+
+    // Load an image from specified path and notify when it is loaded.
+    function loadImage(path, onready) {
+        const image = new Image();
+        image.addEventListener("load", (e) => {
+            onready(e.target);                
+        });
+        image.src = path;
+    }
+</script>
+
+</html>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" />
+    <title>CanvasTools Samples - Palette Swatch Iterator</title>
+</head>
+
+<body>
+    <h1>CanvasTools Samples - Palette Swatch Iterator</h1>
+    <div id="canvasToolsDiv">
+        <div id="paletteDiv">
+            <h2>Palette</h2>
+        </div>
+        <div id="swatchesDiv">
+            <h2>Swatches</h2>
+        </div>
+    
+    </div>
+    <div id="controls">
+        <div>
+            <label for="lightnessRange">Lightness</label>
+            <input type="range" id="lightnessRange" name="lightness" min="0" max="1" value="0.6" step="0.025">
+            <span id="lightnessRangeValue">0.6 [0, 1]</span>
+        </div>
+
+        <div>
+            <label for="lightnessVariationRange">Lightness Variation</label>
+            <input type="range" id="lightnessVariationRange" name="lightnessVariation" min="0" max="0.5" value="0.0" step="0.025">
+            <span id="lightnessVariationRangeValue">0.0 [0, 0.5]</span>
+        </div>
+    
+        <div>
+            <label for="minGraynessRange">Min Grayness</label>
+            <input type="range" id="minGraynessRange" name="minGrayness" min="0" max="2" value="0.2" step="0.025" />
+            <span id="minGraynessRangeValue">0.2 [0, 2]</span>
+        </div>
+        <div>
+            <label for="maxGraynessRange">Max Grayness</label>
+            <input type="range" id="maxGraynessRange" name="maxGrayness" min="0" max="2" value="2.0" step="0.025" />
+            <span id="maxGraynessRangeValue">2.0 [0, 2]</span>
+        </div>
+
+        <div>
+            <button id="addMoreSwatches" >Add new color</button>
+        </div>
+    </div>
+</body>
+<script src="./../shared/js/ct.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", (e) => {
+        // Create canvas element to draw the palette.
+        const paletteCanvasDiv = document.getElementById("paletteDiv");
+        const paletteCanvas = createCanvas(paletteCanvasDiv, 800, 800);
+
+        // Create canvas element to draw the swatches.
+        const swatchesCanvasDiv = document.getElementById("swatchesDiv");
+        const swatchesCanvas = createCanvas(swatchesCanvasDiv, 800, 800);
+        
+        // Init references to UI elements.
+        const lightnessRange = document.getElementById("lightnessRange");
+        const lightnessVariationRange = document.getElementById("lightnessVariationRange");
+        const minGraynessRange = document.getElementById("minGraynessRange");
+        const maxGraynessRange = document.getElementById("maxGraynessRange");
+        const addMoreColors = document.getElementById("addMoreSwatches");
+        const lightnessRangeValueSpan = document.getElementById("lightnessRangeValue");
+        const lightnessVariationRangeValueSpan = document.getElementById("lightnessVariationRangeValue");
+        const minGraynessRangeValueSpan = document.getElementById("minGraynessRangeValue");
+        const maxGraynessRangeValueSpan = document.getElementById("maxGraynessRangeValue");
+
+        // Init references to the CanvasTools clases and namespaces.
+        const ct = CanvasTools;
+        const LABColor = CanvasTools.Core.Colors.LABColor;
+        const RGBColor = CanvasTools.Core.Colors.RGBColor;
+        const Palette = CanvasTools.Core.Colors.Palette;
+
+        // References to the palette
+        let palette;
+        // Reference to the swatch iterator
+        let swatchIterator;
+        // Reference to the swatches collection
+        let swatches;
+
+        function redrawPalette() {
+            // Define palette settings.
+            const paletteSettings = {
+                lightness: getValue(lightnessRange),
+                lightnessVariation: getValue(lightnessVariationRange),
+                minGrayness: getValue(minGraynessRange),
+                maxGrayness: getValue(maxGraynessRange),
+                granularity: 50,
+                abRange: 1.3,
+            };
+
+            // Create a new palette with provided settings.
+            palette = new Palette(paletteSettings);
+
+            // Draw palette gamut when it is ready.
+            palette.gamut().then((gamut) => {
+                drawGamut(paletteCanvas, gamut);
+            });
+
+            // Create a new swatch iterator.
+            swatchIterator = palette.swatchIterator();
+            swatches = [];
+
+            // Draw swatches when new color is generated.
+            swatchIterator.next().then((iteration) => {
+                const color = iteration.value;
+                swatches.push(color);
+                drawGamut(swatchesCanvas, swatches, 14);
+            });
+        }
+
+        // Generate new palette when lightness is changed.
+        lightnessRange.addEventListener("change", (e) => {
+            redrawPalette();
+            updateInputLegend(lightnessRange, lightnessRangeValueSpan);
+        });
+
+        // Generate new palette when lightness variation is changed.
+        lightnessVariationRange.addEventListener("change", (e) => {
+            redrawPalette();
+            updateInputLegend(lightnessVariationRange, lightnessVariationRangeValueSpan);
+        });
+
+        // Generate new palette when min grayness is changed.
+        minGraynessRange.addEventListener("change", (e) => {
+            if (getValue(minGraynessRange) >= getValue(maxGraynessRange)) {
+                maxGraynessRange.value = getValue(minGraynessRange) + 0.025;
+            } 
+            redrawPalette();
+            updateInputLegend(minGraynessRange, minGraynessRangeValueSpan);
+        });
+
+        // Generate new palette when max grayness is changed.
+        maxGraynessRange.addEventListener("change", (e) => {
+            if (getValue(maxGraynessRange) <= getValue(minGraynessRange)) {
+                minGraynessRange.value = getValue(maxGraynessRange) - 0.025;
+            }
+            redrawPalette();
+            updateInputLegend(maxGraynessRange, maxGraynessRangeValueSpan);
+        });
+
+        // Add new color to swatches using iterator
+        addMoreColors.addEventListener("click", (e) => {
+            // Iterator returns a promise resolved when color is generated
+            swatchIterator.next().then((iteration) => {
+                if (!iteration.done) {
+                    const color = iteration.value;
+                    swatches.push(color);
+                    drawGamut(swatchesCanvas, swatches, 14);
+                    console.log(`New color: ${color.sRGB.toHex()}`);
+                } else {
+                    addMoreColors.disabled = "disabled";
+                    console.log("Iterator: done");
+                }                
+            });
+        });
+
+        redrawPalette();
+    });
+
+    /**
+     * Creates new canvas element and appends it to the host element
+     */
+    function createCanvas(host, width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        host.appendChild(canvas);
+        return canvas;
+    } 
+
+    /**
+     * Extracts numeric value from the input.
+     */
+    function getValue(input) {
+        return Number.parseFloat(input.value);
+    }
+
+    /**
+     * Updates helper span content based on the input value, min and max.
+     */
+    function updateInputLegend(input, span) {
+        span.innerHTML = `${input.value} [${input.min}, ${input.max}]`;
+    }
+
+    /**
+     * Inits rules and axes on the canvas
+     */
+    function initRulers(canvas) {
+        const width = canvas.width;
+        const height = canvas.height;
+        const context = canvas.getContext("2d");
+
+        // Define the canvas center
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Clear canvas
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+
+        // Draw axes
+        context.strokeStyle = "#000000";
+        context.beginPath(); 
+        context.moveTo(0, cy);
+        context.lineTo(width, cy);
+        context.moveTo(cx, 0);
+        context.lineTo(cx, height);
+        context.stroke();
+
+        // Draw internal box to project range [-1; 1] x [-1; 1] for (a, b) points.
+        context.strokeRect(cx / 3, cy / 3, width * 2 / 3, height * 2 / 3);
+    }
+
+    /**
+     * Draws a collection of points (gamut) on the canvas, using "rs" as rect size for each point.
+     */
+    function drawGamut(canvas, gamut, rs = 7) {
+        // Clear canvas
+        initRulers(canvas);
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const context = canvas.getContext("2d");
+
+        // Define the canvas center
+        const cx = width / 2;
+        const cy = height / 2;
+
+        gamut.forEach((color) => {
+            // Use LAB a,b as point coordinates.
+            const a = color.LAB.a;
+            const b = color.LAB.b;
+            const x = cx + width / 3 * a;
+            const y = cy - height / 3 * b;
+
+            // Use sRGB color as point color.
+            context.fillStyle = color.sRGB.toHex();
+
+            // Draw the rect to represent point.
+            context.fillRect(x - rs, y - rs, rs * 2, rs * 2);
+        });
+    }
+
+</script>
+
+</html>

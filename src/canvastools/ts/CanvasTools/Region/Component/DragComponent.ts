@@ -132,7 +132,7 @@ export abstract class DragComponent extends RegionComponent {
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
                     this.dragNode.node.setPointerCapture(e.pointerId);
-                    const multiselection = e.shiftKey;
+                    const multiselection = e.ctrlKey;
                     this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
                 },
                 bypass: false,
@@ -142,7 +142,7 @@ export abstract class DragComponent extends RegionComponent {
                 base: this.dragNode.node,
                 listener:  (e: PointerEvent) => {
                     this.dragNode.node.releasePointerCapture(e.pointerId);
-                    const multiselection = e.shiftKey;
+                    const multiselection = e.ctrlKey;
                     this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
                 },
                 bypass: false,

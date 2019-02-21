@@ -12,6 +12,11 @@
                 
         "moduleResolution": "node",
         "baseUrl": "src",
+        "lib": [  
+            "es2017",
+            "dom",
+            "esnext.asynciterable"
+        ],
         "paths": {
         },
         "outDir": "./lib/js"

@@ -244,7 +244,7 @@ export class Editor {
     /**
      * Callback for `RegionsManager` called when some region is deleted from UI.
      */
-    public onRegionDelete: (id: string) => void;
+    public onRegionDelete: (id: string, regionData: RegionData) => void;
 
     /**
      * Callback for `RegionsManager` called when pointer entered manipulation area.
@@ -411,9 +411,9 @@ export class Editor {
                     this.onRegionMoveEnd(id, regionData);
                 }
             },
-            onRegionDelete: (id: string) => {
+            onRegionDelete: (id: string, regionData: RegionData) => {
                 if (typeof this.onRegionDelete === "function") {
-                    this.onRegionDelete(id);
+                    this.onRegionDelete(id, regionData);
                 }
             },
         };

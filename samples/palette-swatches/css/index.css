@@ -1,0 +1,44 @@
+body {
+    margin: 20px;   
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+canvas {
+    width: 400px;
+    height: 400px;
+    border: 0.5px solid black;
+}
+
+#canvasToolsDiv {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#paletteDiv {
+    grid-column: 1/2;
+}
+
+#swatchesDiv {
+    grid-column: 2/3;
+}
+
+#controls div {
+    display: grid;
+    grid-template-columns: 1fr 20px 1fr 20px 1fr;
+}
+
+#controls div * {
+    display: inline-block;
+}
+
+#controls div label {
+    grid-column: 1/2;
+}
+
+#controls div input {
+    grid-column: 3/4;
+}
+
+#controls div span {
+    grid-column: 5/6;
+}

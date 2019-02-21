@@ -262,7 +262,6 @@ export class RegionsManager {
         if (region != null) {
             this.deleteRegion(region);
         }
-        this.menu.hide();
 
         if (this.callbacks.onManipulationEnd !== null) {
             this.callbacks.onManipulationEnd();
@@ -478,8 +477,10 @@ export class RegionsManager {
             return r !== region;
         });
 
+        this.menu.hide();
+
         if ((typeof this.callbacks.onRegionDelete) === "function") {
-            this.callbacks.onRegionDelete(region.ID);
+            this.callbacks.onRegionDelete(region.ID, region.regionData);
         }
     }
 
@@ -492,7 +493,6 @@ export class RegionsManager {
             this.deleteRegion(region);
         }
 
-        this.menu.hide();
         this.selectNextRegion();
         if (this.callbacks.onManipulationEnd !== null) {
             this.callbacks.onManipulationEnd();
@@ -504,7 +504,7 @@ export class RegionsManager {
      * @param region - The region to select.
      */
     private selectRegion(region: Region) {
-        if (region != null) {
+        if (region !== null) {
             this.unselectRegions(region);
             region.select();
 
@@ -636,7 +636,7 @@ export class RegionsManager {
             }
             this.menu.hide();
             if ((typeof this.callbacks.onRegionSelected) === "function") {
-                this.callbacks.onRegionSelected(region.ID);
+                this.callbacks.onRegionSelected(region.ID, multiSelection);
             }
             if ((typeof this.callbacks.onRegionMoveBegin) === "function") {
                 this.callbacks.onRegionMoveBegin(region.ID, regionData);
@@ -669,14 +669,14 @@ export class RegionsManager {
                 region.select();
                 this.menu.showOnRegion(region);
                 if ((typeof this.callbacks.onRegionSelected) === "function") {
-                    this.callbacks.onRegionSelected(region.ID);
+                    this.callbacks.onRegionSelected(region.ID, multiSelection);
                 }
                 // unselect
             } else {
                 region.unselect();
                 this.menu.hide();
                 if ((typeof this.callbacks.onRegionSelected) === "function") {
-                    this.callbacks.onRegionSelected("");
+                    this.callbacks.onRegionSelected("", multiSelection);
                 }
             }
         }
