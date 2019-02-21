@@ -21,7 +21,7 @@
 <script src="./../shared/js/ct.js"></script>
 <script>
     // The list of images
-    let images = [
+    const images = [
             {
                 path: "./../shared/media/background-cat-hd.jpg",
                 title: "Cat (HD)"
@@ -57,26 +57,26 @@
         ];
 
     // The list of tag names
-    let tagNames = ["Awesome", "Amazing", "Brilliante", "Incredible", "Marvelous",
+    const tagNames = ["Awesome", "Amazing", "Brilliante", "Incredible", "Marvelous",
                     "Unbelievable", "Wonderful", "Shocking", "Surprising", "Startling"];
 
     document.addEventListener("DOMContentLoaded", (e) => {
         // Get references for editor and toolbar containers
-        let editorContainer = document.getElementById("editorDiv");
-        let toolbarContainer = document.getElementById("toolbarDiv");
+        const editorContainer = document.getElementById("editorDiv");
+        const toolbarContainer = document.getElementById("toolbarDiv");
 
         // Init the editor with toolbar.
-        let editor = new CanvasTools.Editor(editorContainer).api;
+        const editor = new CanvasTools.Editor(editorContainer).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
         let incrementalRegionId = 100;
 
         // Add new region to the editor when new region is created
         editor.onSelectionEnd = (regionData) => {
-            let id = (incrementalRegionId++).toString();
+            const id = (incrementalRegionId++).toString();
 
             // Use active tag to create TagsDescriptor object
-            let tags = new CanvasTools.Core.TagsDescriptor(getActiveTag());            
+            const tags = new CanvasTools.Core.TagsDescriptor(getActiveTag());            
             editor.addRegion(id, regionData, tags);
         };        
 
