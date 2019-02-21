@@ -16,11 +16,11 @@
         </div>
     </div>
 
-    <div id="tags"></div>
+    <div id="tagsDiv"></div>
 </body>
 <script src="./../shared/js/ct.js"></script>
 <script>
-    // Init image selector
+    // The list of images
     let images = [
             {
                 path: "./../shared/media/background-cat-hd.jpg",
@@ -56,87 +56,95 @@
             }, 
         ];
 
+    // The list of tag names
     let tagNames = ["Awesome", "Amazing", "Brilliante", "Incredible", "Marvelous",
                     "Unbelievable", "Wonderful", "Shocking", "Surprising", "Startling"];
 
     document.addEventListener("DOMContentLoaded", (e) => {
-        let sz = document.getElementById("editorDiv");
-        let tz = document.getElementById("toolbarDiv");
+        let editorContainer = document.getElementById("editorDiv");
+        let toolbarContainer = document.getElementById("toolbarDiv");
 
-        let editor = new CanvasTools.Editor(sz).api;
-        editor.addToolbar(tz, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
+        let editor = new CanvasTools.Editor(editorContainer).api;
+        editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
-        let incrementalRegionID = 100;
+        let incrementalRegionId = 100;
 
+        // Add new region to the editor when new region is created
         editor.onSelectionEnd = (regionData) => {
-            let id = (incrementalRegionID++).toString();
+            let id = (incrementalRegionId++).toString();
+
+            // Use active tag to create TagsDescriptor object
             let tags = new CanvasTools.Core.TagsDescriptor(getActiveTag());            
             editor.addRegion(id, regionData, tags);
         };        
 
-        editor.onRegionMoveBegin = (id, regionData) => {
-            console.log(`Move Begin ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
-        };
-
-        editor.onRegionMove = (id, regionData) => {
-            console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
-        };
-
-        editor.onRegionMoveEnd = (id, regionData) => {
-            console.log(`Move End ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
-        };
-
+        // Freeze and disable editor till swatches are ready
         editor.freeze();
         editor.disable();
         
+        // Define palette settings
         const paletteSettings = {
-            lightness: 0.5,
+            lightness: 0.6,
             lightnessVariation: 0.1,
-            minGrayness: 0.1,
-            maxGrayness: 2.0,
+            minGrayness: 0.2,
+            maxGrayness: 0.6,
             granularity: 100,
             abRange: 1.3,
         };
 
+        // Create new pallete
         const palette = new CanvasTools.Core.Colors.Palette(paletteSettings);
 
+        // Define the number of swatches
         const swatchesCount = tagNames.length;
 
+        // Request swatches from the pallete
         palette.swatches(swatchesCount).then((gamut) => {
+            // Create collection of tags using names and generated colors
             const tags = gamut.map((color, index) => {
                 return new CanvasTools.Core.Tag(tagNames[index], color);
             });
 
-            populateTags(tags);
-            // when swatches are ready enable the editor
+            // Populate tags buttons to the UI
+            const tagsContainer = document.getElementById("tagsDiv");
+            populateTags(tagsContainer, tags);
+
+            // When swatches are ready enable the editor
             editor.unfreeze();
             editor.enable();
         });
 
+        // Load backgorund image
         let imageIndex = 1;
         loadImage(images[imageIndex].path, (image) => {
             editor.addContentSource(image);
         });
     });
 
+    // Current active tag
     let activeTag;
 
-    function populateTags(tags) {
-        let container = document.getElementById("tags");
-
+    // Add buttons for the tags to the container element
+    function populateTags(container, tags) {
         tags.forEach((tag) => {
+            // Create a button
             const tagButton = document.createElement("button");
             tagButton.classList.add("tagButton");
 
+            // Use tag properties to "style" the button
             tagButton.innerHTML = tag.name;
             tagButton.style.backgroundColor = tag.color;
             
+            // Add listener for button click
             tagButton.addEventListener("click", (e) => {
+                // Clear active tags
                 container.querySelectorAll("button").forEach((button) => button.classList.remove("active"));
+                // Make this tag active
                 tagButton.classList.add("active");
                 activeTag = tag;
             });
 
+            // Append button to the container
             container.append(tagButton);
         });
 
@@ -149,6 +157,7 @@
         return activeTag;
     }
 
+    // Load an image from specified path and notify when it is loaded.
     function loadImage(path, onready) {
         const image = new Image();
         image.addEventListener("load", (e) => {
