@@ -145,7 +145,7 @@ image.src = imagePath;
 * Implementation for color difference algorithms in the CIE LAB color space.
 * New `Palette` class to generate color swatches or expand color swatches in specified lightness plane of color space.
 * New samples to use color infrastructure: `palette-swatches`, `palette-swatch-iterator` and `palette-editor`.
-* Updated readme and basic samples to use new infrastructure.
+* Updated readme and basic `editor-*` samples to use new infrastructure.
 
 *CT Library Changes*
 * Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string when creating new tags.
