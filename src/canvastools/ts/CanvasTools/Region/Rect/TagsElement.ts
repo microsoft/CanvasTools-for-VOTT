@@ -229,12 +229,12 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
+                        style: `fill: ${tags.primary.colorShadow};
                                 stroke: #fff;`,
                     },
                     {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
+                        style: `fill: ${tags.primary.colorShadow};
                                 stroke:${tags.primary.colorAccent};`,
                     },
                     {

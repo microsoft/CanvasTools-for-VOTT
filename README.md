@@ -58,12 +58,6 @@ lib/
 
 2. Copy toolbar icons from the [`src` folder](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
 
-3. Create a reference to the `CanvasTools` (or use directrly the `CanvasTools` object).
-
-    ```js
-    let ct = CanvasTools;
-    ```
-
 ### Add Editor to the page
 
 1. Add container elements to host SVG elements for the toolbar and the editor.
@@ -80,11 +74,11 @@ lib/
 2. Initiate the `Editor`-object from the `CanvasTools`.
 
     ```js
-    var sz = document.getElementById("editorDiv");
-    var tz = document.getElementById("toolbarDiv");
+    var editorContainer = document.getElementById("editorDiv");
+    var toolbarContainer = document.getElementById("toolbarDiv");
 
-    var editor = new ct.Editor(sz).api;
-    editor.addToolbar(tz, ct.Editor.FullToolbarSet, "./images/icons/");
+    var editor = new CanvasTools.Editor(editorContainer).api;
+    editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./images/icons/");
     ```
 
     The editor will auto-adjust to available space in provided container block.
@@ -101,19 +95,24 @@ lib/
     // Set callback for onSelectionEnd
     editor.onSelectionEnd = (regionData) => {
         let id = (incrementalRegionID++).toString();
-        let tags = getTagDescriptor();            
+        let tags = getTagsDescriptor();            
         editor.addRegion(id, regionData, tags);
     };        
 
+    const Color = CanvasTools.Core.Colors.Color;
+    const LABColor = CanvasTools.Core.Colors.LABColor;
+    const Tag = CanvasTools.Core.Tag;
+    const TagsDescriptor = CanvasTools.Core.TagsDescriptor;
+
     // Generate tags
-    function getTagDescriptor() {
-        // use hue value
-        let primaryTag = new ct.Core.Tag("Awesome", 300);
-        // use string color to automatically extract hue value
-        let secondaryTag = new ct.Core.Tag("Yes", "#e53");
-        // extract hue value from string color 
-        let ternaryTag = new ct.Core.Tag("one", ct.Core.Tag.getHueFromColor("#3fef66"));
-        return new ct.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
+    function getTagsDescriptor() {
+        // Use the Color class to specify color
+        let primaryTag = new Tag("Awesome", new Color("#c48de7"));
+        // Use a string color to specify color
+        let secondaryTag = new Tag("Yes", "#f94c48");
+        // Use one of the color spaces classes (e.g., LABColor) to specify color
+        let ternaryTag = new Tag("one", new Color(new LABColor(0.62, 0.50, -0.55)));
+        return new TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
     }
     ```
 
@@ -138,6 +137,22 @@ image.src = imagePath;
 ```
 
 ## Changelog
+
+### 2.1.21 - New color infrastructure from the v3-color-lab branch
+
+*New color infrastructure*
+* Implementation of core color spaces: sRGB, RGB, HSL, XYZ and CIE LAB, including conversion between formats. Added new classes under `CanvasTools.Core.Colors.*`: `SRGBColor`, `RGBColor`, `HSLColor`, `XYZColor` and `LABColor`. The `Color` class is a wrapper around vaious formats.
+* Implementation for color difference algorithms in the CIE LAB color space.
+* New `Palette` class to generate color swatches or expand color swatches in specified lightness plane of color space.
+* New samples to use color infrastructure: `palette-swatches`, `palette-swatch-iterator` and `palette-editor`.
+* Updated readme and basic `editor-*` samples to use new infrastructure.
+
+*CT Library Changes*
+* Added the `color` property to `ITag` and `Tag`. Using `colorHue` is now deprecated. Consider using the `Color` class or hex-string when creating new tags.
+* Updated styling of regions to use new `Color` infrastructure.
+* Partially refactored the `canvastools.css` file to use variables to define cursors and colors.
+* Added `regionData` for the `onRegionDeleted` callback.
+* Fixed a bug with menu positioning when region is deleted.
 
 ### 2.1.20
 
