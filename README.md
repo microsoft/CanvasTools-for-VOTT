@@ -138,6 +138,12 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.22
+
+*CT Library Changes*
+* Updated `Editor` properties to use named function types instead of hardcoded ones. 
+* `regionData` param is now optional for all callbacks on the `Editor` -- following the `RegionUpdateFunction` type definition.
+
 ### 2.1.21 - New color infrastructure from the v3-color-lab branch
 
 *New color infrastructure*
