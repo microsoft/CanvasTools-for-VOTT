@@ -201,6 +201,10 @@
     fill: var(--default-color-dark);
 }
 
+.anchorBoneStyle {
+    fill: var(--default-color-transparent);
+}
+
 /* 2.2.3. Point region  colors */
 .primaryTagPointStyle {
     fill: var(--default-color-pure);
