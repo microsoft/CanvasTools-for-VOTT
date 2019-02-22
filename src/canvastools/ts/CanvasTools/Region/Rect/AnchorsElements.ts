@@ -70,7 +70,7 @@ export class AnchorsElement extends AnchorsComponent {
     protected buildBoneAnchors() {
         this.anchorBoneStyles = ["T", "R", "B", "L"];
         this.anchorBones = [];
-        this.boneThickness = AnchorsComponent.DEFAULT_ANCHOR_RADIUS;
+        this.boneThickness = AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS;
 
         const [x, y, w, h] = [this.regionData.x, this.regionData.y, this.regionData.width, this.regionData.height];
 
@@ -81,10 +81,11 @@ export class AnchorsElement extends AnchorsComponent {
 
         const bones = [tBone, rBone, bBone, lBone];
         this.anchorBones.push(...bones);
-        bones.forEach((bone) => {
+        bones.forEach((bone, index) => {
             this.anchorsNode.add(bone);
 
-            // subscribe to events
+            // Using already existing infrastructure for indexes
+            this.subscribeAnchorBoneToEvents(bone, - (index + 1));
         });
     }
 
@@ -100,7 +101,7 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected createAnchorBone(paper: Snap.Paper, x: number, y: number,
                                width: number, height: number, style?: string,
-                               thickness: number = AnchorsComponent.DEFAULT_ANCHOR_RADIUS): Snap.Element {
+                               thickness: number = AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS): Snap.Element {
         let bone: Snap.Element;
         if (width === 0) {
             bone = paper.rect(x - thickness / 2, y, thickness, height);
@@ -124,8 +125,8 @@ export class AnchorsElement extends AnchorsComponent {
      * @param p - The new ghost anchor location.
      */
     protected updateRegion(p: Point2D) {
-        const x1: number = p.x;
-        const y1: number = p.y;
+        let x1: number = p.x;
+        let y1: number = p.y;
         let x2: number;
         let y2: number;
         let flipX: boolean = false;
@@ -133,7 +134,7 @@ export class AnchorsElement extends AnchorsComponent {
 
         let activeAnchor = this.getActiveAnchor();
 
-        switch (this.getActiveAnchor()) {
+        switch (activeAnchor) {
             case "TL": {
                 x2 = this.x + this.width;
                 y2 = this.y + this.height;
@@ -162,17 +163,59 @@ export class AnchorsElement extends AnchorsComponent {
                 flipY = y1 < y2;
                 break;
             }
+            case "T": {
+                x1 = this.x;
+                x2 = this.x + this.width;
+                y2 = this.y + this.height;
+                flipY = y1 > y2;
+                break;
+            }
+            case "R": {
+                x2 = this.x;
+                y1 = this.y;
+                y2 = this.y + this.height;
+                flipX = x2 > x1;
+                break;
+            }
+            case "B": {
+                x1 = this.x;
+                x2 = this.x + this.width;
+                y2 = this.y;
+                flipY = y1 < y2;
+                break;
+            }
+            case "L": {
+                x2 = this.x + this.width;
+                y1 = this.y;
+                y2 = this.y + this.height;
+                flipX = x1 > x2;
+                break;
+            }
         }
 
         let newAA: string = "";
-        if (activeAnchor !== "") {
+        if (activeAnchor !== "" && activeAnchor.length === 2) {
             newAA += (activeAnchor[0] === "T") ? (flipY ? "B" : "T") : (flipY ? "T" : "B");
             newAA += (activeAnchor[1] === "L") ? (flipX ? "R" : "L") : (flipX ? "L" : "R");
+        }
+        if (activeAnchor !== "" && activeAnchor.length === 1) {
+            if (flipX) {
+                newAA = (activeAnchor === "R") ? "L" : "R";
+            } else if (flipY) {
+                newAA = (activeAnchor === "T") ? "B" : "T";
+            } else {
+                newAA = activeAnchor;
+            }
         }
 
         if (activeAnchor !== newAA) {
             this.ghostAnchor.removeClass(activeAnchor);
-            this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA);
+            if (newAA.length === 2) {
+                this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA);
+            } else {
+                this.activeAnchorIndex = - (this.anchorBoneStyles.indexOf(newAA) + 1);
+            }
+
             activeAnchor = newAA;
             this.ghostAnchor.addClass(newAA);
         }
@@ -209,12 +252,12 @@ export class AnchorsElement extends AnchorsComponent {
      * @param bone - The anchor bone for wire up.
      * @param index - The index of the anchor used to define which one is active.
      */
-    protected subscribeAnchorBoneToEvents(bone: Snap.Element) {
+    protected subscribeAnchorBoneToEvents(bone: Snap.Element, index: number) {
         bone.node.addEventListener("pointerenter", (e) => {
             if (!this.isFrozen) {
                 // Set drag origin point to current anchor
                 this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
-                this.activeAnchorIndex = -1;
+                this.activeAnchorIndex = index;
 
                 // Move ghost anchor to current anchor position
                 window.requestAnimationFrame(() => {
@@ -233,7 +276,13 @@ export class AnchorsElement extends AnchorsComponent {
      * Internal helper function to get active anchor.
      */
     private getActiveAnchor(): string {
-        return (this.activeAnchorIndex >= 0) ? this.anchorPointStyles[this.activeAnchorIndex] : "";
+        if (this.activeAnchorIndex >= 0) {
+            // anchor point is activeted
+            return this.anchorPointStyles[this.activeAnchorIndex];
+        } else {
+            // anchor bone is activeted, indexes are negative starting -1
+            return this.anchorBoneStyles[-this.activeAnchorIndex - 1];
+        }
     }
 
 }
