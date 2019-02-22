@@ -303,11 +303,11 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * @returns A new `RegionData` object
      */
     public boundToRect(rect: IRect): RegionData {
-        const tlCorner = this.corner.boundToRect(rect);
         const brCorner = (new Point2D(this.x + this.width, this.y + this.height)).boundToRect(rect);
+        const tlCorner = this.corner.boundToRect(rect);
 
         const width = brCorner.x - tlCorner.x;
-        const height = brCorner.y - brCorner.y;
+        const height = brCorner.y - tlCorner.y;
 
         return new RegionData(tlCorner.x, tlCorner.y, width, height,
                               this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType);

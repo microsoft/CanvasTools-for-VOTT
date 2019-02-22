@@ -164,11 +164,15 @@ export class RectCopySelector extends Selector {
             if (typeof this.callbacks.onSelectionEnd === "function") {
                 let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
                 let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
+
                 p1 = p1.boundToRect(this.boundRect);
                 p2 = p2.boundToRect(this.boundRect);
+                const width = p2.x - p1.x;
+                const height = p2.y - p1.y;
 
-                this.callbacks.onSelectionEnd(
-                    RegionData.BuildRectRegionData(p1.x, p1.y, this.copyRect.width, this.copyRect.height));
+                const regionData = RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
+
+                this.callbacks.onSelectionEnd(regionData);
             }
         });
     }

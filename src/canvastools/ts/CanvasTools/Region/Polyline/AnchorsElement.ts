@@ -31,7 +31,7 @@ export class AnchorsElement extends AnchorsComponent {
     private anchorsLength: number;
 
     /**
-     * Reference to the polyline object.
+     * Reference to the polyline object, used to trigger adding/deleting points.
      */
     private anchorsPolyline: Snap.Element;
 
@@ -87,9 +87,17 @@ export class AnchorsElement extends AnchorsComponent {
     }
 
     /**
-     * Creates collection of anchor points.
+     * Creates a collection on anchors.
      */
-    protected buildPointAnchors() {
+    protected buildAnchors() {
+        this.buildPolylineAnchors();
+        this.buildPointAnchors();
+    }
+
+    /**
+     * Creates acollection of anchor points.
+     */
+    protected buildPolylineAnchors() {
         const pointsData = [];
         this.regionData.points.forEach((p) => {
             pointsData.push(p.x, p.y);
@@ -100,8 +108,6 @@ export class AnchorsElement extends AnchorsComponent {
         this.subscribeLineToEvents(this.anchorsPolyline);
 
         this.anchorsNode.add(this.anchorsPolyline);
-
-        super.buildPointAnchors();
     }
 
     /**

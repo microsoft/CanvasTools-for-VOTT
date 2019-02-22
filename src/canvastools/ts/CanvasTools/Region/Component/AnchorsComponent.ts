@@ -61,7 +61,7 @@ export abstract class AnchorsComponent extends RegionComponent {
         this.anchors = [];
         this.anchorsNode = paper.g();
 
-        this.buildPointAnchors();
+        this.buildAnchors();
 
         this.ghostAnchor = this.createAnchor(paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
         this.ghostAnchor.attr({
@@ -108,7 +108,14 @@ export abstract class AnchorsComponent extends RegionComponent {
     }
 
     /**
-     * Creates collection of anchor points.
+     * Creates a collection on anchors.
+     */
+    protected buildAnchors() {
+        this.buildPointAnchors();
+    }
+
+    /**
+     * Creates a collection of anchor points.
      */
     protected buildPointAnchors() {
         this.regionData.points.forEach((point, index) => {
