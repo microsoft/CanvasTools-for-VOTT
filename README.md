@@ -138,7 +138,7 @@ image.src = imagePath;
 
 ## Changelog
 
-### 2.1.23 - Rect resizing update from the v2-rect-select-manipulate-update 
+### 2.1.23 - Rect resizing update from the v2-rect-select-manipulate-update branch
 
 *CT Library Changes*
 * Fix for the issue #42 with rects overflowing canvas edge when created using the copy-rect tool.
