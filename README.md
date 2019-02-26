@@ -138,7 +138,7 @@ image.src = imagePath;
 
 ## Changelog
 
-### 2.1.24 - API Update from the from the v2-rect-select-manipulate-update branch
+### 2.1.24 - API Update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
 *CT Library Changes*
 * Added a new `getSelectedRegions` method to replace deprecated `getSelectedRegionsBounds` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
@@ -163,7 +163,7 @@ image.src = imagePath;
     * Moved `SelectionMode` definition to the `ISelectorSettings` file.
     * Added new `getSelectorettings` method for the `AreaSelector` to get current settings.
 
-### 2.1.23 - Rect resizing update from the v2-rect-select-manipulate-update branch
+### 2.1.23 - Rect resizing update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
 *CT Library Changes*
 * Fix for the [issue #42](https://github.com/kichinsky/CanvasTools-for-VOTT/issues/42) with rects overflowing canvas edge when created using the copy-rect tool.
@@ -175,7 +175,7 @@ image.src = imagePath;
 * Updated `Editor` properties to use named function types instead of hardcoded ones. 
 * `regionData` param is now optional for all callbacks on the `Editor` -- following the `RegionUpdateFunction` type definition.
 
-### 2.1.21 - New color infrastructure from the v3-color-lab branch
+### 2.1.21 - New color infrastructure from the [v3-color-lab](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v3-color-lab) branch
 
 *New color infrastructure*
 * Implementation of core color spaces: sRGB, RGB, HSL, XYZ and CIE LAB, including conversion between formats. Added new classes under `CanvasTools.Core.Colors.*`: `SRGBColor`, `RGBColor`, `HSLColor`, `XYZColor` and `LABColor`. The `Color` class is a wrapper around various formats.
