@@ -3,6 +3,7 @@ import { Rect } from "../../Core/Rect";
 
 import { Element} from "./Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
+import { IRect } from "../../Interface/IRect";
 
 /**
  * The rect element for selectors
@@ -38,9 +39,9 @@ export class RectElement extends Element implements IPoint2D {
      * @param boundRect - The parent bounding box for selection.
      * @param rect - The rect size.
      */
-    constructor(paper: Snap.Paper, boundRect: Rect, rect: Rect) {
+    constructor(paper: Snap.Paper, boundRect: Rect, rect: IRect) {
         super(paper, boundRect);
-        this.rect = rect;
+        this.rect = new Rect(rect.width, rect.height);
         this.originPoint = new Point2D(0, 0);
         this.buildUIElements();
         this.hide();

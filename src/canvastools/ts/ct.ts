@@ -3,7 +3,8 @@ import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
 import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
 import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
 import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
-import { AreaSelector, SelectionMode } from "./CanvasTools/Selection/AreaSelector";
+import { AreaSelector } from "./CanvasTools/Selection/AreaSelector";
+import { SelectionMode } from "./CanvasTools/Interface/ISelectorSettings";
 import { FilterPipeline, InvertFilter, GrayscaleFilter, BlurDiffFilter, ContrastFilter,
          BrightnessFilter, SaturationFilter } from "./CanvasTools/CanvasTools.Filter";
 import { Rect } from "./CanvasTools/Core/Rect";

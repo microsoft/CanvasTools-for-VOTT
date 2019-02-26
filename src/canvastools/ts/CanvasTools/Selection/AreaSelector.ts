@@ -1,6 +1,7 @@
 import { Rect } from "../Core/Rect";
 
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
+import { ISelectorSettings, SelectionMode } from "../Interface/ISelectorSettings";
 
 import { PointSelector } from "./Selectors/PointSelector";
 import { PolylineSelector } from "./Selectors/PolylineSelector";
@@ -8,11 +9,6 @@ import { PolygonSelector } from "./Selectors/PolygonSelector";
 import { RectCopySelector } from "./Selectors/RectCopySelector";
 import { RectSelector } from "./Selectors/RectSelector";
 import { Selector } from "./Selectors/Selector";
-
-/**
- * Enum to define current selectio mode
- */
-export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }
 
 /**
  * The region selection manager.
@@ -56,6 +52,11 @@ export class AreaSelector {
      * Reference to the current selector.
      */
     private selector: Selector;
+
+    /**
+     * Current selector options, if any.
+     */
+    private selectorSettings: ISelectorSettings;
 
     /**
      * Reference to a `RectSelector` object.
@@ -162,19 +163,38 @@ export class AreaSelector {
 
     /**
      * Sets new selection mode (changes active selector).
-     * @param selectionMode - The new selection mode.
-     * @param options - Options for choosen selector if applicable.
+     * @param selectionMode - Selector mode.
      */
-    public setSelectionMode(selectionMode: SelectionMode, options?: { template?: Rect }) {
+    public setSelectionMode(selectionMode: SelectionMode);
+
+    /**
+     * Sets new selection mode (changes active selector).
+     * @param settings - Selector settings, including selection mode
+     */
+    public setSelectionMode(settings: ISelectorSettings);
+    public setSelectionMode(settings: ISelectorSettings | SelectionMode) {
         this.disable();
+
+        if (settings === null || settings === undefined) {
+            this.selectorSettings = {
+                mode: SelectionMode.NONE,
+            };
+        } else if ((settings as ISelectorSettings).mode !== undefined) {
+            this.selectorSettings = settings as ISelectorSettings;
+        } else {
+            this.selectorSettings = { mode: settings as SelectionMode };
+        }
+
+        const selectionMode = this.selectorSettings.mode;
 
         if (selectionMode === SelectionMode.NONE) {
             this.selector = null;
             return;
         } else if (selectionMode === SelectionMode.COPYRECT) {
             this.selector = this.rectCopySelector;
-            if (options !== undefined && options.template !== undefined) {
-                this.rectCopySelector.setTemplate(options.template);
+            const template = this.selectorSettings.template;
+            if (template !== undefined) {
+                this.rectCopySelector.setTemplate(template);
             } else {
                 this.rectCopySelector.setTemplate(AreaSelector.DefaultTemplateSize);
             }
@@ -195,6 +215,13 @@ export class AreaSelector {
         } else {
             this.hide();
         }
+    }
+
+    /**
+     * Returns current options (settings) for selector.
+     */
+    public getSelectorSettings(): ISelectorSettings {
+        return this.selectorSettings;
     }
 
     /**

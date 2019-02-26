@@ -6,11 +6,12 @@ import { RegionData } from "./Core/RegionData";
 import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
 import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
 import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
+import { SelectionMode } from "./Interface/ISelectorSettings";
 
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 
-import { AreaSelector, SelectionMode } from "./Selection/AreaSelector";
+import { AreaSelector } from "./Selection/AreaSelector";
 
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
@@ -47,7 +48,7 @@ export class Editor {
             tooltip: "Regions Manipulation (M)",
             keycode: "KeyM",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.NONE);
+                sl.setSelectionMode({ mode: SelectionMode.NONE });
             },
             activate: false,
         },
@@ -61,7 +62,7 @@ export class Editor {
             tooltip: "Point-selection (P)",
             keycode: "KeyP",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POINT);
+                sl.setSelectionMode({ mode: SelectionMode.POINT });
             },
             activate: false,
         },
@@ -72,7 +73,7 @@ export class Editor {
             tooltip: "Rectangular box (R)",
             keycode: "KeyR",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.RECT);
+                sl.setSelectionMode({ mode: SelectionMode.RECT });
             },
             activate: true,
         },
@@ -86,11 +87,13 @@ export class Editor {
                 const regions = rm.getSelectedRegions();
                 if (regions !== undefined && regions.length > 0) {
                     const r = regions[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                    sl.setSelectionMode({
+                        mode: SelectionMode.COPYRECT,
                         template: new Rect(r.regionData.width, r.regionData.height),
                     });
                 } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                    sl.setSelectionMode({
+                        mode: SelectionMode.COPYRECT,
                         template: new Rect(40, 40),
                     });
                 }
@@ -104,7 +107,7 @@ export class Editor {
             tooltip: "Polyline-selection (Y)",
             keycode: "KeyY",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POLYLINE);
+                sl.setSelectionMode({ mode: SelectionMode.POLYLINE });
             },
             activate: false,
         },
@@ -115,7 +118,7 @@ export class Editor {
             tooltip: "Polygon-selection (O)",
             keycode: "KeyO",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.POLYGON);
+                sl.setSelectionMode({ mode: SelectionMode.POLYGON });
             },
             activate: false,
         },
@@ -146,7 +149,7 @@ export class Editor {
             tooltip: "Regions Manipulation (M)",
             keycode: "KeyM",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.NONE);
+                sl.setSelectionMode({ mode: SelectionMode.NONE });
             },
             activate: false,
         },
@@ -160,7 +163,7 @@ export class Editor {
             tooltip: "Rectangular box (R)",
             keycode: "KeyR",
             actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode(SelectionMode.RECT);
+                sl.setSelectionMode({ mode: SelectionMode.RECT });
             },
             activate: true,
         },
@@ -174,11 +177,13 @@ export class Editor {
                 const regions = rm.getSelectedRegions();
                 if (regions !== undefined && regions.length > 0) {
                     const r = regions[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                    sl.setSelectionMode({
+                        mode: SelectionMode.COPYRECT,
                         template: new Rect(r.regionData.width, r.regionData.height),
                     });
                 } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                    sl.setSelectionMode({
+                        mode: SelectionMode.COPYRECT,
                         template: new Rect(40, 40),
                     });
                 }
