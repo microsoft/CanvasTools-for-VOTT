@@ -138,6 +138,16 @@ image.src = imagePath;
 
 ## Changelog
 
+### 2.1.24
+
+*CT Library Changes*
+* Added a new `getSelectedRegions` method to replace deprecated `getSelectedRegionsBounds` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
+* Selection mode (`AreaSelector`):
+    * Extracted new `ISelectorSettings` interface to use in `setSelectionMode` (wraps previous selectionMode and options).
+    * Added new signature for the `setSelectionMode` method to use `ISelectorSettings` object instead of `selectionMode`.
+    * Moved `SelectionMode` definition to the `ISelectorSettings` file.
+    * Added new `getSelectorettings` method for the `AreaSelector` to get current settings.
+
 ### 2.1.23 - Rect resizing update from the v2-rect-select-manipulate-update branch
 
 *CT Library Changes*
