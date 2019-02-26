@@ -138,13 +138,25 @@ image.src = imagePath;
 
 ## Changelog
 
-### 2.1.24
+### 2.1.24 - API Update from the from the v2-rect-select-manipulate-update branch
 
 *CT Library Changes*
 * Added a new `getSelectedRegions` method to replace deprecated `getSelectedRegionsBounds` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
 * Selection mode (`AreaSelector`):
     * Extracted new `ISelectorSettings` interface to use in `setSelectionMode` (wraps previous selectionMode and options).
     * Added new signature for the `setSelectionMode` method to use `ISelectorSettings` object instead of `selectionMode`.
+    ```js
+    // new way:
+    editor.AS.setSelectionMode({ mode: SelectionMode.NONE });
+    // old way:
+    editor.AS.setSelectionMode(mode: SelectionMode.NONE);
+    // new way with template
+    editor.AS.setSelectionMode({
+        mode: SelectionMode.COPYRECT,
+        template: new Rect(r.regionData.width, r.regionData.height),
+    });
+    // note: the old way with settings template as second arg is not available any more
+    ```
     * Moved `SelectionMode` definition to the `ISelectorSettings` file.
     * Added new `getSelectorettings` method for the `AreaSelector` to get current settings.
 
