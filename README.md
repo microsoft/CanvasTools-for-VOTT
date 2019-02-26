@@ -148,14 +148,17 @@ image.src = imagePath;
     ```js
     // new way:
     editor.AS.setSelectionMode({ mode: SelectionMode.NONE });
-    // old way:
+
+    // old way (still available but not recommended):
     editor.AS.setSelectionMode(mode: SelectionMode.NONE);
+
     // new way with template
     editor.AS.setSelectionMode({
         mode: SelectionMode.COPYRECT,
         template: new Rect(r.regionData.width, r.regionData.height),
     });
-    // note: the old way with settings template as second arg is not available any more
+
+    // note: the old way with setting a template for 'COPYRECT' mode as a second arg is not available any more
     ```
     * Moved `SelectionMode` definition to the `ISelectorSettings` file.
     * Added new `getSelectorettings` method for the `AreaSelector` to get current settings.
