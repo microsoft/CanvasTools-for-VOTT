@@ -237,7 +237,7 @@ export class RegionsManager {
 
     /**
      * Returns bounding boxes of the selected regions.
-     * @deprecated
+     * @deprecated Use `getSelectedRegions` method instead
      */
     public getSelectedRegionsBounds() {
         const regions = this.lookupSelectedRegions().map((region) => {
@@ -247,6 +247,19 @@ export class RegionsManager {
                 y: region.y,
                 width: region.boundRect.width,
                 height: region.boundRect.height,
+            };
+        });
+        return regions;
+    }
+
+    /**
+     * Returns a collection of selected regions.
+     */
+    public getSelectedRegions(): Array<{ id: string, regionData: RegionData }> {
+        const regions = this.lookupSelectedRegions().map((region) => {
+            return {
+                id: region.ID,
+                regionData: region.regionData,
             };
         });
         return regions;

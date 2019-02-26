@@ -3,7 +3,7 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
+import { IRect } from "../../Interface/IRect";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
 import { CrossElement } from "../Component/CrossElement";
@@ -50,8 +50,8 @@ export class RectCopySelector extends Selector {
      * Updates the template for selector.
      * @param copyRect - New template rect.
      */
-    public setTemplate(copyRect: Rect) {
-        this.copyRect = copyRect;
+    public setTemplate(copyRect: IRect) {
+        this.copyRect = new Rect(copyRect.width, copyRect.height);
 
         this.copyRectEl.resize(copyRect.width, copyRect.height);
         this.moveCopyRect(this.copyRectEl, this.crossA);

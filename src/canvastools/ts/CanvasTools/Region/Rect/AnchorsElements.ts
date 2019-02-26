@@ -8,6 +8,9 @@ import { AnchorsComponent } from "../Component/AnchorsComponent";
 
 /**
  * `AnchorsComponent` for the `RectRegion` class.
+ * @todo Current implementations of bones reuses existing aprroach with anchor index
+ * by using negative indexes and manually correcting them to actual indexes.
+ * It seems like it should be refactored some how.
  */
 export class AnchorsElement extends AnchorsComponent {
     private anchorPointStyles: string[];
@@ -67,6 +70,9 @@ export class AnchorsElement extends AnchorsComponent {
         });
     }
 
+    /**
+     * Creates collection of anchor bones.
+     */
     protected buildBoneAnchors() {
         this.anchorBoneStyles = ["T", "R", "B", "L"];
         this.anchorBones = [];
