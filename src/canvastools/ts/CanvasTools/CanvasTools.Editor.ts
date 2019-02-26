@@ -83,12 +83,16 @@ export class Editor {
             tooltip: "Template-based box (T)",
             keycode: "KeyT",
             actionCallback: (action, rm, sl) => {
-                const rs = rm.getSelectedRegionsBounds();
-                if (rs !== undefined && rs.length > 0) {
-                    const r = rs[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
+                const regions = rm.getSelectedRegions();
+                if (regions !== undefined && regions.length > 0) {
+                    const r = regions[0];
+                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                        template: new Rect(r.regionData.width, r.regionData.height),
+                    });
                 } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
+                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                        template: new Rect(40, 40),
+                    });
                 }
             },
             activate: false,
@@ -167,12 +171,16 @@ export class Editor {
             tooltip: "Template-based box (T)",
             keycode: "KeyT",
             actionCallback: (action, rm, sl) => {
-                const rs = rm.getSelectedRegionsBounds();
-                if (rs !== undefined && rs.length > 0) {
-                    const r = rs[0];
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(r.width, r.height) });
+                const regions = rm.getSelectedRegions();
+                if (regions !== undefined && regions.length > 0) {
+                    const r = regions[0];
+                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                        template: new Rect(r.regionData.width, r.regionData.height),
+                    });
                 } else {
-                    sl.setSelectionMode(SelectionMode.COPYRECT, { template: new Rect(40, 40) });
+                    sl.setSelectionMode(SelectionMode.COPYRECT, {
+                        template: new Rect(40, 40),
+                    });
                 }
             },
             activate: false,
