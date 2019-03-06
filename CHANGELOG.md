@@ -23,7 +23,7 @@
     // note: the old way with setting a template for 'COPYRECT' mode as a second arg is not available any more
     ```
     * Moved `SelectionMode` definition to the `ISelectorSettings` file.
-    * Added new `getSelectorettings` method for the `AreaSelector` to get current settings.
+    * Added new `getSelectorSettings` method for the `AreaSelector` to get current settings.
 
 ### 2.1.23 - Rect resizing update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
