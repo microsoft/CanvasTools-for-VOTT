@@ -15,6 +15,7 @@ import { AreaSelector } from "./Selection/AreaSelector";
 
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
+import { IToolbarIcon } from "./Interface/IToolbarIcon";
 
 /**
  * Internal type to describe toolbar presets
@@ -560,45 +561,32 @@ export class Editor {
         toolbarSet.forEach((item) => {
             if (item.type === ToolbarItemType.SEPARATOR) {
                 this.toolbar.addSeparator();
-            } else if (item.type === ToolbarItemType.SELECTOR) {
-                this.toolbar.addSelector({
+            } else {
+                const toolbarItem: IToolbarIcon = {
                     action: item.action,
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
                     keycode: item.keycode,
                     width: item.width,
                     height: item.height,
-                }, (action) => {
-                    item.actionCallback(action, this.regionsManager, this.areaSelector);
-                });
+                };
 
-                if (item.activate) {
-                    activeSelector = item.action;
+                const actionFn = (action) => {
+                    item.actionCallback(action, this.regionsManager, this.areaSelector);
+                };
+
+                if (item.type === ToolbarItemType.SELECTOR) {
+                    this.toolbar.addSelector(toolbarItem, actionFn);
+                    if (item.activate) {
+                        activeSelector = item.action;
+                    }
+                } else if (item.type === ToolbarItemType.SWITCH) {
+                    this.toolbar.addSwitch(toolbarItem, actionFn);
+
+                    this.toolbar.setSwitch(item.action, item.activate);
+                } else if (item.type === ToolbarItemType.TRIGGER) {
+                    this.toolbar.addTrigger(toolbarItem, actionFn);
                 }
-            } else if (item.type === ToolbarItemType.SWITCH) {
-                this.toolbar.addSwitch({
-                    action: item.action,
-                    iconUrl: iconsPath + item.iconFile,
-                    tooltip: item.tooltip,
-                    keycode: item.keycode,
-                    width: item.width,
-                    height: item.height,
-                }, (action) => {
-                    item.actionCallback(action, this.regionsManager, this.areaSelector);
-                });
-
-                this.toolbar.setSwitch(item.action, item.activate);
-            } else if (item.type === ToolbarItemType.TRIGGER) {
-                this.toolbar.addTrigger({
-                    action: item.action,
-                    iconUrl: iconsPath + item.iconFile,
-                    tooltip: item.tooltip,
-                    keycode: item.keycode,
-                    width: item.width,
-                    height: item.height,
-                }, (action) => {
-                    item.actionCallback(action, this.regionsManager, this.areaSelector);
-                });
             }
         });
 

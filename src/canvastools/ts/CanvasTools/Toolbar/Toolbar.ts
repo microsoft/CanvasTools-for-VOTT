@@ -158,7 +158,8 @@ export class Toolbar {
                 if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
                     const icon = this.findIconByKeycode(e.code);
                     if (icon !== undefined) {
-                        if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon) {
+                        if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon
+                            || icon instanceof ToolbarTriggerIcon) {
                             icon.activate();
                         }
                     }
