@@ -553,7 +553,7 @@ export class Editor {
 
         this.toolbar = new Toolbar(svg);
 
-        if (toolbarSet === null) {
+        if (toolbarSet === null || toolbarSet === undefined) {
             toolbarSet = Editor.FullToolbarSet;
         }
 
