@@ -4,9 +4,7 @@ import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
 import { ToolbarSelectIcon } from "./ToolbarSelectIcon";
 import { ToolbarSeparator } from "./ToolbarSeparator";
 import { ToolbarSwitchIcon } from "./ToolbarSwitchIcon";
-
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
+import { ToolbarTriggerIcon } from "./ToolbarTriggerIcon";
 
 export class Toolbar {
     private baseParent: SVGSVGElement;
@@ -50,6 +48,14 @@ export class Toolbar {
 
     public addSeparator() {
         const newIcon = new ToolbarSeparator(this.paper, ToolbarIcon.IconWidth);
+        this.addIcon(newIcon);
+    }
+
+    public addTrigger(icon: IToolbarIcon, actor: IconCallback) {
+        const newIcon = new ToolbarTriggerIcon(this.paper, icon, (action) => {
+            actor(action);
+        });
+
         this.addIcon(newIcon);
     }
 
