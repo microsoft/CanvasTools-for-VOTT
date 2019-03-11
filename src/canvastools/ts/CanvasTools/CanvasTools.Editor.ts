@@ -20,7 +20,7 @@ import { Toolbar } from "./Toolbar/Toolbar";
  * Internal type to describe toolbar presets
  */
 type ToolbarIconDescription = {
-    type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH,
+    type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH | ToolbarItemType.TRIGGER,
     action: string,
     iconFile: string,
     tooltip: string,
@@ -126,6 +126,20 @@ export class Editor {
             type: ToolbarItemType.SEPARATOR,
         },
         {
+            type: ToolbarItemType.TRIGGER,
+            action: "delete-all-select",
+            iconFile: "delete-all-selection.svg",
+            tooltip: "Delete all regions",
+            keycode: "",
+            actionCallback: (action, rm, sl) => {
+                rm.deleteAllRegions();
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
             type: ToolbarItemType.SWITCH,
             action: "selection-lock",
             iconFile: "selection-lock.svg",
@@ -187,6 +201,20 @@ export class Editor {
                         template: new Rect(40, 40),
                     });
                 }
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SEPARATOR,
+        },
+        {
+            type: ToolbarItemType.TRIGGER,
+            action: "delete-all-select",
+            iconFile: "delete-all-selection.svg",
+            tooltip: "Delete all regions",
+            keycode: "",
+            actionCallback: (action, rm, sl) => {
+                rm.deleteAllRegions();
             },
             activate: false,
         },
@@ -560,6 +588,17 @@ export class Editor {
                 });
 
                 this.toolbar.setSwitch(item.action, item.activate);
+            } else if (item.type === ToolbarItemType.TRIGGER) {
+                this.toolbar.addTrigger({
+                    action: item.action,
+                    iconUrl: iconsPath + item.iconFile,
+                    tooltip: item.tooltip,
+                    keycode: item.keycode,
+                    width: item.width,
+                    height: item.height,
+                }, (action) => {
+                    item.actionCallback(action, this.regionsManager, this.areaSelector);
+                });
             }
         });
 
