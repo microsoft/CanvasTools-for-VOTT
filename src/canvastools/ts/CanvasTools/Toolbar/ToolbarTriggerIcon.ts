@@ -1,7 +1,10 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
 import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
 
-export class ToolbarSelectIcon extends ToolbarIcon {
+import * as SNAPSVG_TYPE from "snapsvg";
+declare var Snap: typeof SNAPSVG_TYPE;
+
+export class ToolbarTriggerIcon extends ToolbarIcon {
     public onAction: IconCallback;
 
     private iconBackgrounRect: Snap.Element;
@@ -17,7 +20,6 @@ export class ToolbarSelectIcon extends ToolbarIcon {
 
     public activate() {
         this.onAction(this.description.action);
-        this.select();
     }
 
     public move(x: number, y: number) {

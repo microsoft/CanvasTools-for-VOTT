@@ -1,11 +1,8 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
-
 export type IconCallback = (action: string) => void;
 
-export enum ToolbarItemType { SELECTOR, SWITCH, SEPARATOR }
+export enum ToolbarItemType { SELECTOR, SWITCH, SEPARATOR, TRIGGER }
 
 export abstract class ToolbarIcon {
     public static IconWidth: number = 48;
