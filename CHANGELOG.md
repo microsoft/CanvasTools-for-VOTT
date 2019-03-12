@@ -1,5 +1,12 @@
 ## Changelog
 
+### 2.1.25 - Trigger button type for Toolbar from the [v2-toolbar-clear-regions](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-clear-regions) branch
+
+*CT Library Changes*
+* Added new `ToolbarTriggerIcon` type for Toolbar, allowing adding buttons that trigger some action but does not change state.
+* Added new "Delete all regions" button to default toolbar presets.
+
+
 ### 2.1.24 - API Update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
 *CT Library Changes*
