@@ -401,6 +401,17 @@ export class RegionsManager {
     }
 
     /**
+     * Changes the tags drawing setting to draw background or make it transparent.
+     */
+    public toggleBackground() {
+        this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
+
+        this.regions.forEach((r) => {
+            r.updateTags(r.tags, this.tagsUpdateOptions);
+        });
+    }
+
+    /**
      * Finds the region by specified `id`.
      * @param id - The `id` to look for.
      */
@@ -708,17 +719,6 @@ export class RegionsManager {
     }
 
     /**
-     * Changes the tags drawing setting to draw background or make it transparent.
-     */
-    private toggleBackground() {
-        this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
-
-        this.regions.forEach((r) => {
-            r.updateTags(r.tags, this.tagsUpdateOptions);
-        });
-    }
-
-    /**
      * Inits regions manager UI.
      * @param paper - The `Snap.Paper` element to draw on.
      */
@@ -839,14 +839,6 @@ export class RegionsManager {
                                 this.selectAllRegions();
                             }
                             break;
-                        // ctrl + B, ctrl + b
-                        case "KeyB":
-                            if (e.ctrlKey) {
-                                this.toggleBackground();
-                            }
-                            break;
-                        // default
-                        default: return;
                     }
                     // e.preventDefault();
                 }
