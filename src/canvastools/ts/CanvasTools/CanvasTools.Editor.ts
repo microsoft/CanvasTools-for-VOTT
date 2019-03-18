@@ -151,6 +151,17 @@ export class Editor {
             },
             activate: false,
         },
+        {
+            type: ToolbarItemType.SWITCH,
+            action: "background-toggle",
+            iconFile: "background-toggle.svg",
+            tooltip: "Toggle Region Background (B)",
+            keycode: "KeyB",
+            actionCallback: (action, rm, sl) => {
+                rm.toggleBackground();
+            },
+            activate: false,
+        },
     ];
 
     /**
@@ -230,6 +241,17 @@ export class Editor {
             keycode: "KeyL",
             actionCallback: (action, rm, sl) => {
                 rm.toggleFreezeMode();
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SWITCH,
+            action: "background-toggle",
+            iconFile: "background-toggle.svg",
+            tooltip: "Toggle Region Background (B)",
+            keycode: "KeyB",
+            actionCallback: (action, rm, sl) => {
+                rm.toggleBackground();
             },
             activate: false,
         },
