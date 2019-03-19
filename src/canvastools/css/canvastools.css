@@ -148,8 +148,8 @@
     --default-color-shadow: rgba(128, 128, 128, 0.4);
     --default-color-highlight: rgba(128, 128, 128, 0.2);
     --default-color-white: rgb(255, 255, 255);
-    --default-color-transparent: rgb(255, 255, 255, 0);
-    --default-color-ghost: rgb(255, 255, 255, 0.5);
+    --default-color-transparent: rgba(255, 255, 255, 0);
+    --default-color-ghost: rgba(255, 255, 255, 0.5);
     --default-color-delete: rgba(216, 24, 65, 1.0);
     --default-color-add: rgba(21, 127, 240, 1.0);
 }
