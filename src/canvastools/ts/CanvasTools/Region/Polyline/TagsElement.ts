@@ -169,7 +169,7 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.${this.styleId} .primaryTagBoundRectStyle`,
                         style: `fill: none;
-                                stroke: ${tags.primary.colorAccent};`,
+                                stroke: var(--default-color-accent);`,
                     },
                     {
                         rule: `.${this.styleId} .primaryTagBoundRectStyle`,
