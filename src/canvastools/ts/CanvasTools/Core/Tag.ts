@@ -82,7 +82,7 @@ export class Tag implements ITag {
      */
     public get colorPure(): string {
         if (this.tagColorPure === "") {
-            this.tagColorPure = this.colorObj.sRGB.toHex();
+            this.tagColorPure = this.colorObj.sRGB.toCSSString();
             // OLD: `hsl(${this.tagHue.toString()}, 100%, 50%)`;
         }
         return this.tagColorPure;
@@ -95,7 +95,7 @@ export class Tag implements ITag {
      */
     public get colorAccent(): string {
         if (this.tagColorAccent === "") {
-            this.tagColorAccent = this.colorObj.sRGB.toHex(0.8);
+            this.tagColorAccent = this.colorObj.sRGB.toCSSString(0.8);
             // OLD: `hsla(${this.tagHue.toString()}, 100%, 50%, 0.5)`;
         }
         return this.tagColorAccent;
@@ -110,7 +110,7 @@ export class Tag implements ITag {
         if (this.tagColorHighlight === "") {
             const lab = this.colorObj.LAB.toArray();
             const highlight = new LABColor(lab[0] * 0.7, lab[1] * 0.7, lab[2] * 0.7);
-            this.tagColorHighlight = highlight.toSRGB().truncate().toHex(0.4);
+            this.tagColorHighlight = highlight.toSRGB().truncate().toCSSString(0.4);
             // OLD: `hsla(${this.tagHue.toString()}, 80%, 40%, 0.3)`;
         }
         return this.tagColorHighlight;
@@ -125,7 +125,7 @@ export class Tag implements ITag {
         if (this.tagColorShadow === "") {
             const lab = this.colorObj.LAB.toArray();
             const shadow = new LABColor(lab[0] * 0.6, lab[1] * 0.6, lab[2] * 0.6);
-            this.tagColorShadow = shadow.toSRGB().truncate().toHex(0.2);
+            this.tagColorShadow = shadow.toSRGB().truncate().toCSSString(0.2);
             // OLD: `hsla(${this.tagHue.toString()}, 50%, 30%, 0.2)`;
         }
         return this.tagColorShadow;
@@ -140,7 +140,7 @@ export class Tag implements ITag {
         if (this.tagColorDark === "") {
             const lab = this.colorObj.LAB.toArray();
             const dark = new LABColor(lab[0] * 0.5, lab[1] * 0.5, lab[2] * 0.5);
-            this.tagColorDark = dark.toSRGB().truncate().toHex(0.8);
+            this.tagColorDark = dark.toSRGB().truncate().toCSSString(0.8);
             // OLD: `hsla(${this.tagHue.toString()}, 50%, 30%, 0.8)`;
         }
         return this.tagColorDark;
