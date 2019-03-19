@@ -40,6 +40,11 @@ export class RectSelector extends Selector {
     private capturingState: boolean = false;
 
     /**
+     * Pointer Id for capturing
+     */
+    private pointerCaptureId: number = -1;
+
+    /**
      * Internal flag for selection mode.
      */
     private isTwoPoints: boolean = false;
@@ -78,6 +83,10 @@ export class RectSelector extends Selector {
     public hide() {
         super.hide();
         this.hideAll([this.crossA, this.crossB, this.selectionBox]);
+        if (this.pointerCaptureId >= 0) {
+            this.parentNode.releasePointerCapture(this.pointerCaptureId);
+            this.pointerCaptureId = -1;
+        }
     }
 
     /**
@@ -170,7 +179,8 @@ export class RectSelector extends Selector {
             if (!this.isTwoPoints) {
                 this.capturingState = true;
 
-                this.parentNode.setPointerCapture(e.pointerId);
+                this.pointerCaptureId = e.pointerId;
+                this.parentNode.setPointerCapture(this.pointerCaptureId);
                 this.moveCross(this.crossB, this.crossA);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
 
@@ -194,7 +204,10 @@ export class RectSelector extends Selector {
 
             if (!this.isTwoPoints) {
                 this.capturingState = false;
-                this.parentNode.releasePointerCapture(e.pointerId);
+                if (this.pointerCaptureId >= 0) {
+                    this.parentNode.releasePointerCapture(this.pointerCaptureId);
+                    this.pointerCaptureId = -1;
+                }
                 this.hideAll([this.crossB, this.selectionBox]);
 
                 if (typeof this.callbacks.onSelectionEnd === "function") {
