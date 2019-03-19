@@ -99,12 +99,12 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.${this.styleId} .primaryTagPointStyle`,
                         style: `fill: ${tags.primary.colorNoColor};
-                                    stroke:${tags.primary.colorAccent};`,
+                                stroke:${tags.primary.colorAccent};
+                                stroke-width: 1px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover  .primaryTagPointStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
-                                stroke: #fff;`,
+                        style: `stroke:${tags.primary.colorAccent};`,
                     },
                     {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagPointStyle`,
@@ -115,10 +115,33 @@ export class TagsElement extends TagsComponent {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
                         style: `opacity:0.25;`,
                     },
+                    {
+                        rule: `.regionStyle.${this.styleId} .dragPointStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .dragPointStyle`,
+                        style: `opacity:0.5;`,
+                    },
                 ];
             } else {
                 this.styleMap = [];
-                this.styleLightMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagPointStyle`,
+                        style: `fill: var(--default-color-transparent);
+                                stroke: var(--default-color-pure);
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .dragPointStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .dragPointStyle`,
+                        style: `opacity:0.5;`,
+                    },
+                ];
             }
 
             if (tags.secondary !== null && tags.secondary !== undefined) {
