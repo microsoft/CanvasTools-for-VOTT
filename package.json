@@ -1,6 +1,6 @@
 {
   "name": "vott-ct",
-  "version": "2.1.26",
+  "version": "2.1.27",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
@@ -28,6 +28,10 @@
     "url": "https://github.com/kichinsky/CanvasTools-for-VOTT/issues"
   },
   "homepage": "https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
+  "files": [
+    "/lib",
+    "/dist"
+  ],
   "dependencies": {
     "snapsvg-cjs": "0.0.6"
   },
