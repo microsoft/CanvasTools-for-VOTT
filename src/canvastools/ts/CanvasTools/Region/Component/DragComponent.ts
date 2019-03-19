@@ -44,44 +44,7 @@ export abstract class DragComponent extends RegionComponent {
      */
     public freeze() {
         super.freeze();
-        this.dragNode.undrag();
         this.onManipulationEnd();
-    }
-
-    /**
-     * Callback for the dragbegin event.
-     */
-    protected onDragBegin() {
-        this.dragOrigin = new Point2D(this.x, this.y);
-    }
-
-    /**
-     * Callback for the dragmove event.
-     * @param dx - Diff in the `x`-coordinate of draggable element.
-     * @param dy - Diff in the `y`-coordinate of draggable element.
-     * @remarks This method directly calls the `onChange` callback wrapper.
-     */
-    protected onDragMove(dx: number, dy: number) {
-        if (dx !== 0 && dy !== 0) {
-            let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
-
-            if (this.paperRect !== null) {
-                p = p.boundToRect(this.paperRect);
-            }
-
-            const rd = this.regionData.copy();
-            rd.move(p);
-            this.onChange(this, rd, ChangeEventType.MOVING);
-        }
-    }
-
-    /**
-     * Callback for the dragend event.
-     */
-    protected onDragEnd() {
-        this.dragOrigin = null;
-
-        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
     }
 
     /**
@@ -102,8 +65,21 @@ export abstract class DragComponent extends RegionComponent {
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
                     if (this.isDragged) {
-                        const dx = e.clientX - this.dragOrigin.x;
-                        const dy = e.clientY - this.dragOrigin.y;
+                        const rect = (e.target as HTMLElement).getBoundingClientRect();
+                        const rdx = e.clientX - rect.left;
+                        const rdy = e.clientY - rect.top;
+
+                        let dx = e.clientX - this.dragOrigin.x;
+                        let dy = e.clientY - this.dragOrigin.y;
+
+                        if ((rdx < 0 && dx > 0) || (rdx > this.width && dx < 0)) {
+                            dx = 0;
+                        }
+
+                        if ((rdy < 0 && dy > 0) || (rdy > this.height && dy < 0)) {
+                            dy = 0;
+                        }
+
                         let p = new Point2D(this.x + dx, this.y + dy);
 
                         if (this.paperRect !== null) {
@@ -123,8 +99,9 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerleave",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    this.isDragged = false;
-                    this.onManipulationEnd();
+                    if (!this.isDragged) {
+                        this.onManipulationEnd();
+                    }
                 },
                 bypass: false,
             },
