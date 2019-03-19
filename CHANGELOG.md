@@ -1,5 +1,15 @@
 ## Changelog
 
+### 2.1.26 - Background toggling from the [v2-toolbar-background-toggle](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-background-toggle) branch
+
+*CT Library Changes*
+* Exposed the `toggleBackgroun` method for `RegionsManager` as public.
+* Removed `KeyB`-event listener from the `RegionsManager`. Use toolbar insted.
+* Updated styles for the light theme without background.
+
+*CT Toolbar*
+* Added background toggling button to the toolbar icon sets.
+
 ### 2.1.25 - Trigger button type for Toolbar from the [v2-toolbar-clear-regions](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-clear-regions) branch
 
 *CT Library Changes*

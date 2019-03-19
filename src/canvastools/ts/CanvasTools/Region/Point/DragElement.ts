@@ -12,7 +12,7 @@ export class DragElement extends DragComponent {
     /**
      * Default (visual) radius for point drag-component.
      */
-    public static DEFAULT_DRAG_RADIUS: number = 7;
+    public static DEFAULT_DRAG_RADIUS: number = 6;
 
     /**
      * Creates a new `DragElement`.

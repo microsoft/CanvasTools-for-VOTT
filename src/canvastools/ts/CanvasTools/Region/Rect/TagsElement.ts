@@ -225,25 +225,26 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.${this.styleId} .primaryTagRectStyle`,
                         style: `fill: ${tags.primary.colorNoColor};
-                                stroke:${tags.primary.colorAccent};`,
+                                stroke:${tags.primary.colorAccent};
+                                stroke-width: 1px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
+                        style: `fill: ${tags.primary.colorHighlight};
                                 stroke: #fff;`,
                     },
                     {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
+                        style: `fill: ${tags.primary.colorNoColor};
                                 stroke:${tags.primary.colorAccent};`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                        style: `fill:${tags.primary.colorShadow};`,
+                        style: `fill:${tags.primary.colorNoColor};`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
-                        style: `opacity:0.25;`,
+                        style: `fill:${tags.primary.colorAccent};`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
@@ -252,7 +253,8 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
+                                fill: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
@@ -260,16 +262,42 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;`,
+                        style: `fill:transparent;
+                                stroke-width: 0;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                        style: `fill:rgba(255,255,255,0.5);`,
+                        style: `fill:rgba(255,255,255,0.5);
+                                stroke-width: 0;`,
                     },
                 ];
             } else {
                 this.styleMap = [];
-                this.styleLightMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: var(--default-color-transparent);
+                                stroke: var(--default-color-pure);
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: var(--default-color-transparent);
+                                stroke: var(--default-color-pure);`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `stroke-width: 0;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
+                        style: `stroke-width: 0;`,
+                    },
+                ];
             }
 
             if (tags.secondary !== null && tags.secondary !== undefined) {

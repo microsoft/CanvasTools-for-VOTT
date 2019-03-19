@@ -89,7 +89,7 @@
 
 .primaryTagRectStyle {
     stroke-width: 2;
-    stroke-dasharray: 2 6;
+    stroke-dasharray: 0.5 4;
     stroke-linecap: round;
     filter: url(#black-glow);
 }
@@ -137,6 +137,7 @@
 .primaryTagPolylineStyle, .primaryTagPolygonStyle {
     stroke-width: 2;
     stroke-linecap: round;
+    stroke-dasharray: 0.5 4;
 }
 
 /* 2.2. Default colors */
@@ -226,7 +227,7 @@
 .primaryTagBoundRectStyle {
     fill: var(--default-color-shadow);
     stroke:var(--default-color-accent);
-    opacity: 0.5;
+    opacity: 0.25;
 }
 
 .regionStyle.selected .primaryTagBoundRectStyle {
@@ -245,6 +246,7 @@
 
 .regionStyle.selected .primaryTagPolylineStyle {
     filter: url(#black-glow);
+    stroke-dasharray: none;
 }
 
 .primaryTagPolygonStyle {
@@ -255,6 +257,7 @@
 .regionStyle.selected .primaryTagPolygonStyle {
     fill: var(--default-color-highlight);
     filter: url(#black-glow);
+    stroke-dasharray: none;
 }
 
 .regionStyle:hover .primaryTagPolygonStyle {
@@ -343,7 +346,9 @@ svg:not(:root) .menuLayer {
 }
 
 .regionManager.frozen .regionStyle.old .primaryTagRectStyle,
-.regionManager.frozen .regionStyle.old .primaryTagPointStyle {
+.regionManager.frozen .regionStyle.old .primaryTagPointStyle,
+.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,
+.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {
     stroke-width: 1;
     stroke-dasharray: 0 0;
 }

@@ -151,24 +151,25 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.${this.styleId} .primaryTagPolygonStyle`,
-                        style: `fill: none;
+                        style: `fill: ${tags.primary.colorNoColor};
                                 stroke: ${tags.primary.colorPure};
                                 stroke-width: 1px;`,
                     },
                     {
-                        rule: `.${this.styleId}:hover .primaryTagPolygonStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
+                        rule: `.regionStyle.${this.styleId}:hover .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
                                 stroke: ${tags.primary.colorPure};`,
                     },
                     {
                         rule: `.regionStyle.selected.${this.styleId} .primaryTagPolygonStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
+                        style: `fill: ${tags.primary.colorNoColor};
                                 stroke: ${tags.primary.colorPure};`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
+                                fill: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
@@ -176,7 +177,8 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;`,
+                        style: `fill:transparent;
+                                stroke-width: 0px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
@@ -185,7 +187,32 @@ export class TagsElement extends TagsComponent {
                 ];
             } else {
                 this.styleMap = [];
-                this.styleLightMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: var(--default-color-transparent);`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: var(--default-color-transparent);`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `stroke-width: 0px;`,
+                    },
+                ];
             }
 
             if (tags.secondary !== null && tags.secondary !== undefined) {

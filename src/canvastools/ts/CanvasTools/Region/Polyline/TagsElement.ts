@@ -146,7 +146,8 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
+                                fill: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
@@ -154,7 +155,8 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;`,
+                        style: `fill:transparent;
+                                stroke-width: 0px;`,
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
@@ -163,7 +165,25 @@ export class TagsElement extends TagsComponent {
                 ];
             } else {
                 this.styleMap = [];
-                this.styleLightMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;
+                                stroke: ${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                ];
             }
 
             if (tags.secondary !== null && tags.secondary !== undefined) {
