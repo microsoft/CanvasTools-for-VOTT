@@ -103,6 +103,12 @@
     font-size: 9pt;
     fill: #fff;
     user-select: none;
+    pointer-events: none;
+}
+
+.primaryTagTextStyle::selection {
+    background: none;
+    fill: #fff;
 }
 
 .secondaryTagStyle {
@@ -395,7 +401,6 @@ svg:not(:root) .menuLayer {
         .nextPointStyle
 */
 
-*/
 #selectionOverlay {
     position: relative;
     width: 100%;
@@ -410,25 +415,10 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
-.rectSelector .maskStyle {
-    fill: #000;
-    fill-opacity: 0.5;
-    stroke-width: 0;
-    pointer-events: none;
-}
-
-.maskInStyle {
+.selectionBoxStyle {
     fill: #fff;
+    fill-opacity: 0.25;
     stroke-width: 0;
-    visibility: visible;
-    pointer-events: none;
-}
-
-.maskOutStyle {
-    /* Transparent crop*/
-    fill: #000;
-    stroke-width: 0;
-    visibility: visible;
     pointer-events: none;
 }
 
