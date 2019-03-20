@@ -67,16 +67,6 @@ export abstract class AnchorsComponent extends RegionComponent {
         this.anchorsNode = paper.g();
 
         this.buildAnchors();
-
-        this.ghostAnchor = this.createAnchor(paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
-        this.ghostAnchor.attr({
-            display: "none",
-        });
-
-        this.node.add(this.anchorsNode);
-        this.node.add(this.ghostAnchor);
-
-        this.subscribeGhostToEvents();
     }
 
     /**
@@ -109,6 +99,7 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     protected buildAnchors() {
         this.buildPointAnchors();
+        this.buildGhostAnchor();
     }
 
     /**
@@ -122,6 +113,20 @@ export abstract class AnchorsComponent extends RegionComponent {
 
             this.subscribeAnchorToEvents(anchor, index);
         });
+        this.node.add(this.anchorsNode);
+    }
+
+    /**
+     * Creates the ghost anchor.
+     */
+    protected buildGhostAnchor() {
+        this.ghostAnchor = this.createAnchor(this.paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
+        this.ghostAnchor.attr({
+            display: "none",
+        });
+
+        this.node.add(this.ghostAnchor);
+        this.subscribeGhostToEvents();
     }
 
     /**
