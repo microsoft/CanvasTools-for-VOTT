@@ -749,6 +749,12 @@ export class Editor {
     private createSVGElement(): SVGSVGElement {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.innerHTML = Editor.SVGDefsTemplate;
+        svg.ondragstart = () => {
+            return false;
+        };
+        svg.ondragend = () => {
+            return false;
+        };
         return svg;
     }
 
