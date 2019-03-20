@@ -61,10 +61,11 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks) {
         super(paper, paperRect, regionData, callbacks);
-        this.node = paper.g();
+        this.node = this.paper.g();
         this.node.addClass("anchorsLayer");
         this.anchors = [];
-        this.anchorsNode = paper.g();
+        this.anchorsNode = this.paper.g();
+        this.node.add(this.anchorsNode);
 
         this.buildAnchors();
     }
@@ -113,7 +114,6 @@ export abstract class AnchorsComponent extends RegionComponent {
 
             this.subscribeAnchorToEvents(anchor, index);
         });
-        this.node.add(this.anchorsNode);
     }
 
     /**

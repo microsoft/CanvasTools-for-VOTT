@@ -54,6 +54,7 @@ export class AnchorsElement extends AnchorsComponent {
     protected buildAnchors() {
         this.buildBoneAnchors();
         this.buildPointAnchors();
+        this.buildGhostAnchor();
     }
 
     /**
