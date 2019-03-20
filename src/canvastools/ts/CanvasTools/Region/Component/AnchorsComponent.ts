@@ -130,23 +130,27 @@ export abstract class AnchorsComponent extends RegionComponent {
      * @param index - The index of the anchor used to define which one is active.
      */
     protected subscribeAnchorToEvents(anchor: Snap.Element, index: number) {
-        anchor.node.addEventListener("pointerenter", (e) => {
-            if (!this.isFrozen) {
-                // Set drag origin point to current anchor
-                const anchorPoint = this.regionData.points[index];
-                this.activeAnchorIndex = index;
-
-                // Move ghost anchor to current anchor position
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.attr({
-                        cx: anchorPoint.x,
-                        cy: anchorPoint.y,
-                        display: "block",
+        this.subscribeToEvents([
+            {
+                event: "pointerenter",
+                base: anchor.node,
+                listener: (e) => {
+                    // Set drag origin point to current anchor
+                    const anchorPoint = this.regionData.points[index];
+                    this.activeAnchorIndex = index;
+                    // Move ghost anchor to current anchor position
+                    window.requestAnimationFrame(() => {
+                        this.ghostAnchor.attr({
+                            cx: anchorPoint.x,
+                            cy: anchorPoint.y,
+                            display: "block",
+                        });
                     });
-                });
-                this.onManipulationBegin();
-            }
-        });
+                    this.onManipulationBegin();
+                },
+                bypass: false,
+            },
+        ]);
     }
 
     /**
@@ -219,11 +223,6 @@ export abstract class AnchorsComponent extends RegionComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerEnter(e: PointerEvent) {
-        /* this.ghostAnchor.drag(
-            this.anchorDragMove.bind(this),
-            this.anchorDragBegin.bind(this),
-            this.anchorDragEnd.bind(this)); */
-
         this.onManipulationBegin();
     }
 
@@ -232,8 +231,6 @@ export abstract class AnchorsComponent extends RegionComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerLeave(e: PointerEvent) {
-        /* this.ghostAnchor.undrag(); */
-
         window.requestAnimationFrame(() => {
             this.ghostAnchor.attr({
                 display: "none",
