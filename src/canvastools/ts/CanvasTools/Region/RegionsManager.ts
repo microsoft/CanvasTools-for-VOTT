@@ -201,27 +201,6 @@ export class RegionsManager {
         this.registerRegion(region);
     }
 
-/*     // REGION CREATION
-    public drawRegion(x: number, y: number, rect: Rect, id: string, tagsDescriptor: TagsDescriptor) {
-        this.menu.hide();
-        let region = new RectRegion(this.paper, this.paperRect, new Point2D(x, y), rect, id, tagsDescriptor,
-            this.onManipulationBegin_local.bind(this),
-            this.onManipulationEnd_local.bind(this),
-            this.tagsUpdateOptions);
-        region.area = rect.height * rect.width;
-        region.onChange = this.onRegionChange.bind(this);
-
-        region.updateTags(region.tags, this.tagsUpdateOptions);
-        this.regionManagerLayer.add(region.node);
-        this.regions.push(region);
-        // Need to do a check for invalid stacking from user generated or older saved json
-        if (this.regions.length > 1) {
-            this.sortRegionsByArea();
-            this.redrawAllRegions();
-        }
-        //this.menu.showOnRegion(region);
-    } */
-
     /**
      * Redraws all regions. Reinserts regions in actual order.
      */
@@ -752,7 +731,6 @@ export class RegionsManager {
         this.regionManagerLayer.node.addEventListener("pointerleave", (e: PointerEvent) => {
             if (this.callbacks.onManipulationEnd !== null) {
                 this.callbacks.onManipulationEnd();
-                console.log("rm ma-end");
             }
         });
 
