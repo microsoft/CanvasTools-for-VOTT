@@ -93,7 +93,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     /**
      * Reference to external callbacks collection.
      */
-    private callbacks: IRegionCallbacks;
+    protected callbacks: IRegionCallbacks;
 
     /**
      * Creates a new UI component (part of the region).
@@ -114,16 +114,11 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         };
 
         if (callbacks !== null && callbacks !== undefined) {
-            if (callbacks.onManipulationBegin !== undefined) {
-                this.callbacks.onManipulationBegin = callbacks.onManipulationBegin;
-            }
-            if (callbacks.onManipulationEnd !== undefined) {
-                this.callbacks.onManipulationEnd = callbacks.onManipulationEnd;
-            }
-
-            if (callbacks.onChange !== undefined) {
-                this.callbacks.onChange = callbacks.onChange;
-            }
+            this.callbacks.onManipulationBegin = this.nullGuard(callbacks.onManipulationBegin);
+            this.callbacks.onManipulationEnd = this.nullGuard(callbacks.onManipulationEnd);
+            this.callbacks.onChange = this.nullGuard(callbacks.onChange);
+            this.callbacks.onManipulationLockRelease = this.nullGuard(callbacks.onManipulationLockRelease);
+            this.callbacks.onManipulationLockRequest = this.nullGuard(callbacks.onManipulationLockRequest);
         }
     }
 
@@ -216,40 +211,6 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * The wrapper around external `onChange` callback. Checks whether the callback is defined.
-     * @param region - Reference to the component.
-     * @param regionData - The `RegionData` object to be passed.
-     * @param eventType - The event type.
-     * @param multiSelection - The flag for multiple regions selection.
-     */
-    protected onChange(region: RegionComponent, regionData: RegionData, eventType?: ChangeEventType,
-                       multiSelection?: boolean) {
-        if (this.callbacks.onChange !== null && this.callbacks.onChange !== undefined) {
-            this.callbacks.onChange(region, regionData, eventType, multiSelection);
-        }
-    }
-
-    /**
-     * The wrapper around external `onManipulationBegin` callback. Checks whether the callback is defined.
-     * @param region - Reference to the component.
-     */
-    protected onManipulationBegin(region?: RegionComponent) {
-        if (this.callbacks.onManipulationBegin !== null && this.callbacks.onManipulationBegin !== undefined) {
-            this.callbacks.onManipulationBegin(region);
-        }
-    }
-
-    /**
-     * The wrapper around external `onManupulationEnd` callback. Checks whether the callback is defined.
-     * @param region - Reference to the component.
-     */
-    protected onManipulationEnd(region?: RegionComponent) {
-        if (this.callbacks.onManipulationEnd !== null && this.callbacks.onManipulationEnd !== undefined) {
-            this.callbacks.onManipulationEnd(region);
-        }
-    }
-
-    /**
      * Subscrubes the component elements according to provided event descriptors. Binds to the `this` object.
      * @param listeners - The collection of event descriptors.
      */
@@ -268,6 +229,14 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         return (args: PointerEvent | KeyboardEvent) => {
             if (!this.isFrozen || bypass) {
                 f(args);
+            }
+        };
+    }
+
+    private nullGuard<T extends any[]>(f: (...args: T) => void): (...args: T) => void {
+        return (...args) => {
+            if (f !== null && f !== undefined) {
+                f(...args);
             }
         };
     }
