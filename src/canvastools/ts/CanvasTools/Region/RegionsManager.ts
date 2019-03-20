@@ -743,15 +743,16 @@ export class RegionsManager {
      * Helper function to subscribe manager to pointer and keyboard events.
      */
     private subscribeToEvents() {
-        this.regionManagerLayer.mouseover((e: MouseEvent) => {
+        this.regionManagerLayer.node.addEventListener("pointerenter", (e: PointerEvent) => {
             if (this.callbacks.onManipulationBegin !== null) {
                 this.callbacks.onManipulationBegin();
             }
         });
 
-        this.regionManagerLayer.mouseout((e: MouseEvent) => {
+        this.regionManagerLayer.node.addEventListener("pointerleave", (e: PointerEvent) => {
             if (this.callbacks.onManipulationEnd !== null) {
                 this.callbacks.onManipulationEnd();
+                console.log("rm ma-end");
             }
         });
 
