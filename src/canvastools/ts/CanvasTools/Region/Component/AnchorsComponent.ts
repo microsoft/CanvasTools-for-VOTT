@@ -71,15 +71,7 @@ export abstract class AnchorsComponent extends RegionComponent {
         this.node.add(this.anchorsNode);
         this.node.add(this.ghostAnchor);
 
-        const listeners: IEventDescriptor[] = [
-            { event: "pointerenter", listener: this.onGhostPointerEnter, base: this.ghostAnchor.node, bypass: false },
-            { event: "pointerleave", listener: this.onGhostPointerLeave, base: this.ghostAnchor.node, bypass: false },
-            { event: "pointerdown", listener: this.onGhostPointerDown, base: this.ghostAnchor.node, bypass: false },
-            { event: "pointerup", listener: this.onGhostPointerUp, base: this.ghostAnchor.node, bypass: false },
-            { event: "pointermove", listener: this.onGhostPointerMove, base: this.ghostAnchor.node, bypass: false },
-        ];
-
-        this.subscribeToEvents(listeners);
+        this.subscribeToGhostEvents();
     }
 
     /**
@@ -273,5 +265,45 @@ export abstract class AnchorsComponent extends RegionComponent {
     protected onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
         this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
+    }
+
+    /**
+     * Subscribe event listeners on the ghost anchor
+     */
+    protected subscribeToGhostEvents() {
+        const listeners: IEventDescriptor[] = [
+            {
+                event: "pointerenter",
+                base: this.ghostAnchor.node,
+                listener: this.onGhostPointerEnter,
+                bypass: false,
+            },
+            {
+                event: "pointerleave",
+                base: this.ghostAnchor.node,
+                listener: this.onGhostPointerLeave,
+                bypass: false,
+            },
+            {
+                event: "pointerdown",
+                base: this.ghostAnchor.node,
+                listener: this.onGhostPointerDown,
+                bypass: false,
+            },
+            {
+                event: "pointerup",
+                base: this.ghostAnchor.node,
+                listener: this.onGhostPointerUp,
+                bypass: false,
+            },
+            {
+                event: "pointermove",
+                base: this.ghostAnchor.node,
+                listener: this.onGhostPointerMove,
+                bypass: false,
+            },
+        ];
+
+        this.subscribeToEvents(listeners);
     }
 }
