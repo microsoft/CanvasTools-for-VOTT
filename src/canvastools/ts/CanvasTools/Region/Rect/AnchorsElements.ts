@@ -92,7 +92,7 @@ export class AnchorsElement extends AnchorsComponent {
             this.anchorsNode.add(bone);
 
             // Using already existing infrastructure for indexes
-            this.subscribeAnchorBoneToEvents(bone, - (index + 1));
+            // this.subscribeAnchorBoneToEvents(bone, - (index + 1));
         });
     }
 
@@ -233,7 +233,7 @@ export class AnchorsElement extends AnchorsComponent {
         const rd = this.regionData.copy();
         rd.setPoints([p1, new Point2D(p2.x, p1.y), p2, new Point2D(p1.x, p2.y)]);
 
-        this.onChange(this, rd, ChangeEventType.MOVING);
+        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
     }
 
     /**
@@ -274,7 +274,6 @@ export class AnchorsElement extends AnchorsComponent {
                         display: "block",
                     });
                 });
-                this.onManipulationBegin();
             }
         });
     }

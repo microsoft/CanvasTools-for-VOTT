@@ -111,6 +111,8 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
             onChange: null,
             onManipulationBegin: null,
             onManipulationEnd: null,
+            onManipulationLockRelease: null,
+            onManipulationLockRequest: null,
         };
 
         if (callbacks !== null && callbacks !== undefined) {

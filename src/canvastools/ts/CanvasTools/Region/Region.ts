@@ -70,6 +70,13 @@ export abstract class Region extends RegionComponent {
         this.tagsUpdateOptions = tagsUpdateOptions;
 
         this.UI = [];
+
+        const onChange = this.callbacks.onChange;
+        this.callbacks.onChange = (region: RegionComponent, regionData: RegionData, ...args) => {
+            this.regionData.initFrom(regionData);
+            this.redraw();
+            onChange(this, this.regionData.copy(), ...args);
+        };
     }
 
     /**
@@ -77,20 +84,6 @@ export abstract class Region extends RegionComponent {
      */
     public removeStyles() {
         document.getElementById(this.styleID).remove();
-    }
-
-    /**
-     * The callback function fot internal components.
-     * @param component - Reference to the UI component.
-     * @param regionData - New RegionData object.
-     * @param state - New state of the region.
-     * @param multiSelection - Flag for multiselection.
-     */
-    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType,
-                    multiSelection: boolean = false) {
-        this.regionData.initFrom(regionData);
-        this.redraw();
-        super.onChange(this, this.regionData.copy(), state, multiSelection);
     }
 
     /**

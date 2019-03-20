@@ -131,7 +131,6 @@ export class AnchorsElement extends AnchorsComponent {
                 } else {
                     this.addOnPointerUp = false;
                 }
-                this.onManipulationBegin();
             }
         }, false);
     }
@@ -146,7 +145,7 @@ export class AnchorsElement extends AnchorsComponent {
             rd.setPoint(p, this.activeAnchorIndex);
         }
 
-        this.onChange(this, rd, ChangeEventType.MOVING);
+        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
     }
 
     /**
@@ -172,8 +171,6 @@ export class AnchorsElement extends AnchorsComponent {
             this.anchorDragMove.bind(this),
             this.anchorDragBegin.bind(this),
             this.anchorDragEnd.bind(this));
-
-        this.onManipulationBegin();
     }
 
     /**
@@ -274,6 +271,6 @@ export class AnchorsElement extends AnchorsComponent {
             this.ghostAnchor.addClass("delete");
         }
 
-        this.onChange(this, rd, ChangeEventType.MOVEEND);
+        this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
     }
 }

@@ -253,11 +253,11 @@ export class MenuElement extends RegionComponent {
         this.menuGroup.add(this.menuItemsGroup);
 
         this.menuGroup.mouseover((e) => {
-            this.onManipulationBegin();
+            this.callbacks.onManipulationBegin();
         });
 
         this.menuGroup.mouseout((e) => {
-            this.onManipulationEnd();
+            this.callbacks.onManipulationEnd();
         });
     }
 

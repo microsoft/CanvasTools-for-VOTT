@@ -62,6 +62,13 @@ export class RectRegion extends Region {
         }
 
         this.buildOn(paper);
+
+        const onChange = this.callbacks.onChange;
+        this.callbacks.onChange = (region: RegionComponent, regionData: RegionData, ...args) => {
+            this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
+                this.paperRects.host.height - regionData.height);
+            onChange(this, this.regionData.copy(), ...args);
+        };
     }
 
     /**
@@ -86,20 +93,6 @@ export class RectRegion extends Region {
     }
 
     /**
-     * The callback function fot internal components.
-     * @param component - Reference to the UI component.
-     * @param regionData - New RegionData object.
-     * @param state - New state of the region.
-     * @param multiSelection - Flag for multiselection.
-     */
-    public onChange(component: RegionComponent, regionData: RegionData, state: ChangeEventType,
-                    multiSelection: boolean = false) {
-        this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
-                                      this.paperRects.host.height - regionData.height);
-        super.onChange(component, regionData, state, multiSelection);
-    }
-
-    /**
      * Creates the UI of the region component.
      * @param paper - The `Snap.Paper` element to draw on.
      */
@@ -108,14 +101,8 @@ export class RectRegion extends Region {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        const callbacks = {
-            onChange: this.onChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin.bind(this),
-            onManipulationEnd: this.onManipulationEnd.bind(this),
-        };
-
-        this.anchorNode = new AnchorsElement(paper, this.paperRects.host, this.regionData, callbacks);
-        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, callbacks);
+        this.anchorNode = new AnchorsElement(paper, this.paperRects.host, this.regionData, this.callbacks);
+        this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, this.callbacks);
         this.tagsNode = new TagsElement(paper, this.paperRects.host, this.regionData,
                                         this.tags, this.styleID, this.styleSheet,
                                         this.tagsUpdateOptions);
