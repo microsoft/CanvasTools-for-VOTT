@@ -44,6 +44,8 @@ export abstract class DragComponent extends RegionComponent {
      */
     public freeze() {
         super.freeze();
+        this.isDragged = false;
+        this.dragOrigin = null;
         this.onManipulationEnd();
     }
 
@@ -127,9 +129,8 @@ export abstract class DragComponent extends RegionComponent {
                         this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND, multiselection);
                         this.isDragged = false;
                         this.dragOrigin = null;
-                    } else {
-                        this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
                     }
+                    this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
                 },
                 bypass: false,
             },
