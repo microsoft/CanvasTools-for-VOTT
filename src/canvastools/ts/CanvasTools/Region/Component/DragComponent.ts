@@ -46,7 +46,6 @@ export abstract class DragComponent extends RegionComponent {
         super.freeze();
         this.isDragged = false;
         this.dragOrigin = null;
-        this.onManipulationEnd();
     }
 
     /**
@@ -58,7 +57,7 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerenter",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    this.onManipulationBegin();
+                    // do nothing
                 },
                 bypass: false,
             },
@@ -94,6 +93,7 @@ export abstract class DragComponent extends RegionComponent {
                         rd.move(p);
                         this.onChange(this, rd, ChangeEventType.MOVING);
                     }
+                    e.stopPropagation();
                 },
                 bypass: false,
             },
@@ -102,7 +102,7 @@ export abstract class DragComponent extends RegionComponent {
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
                     if (!this.isDragged) {
-                        this.onManipulationEnd();
+                        // do nothing
                     }
                 },
                 bypass: false,

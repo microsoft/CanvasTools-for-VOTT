@@ -91,8 +91,6 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     public freeze() {
         super.freeze();
-        this.ghostAnchor.undrag();
-        this.onManipulationEnd();
     }
 
     /**
@@ -151,7 +149,6 @@ export abstract class AnchorsComponent extends RegionComponent {
                             display: "block",
                         });
                     });
-                    this.onManipulationBegin();
                 },
                 bypass: false,
             },
@@ -228,7 +225,7 @@ export abstract class AnchorsComponent extends RegionComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerEnter(e: PointerEvent) {
-        this.onManipulationBegin();
+        // do nothing
     }
 
     /**
@@ -243,7 +240,6 @@ export abstract class AnchorsComponent extends RegionComponent {
         });
 
         this.activeAnchorIndex = -1;
-        this.onManipulationEnd();
     }
 
     /**
