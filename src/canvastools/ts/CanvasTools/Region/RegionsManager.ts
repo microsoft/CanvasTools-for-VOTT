@@ -11,6 +11,7 @@ import { PolylineRegion } from "./Polyline/PolylineRegion";
 import { MenuElement } from "./RegionMenu";
 import { RegionData, RegionDataType } from "../Core/RegionData";
 import { Region } from "./Region";
+import { RegionComponent } from "./Component/RegionComponent";
 
 /**
  * The manager for visual region objects.
@@ -67,6 +68,11 @@ export class RegionsManager {
     private justManipulated = false;
 
     /**
+     * Internal flag for locking manipulation.
+     */
+    private manipulationLock = false;
+
+    /**
      * Returns current freezing state.
      */
     public get isFrozen(): boolean {
@@ -97,25 +103,64 @@ export class RegionsManager {
 
         this.regions = new Array<Region>();
 
-        if (callbacks !== undefined) {
-            this.callbacks = callbacks;
-
-            if (typeof callbacks.onChange === "function") {
-                this.callbacks.onChange = (region: Region, regionData: RegionData, state: ChangeEventType,
-                                           multiSelection: boolean = false) => {
-                    this.onRegionChange(region, regionData, state, multiSelection);
+        this.callbacks = {
+            onChange: (region: Region, regionData: RegionData, state: ChangeEventType,
+                       multiSelection: boolean = false) => {
+                this.onRegionChange(region, regionData, state, multiSelection);
+                if (typeof callbacks.onChange === "function") {
                     callbacks.onChange(region, regionData, state, multiSelection);
-                };
-            } else {
-                this.callbacks.onChange = this.onRegionChange.bind(this);
-            }
-        } else {
-            this.callbacks = {
-                onChange: this.onRegionChange.bind(this),
-                onManipulationBegin: null,
-                onManipulationEnd: null,
-            };
-        }
+                }
+            },
+            onManipulationLockRequest: (region?: RegionComponent) => {
+                this.manipulationLock = true;
+
+                if (typeof callbacks.onManipulationLockRequest === "function") {
+                    callbacks.onManipulationLockRequest(region);
+                }
+            },
+            onManipulationLockRelease: (region?: RegionComponent) => {
+                this.manipulationLock = false;
+
+                if (typeof callbacks.onManipulationLockRelease === "function") {
+                    callbacks.onManipulationLockRelease(region);
+                }
+            },
+            onManipulationBegin: (region?: RegionComponent) => {
+                if (typeof callbacks.onManipulationBegin === "function") {
+                    callbacks.onManipulationBegin(region);
+                }
+            },
+            onManipulationEnd: (region?: RegionComponent) => {
+                if (!this.manipulationLock && typeof callbacks.onManipulationEnd === "function") {
+                    callbacks.onManipulationEnd(region);
+                }
+            },
+            onRegionMove: (...args) => {
+                if (typeof callbacks.onRegionMove === "function") {
+                    callbacks.onRegionMove(...args);
+                }
+            },
+            onRegionDelete: (...args) => {
+                if (typeof callbacks.onRegionDelete === "function") {
+                    callbacks.onRegionDelete(...args);
+                }
+            },
+            onRegionMoveBegin: (...args) => {
+                if (typeof callbacks.onRegionMoveBegin === "function") {
+                    callbacks.onRegionMoveBegin(...args);
+                }
+            },
+            onRegionMoveEnd: (...args) => {
+                if (typeof callbacks.onRegionMoveEnd === "function") {
+                    callbacks.onRegionMoveEnd(...args);
+                }
+            },
+            onRegionSelected: (...args) => {
+                if (typeof callbacks.onRegionSelected === "function") {
+                    callbacks.onRegionSelected(...args);
+                }
+            },
+        };
 
         this.buildOn(this.paper);
         this.subscribeToEvents();
@@ -255,9 +300,7 @@ export class RegionsManager {
             this.deleteRegion(region);
         }
 
-        if (this.callbacks.onManipulationEnd !== null) {
-            this.callbacks.onManipulationEnd();
-        }
+        this.callbacks.onManipulationEnd();
     }
 
     /**
@@ -482,9 +525,7 @@ export class RegionsManager {
 
         this.menu.hide();
 
-        if ((typeof this.callbacks.onRegionDelete) === "function") {
-            this.callbacks.onRegionDelete(region.ID, region.regionData);
-        }
+        this.callbacks.onRegionDelete(region.ID, region.regionData);
     }
 
     /**
@@ -497,9 +538,7 @@ export class RegionsManager {
         }
 
         this.selectNextRegion();
-        if (this.callbacks.onManipulationEnd !== null) {
-            this.callbacks.onManipulationEnd();
-        }
+        this.callbacks.onManipulationEnd();
     }
 
     /**
@@ -512,9 +551,7 @@ export class RegionsManager {
             region.select();
 
             this.menu.showOnRegion(region);
-            if ((typeof this.callbacks.onRegionSelected) === "function") {
-                this.callbacks.onRegionSelected(region.ID);
-            }
+            this.callbacks.onRegionSelected(region.ID);
         }
     }
 
@@ -527,9 +564,7 @@ export class RegionsManager {
             r = region;
             r.select();
 
-            if ((typeof this.callbacks.onRegionSelected) === "function") {
-                this.callbacks.onRegionSelected(r.ID);
-            }
+            this.callbacks.onRegionSelected(r.ID);
         }
         if (r != null) {
             this.menu.showOnRegion(r);
@@ -638,18 +673,12 @@ export class RegionsManager {
                 this.unselectRegions(region);
             }
             this.menu.hide();
-            if ((typeof this.callbacks.onRegionSelected) === "function") {
-                this.callbacks.onRegionSelected(region.ID, multiSelection);
-            }
-            if ((typeof this.callbacks.onRegionMoveBegin) === "function") {
-                this.callbacks.onRegionMoveBegin(region.ID, regionData);
-            }
+            this.callbacks.onRegionSelected(region.ID, multiSelection);
+            this.callbacks.onRegionMoveBegin(region.ID, regionData);
             this.justManipulated = false;
             // resizing or dragging
         } else if (state === ChangeEventType.MOVING) {
-            if ((typeof this.callbacks.onRegionMove) === "function") {
-                this.callbacks.onRegionMove(region.ID, regionData);
-            }
+            this.callbacks.onRegionMove(region.ID, regionData);
             this.justManipulated = true;
             // resize or drag end
         } else if (state === ChangeEventType.MOVEEND) {
@@ -658,10 +687,7 @@ export class RegionsManager {
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
-
-                if ((typeof this.callbacks.onRegionMoveEnd) === "function") {
-                    this.callbacks.onRegionMoveEnd(region.ID, regionData);
-                }
+                this.callbacks.onRegionMoveEnd(region.ID, regionData);
             }
         } else if (state === ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {
             // select
@@ -671,16 +697,12 @@ export class RegionsManager {
                 }
                 region.select();
                 this.menu.showOnRegion(region);
-                if ((typeof this.callbacks.onRegionSelected) === "function") {
-                    this.callbacks.onRegionSelected(region.ID, multiSelection);
-                }
+                this.callbacks.onRegionSelected(region.ID, multiSelection);
                 // unselect
             } else {
                 region.unselect();
                 this.menu.hide();
-                if ((typeof this.callbacks.onRegionSelected) === "function") {
-                    this.callbacks.onRegionSelected("", multiSelection);
-                }
+                this.callbacks.onRegionSelected("", multiSelection);
             }
         }
     }
@@ -723,15 +745,11 @@ export class RegionsManager {
      */
     private subscribeToEvents() {
         this.regionManagerLayer.node.addEventListener("pointerenter", (e: PointerEvent) => {
-            if (this.callbacks.onManipulationBegin !== null) {
-                this.callbacks.onManipulationBegin();
-            }
+            this.callbacks.onManipulationBegin();
         });
 
         this.regionManagerLayer.node.addEventListener("pointerleave", (e: PointerEvent) => {
-            if (this.callbacks.onManipulationEnd !== null) {
-                this.callbacks.onManipulationEnd();
-            }
+            this.callbacks.onManipulationEnd();
         });
 
         window.addEventListener("keyup", (e) => {
