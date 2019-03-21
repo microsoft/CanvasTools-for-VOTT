@@ -8,6 +8,7 @@ import { IMovable } from "../../Interface/IMovable";
 import { IResizable } from "../../Interface/IResizable";
 import { IRegionCallbacks, ChangeEventType } from "../../Interface/IRegionCallbacks";
 import { IPoint2D } from "../../Interface/IPoint2D";
+import { type } from "os";
 
 /**
  * An abstract visial component to define a component of region presentation UI.
@@ -107,21 +108,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         this.paperRect = paperRect;
         this.regionData = regionData;
 
-        this.callbacks = {
-            onChange: null,
-            onManipulationBegin: null,
-            onManipulationEnd: null,
-            onManipulationLockRelease: null,
-            onManipulationLockRequest: null,
-        };
-
-        if (callbacks !== null && callbacks !== undefined) {
-            this.callbacks.onManipulationBegin = this.nullGuard(callbacks.onManipulationBegin);
-            this.callbacks.onManipulationEnd = this.nullGuard(callbacks.onManipulationEnd);
-            this.callbacks.onChange = this.nullGuard(callbacks.onChange);
-            this.callbacks.onManipulationLockRelease = this.nullGuard(callbacks.onManipulationLockRelease);
-            this.callbacks.onManipulationLockRequest = this.nullGuard(callbacks.onManipulationLockRequest);
-        }
+        this.callbacks = callbacks;
     }
 
     /**
@@ -231,14 +218,6 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
         return (args: PointerEvent | KeyboardEvent) => {
             if (!this.isFrozen || bypass) {
                 f(args);
-            }
-        };
-    }
-
-    private nullGuard<T extends any[]>(f: (...args: T) => void): (...args: T) => void {
-        return (...args) => {
-            if (f !== null && f !== undefined) {
-                f(...args);
             }
         };
     }

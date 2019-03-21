@@ -125,41 +125,13 @@ export class RegionsManager {
                     callbacks.onManipulationLockRelease(region);
                 }
             },
-            onManipulationBegin: (region?: RegionComponent) => {
-                if (typeof callbacks.onManipulationBegin === "function") {
-                    callbacks.onManipulationBegin(region);
-                }
-            },
-            onManipulationEnd: (region?: RegionComponent) => {
-                if (!this.manipulationLock && typeof callbacks.onManipulationEnd === "function") {
-                    callbacks.onManipulationEnd(region);
-                }
-            },
-            onRegionMove: (...args) => {
-                if (typeof callbacks.onRegionMove === "function") {
-                    callbacks.onRegionMove(...args);
-                }
-            },
-            onRegionDelete: (...args) => {
-                if (typeof callbacks.onRegionDelete === "function") {
-                    callbacks.onRegionDelete(...args);
-                }
-            },
-            onRegionMoveBegin: (...args) => {
-                if (typeof callbacks.onRegionMoveBegin === "function") {
-                    callbacks.onRegionMoveBegin(...args);
-                }
-            },
-            onRegionMoveEnd: (...args) => {
-                if (typeof callbacks.onRegionMoveEnd === "function") {
-                    callbacks.onRegionMoveEnd(...args);
-                }
-            },
-            onRegionSelected: (...args) => {
-                if (typeof callbacks.onRegionSelected === "function") {
-                    callbacks.onRegionSelected(...args);
-                }
-            },
+            onManipulationBegin: this.functionGuard(callbacks.onManipulationBegin),
+            onManipulationEnd: this.functionGuard(callbacks.onManipulationEnd),
+            onRegionDelete: this.functionGuard(callbacks.onRegionDelete),
+            onRegionMoveBegin: this.functionGuard(callbacks.onRegionMoveBegin),
+            onRegionMove: this.functionGuard(callbacks.onRegionMove),
+            onRegionMoveEnd: this.functionGuard(callbacks.onRegionMoveEnd),
+            onRegionSelected: this.functionGuard(callbacks.onRegionSelected),
         };
 
         this.buildOn(this.paper);
@@ -855,5 +827,17 @@ export class RegionsManager {
         this.regions.push(region);
 
         this.menu.showOnRegion(region);
+    }
+
+    /**
+     * Wraps provided function into a checker that it exists
+     * @param f - Function to wrap
+     */
+    private functionGuard<T extends any[]>(f: (...args: T) => void): (...args: T) => void {
+        return (...args) => {
+            if (typeof f === "function") {
+                f(...args);
+            }
+        };
     }
 }
