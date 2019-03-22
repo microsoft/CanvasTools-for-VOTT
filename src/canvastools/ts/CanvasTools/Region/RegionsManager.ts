@@ -126,7 +126,11 @@ export class RegionsManager {
                 }
             },
             onManipulationBegin: this.functionGuard(callbacks.onManipulationBegin),
-            onManipulationEnd: this.functionGuard(callbacks.onManipulationEnd),
+            onManipulationEnd: (region?: RegionComponent) => {
+                if (!this.manipulationLock && typeof callbacks.onManipulationEnd === "function") {
+                    callbacks.onManipulationEnd(region);
+                }
+            },
             onRegionDelete: this.functionGuard(callbacks.onRegionDelete),
             onRegionMoveBegin: this.functionGuard(callbacks.onRegionMoveBegin),
             onRegionMove: this.functionGuard(callbacks.onRegionMove),
