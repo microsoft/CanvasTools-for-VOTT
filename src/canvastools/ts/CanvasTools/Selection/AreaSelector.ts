@@ -173,47 +173,48 @@ export class AreaSelector {
      */
     public setSelectionMode(settings: ISelectorSettings);
     public setSelectionMode(settings: ISelectorSettings | SelectionMode) {
-        this.disable();
-
+        let selectionSettings: ISelectorSettings;
         if (settings === null || settings === undefined) {
-            this.selectorSettings = {
+            selectionSettings = {
                 mode: SelectionMode.NONE,
             };
         } else if ((settings as ISelectorSettings).mode !== undefined) {
-            this.selectorSettings = settings as ISelectorSettings;
+            selectionSettings = settings as ISelectorSettings;
         } else {
-            this.selectorSettings = { mode: settings as SelectionMode };
+            selectionSettings = { mode: settings as SelectionMode };
         }
 
-        const selectionMode = this.selectorSettings.mode;
+        if (this.selectorSettings === undefined || this.selectorSettings.mode !== selectionSettings.mode) {
+            this.disable();
+            this.selectorSettings = selectionSettings;
 
-        if (selectionMode === SelectionMode.NONE) {
-            this.selector = null;
-            return;
-        } else if (selectionMode === SelectionMode.COPYRECT) {
-            this.selector = this.rectCopySelector;
-            const template = this.selectorSettings.template;
-            if (template !== undefined) {
-                this.rectCopySelector.setTemplate(template);
-            } else {
-                this.rectCopySelector.setTemplate(AreaSelector.DefaultTemplateSize);
+            if (this.selectorSettings.mode === SelectionMode.NONE) {
+                this.selector = null;
+                return;
+            } else if (this.selectorSettings.mode === SelectionMode.COPYRECT) {
+                this.selector = this.rectCopySelector;
+                const template = this.selectorSettings.template;
+                if (template !== undefined) {
+                    this.rectCopySelector.setTemplate(template);
+                } else {
+                    this.rectCopySelector.setTemplate(AreaSelector.DefaultTemplateSize);
+                }
+            } else if (this.selectorSettings.mode === SelectionMode.RECT) {
+                this.selector = this.rectSelector;
+            } else if (this.selectorSettings.mode === SelectionMode.POINT) {
+                this.selector = this.pointSelector;
+            } else if (this.selectorSettings.mode === SelectionMode.POLYLINE) {
+                this.selector = this.polylineSelector;
+            } else if (this.selectorSettings.mode === SelectionMode.POLYGON) {
+                this.selector = this.polygonSelector;
             }
-        } else if (selectionMode === SelectionMode.RECT) {
-            this.selector = this.rectSelector;
-        } else if (selectionMode === SelectionMode.POINT) {
-            this.selector = this.pointSelector;
-        } else if (selectionMode === SelectionMode.POLYLINE) {
-            this.selector = this.polylineSelector;
-        } else if (selectionMode === SelectionMode.POLYGON) {
-            this.selector = this.polygonSelector;
-        }
-
-        // restore enablement status
-        this.enable();
-        if (this.isVisible) {
-            this.show();
-        } else {
-            this.hide();
+            // restore enablement status
+            this.enable();
+            if (this.isVisible) {
+                this.show();
+            } else {
+                this.hide();
+            }
         }
     }
 
