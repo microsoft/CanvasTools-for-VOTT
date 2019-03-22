@@ -122,7 +122,6 @@ export class PointSelector extends Selector {
                 listener: (e: PointerEvent) => {
                     const rect = this.parentNode.getClientRects();
                     const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-                    this.show();
                     this.moveCross(this.crossA, p);
                     this.movePoint(this.point, this.crossA);
                     e.preventDefault();
