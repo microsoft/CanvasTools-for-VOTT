@@ -211,14 +211,6 @@ export class TagsElement extends TagsComponent {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                         style: `stroke:#fff;`,
                     },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                        style: `fill:rgba(255,255,255,0.5);`,
-                    },
                 ];
 
                 this.styleLightMap = [
@@ -260,16 +252,6 @@ export class TagsElement extends TagsComponent {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                         style: `stroke:#fff;`,
                     },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;
-                                stroke-width: 0;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                        style: `fill:rgba(255,255,255,0.5);
-                                stroke-width: 0;`,
-                    },
                 ];
             } else {
                 this.styleMap = [];
@@ -288,14 +270,6 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `stroke-width: 0;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost:hover`,
-                        style: `stroke-width: 0;`,
                     },
                 ];
             }

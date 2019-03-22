@@ -176,11 +176,6 @@ export class TagsElement extends TagsComponent {
                         style: `stroke:#fff;`,
                     },
                     {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;
-                                stroke-width: 0px;`,
-                    },
-                    {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
                         style: `opacity:0.25;`,
                     },
@@ -207,10 +202,6 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `stroke-width: 0px;`,
                     },
                 ];
             }
