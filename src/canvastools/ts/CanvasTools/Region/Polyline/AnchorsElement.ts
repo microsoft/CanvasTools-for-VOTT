@@ -147,7 +147,7 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected updateRegion(p: Point2D) {
         const rd = this.regionData.copy();
-        if (this.activeAnchorIndex >= 0 && this.activeAnchorIndex < this.regionData.points.length) {
+        if (this.activeAnchorIndex >= 0 && this.activeAnchorIndex <= this.regionData.points.length) {
             rd.setPoint(p, this.activeAnchorIndex - 1);
         }
 
