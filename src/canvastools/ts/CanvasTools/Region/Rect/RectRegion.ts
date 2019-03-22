@@ -52,7 +52,7 @@ export class RectRegion extends Region {
      */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
                 id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
+        super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
 
         if (paperRect !== null) {
             this.paperRects = {
@@ -67,7 +67,7 @@ export class RectRegion extends Region {
         this.callbacks.onChange = (region: RegionComponent, regionData: RegionData, ...args) => {
             this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
                 this.paperRects.host.height - regionData.height);
-            onChange(this, this.regionData.copy(), ...args);
+            onChange(this, regionData, ...args);
         };
     }
 

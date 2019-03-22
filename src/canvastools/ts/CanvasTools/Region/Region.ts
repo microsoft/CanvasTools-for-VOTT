@@ -59,7 +59,7 @@ export abstract class Region extends RegionComponent {
      */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
                 id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, callbacks);
+        super(paper, paperRect, regionData, Object.assign({}, callbacks));
 
         this.ID = id;
         this.tags = tagsDescriptor;
@@ -75,7 +75,7 @@ export abstract class Region extends RegionComponent {
         this.callbacks.onChange = (region: RegionComponent, regionData: RegionData, ...args) => {
             this.regionData.initFrom(regionData);
             this.redraw();
-            onChange(this, this.regionData.copy(), ...args);
+            onChange(this, this.regionData, ...args);
         };
     }
 
