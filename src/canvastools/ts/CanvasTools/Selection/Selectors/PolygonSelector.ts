@@ -114,8 +114,8 @@ export class PolygonSelector extends Selector {
      * Disables and hides this selector.
      */
     public disable() {
-        this.reset();
         super.disable();
+        this.reset();
     }
 
     /**
@@ -206,7 +206,6 @@ export class PolygonSelector extends Selector {
                     window.requestAnimationFrame(() => {
                         const rect = this.parentNode.getClientRects();
                         const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-                        this.show();
                         this.moveCross(this.crossA, p);
                         this.movePoint(this.nextPoint, p);
                         if (this.lastPoint != null) {
