@@ -39,8 +39,11 @@ export abstract class AnchorsComponent extends RegionComponent {
 
     /**
      * The index of currently active anchor.
+     * 0 - none
+     * 1, 2, ... - one of point anchors
+     * -1, -2, ... - one of bone anchors
      */
-    protected activeAnchorIndex: number = -1;
+    protected activeAnchorIndex: number = 0;
 
     /**
      * The coordinates of the origin point on dragging.
@@ -99,6 +102,23 @@ export abstract class AnchorsComponent extends RegionComponent {
     protected buildAnchors() {
         this.buildPointAnchors();
         this.buildGhostAnchor();
+
+        this.subscribeToEvents([
+            {
+                event: "pointerleave",
+                base: this.node.node,
+                listener: (e: PointerEvent) => {
+                    if (!this.isDragged) {
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                display: "none",
+                            });
+                        });
+                    }
+                },
+                bypass: true,
+            },
+        ]);
     }
 
     /**
@@ -110,7 +130,7 @@ export abstract class AnchorsComponent extends RegionComponent {
             this.anchors.push(anchor);
             this.anchorsNode.add(anchor);
 
-            this.subscribeAnchorToEvents(anchor, index);
+            this.subscribeAnchorToEvents(anchor, index + 1);
         });
     }
 
@@ -137,15 +157,15 @@ export abstract class AnchorsComponent extends RegionComponent {
             {
                 event: "pointerenter",
                 base: anchor.node,
-                listener: (e) => {
+                listener: (e: PointerEvent) => {
                     // Set drag origin point to current anchor
-                    const anchorPoint = this.regionData.points[index];
                     this.activeAnchorIndex = index;
+                    const anchorPoint = this.getActiveAnchorPoint(e);
                     // Move ghost anchor to current anchor position
                     window.requestAnimationFrame(() => {
                         this.ghostAnchor.attr({
-                            cx: anchorPoint.x,
-                            cy: anchorPoint.y,
+                            cx: e.offsetX,
+                            cy: e.offsetY,
                             display: "block",
                         });
                     });
@@ -180,47 +200,6 @@ export abstract class AnchorsComponent extends RegionComponent {
     protected abstract updateRegion(p: Point2D);
 
     /**
-     * Callback for the dragbegin event.
-     */
-    protected anchorDragBegin() {
-        // do nothing
-    }
-
-    /**
-     * Callback for the dragmove event. Uses `dragOrigin` to calculate new position.
-     * @param dx - Diff in the `x`-coordinate.
-     * @param dy - Diff in the `y`-coordinate.
-     * @param x - New `x`-coordinate.
-     * @param y - New `y`-coordinate.
-     * @remarks This method calls the `updateRegion` method to actually make any changes in data.
-     */
-    protected anchorDragMove(dx: number, dy: number, x: number, y: number) {
-        let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
-
-        if (this.paperRect !== null) {
-            p = p.boundToRect(this.paperRect);
-        }
-
-        window.requestAnimationFrame(() => {
-            this.ghostAnchor.attr({ cx: p.x, cy: p.y });
-        });
-
-        this.updateRegion(p);
-    }
-
-    /**
-     * Callback for the dranend event.
-     */
-    protected anchorDragEnd() {
-        window.requestAnimationFrame(() => {
-            this.ghostAnchor.attr({
-                display: "none",
-            });
-        });
-        this.activeAnchorIndex = -1;
-    }
-
-    /**
      * Callback for the pointerenter event for the ghost anchor.
      * @param e - PointerEvent object.
      */
@@ -233,13 +212,14 @@ export abstract class AnchorsComponent extends RegionComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerLeave(e: PointerEvent) {
-        window.requestAnimationFrame(() => {
-            this.ghostAnchor.attr({
-                display: "none",
+        if (!this.isDragged) {
+            window.requestAnimationFrame(() => {
+                this.ghostAnchor.attr({
+                    display: "none",
+                });
             });
-        });
-
-        this.activeAnchorIndex = -1;
+            this.activeAnchorIndex = 0;
+        }
     }
 
     /**
@@ -248,11 +228,11 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     protected onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
-        this.dragOrigin = new Point2D(e.clientX, e.clientY);
+        this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
 
         this.isDragged = true;
-
-        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
+        this.callbacks.onManipulationLockRequest(this);
+        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
     }
 
     /**
@@ -265,8 +245,8 @@ export abstract class AnchorsComponent extends RegionComponent {
             const rdx = e.clientX - ghost.left;
             const rdy = e.clientY - ghost.top;
 
-            let dx = e.clientX - this.dragOrigin.x;
-            let dy = e.clientY - this.dragOrigin.y;
+            let dx = e.offsetX - this.dragOrigin.x;
+            let dy = e.offsetY - this.dragOrigin.y;
 
             if ((rdx < 0 && dx > 0) || (rdx > 0 && dx < 0)) {
                 dx = 0;
@@ -276,20 +256,22 @@ export abstract class AnchorsComponent extends RegionComponent {
                 dy = 0;
             }
 
-            const anchorPoint = this.regionData.points[this.activeAnchorIndex];
-            let p = new Point2D(anchorPoint.x + dx, anchorPoint.y + dy);
+            if (this.activeAnchorIndex !== 0) {
+                const anchorPoint = this.getActiveAnchorPoint(e);
+                let p = new Point2D(anchorPoint.x + dx, anchorPoint.y + dy);
 
-            if (this.paperRect !== null) {
-                p = p.boundToRect(this.paperRect);
+                if (this.paperRect !== null) {
+                    p = p.boundToRect(this.paperRect);
+                }
+                window.requestAnimationFrame(() => {
+                    this.ghostAnchor.attr({ cx: p.x, cy: p.y });
+                });
+
+                this.updateRegion(p);
+
             }
 
-            this.dragOrigin = new Point2D(e.clientX, e.clientY);
-
-            window.requestAnimationFrame(() => {
-                this.ghostAnchor.attr({ cx: p.x, cy: p.y });
-            });
-
-            this.updateRegion(p);
+            this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
         }
     }
 
@@ -299,10 +281,16 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     protected onGhostPointerUp(e: PointerEvent) {
         this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
-        this.activeAnchorIndex = -1;
+        this.callbacks.onManipulationLockRelease(this);
+        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
+        this.activeAnchorIndex = 0;
         this.dragOrigin = null;
         this.isDragged = false;
+        window.requestAnimationFrame(() => {
+            this.ghostAnchor.attr({
+                display: "none",
+            });
+        });
     }
 
     /**
@@ -343,5 +331,16 @@ export abstract class AnchorsComponent extends RegionComponent {
         ];
 
         this.subscribeToEvents(listeners);
+    }
+
+    /**
+     * Returns `Point2D` with coordinates of active anchor
+     */
+    protected getActiveAnchorPoint(e?: PointerEvent): Point2D {
+        if (this.activeAnchorIndex > 0) {
+            return this.regionData.points[this.activeAnchorIndex - 1];
+        } else {
+            return null;
+        }
     }
 }
