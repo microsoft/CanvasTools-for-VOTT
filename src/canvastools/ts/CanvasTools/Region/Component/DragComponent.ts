@@ -57,7 +57,9 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerenter",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    // do nothing
+                    if (this.isDragged) {
+                        e.stopPropagation();
+                    }
                 },
                 bypass: false,
             },
@@ -91,9 +93,9 @@ export abstract class DragComponent extends RegionComponent {
 
                         const rd = this.regionData.copy();
                         rd.move(p);
-                        this.onChange(this, rd, ChangeEventType.MOVING);
+                        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
+
                     }
-                    e.stopPropagation();
                 },
                 bypass: false,
             },
@@ -101,9 +103,7 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerleave",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    if (!this.isDragged) {
-                        // do nothing
-                    }
+                    // do nothing
                 },
                 bypass: false,
             },
@@ -115,7 +115,8 @@ export abstract class DragComponent extends RegionComponent {
                     const multiselection = e.ctrlKey;
                     this.isDragged = true;
                     this.dragOrigin = new Point2D(e.clientX, e.clientY);
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
+                    this.callbacks.onManipulationLockRequest(this);
+                    this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
                 },
                 bypass: false,
             },
@@ -126,11 +127,13 @@ export abstract class DragComponent extends RegionComponent {
                     this.dragNode.node.releasePointerCapture(e.pointerId);
                     const multiselection = e.ctrlKey;
                     if (this.isDragged) {
-                        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND, multiselection);
+                        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND, multiselection);
                         this.isDragged = false;
                         this.dragOrigin = null;
                     }
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
+                    this.callbacks.onManipulationLockRelease(this);
+                    this.callbacks.onChange(this, this.regionData.copy(),
+                                            ChangeEventType.SELECTIONTOGGLE, multiselection);
                 },
                 bypass: false,
             },
