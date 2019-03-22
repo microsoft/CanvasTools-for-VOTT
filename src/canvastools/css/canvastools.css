@@ -183,10 +183,7 @@
     stroke: var(--default-color-white);
 }
 
-.anchorStyle.ghost {
-    fill: var(--default-color-transparent);
-}
-
+.anchorStyle.ghost,
 .anchorStyle.ghost:hover,
 .regionStyle.selected .anchorStyle.ghost,
 .regionStyle.selected .anchorStyle.ghost:hover {
