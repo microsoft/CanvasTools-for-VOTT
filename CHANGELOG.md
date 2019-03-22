@@ -1,5 +1,25 @@
 ## Changelog
 
+### 2.2.0-beta.0
+
+*New versioning aproach*
+2.2.0 and futher updates will consider releasing new features/fixes under beta-version packages till stabilization.
+
+*CT Library Changes*
+* Fixed major compatiblity issues with Edge and Firefox.
+* Fixed minor interaction bugs and visual glitches.
+* Changed model for emitting (internal) `onManipulation*` events. Reduced number of generated events and internal emitters.
+* Removed mask from rect-selection.
+
+### 2.1.28
+
+*CT Library Changes*
+* Polyline default background fix
+
+### 2.1.27
+
+Fix to missing /Core folder in the package.
+
 ### 2.1.26 - Background toggling from the [v2-toolbar-background-toggle](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-background-toggle) branch
 
 *CT Library Changes*

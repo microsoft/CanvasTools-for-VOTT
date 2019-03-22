@@ -53,7 +53,7 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected buildAnchors() {
         this.buildBoneAnchors();
-        this.buildPointAnchors();
+        super.buildAnchors();
     }
 
     /**
@@ -66,7 +66,7 @@ export class AnchorsElement extends AnchorsComponent {
             this.anchors.push(anchor);
             this.anchorsNode.add(anchor);
 
-            this.subscribeAnchorToEvents(anchor, index);
+            this.subscribeAnchorToEvents(anchor, index + 1);
         });
     }
 
@@ -217,7 +217,7 @@ export class AnchorsElement extends AnchorsComponent {
         if (activeAnchor !== newAA) {
             this.ghostAnchor.removeClass(activeAnchor);
             if (newAA.length === 2) {
-                this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA);
+                this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA) + 1;
             } else {
                 this.activeAnchorIndex = - (this.anchorBoneStyles.indexOf(newAA) + 1);
             }
@@ -232,7 +232,7 @@ export class AnchorsElement extends AnchorsComponent {
         const rd = this.regionData.copy();
         rd.setPoints([p1, new Point2D(p2.x, p1.y), p2, new Point2D(p1.x, p2.y)]);
 
-        this.onChange(this, rd, ChangeEventType.MOVING);
+        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
     }
 
     /**
@@ -259,35 +259,61 @@ export class AnchorsElement extends AnchorsComponent {
      * @param index - The index of the anchor used to define which one is active.
      */
     protected subscribeAnchorBoneToEvents(bone: Snap.Element, index: number) {
-        bone.node.addEventListener("pointerenter", (e) => {
-            if (!this.isFrozen) {
-                // Set drag origin point to current anchor
-                this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
-                this.activeAnchorIndex = index;
+        this.subscribeToEvents([
+            {
+                event: "pointerenter",
+                base: bone.node,
+                listener: (e: PointerEvent) => {
+                    if (!this.isFrozen) {
+                        this.activeAnchorIndex = index;
+                        const anchorPoint = this.getActiveAnchorPoint(e);
+                        // Move ghost anchor to current anchor position
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                cx: anchorPoint.x,
+                                cy: anchorPoint.y,
+                                display: "block",
+                            });
+                        });
+                    }
+                },
+                bypass: false,
+            },
+        ]);
+    }
 
-                // Move ghost anchor to current anchor position
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.attr({
-                        cx: this.dragOrigin.x,
-                        cy: this.dragOrigin.y,
-                        display: "block",
-                    });
-                });
-                this.onManipulationBegin();
+    /**
+     * Returns `Point2D` with coordinates of active anchor
+     */
+    protected getActiveAnchorPoint(e?: PointerEvent): Point2D {
+        if (this.activeAnchorIndex > 0) {
+            return this.regionData.points[this.activeAnchorIndex - 1];
+        } else if (this.activeAnchorIndex < 0) {
+            if (e !== undefined) {
+                const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+                const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+                return new Point2D(offsetX, offsetY);
+            } else {
+                const boneBox = this.anchorBones[-this.activeAnchorIndex - 1].getBBox();
+                return new Point2D(boneBox.cx, boneBox.cy);
             }
-        });
+        } else {
+            return null;
+        }
     }
 
     /**
      * Internal helper function to get active anchor.
      */
     private getActiveAnchor(): string {
-        if (this.activeAnchorIndex >= 0) {
+        if (this.activeAnchorIndex > 0) {
             // anchor point is activeted
-            return this.anchorPointStyles[this.activeAnchorIndex];
-        } else {
+            return this.anchorPointStyles[this.activeAnchorIndex - 1];
+        } else if (this.activeAnchorIndex < 0) {
             // anchor bone is activeted, indexes are negative starting -1
             return this.anchorBoneStyles[-this.activeAnchorIndex - 1];
+        } else {
+            return "";
         }
     }
 

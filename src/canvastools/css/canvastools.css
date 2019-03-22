@@ -48,6 +48,13 @@
     cursor: var(--cursor-pointer);
 }
 
+.CanvasToolsEditor svg title {
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    pointer-events: none;
+}
+
 /* 2. RegionsManager
 
 .regionManager
@@ -102,7 +109,15 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 9pt;
     fill: #fff;
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none;
+    pointer-events: none;
+}
+
+.primaryTagTextStyle::selection {
+    background: none;
+    fill: #fff;
 }
 
 .secondaryTagStyle {
@@ -148,8 +163,8 @@
     --default-color-shadow: rgba(128, 128, 128, 0.4);
     --default-color-highlight: rgba(128, 128, 128, 0.2);
     --default-color-white: rgb(255, 255, 255);
-    --default-color-transparent: rgb(255, 255, 255, 0);
-    --default-color-ghost: rgb(255, 255, 255, 0.5);
+    --default-color-transparent: rgba(255, 255, 255, 0);
+    --default-color-ghost: rgba(255, 255, 255, 0.5);
     --default-color-delete: rgba(216, 24, 65, 1.0);
     --default-color-add: rgba(21, 127, 240, 1.0);
 }
@@ -168,10 +183,7 @@
     stroke: var(--default-color-white);
 }
 
-.anchorStyle.ghost {
-    fill: var(--default-color-transparent);
-}
-
+.anchorStyle.ghost,
 .anchorStyle.ghost:hover,
 .regionStyle.selected .anchorStyle.ghost,
 .regionStyle.selected .anchorStyle.ghost:hover {
@@ -395,7 +407,6 @@ svg:not(:root) .menuLayer {
         .nextPointStyle
 */
 
-*/
 #selectionOverlay {
     position: relative;
     width: 100%;
@@ -410,25 +421,10 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
-.rectSelector .maskStyle {
-    fill: #000;
-    fill-opacity: 0.5;
-    stroke-width: 0;
-    pointer-events: none;
-}
-
-.maskInStyle {
+.selectionBoxStyle {
     fill: #fff;
+    fill-opacity: 0.25;
     stroke-width: 0;
-    visibility: visible;
-    pointer-events: none;
-}
-
-.maskOutStyle {
-    /* Transparent crop*/
-    fill: #000;
-    stroke-width: 0;
-    visibility: visible;
     pointer-events: none;
 }
 

@@ -66,13 +66,7 @@ export class PointRegion extends Region {
         this.node.addClass("regionStyle");
         this.node.addClass(this.styleID);
 
-        const callbacks = {
-            onChange: this.onChange.bind(this),
-            onManipulationBegin: this.onManipulationBegin.bind(this),
-            onManipulationEnd: this.onManipulationEnd.bind(this),
-        };
-
-        this.dragNode = new DragElement(paper, this.paperRect, this.regionData, callbacks);
+        this.dragNode = new DragElement(paper, this.paperRect, this.regionData, this.callbacks);
         this.tagsNode = new TagsElement(paper, this.paperRect,  this.regionData, this.tags, this.styleID,
                                         this.styleSheet, this.tagsUpdateOptions);
 

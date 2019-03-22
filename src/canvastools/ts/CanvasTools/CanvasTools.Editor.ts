@@ -677,8 +677,8 @@ export class Editor {
 
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
 
-        this.frameWidth = this.editorSVG.clientWidth;
-        this.frameHeight = this.editorSVG.clientHeight;
+        this.frameWidth = containerWidth - hpadding * 2;
+        this.frameHeight = containerHeight - vpadding * 2;
 
         this.areaSelector.resize(this.frameWidth, this.frameHeight);
         this.regionsManager.resize(this.frameWidth, this.frameHeight);
@@ -749,6 +749,12 @@ export class Editor {
     private createSVGElement(): SVGSVGElement {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.innerHTML = Editor.SVGDefsTemplate;
+        svg.ondragstart = () => {
+            return false;
+        };
+        svg.ondragend = () => {
+            return false;
+        };
         return svg;
     }
 

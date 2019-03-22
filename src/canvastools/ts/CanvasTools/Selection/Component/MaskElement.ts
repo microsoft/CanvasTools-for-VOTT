@@ -22,6 +22,16 @@ export class MaskElement extends Element {
     private maskOut: { node: Snap.Element };
 
     /**
+     * Combined mask
+     */
+    private combinedMask: Snap.Element;
+
+    /**
+     * Reference url to the mask
+     */
+    private maskReference: string;
+
+    /**
      * Creates a new `MaskElement`.
      * @param paper - The `Snap.Paper` object to draw on.
      * @param boundRect - The parent bounding box for selection.
@@ -55,13 +65,15 @@ export class MaskElement extends Element {
         this.maskIn = this.createMaskIn();
         this.maskOut.node.addClass("maskOutStyle");
 
-        const combinedMask = this.paper.g();
-        combinedMask.add(this.maskIn.node);
-        combinedMask.add(this.maskOut.node);
+        this.combinedMask = this.paper.g();
+        this.combinedMask.add(this.maskIn.node);
+        this.combinedMask.add(this.maskOut.node);
 
         this.mask.node.attr({
-            mask: combinedMask,
+            mask: this.combinedMask,
         });
+
+        this.maskReference = this.mask.node.node.getAttribute("mask");
 
         this.node = this.mask.node;
     }

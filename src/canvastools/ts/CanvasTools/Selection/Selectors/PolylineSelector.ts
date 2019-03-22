@@ -15,6 +15,16 @@ import { IPoint2D } from "../../Interface/IPoint2D";
  */
 export class PolylineSelector extends Selector {
     /**
+     * Default radius for the point element. Can be redefined through css styles.
+     */
+    private static DEFAULT_POINT_RADIUS: number = 3;
+
+    /**
+     * Default radius for the point element. Can be redefined through css styles.
+     */
+    private static DEFAULT_SELECTOR_RADIUS: number = 6;
+
+    /**
      * The `CrossElement` to define point position
      */
     private crossA: CrossElement;
@@ -48,11 +58,6 @@ export class PolylineSelector extends Selector {
      * The last point.
      */
     private lastPoint: Point2D;
-
-    /**
-     * Default point radius.
-     */
-    private pointRadius: number = 3;
 
     /**
      * Current state of selector.
@@ -124,7 +129,7 @@ export class PolylineSelector extends Selector {
         this.node.addClass("polylineSelector");
 
         this.crossA = new CrossElement(this.paper, this.boundRect);
-        this.nextPoint = this.paper.circle(0, 0, this.pointRadius);
+        this.nextPoint = this.paper.circle(0, 0, PolylineSelector.DEFAULT_SELECTOR_RADIUS);
         this.nextPoint.addClass("nextPointStyle");
 
         this.nextSegment = this.paper.line(0, 0, 0, 0);
@@ -184,7 +189,7 @@ export class PolylineSelector extends Selector {
     private addPoint(x: number, y: number) {
         this.points.push(new Point2D(x, y));
 
-        const point = this.paper.circle(x, y, this.pointRadius);
+        const point = this.paper.circle(x, y, PolylineSelector.DEFAULT_POINT_RADIUS);
         point.addClass("polylinePointStyle");
 
         this.pointsGroup.add(point);

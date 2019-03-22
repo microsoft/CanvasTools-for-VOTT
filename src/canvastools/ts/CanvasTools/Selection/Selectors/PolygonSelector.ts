@@ -15,6 +15,16 @@ import { IPoint2D } from "../../Interface/IPoint2D";
  */
 export class PolygonSelector extends Selector {
     /**
+     * Default radius for the point element. Can be redefined through css styles.
+     */
+    private static DEFAULT_POINT_RADIUS: number = 3;
+
+    /**
+     * Default radius for the point element. Can be redefined through css styles.
+     */
+    private static DEFAULT_SELECTOR_RADIUS: number = 6;
+
+    /**
      * The `CrossElement` to define point position
      */
     private crossA: CrossElement;
@@ -58,11 +68,6 @@ export class PolygonSelector extends Selector {
      * The last point.
      */
     private lastPoint: Point2D;
-
-    /**
-     * Default point radius.
-     */
-    private pointRadius: number = 3;
 
     /**
      * Current state of selector.
@@ -114,8 +119,8 @@ export class PolygonSelector extends Selector {
      * Disables and hides this selector.
      */
     public disable() {
-        this.reset();
         super.disable();
+        this.reset();
     }
 
     /**
@@ -126,7 +131,7 @@ export class PolygonSelector extends Selector {
         this.node.addClass("polygonSelector");
 
         this.crossA = new CrossElement(this.paper, this.boundRect);
-        this.nextPoint = this.paper.circle(0, 0, this.pointRadius);
+        this.nextPoint = this.paper.circle(0, 0, PolygonSelector.DEFAULT_SELECTOR_RADIUS);
         this.nextPoint.addClass("nextPointStyle");
 
         this.nextSegment = this.paper.g();
@@ -206,7 +211,6 @@ export class PolygonSelector extends Selector {
                     window.requestAnimationFrame(() => {
                         const rect = this.parentNode.getClientRects();
                         const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-                        this.show();
                         this.moveCross(this.crossA, p);
                         this.movePoint(this.nextPoint, p);
                         if (this.lastPoint != null) {
@@ -271,7 +275,7 @@ export class PolygonSelector extends Selector {
     private addPoint(x: number, y: number) {
         this.points.push(new Point2D(x, y));
 
-        const point = this.paper.circle(x, y, this.pointRadius);
+        const point = this.paper.circle(x, y, PolygonSelector.DEFAULT_POINT_RADIUS);
         point.addClass("polygonPointStyle");
 
         this.pointsGroup.add(point);

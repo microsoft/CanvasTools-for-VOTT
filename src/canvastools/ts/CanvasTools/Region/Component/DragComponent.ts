@@ -44,44 +44,8 @@ export abstract class DragComponent extends RegionComponent {
      */
     public freeze() {
         super.freeze();
-        this.dragNode.undrag();
-        this.onManipulationEnd();
-    }
-
-    /**
-     * Callback for the dragbegin event.
-     */
-    protected onDragBegin() {
-        this.dragOrigin = new Point2D(this.x, this.y);
-    }
-
-    /**
-     * Callback for the dragmove event.
-     * @param dx - Diff in the `x`-coordinate of draggable element.
-     * @param dy - Diff in the `y`-coordinate of draggable element.
-     * @remarks This method directly calls the `onChange` callback wrapper.
-     */
-    protected onDragMove(dx: number, dy: number) {
-        if (dx !== 0 && dy !== 0) {
-            let p = new Point2D(this.dragOrigin.x + dx, this.dragOrigin.y + dy);
-
-            if (this.paperRect !== null) {
-                p = p.boundToRect(this.paperRect);
-            }
-
-            const rd = this.regionData.copy();
-            rd.move(p);
-            this.onChange(this, rd, ChangeEventType.MOVING);
-        }
-    }
-
-    /**
-     * Callback for the dragend event.
-     */
-    protected onDragEnd() {
+        this.isDragged = false;
         this.dragOrigin = null;
-
-        this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
     }
 
     /**
@@ -93,12 +57,9 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerenter",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    this.dragNode.undrag();
-                    this.dragNode.drag(this.onDragMove.bind(this),
-                                       this.onDragBegin.bind(this),
-                                       this.onDragEnd.bind(this));
-                    this.isDragged = true;
-                    this.onManipulationBegin();
+                    if (this.isDragged) {
+                        e.stopPropagation();
+                    }
                 },
                 bypass: false,
             },
@@ -106,13 +67,34 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointermove",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    if (!this.isDragged) {
-                        this.dragNode.undrag();
-                        this.dragNode.drag(this.onDragMove.bind(this),
-                                           this.onDragBegin.bind(this),
-                                           this.onDragEnd.bind(this));
-                        this.isDragged = true;
-                        this.onManipulationBegin();
+                    if (this.isDragged) {
+                        const rect = (e.target as HTMLElement).getBoundingClientRect();
+                        const rdx = e.clientX - rect.left;
+                        const rdy = e.clientY - rect.top;
+
+                        let dx = e.clientX - this.dragOrigin.x;
+                        let dy = e.clientY - this.dragOrigin.y;
+
+                        if ((rdx < 0 && dx > 0) || (rdx > this.width && dx < 0)) {
+                            dx = 0;
+                        }
+
+                        if ((rdy < 0 && dy > 0) || (rdy > this.height && dy < 0)) {
+                            dy = 0;
+                        }
+
+                        let p = new Point2D(this.x + dx, this.y + dy);
+
+                        if (this.paperRect !== null) {
+                            p = p.boundToRect(this.paperRect);
+                        }
+
+                        this.dragOrigin = new Point2D(e.clientX, e.clientY);
+
+                        const rd = this.regionData.copy();
+                        rd.move(p);
+                        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
+
                     }
                 },
                 bypass: false,
@@ -121,9 +103,7 @@ export abstract class DragComponent extends RegionComponent {
                 event: "pointerleave",
                 base: this.dragNode.node,
                 listener: (e: PointerEvent) => {
-                    this.dragNode.undrag();
-                    this.isDragged = false;
-                    this.onManipulationEnd();
+                    // do nothing
                 },
                 bypass: false,
             },
@@ -133,7 +113,10 @@ export abstract class DragComponent extends RegionComponent {
                 listener: (e: PointerEvent) => {
                     this.dragNode.node.setPointerCapture(e.pointerId);
                     const multiselection = e.ctrlKey;
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
+                    this.isDragged = true;
+                    this.dragOrigin = new Point2D(e.clientX, e.clientY);
+                    this.callbacks.onManipulationLockRequest(this);
+                    this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN, multiselection);
                 },
                 bypass: false,
             },
@@ -143,7 +126,14 @@ export abstract class DragComponent extends RegionComponent {
                 listener:  (e: PointerEvent) => {
                     this.dragNode.node.releasePointerCapture(e.pointerId);
                     const multiselection = e.ctrlKey;
-                    this.onChange(this, this.regionData.copy(), ChangeEventType.SELECTIONTOGGLE, multiselection);
+                    if (this.isDragged) {
+                        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND, multiselection);
+                        this.isDragged = false;
+                        this.dragOrigin = null;
+                    }
+                    this.callbacks.onManipulationLockRelease(this);
+                    this.callbacks.onChange(this, this.regionData.copy(),
+                                            ChangeEventType.SELECTIONTOGGLE, multiselection);
                 },
                 bypass: false,
             },

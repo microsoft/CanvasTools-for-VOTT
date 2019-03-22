@@ -79,6 +79,7 @@ export class AnchorsElement extends AnchorsComponent {
             this.regionData.points.forEach((p) => {
                 pointsData.push(p.x, p.y);
             });
+            pointsData.push(this.regionData.points[0].x, this.regionData.points[0].y);
 
             this.anchorsPolyline.attr({
                 points: pointsData.toString(),
@@ -91,7 +92,7 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected buildAnchors() {
         this.buildPolylineAnchors();
-        this.buildPointAnchors();
+        super.buildAnchors();
     }
 
     /**
@@ -102,6 +103,7 @@ export class AnchorsElement extends AnchorsComponent {
         this.regionData.points.forEach((p) => {
             pointsData.push(p.x, p.y);
         });
+        pointsData.push(this.regionData.points[0].x, this.regionData.points[0].y);
 
         this.anchorsPolyline = this.paper.polyline(pointsData);
         this.anchorsPolyline.addClass("anchorLineStyle");
@@ -115,25 +117,30 @@ export class AnchorsElement extends AnchorsComponent {
      * @param anchor - The anchor to wire up with events.
      */
     protected subscribeLineToEvents(anchor: Snap.Element) {
-        anchor.node.addEventListener("pointermove", (e: PointerEvent) => {
-            if (!this.isFrozen) {
-                if (e.ctrlKey) {
-                    this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
-                    this.activeAnchorIndex = -1;
-                    this.addOnPointerUp = true;
-                    window.requestAnimationFrame(() => {
-                        this.ghostAnchor.attr({
-                            cx: this.dragOrigin.x,
-                            cy: this.dragOrigin.y,
-                            display: "block",
+        this.subscribeToEvents([
+            {
+                base: anchor.node,
+                event: "pointermove",
+                listener: (e: PointerEvent) => {
+                    if (e.ctrlKey) {
+                        this.activeAnchorIndex = -1;
+                        const anchorPoint = this.getActiveAnchorPoint(e);
+                        this.dragOrigin = anchorPoint;
+                        this.addOnPointerUp = true;
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                cx: anchorPoint.x,
+                                cy: anchorPoint.y,
+                                display: "block",
+                            });
                         });
-                    });
-                } else {
-                    this.addOnPointerUp = false;
-                }
-                this.onManipulationBegin();
-            }
-        }, false);
+                    } else {
+                        this.addOnPointerUp = false;
+                    }
+                },
+                bypass: false,
+            },
+        ]);
     }
 
     /**
@@ -142,11 +149,11 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected updateRegion(p: Point2D) {
         const rd = this.regionData.copy();
-        if (this.activeAnchorIndex >= 0 && this.activeAnchorIndex < this.regionData.points.length) {
-            rd.setPoint(p, this.activeAnchorIndex);
+        if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
+            rd.setPoint(p, this.activeAnchorIndex - 1);
         }
 
-        this.onChange(this, rd, ChangeEventType.MOVING);
+        this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
     }
 
     /**
@@ -168,12 +175,7 @@ export class AnchorsElement extends AnchorsComponent {
             this.deleteOnPointerUp = false;
         }
 
-        this.ghostAnchor.drag(
-            this.anchorDragMove.bind(this),
-            this.anchorDragBegin.bind(this),
-            this.anchorDragEnd.bind(this));
-
-        this.onManipulationBegin();
+        super.onGhostPointerEnter(e);
     }
 
     /**
@@ -181,44 +183,27 @@ export class AnchorsElement extends AnchorsComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerMove(e: PointerEvent) {
-        if (e.ctrlKey) {
-            const p = new Point2D(e.offsetX, e.offsetY);
+        if (e.ctrlKey && this.activeAnchorIndex !== 0) {
+            const p = this.getActiveAnchorPoint(e);
             let dist: number = Number.MAX_VALUE;
-            let nearestPoint: Point2D = null;
             let index: number = -1;
             this.regionData.points.forEach((point, i) => {
                 const d = p.squareDistanceToPoint(point);
                 if (d < dist) {
                     dist = d;
-                    nearestPoint = point;
                     index = i;
                 }
             });
 
             const swapToDelete: boolean = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
 
-            if (this.addOnPointerUp && this.activeAnchorIndex < 0 && !swapToDelete) {
+            if (this.addOnPointerUp && this.activeAnchorIndex <= 0 && !swapToDelete) {
                 this.ghostAnchor.addClass("add");
-
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.attr({
-                        cx: p.x,
-                        cy: p.y,
-                    });
-                });
-
+                this.activeAnchorIndex = -1;
             } else if (this.regionData.points.length > 2 || swapToDelete) {
                 this.ghostAnchor.removeClass("add");
                 this.ghostAnchor.addClass("delete");
-                this.activeAnchorIndex = index;
-
-                window.requestAnimationFrame(() => {
-                    this.ghostAnchor.attr({
-                        cx: nearestPoint.x,
-                        cy: nearestPoint.y,
-                    });
-                });
-
+                this.activeAnchorIndex = index + 1;
                 this.deleteOnPointerUp = true;
                 this.addOnPointerUp = false;
             }
@@ -228,6 +213,8 @@ export class AnchorsElement extends AnchorsComponent {
             this.deleteOnPointerUp = false;
             this.addOnPointerUp = false;
         }
+
+        super.onGhostPointerMove(e);
     }
 
     /**
@@ -235,30 +222,36 @@ export class AnchorsElement extends AnchorsComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerUp(e: PointerEvent) {
-        this.ghostAnchor.node.releasePointerCapture(e.pointerId);
-
         const rd = this.regionData.copy();
 
         if (this.deleteOnPointerUp) {
-            if (this.activeAnchorIndex >= 0 && this.activeAnchorIndex < this.regionData.points.length) {
+            if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
                 const points = rd.points;
-                points.splice(this.activeAnchorIndex, 1);
+                points.splice(this.activeAnchorIndex - 1, 1);
                 rd.setPoints(points);
             }
             this.deleteOnPointerUp = false;
             this.addOnPointerUp = false;
             this.ghostAnchor.removeClass("delete");
             this.ghostAnchor.removeClass("add");
+            this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         } else if (this.addOnPointerUp) {
-            const point = new Point2D(e.offsetX, e.offsetY);
+            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+            const point = new Point2D(offsetX, offsetY);
             const points = rd.points;
 
             // Find the nearest segment of polyline
             let index = 0;
             let distance = Number.MAX_VALUE;
 
-            for (let i = 0; i < points.length - 1; i++) {
-                const d = this.dragOrigin.squareDistanceToLine(points[i], points[i + 1]);
+            for (let i = 0; i < points.length; i++) {
+                let d: number;
+                if (i < points.length - 1) {
+                    d = this.dragOrigin.squareDistanceToLine(points[i], points[i + 1]);
+                } else {
+                    d = this.dragOrigin.squareDistanceToLine(points[i], points[0]);
+                }
 
                 if (d < distance) {
                     index = i;
@@ -272,8 +265,24 @@ export class AnchorsElement extends AnchorsComponent {
             this.deleteOnPointerUp = false;
             this.addOnPointerUp = false;
             this.ghostAnchor.addClass("delete");
+            this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         }
 
-        this.onChange(this, rd, ChangeEventType.MOVEEND);
+        super.onGhostPointerUp(e);
+    }
+
+    /**
+     * Returns `Point2D` with coordinates of active anchor
+     */
+    protected getActiveAnchorPoint(e: PointerEvent): Point2D {
+        if (this.activeAnchorIndex > 0) {
+            return this.regionData.points[this.activeAnchorIndex - 1];
+        } else if (this.activeAnchorIndex < 0) {
+            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+            return new Point2D(offsetX, offsetY);
+        } else {
+            return null;
+        }
     }
 }

@@ -3,11 +3,9 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
 import { CrossElement } from "../Component/CrossElement";
-import { MaskElement } from "../Component/MaskElement";
 import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
@@ -37,14 +35,14 @@ export class RectSelector extends Selector {
     private selectionBox: RectElement;
 
     /**
-     * The `MaskElement` to hide rest of the source image.
-     */
-    private mask: MaskElement;
-
-    /**
      * Internal flag for selection state.
      */
     private capturingState: boolean = false;
+
+    /**
+     * Pointer Id for capturing
+     */
+    private pointerCaptureId: number = -1;
 
     /**
      * Internal flag for selection mode.
@@ -76,7 +74,7 @@ export class RectSelector extends Selector {
      */
     public resize(width: number, height: number) {
         super.resize(width, height);
-        this.resizeAll([this.mask, this.crossA, this.crossB]);
+        this.resizeAll([this.selectionBox, this.crossA, this.crossB]);
     }
 
     /**
@@ -84,7 +82,11 @@ export class RectSelector extends Selector {
      */
     public hide() {
         super.hide();
-        this.hideAll([this.crossA, this.crossB, this.mask]);
+        this.hideAll([this.crossA, this.crossB, this.selectionBox]);
+        if (this.pointerCaptureId >= 0) {
+            this.parentNode.releasePointerCapture(this.pointerCaptureId);
+            this.pointerCaptureId = -1;
+        }
     }
 
     /**
@@ -106,11 +108,9 @@ export class RectSelector extends Selector {
         this.selectionBox = new RectElement(this.paper, this.boundRect, new Rect(0, 0));
         this.selectionBox.node.addClass("selectionBoxStyle");
 
-        this.mask = new MaskElement(this.paper, this.boundRect, this.selectionBox);
-
-        this.node.add(this.mask.node);
         this.node.add(this.crossA.node);
         this.node.add(this.crossB.node);
+        this.node.add(this.selectionBox.node);
 
         const listeners: IEventDescriptor[] = [
             { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
@@ -179,11 +179,12 @@ export class RectSelector extends Selector {
             if (!this.isTwoPoints) {
                 this.capturingState = true;
 
-                this.parentNode.setPointerCapture(e.pointerId);
+                this.pointerCaptureId = e.pointerId;
+                this.parentNode.setPointerCapture(this.pointerCaptureId);
                 this.moveCross(this.crossB, this.crossA);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
 
-                this.showAll([this.mask, this.crossB, this.selectionBox]);
+                this.showAll([this.crossA, this.crossB, this.selectionBox]);
 
                 if (typeof this.callbacks.onSelectionBegin === "function") {
                     this.callbacks.onSelectionBegin();
@@ -203,8 +204,11 @@ export class RectSelector extends Selector {
 
             if (!this.isTwoPoints) {
                 this.capturingState = false;
-                this.parentNode.releasePointerCapture(e.pointerId);
-                this.hideAll([this.crossB, this.mask]);
+                if (this.pointerCaptureId >= 0) {
+                    this.parentNode.releasePointerCapture(this.pointerCaptureId);
+                    this.pointerCaptureId = -1;
+                }
+                this.hideAll([this.crossB, this.selectionBox]);
 
                 if (typeof this.callbacks.onSelectionEnd === "function") {
                     const x = Math.min(this.crossA.x, this.crossB.x);
@@ -217,7 +221,7 @@ export class RectSelector extends Selector {
             } else {
                 if (this.capturingState) {
                     this.capturingState = false;
-                    this.hideAll([this.crossB, this.mask]);
+                    this.hideAll([this.crossB, this.selectionBox]);
 
                     if (typeof this.callbacks.onSelectionEnd === "function") {
                         const x = Math.min(this.crossA.x, this.crossB.x);
@@ -233,7 +237,7 @@ export class RectSelector extends Selector {
                     this.capturingState = true;
                     this.moveCross(this.crossB, p);
                     this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                    this.showAll([this.crossA, this.crossB, this.selectionBox, this.mask]);
+                    this.showAll([this.crossA, this.crossB, this.selectionBox]);
 
                     if (typeof this.callbacks.onSelectionBegin === "function") {
                         this.callbacks.onSelectionBegin();
@@ -251,8 +255,6 @@ export class RectSelector extends Selector {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
             const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-
-            this.crossA.show();
 
             if (!this.isTwoPoints) {
                 if (this.capturingState) {
@@ -307,7 +309,7 @@ export class RectSelector extends Selector {
             this.isTwoPoints = false;
             this.capturingState = false;
             this.moveCross(this.crossA, this.crossB);
-            this.hideAll([this.crossB, this.selectionBox, this.mask]);
+            this.hideAll([this.crossB, this.selectionBox]);
         }
     }
 }

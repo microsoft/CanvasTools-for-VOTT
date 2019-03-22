@@ -8,6 +8,11 @@ import { RegionComponent } from "../Region/Component/RegionComponent";
 export type RegionManipulationFunction = (UIElement?: RegionComponent) => void;
 
 /**
+ * Defines callbacks for requesting/releasing manipulation lock.
+ */
+export type RegionManipulationLockFunction = (UIElement?: RegionComponent) => void;
+
+/**
  * Defines supported events types for regions.
  */
 export enum ChangeEventType { MOVEEND, MOVING, MOVEBEGIN, SELECTIONTOGGLE }
@@ -36,4 +41,14 @@ export interface IRegionCallbacks {
      * The callback to be called when region state changes.
      */
     onChange: RegionChangeFunction;
+
+    /**
+     * The callback to be called when manipulation should be locked down (exclusive).
+     */
+    onManipulationLockRequest?: RegionManipulationLockFunction;
+
+    /**
+     * The callback to be called when manipulation is done and lock should be released.
+     */
+    onManipulationLockRelease?: RegionManipulationLockFunction;
 }
