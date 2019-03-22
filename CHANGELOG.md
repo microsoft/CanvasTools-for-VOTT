@@ -9,6 +9,7 @@
 * Fixed major compatiblity issues with Edge and Firefox.
 * Fixed minor interaction bugs and visual glitches.
 * Changed model for emitting (internal) `onManipulation*` events. Reduced number of generated events and internal emitters.
+* Removed mask from rect-selection.
 
 ### 2.1.28
 
