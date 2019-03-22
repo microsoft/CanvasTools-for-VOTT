@@ -184,7 +184,7 @@ export class RectSelector extends Selector {
                 this.moveCross(this.crossB, this.crossA);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
 
-                this.showAll([this.crossB, this.selectionBox]);
+                this.showAll([this.crossA, this.crossB, this.selectionBox]);
 
                 if (typeof this.callbacks.onSelectionBegin === "function") {
                     this.callbacks.onSelectionBegin();
@@ -255,8 +255,6 @@ export class RectSelector extends Selector {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
             const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-
-            this.crossA.show();
 
             if (!this.isTwoPoints) {
                 if (this.capturingState) {
