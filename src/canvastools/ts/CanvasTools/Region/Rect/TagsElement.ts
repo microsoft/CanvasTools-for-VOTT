@@ -211,6 +211,10 @@ export class TagsElement extends TagsComponent {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                         style: `stroke:#fff;`,
                     },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
                 ];
 
                 this.styleLightMap = [
@@ -252,6 +256,10 @@ export class TagsElement extends TagsComponent {
                         rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
                         style: `stroke:#fff;`,
                     },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
                 ];
             } else {
                 this.styleMap = [];
@@ -270,6 +278,10 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
                     },
                 ];
             }

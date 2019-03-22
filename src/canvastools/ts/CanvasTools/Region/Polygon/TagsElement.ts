@@ -139,7 +139,7 @@ export class TagsElement extends TagsComponent {
                     },
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill:transparent;`,
+                        style: `fill: var(--default-color-ghost);`,
                     },
                 ];
 
@@ -176,6 +176,10 @@ export class TagsElement extends TagsComponent {
                         style: `stroke:#fff;`,
                     },
                     {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                    {
                         rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
                         style: `opacity:0.25;`,
                     },
@@ -202,6 +206,10 @@ export class TagsElement extends TagsComponent {
                     {
                         rule: `.regionStyle.${this.styleId} .anchorStyle`,
                         style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
                     },
                 ];
             }
