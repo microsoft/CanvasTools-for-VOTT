@@ -236,7 +236,9 @@ export class AnchorsElement extends AnchorsComponent {
             this.ghostAnchor.removeClass("add");
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         } else if (this.addOnPointerUp) {
-            const point = new Point2D(e.offsetX, e.offsetY);
+            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+            const point = new Point2D(offsetX, offsetY);
             const points = rd.points;
 
             // Find the nearest segment of polyline
@@ -276,7 +278,9 @@ export class AnchorsElement extends AnchorsComponent {
         if (this.activeAnchorIndex > 0) {
             return this.regionData.points[this.activeAnchorIndex - 1];
         } else if (this.activeAnchorIndex < 0) {
-            return new Point2D(e.offsetX, e.offsetY);
+            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+            return new Point2D(offsetX, offsetY);
         } else {
             return null;
         }

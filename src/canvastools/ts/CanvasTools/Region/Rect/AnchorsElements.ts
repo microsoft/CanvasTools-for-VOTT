@@ -290,7 +290,9 @@ export class AnchorsElement extends AnchorsComponent {
             return this.regionData.points[this.activeAnchorIndex - 1];
         } else if (this.activeAnchorIndex < 0) {
             if (e !== undefined) {
-                return new Point2D(e.offsetX, e.offsetY);
+                const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+                const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+                return new Point2D(offsetX, offsetY);
             } else {
                 const boneBox = this.anchorBones[-this.activeAnchorIndex - 1].getBBox();
                 return new Point2D(boneBox.cx, boneBox.cy);

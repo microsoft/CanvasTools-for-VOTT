@@ -164,8 +164,8 @@ export abstract class AnchorsComponent extends RegionComponent {
                     // Move ghost anchor to current anchor position
                     window.requestAnimationFrame(() => {
                         this.ghostAnchor.attr({
-                            cx: e.offsetX,
-                            cy: e.offsetY,
+                            cx: anchorPoint.x,
+                            cy: anchorPoint.y,
                             display: "block",
                         });
                     });
@@ -228,7 +228,9 @@ export abstract class AnchorsComponent extends RegionComponent {
      */
     protected onGhostPointerDown(e: PointerEvent) {
         this.ghostAnchor.node.setPointerCapture(e.pointerId);
-        this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
+        const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+        const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+        this.dragOrigin = new Point2D(offsetX, offsetY);
 
         this.isDragged = true;
         this.callbacks.onManipulationLockRequest(this);
@@ -245,8 +247,11 @@ export abstract class AnchorsComponent extends RegionComponent {
             const rdx = e.clientX - ghost.left;
             const rdy = e.clientY - ghost.top;
 
-            let dx = e.offsetX - this.dragOrigin.x;
-            let dy = e.offsetY - this.dragOrigin.y;
+            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+
+            let dx = offsetX - this.dragOrigin.x;
+            let dy = offsetY - this.dragOrigin.y;
 
             if ((rdx < 0 && dx > 0) || (rdx > 0 && dx < 0)) {
                 dx = 0;
@@ -271,7 +276,7 @@ export abstract class AnchorsComponent extends RegionComponent {
 
             }
 
-            this.dragOrigin = new Point2D(e.offsetX, e.offsetY);
+            this.dragOrigin = new Point2D(offsetX, offsetY);
         }
     }
 
