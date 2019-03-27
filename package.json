@@ -16,7 +16,10 @@
     "clean-dts": "del-cli ./dist/CanvasTools/ ./dist/CanvasTools.d.ts",
     "clean-dist": "del-cli ./dist/",
     "clean-lib": "del-cli ./lib/",
-    "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib"
+    "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib",
+    "test": "jest",
+    "test-ui": "jest --config jest.config.ui.js",
+    "coverage": "jest --coverage"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",
@@ -36,14 +39,21 @@
     "snapsvg-cjs": "0.0.6"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.11",
     "@types/snapsvg": "^0.4.35",
+    "chromedriver": "^2.46.0",
     "cpx": "^1.5.0",
     "css-loader": "^1.0.1",
     "del-cli": "^1.1.0",
     "dts-bundle": "^0.7.3",
     "es6-plato": "^1.1.5",
+    "geckodriver": "^1.16.0",
     "imports-loader": "^0.8.0",
+    "jest": "^24.5.0",
+    "jest-environment-webdriver": "^0.2.0",
+    "selenium-webdriver": "^3.6.0",
     "style-loader": "^0.23.1",
+    "ts-jest": "^24.0.0",
     "ts-loader": "^5.3.0",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
     "tslint": "^5.12.0",
@@ -51,6 +61,7 @@
     "typescript": "^3.2.2",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
-    "webpack-merge": "^4.1.4"
+    "webpack-merge": "^4.1.4",
+    "yarn": "^1.13.0"
   }
 }
