@@ -32,10 +32,18 @@ var webpackSettings = {
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
     },
-    'test': {
+    'samples': {
         minimize: false,
         mode: 'development',
         path: path.resolve(__dirname, './samples/shared/js'),
+        filename: `${libraryFileName}.js`,
+        devtool: "inline-source-map",
+        tsconfig: "tsconfig.test.json"
+    },
+    'test': {
+        minimize: false,
+        mode: 'development',
+        path: path.resolve(__dirname, './tests/shared/js'),
         filename: `${libraryFileName}.js`,
         devtool: "inline-source-map",
         tsconfig: "tsconfig.test.json"
