@@ -53,6 +53,17 @@ export class XYZColor {
     }
 
     /**
+     * Normalize color to the [0, 1] range
+     */
+    public normalize(): XYZColor {
+        let [x, y, z] = this.values;
+        x = Math.min(1, Math.max(0, x));
+        y = Math.min(1, Math.max(0, y));
+        z = Math.min(1, Math.max(0, z));
+        return new XYZColor(x, y, z);
+    }
+
+    /**
      * Return a copy of color values in array format as [x, y, z].
      */
     public toArray(): number[] {
@@ -64,10 +75,11 @@ export class XYZColor {
      * Trasforms color to the RGB format.
      */
     public toRGB(): RGBColor {
+        // https://www.w3.org/TR/css-color-4/#color-conversion-code
         const [x, y, z] = this.values;
-        const r = +3.2406255 * x - 1.5372080 * y - 0.4986286 * z;
-        const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
-        const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
+        const r = +3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
+        const g = -0.9692660 * x + 1.8760108 * y + 0.0415560 * z;
+        const b = +0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
         return new RGBColor(r, g, b);
     }
 
