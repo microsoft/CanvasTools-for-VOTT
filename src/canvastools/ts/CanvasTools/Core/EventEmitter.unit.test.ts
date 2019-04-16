@@ -1,7 +1,7 @@
 import { EventEmitter } from "./EventEmitter";
 
-describe("EventEmitter Tests", () => {
-    it("Create Emitter", () => {
+describe("Core.EventEmitter Tests", () => {
+    it("emitter can be created", () => {
         const emitter = new EventEmitter();
 
         expect(emitter).not.toBeNull();
@@ -10,7 +10,7 @@ describe("EventEmitter Tests", () => {
         expect(emitter).toHaveProperty("emit");
     });
 
-    it("Subscribe one handler to event", () => {
+    it("emitter works with one handler per one event (on, emit)", () => {
         const emitter = new EventEmitter();
 
         const eventName = "test";
@@ -34,7 +34,7 @@ describe("EventEmitter Tests", () => {
         expect(testValue).toBe(newValue);
     });
 
-    it("Subscribe multiple handlers to event", () => {
+    it("emitter works with multiple handlers for one event (on, emit)", () => {
         const emitter = new EventEmitter();
 
         const eventName = "test";
@@ -55,7 +55,7 @@ describe("EventEmitter Tests", () => {
         }
     });
 
-    it("Subscrube and unsubscribe from event", () => {
+    it("emitter allos subscribing and unsubscribing from event (on, off, emit)", () => {
         const emitter = new EventEmitter();
         const eventName = "test";
 
@@ -75,7 +75,7 @@ describe("EventEmitter Tests", () => {
         expect(testValues.length).toBe(1);
     });
 
-    it("Subscribe to multiple events", () => {
+    it("emitters works with multiple events (on, emit)", () => {
         const emitter = new EventEmitter();
         const eventName1 = "one";
         const eventName2 = "two";
@@ -100,7 +100,7 @@ describe("EventEmitter Tests", () => {
         expect(testValues).toContain(setValue2);
     });
 
-    it("Subscrybe async with promise", async () => {
+    it("emitter allow async promises wrappers for handlers (onAsync, emit)", async () => {
         const emitter = new EventEmitter();
         const eventName = "test";
 
