@@ -1,8 +1,8 @@
 import { Point2D } from "./Point2D";
 import { Rect } from "./Rect";
 
-describe("Point2D Tests", () => {
-    it("Point2D - Creation", () => {
+describe("Core.Point2D Tests", () => {
+    it("the Point2D object can be created", () => {
         const x = 10;
         const y = 15;
         const p1 = new Point2D(x, y);
@@ -18,7 +18,7 @@ describe("Point2D Tests", () => {
         expect(p2.y).toBe(y);
     });
 
-    it("Point2D - Point move and shift", () => {
+    it("the Point2D supports moving (move) and shifting (shift)", () => {
         const x1 = 10;
         const y1 = 15;
         const p = new Point2D(x1, y1);
@@ -41,7 +41,7 @@ describe("Point2D Tests", () => {
         expect(p.y).toBe(y1 + dy);
     });
 
-    it("Point2D - Bound rect", () => {
+    it("the Point2D can be bounded to rect (boundToRect)", () => {
         const x1 = 10;
         const y1 = 15;
         const p1 = new Point2D(x1, y1);
@@ -77,7 +77,7 @@ describe("Point2D Tests", () => {
         expect(p3b.y).toBe(0);
     });
 
-    it("Point2D - Copy", () => {
+    it("the Point2D object can be copied (copy)", () => {
         const x = 10;
         const y = 15;
 
@@ -94,7 +94,7 @@ describe("Point2D Tests", () => {
         expect(p.y).toBe(y);
     });
 
-    it("Point2D - To/From JSON", () => {
+    it("the Point2D can be converted to JSON (toJSON) and restore from JSON (BuildFromJSON)", () => {
         const x = 10;
         const y = 15;
 
@@ -109,7 +109,7 @@ describe("Point2D Tests", () => {
         expect(np.y).toBe(y);
     });
 
-    it("Point2D - Distance", () => {
+    it("the distance between two Point2D objects is calculated correctly", () => {
         const x = 1;
         const y = 1;
         const p = new Point2D(x, y);
@@ -145,13 +145,14 @@ describe("Point2D Tests", () => {
         expect(p.squareDistanceToLine(new Point2D(5, 4), new Point2D(5, 4))).toBe(25);
     });
 
-    it("Point2D - To String", () => {
+    it("the Point2D can be converted to expected string format (toString)", () => {
         const x = 10;
         const y = 15;
 
         const p = new Point2D(x, y);
 
         const str = p.toString();
+        // {x, y}, x and y - numbers
         expect(str).toMatch(/\{([+-]?\d+(\.\d+)?),\s*([+-]?\d+(\.\d+)?)\}/g);
         expect(str).toBe(`{${x}, ${y}}`);
     });
