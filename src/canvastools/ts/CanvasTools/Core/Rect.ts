@@ -40,8 +40,10 @@ export class Rect implements IResizable {
      * @param height - a new `height` for the rect
      */
     public resize(width: number, height: number): void {
-        if (width >= 0 && height >= 0) {
+        if (width >= 0) {
             this.width = width;
+        }
+        if (height >= 0) {
             this.height = height;
         }
     }
