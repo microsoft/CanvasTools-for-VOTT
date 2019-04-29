@@ -77,8 +77,8 @@ export class Tag implements ITag {
     private colorObj: Color;
 
     /**
-     * Returns the pure color variation of the tag's color
-     * @returns String hsl(H, 100%, 50%)
+     * Returns the pure (original) color variation of the tag's color
+     * @returns Original color
      */
     public get colorPure(): string {
         if (this.tagColorPure === "") {
@@ -148,7 +148,7 @@ export class Tag implements ITag {
 
     /**
      * Returns the fully transparent color variation of the tag's color
-     * @returns Hex string for the color
+     * @returns Hex string for the color ("rgba(0, 0, 0, 0.0)"")
      */
     public get colorNoColor(): string {
         if (this.tagColorNoColor === "") {
