@@ -35,6 +35,65 @@ export class SRGBColor {
     }
 
     /**
+     * Parses the hex-string representation of the RGB color to extract alpha value
+     * @param hex - Color string in the format "#RGB" (#RGBA) or "#RRGGBB" (#RRGGBBAA).
+     * @returns Alpha value of the color
+     */
+    public static ParseHexAlpha(hex: string): number {
+        const isValidColor = /#([a-f0-9]{3,4}){1,2}\b/i.test(hex);
+        if (!isValidColor) {
+            throw new Error(`Invalid CSS RGB color: ${hex}`);
+        }
+
+        let a: number = 0;
+        if (hex.length === 9) {
+            a = parseInt(hex.substring(7, 9), 16) / 255;
+        } else if (hex.length === 5) {
+            a = parseInt(hex.charAt(4), 16) / 16;
+        }
+        return a
+    }
+
+    /**
+     * Parses the css-string representation of the RGB color (rgb/rgba)
+     * @param hex - Color string in the format "rgb(...)" or "rgba(...)".
+     * @remarks Alpha value (if present) is ignored.
+     */
+    public static ParseCSSString(cssString: string): SRGBColor {
+        const matchResult = cssString.match(/rgba?\((.*)\)/);
+
+        const isValidColor = matchResult !== null;
+        if (!isValidColor) {
+            throw new Error(`Invalid CSS String color: ${cssString}`);
+        }
+        const rgba = matchResult[1].split(',').map(Number);
+
+        return new SRGBColor(rgba[0]/255, rgba[1]/255, rgba[2]/255);
+    }
+
+    /**
+     * Parses the css-string representation of the RGB color (rgb/rgba) to extract alpha value
+     * @param hex - Color string in the format "rgb(...)" or "rgba(...)".
+     * @returns Alpha value
+     */
+    public static ParseCSSStringAlpha(cssString: string): number {
+        const matchResult = cssString.match(/rgba?\((.*)\)/);
+
+        const isValidColor = matchResult !== null;
+        if (!isValidColor) {
+            throw new Error(`Invalid CSS String color: ${cssString}`);
+        }
+        const rgba = matchResult[1].split(',').map(Number);
+
+        let alpha = 0;
+        if (rgba.length > 3) {
+            alpha = rgba[3];
+        }
+                
+        return alpha;
+    }
+
+    /**
      * The red-component of the color.
      */
     public get r(): number {
