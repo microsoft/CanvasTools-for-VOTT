@@ -1,4 +1,3 @@
-import { Point2D } from "./Point2D";
 import { Rect } from "./Rect";
 
 describe("Core.Rect Tests", () => {
