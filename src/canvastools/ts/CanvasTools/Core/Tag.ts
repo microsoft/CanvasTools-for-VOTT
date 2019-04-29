@@ -158,13 +158,13 @@ export class Tag implements ITag {
     }
 
     /**
-     * Creates a new `Tag` object with specified `name`, `colorHue` and `id`
+     * Creates a new `Tag` object with specified `name`, hue value of `cssColor` and `id`
      * @param name - `name` of the new tag
-     * @param colorHue - `colorHue` of the new tag
+     * @param color - The `Color` object.
      * @param id - `id` of the new tag (optional, by default is "")
-     * @deprecated Use the `Color` class instead.
      */
-    constructor(name: string, colorHue: number, id?: string);
+    constructor(name: string, color: Color, id?: string);
+    
     /**
      * Creates a new `Tag` object with specified `name`, hue value of `cssColor` and `id`
      * @param name - `name` of the new tag
@@ -173,12 +173,13 @@ export class Tag implements ITag {
      */
     constructor(name: string, cssColor: string, id?: string);
     /**
-     * Creates a new `Tag` object with specified `name`, hue value of `cssColor` and `id`
+     * Creates a new `Tag` object with specified `name`, `colorHue` and `id`
      * @param name - `name` of the new tag
-     * @param color - The `Color` object.
+     * @param colorHue - `colorHue` of the new tag
      * @param id - `id` of the new tag (optional, by default is "")
+     * @deprecated Use the `Color` class instead.
      */
-    constructor(name: string, color: Color, id?: string);
+    constructor(name: string, colorHue: number, id?: string);
 
     constructor(name: string, color: number|string|Color, id: string = "") {
         this.tagName = name;
