@@ -10,6 +10,8 @@ import { RectCopySelector } from "./Selectors/RectCopySelector";
 import { RectSelector } from "./Selectors/RectSelector";
 import { Selector } from "./Selectors/Selector";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The region selection manager.
  * @remarks The naming of the class is historical per the idea to specify the

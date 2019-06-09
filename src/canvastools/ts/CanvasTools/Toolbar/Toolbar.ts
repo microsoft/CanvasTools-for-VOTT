@@ -6,6 +6,8 @@ import { ToolbarSeparator } from "./ToolbarSeparator";
 import { ToolbarSwitchIcon } from "./ToolbarSwitchIcon";
 import { ToolbarTriggerIcon } from "./ToolbarTriggerIcon";
 
+import * as Snap from "snapsvg-cjs";
+
 export class Toolbar {
     private baseParent: SVGSVGElement;
     private paper: Snap.Paper;

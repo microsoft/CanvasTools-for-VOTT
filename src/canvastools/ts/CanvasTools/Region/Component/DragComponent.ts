@@ -7,6 +7,8 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 import { RegionComponent } from "./RegionComponent";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * An abstract visual component used internall do allow dragging the whole region.
  */

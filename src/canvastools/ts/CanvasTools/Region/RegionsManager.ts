@@ -13,6 +13,8 @@ import { RegionData, RegionDataType } from "../Core/RegionData";
 import { Region } from "./Region";
 import { RegionComponent } from "./Component/RegionComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The manager for visual region objects.
  */

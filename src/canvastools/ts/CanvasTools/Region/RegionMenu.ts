@@ -7,6 +7,8 @@ import { IRegionCallbacks } from "../Interface/IRegionCallbacks";
 import { RegionComponent } from "./Component/RegionComponent";
 import { Region } from "./Region";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The region menu element.
  */

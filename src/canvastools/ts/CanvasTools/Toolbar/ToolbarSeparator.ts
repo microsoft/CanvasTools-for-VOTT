@@ -1,7 +1,6 @@
 import { ToolbarIcon } from "./ToolbarIcon";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
+import * as Snap from "snapsvg-cjs";
 
 export class ToolbarSeparator extends ToolbarIcon {
     private iconSeparator: Snap.Element;

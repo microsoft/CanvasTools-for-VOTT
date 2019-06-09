@@ -2,6 +2,8 @@ import { Rect } from "../../Core/Rect";
 import { Element } from "./Element";
 import { RectElement } from "./RectElement";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The mask element for selectors
  */

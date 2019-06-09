@@ -2,6 +2,8 @@ import { Rect } from "../../Core/Rect";
 import { IHideable } from "../../Interface/IHideadble";
 import { IResizable } from "../../Interface/IResizable";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * Abstract class for building blocks of selectors.
  */

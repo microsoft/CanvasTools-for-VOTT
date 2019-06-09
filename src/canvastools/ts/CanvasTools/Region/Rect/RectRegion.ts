@@ -11,6 +11,8 @@ import { AnchorsElement } from "./AnchorsElements";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The rect-type region class.
  */

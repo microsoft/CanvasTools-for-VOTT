@@ -1,5 +1,7 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
 
+import * as Snap from "snapsvg-cjs";
+
 export type IconCallback = (action: string) => void;
 
 export enum ToolbarItemType { SELECTOR, SWITCH, SEPARATOR, TRIGGER }
