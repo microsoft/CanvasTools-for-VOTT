@@ -10,6 +10,8 @@ import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The selector to define a polyline-region.
  */

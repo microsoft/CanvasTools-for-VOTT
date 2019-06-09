@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.2.0-beta.1
+
+* Fix for Angular compat.
+* Small typo fixes in samples.
+
 ### 2.2.0-beta.0
 
 *New versioning aproach*

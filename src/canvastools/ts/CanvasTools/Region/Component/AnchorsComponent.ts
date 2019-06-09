@@ -7,6 +7,8 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 
 import { RegionComponent } from "./RegionComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * An abstract visual component used internall to draw anchor points that allow
  * region points moving and this component resizing.

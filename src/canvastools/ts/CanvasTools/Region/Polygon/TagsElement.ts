@@ -6,6 +6,8 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { TagsComponent } from "../Component/TagsComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * `TagsComponent` for the `PolygonRegion` class.
  */

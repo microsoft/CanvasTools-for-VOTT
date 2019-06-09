@@ -1,6 +1,8 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
 import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
 
+import * as Snap from "snapsvg-cjs";
+
 export class ToolbarSelectIcon extends ToolbarIcon {
     public onAction: IconCallback;
 

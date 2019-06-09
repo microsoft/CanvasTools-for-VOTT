@@ -5,6 +5,8 @@ import { IMovable } from "../../Interface/IMovable";
 import { Element } from "./Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The cross element for selectors.
  */
