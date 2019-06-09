@@ -11,6 +11,8 @@ import { AnchorsElement } from "./AnchorsElement";
 import { DragElement } from "./DragElement";
 import { TagsElement } from "./TagsElement";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The polyline-type region class.
  */

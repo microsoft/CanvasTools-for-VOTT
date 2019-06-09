@@ -6,6 +6,8 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 
 import { AnchorsComponent } from "../Component/AnchorsComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * `AnchorsComponent` for the `RectRegion` class.
  * @todo Current implementations of bones reuses existing aprroach with anchor index

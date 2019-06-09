@@ -8,8 +8,7 @@ import { ChangeEventType, IRegionCallbacks } from "../Interface/IRegionCallbacks
 
 import { RegionComponent } from "./Component/RegionComponent";
 
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
+import * as Snap from "snapsvg-cjs";
 
 export abstract class Region extends RegionComponent {
     /**

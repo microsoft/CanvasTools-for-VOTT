@@ -6,6 +6,8 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { RegionComponent } from "./RegionComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * An abstract visual component used internall do draw tags data for regions.
  */

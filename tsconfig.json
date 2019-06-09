@@ -19,6 +19,7 @@
         ],
         "paths": {
         },
+        "types": [],
         "outDir": "dist"
         /* "outFile": "dist/ct.js" */
     },

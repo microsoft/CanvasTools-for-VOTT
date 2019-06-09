@@ -10,6 +10,8 @@ import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * Enum to specify selection mode.
  */

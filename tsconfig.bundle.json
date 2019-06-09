@@ -19,6 +19,7 @@
         ],
         "paths": {
         },
+        "types": [],
         "outDir": "./lib/js"
         /* "outFile": "./lib/ct.js" */
     },

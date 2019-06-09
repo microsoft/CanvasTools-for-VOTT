@@ -5,6 +5,8 @@ import { Element} from "./Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
 import { IRect } from "../../Interface/IRect";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The rect element for selectors
  */

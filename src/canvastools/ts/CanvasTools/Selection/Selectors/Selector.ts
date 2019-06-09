@@ -9,6 +9,8 @@ import { Element } from "../Component/Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
 import { CrossElement } from "../Component/CrossElement";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * The abstract class to define region selectors.
  */

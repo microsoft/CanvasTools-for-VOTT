@@ -5,6 +5,8 @@ import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { DragComponent } from "../Component/DragComponent";
 
+import * as Snap from "snapsvg-cjs";
+
 /**
  * `DragComponent` for the `PolylineRegion` class.
  */

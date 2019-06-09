@@ -148,7 +148,7 @@
             if (r < 0.2) {
                 // Create tags descriptor passing all three tags 
                 tags = new CanvasTools.Core.TagsDescriptor(primaryTag, [secondaryTag, ternaryTag]);
-            } else if (requestAnimationFrame < 0.4) {
+            } else if (r < 0.4) {
                 // Create tags descriptor without primary tag
                 tags = new CanvasTools.Core.TagsDescriptor(null, [secondaryTag, ternaryTag]);
             } else if (r < 0.6) {
