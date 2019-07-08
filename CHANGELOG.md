@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.1 
+Update repo links and add new interface method `getAllRegions` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
+
 ### 2.2.0-beta.0
 
 *New versioning aproach*
