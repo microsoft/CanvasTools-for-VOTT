@@ -1,6 +1,6 @@
 {
   "name": "vott-ct",
-  "version": "2.2.0-beta.0",
+  "version": "2.2.1",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
@@ -22,12 +22,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kichinsky/CanvasTools-for-VOTT.git"
+    "url": "git+https://github.com/microsoft/CanvasTools-for-VOTT.git"
   },
   "bugs": {
-    "url": "https://github.com/kichinsky/CanvasTools-for-VOTT/issues"
+    "url": "https://github.com/microsoft/CanvasTools-for-VOTT/issues"
   },
-  "homepage": "https://github.com/kichinsky/CanvasTools-for-VOTT#readme",
+  "homepage": "https://github.com/microsoft/CanvasTools-for-VOTT#readme",
   "files": [
     "/lib",
     "/dist"

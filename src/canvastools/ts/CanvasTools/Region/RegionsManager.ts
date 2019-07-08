@@ -253,16 +253,29 @@ export class RegionsManager {
     }
 
     /**
-     * Returns a collection of selected regions.
+     * Returns a collection of all the regions currently drawn on the canvas
      */
-    public getSelectedRegions(): Array<{ id: string, regionData: RegionData }> {
-        const regions = this.lookupSelectedRegions().map((region) => {
+    public getAllRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+        return this.regions.map((region) => {
             return {
                 id: region.ID,
+                tags: region.tags,
                 regionData: region.regionData,
             };
         });
-        return regions;
+    }
+
+    /**
+     * Returns a collection of selected regions.
+     */
+    public getSelectedRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+        return this.lookupSelectedRegions().map((region) => {
+            return {
+                id: region.ID,
+                tags: region.tags,
+                regionData: region.regionData,
+            };
+        });
     }
 
     /**

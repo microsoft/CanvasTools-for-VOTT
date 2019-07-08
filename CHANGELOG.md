@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.1 
+Update repo links and add new interface method `getAllRegions` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
+
 ### 2.2.0-beta.0
 
 *New versioning aproach*
@@ -20,7 +23,7 @@
 
 Fix to missing /Core folder in the package.
 
-### 2.1.26 - Background toggling from the [v2-toolbar-background-toggle](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-background-toggle) branch
+### 2.1.26 - Background toggling from the [v2-toolbar-background-toggle](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v2-toolbar-background-toggle) branch
 
 *CT Library Changes*
 * Exposed the `toggleBackgroun` method for `RegionsManager` as public.
@@ -30,14 +33,14 @@ Fix to missing /Core folder in the package.
 *CT Toolbar*
 * Added background toggling button to the toolbar icon sets.
 
-### 2.1.25 - Trigger button type for Toolbar from the [v2-toolbar-clear-regions](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-toolbar-clear-regions) branch
+### 2.1.25 - Trigger button type for Toolbar from the [v2-toolbar-clear-regions](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v2-toolbar-clear-regions) branch
 
 *CT Library Changes*
 * Added new `ToolbarTriggerIcon` type for Toolbar, allowing adding buttons that trigger some action but does not change state.
 * Added new "Delete all regions" button to default toolbar presets.
 
 
-### 2.1.24 - API Update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
+### 2.1.24 - API Update from the [v2-rect-select-manipulate-update](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
 *CT Library Changes*
 * Added a new `getSelectedRegions` method to replace deprecated `getSelectedRegionsBounds` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
@@ -62,11 +65,11 @@ Fix to missing /Core folder in the package.
     * Moved `SelectionMode` definition to the `ISelectorSettings` file.
     * Added new `getSelectorSettings` method for the `AreaSelector` to get current settings.
 
-### 2.1.23 - Rect resizing update from the [v2-rect-select-manipulate-update](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
+### 2.1.23 - Rect resizing update from the [v2-rect-select-manipulate-update](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v2-rect-select-manipulate-update) branch
 
 *CT Library Changes*
-* Fix for the [issue #42](https://github.com/kichinsky/CanvasTools-for-VOTT/issues/42) with rects overflowing canvas edge when created using the copy-rect tool.
-* Added rect resizing by dragging edges ([issue #30](https://github.com/kichinsky/CanvasTools-for-VOTT/issues/30)).
+* Fix for the [issue #42](https://github.com/microsoft/CanvasTools-for-VOTT/issues/42) with rects overflowing canvas edge when created using the copy-rect tool.
+* Added rect resizing by dragging edges ([issue #30](https://github.com/microsoft/CanvasTools-for-VOTT/issues/30)).
 
 ### 2.1.22
 
@@ -74,7 +77,7 @@ Fix to missing /Core folder in the package.
 * Updated `Editor` properties to use named function types instead of hardcoded ones. 
 * `regionData` param is now optional for all callbacks on the `Editor` -- following the `RegionUpdateFunction` type definition.
 
-### 2.1.21 - New color infrastructure from the [v3-color-lab](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/v3-color-lab) branch
+### 2.1.21 - New color infrastructure from the [v3-color-lab](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v3-color-lab) branch
 
 *New color infrastructure*
 * Implementation of core color spaces: sRGB, RGB, HSL, XYZ and CIE LAB, including conversion between formats. Added new classes under `CanvasTools.Core.Colors.*`: `SRGBColor`, `RGBColor`, `HSLColor`, `XYZColor` and `LABColor`. The `Color` class is a wrapper around various formats.
