@@ -56,7 +56,7 @@ lib/
 
     ```
 
-2. Copy toolbar icons from the [`src` folder](https://github.com/kichinsky/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
+2. Copy toolbar icons from the [`src` folder](https://github.com/microsoft/CanvasTools-for-VOTT/tree/master/src/canvastools/icons) to your project.
 
 ### Add Editor to the page
 
@@ -137,4 +137,4 @@ image.src = imagePath;
 ```
 
 ## Changelog
-Moved to a new file: [CHANGELOG.md](https://github.com/kichinsky/CanvasTools-for-VOTT/blob/master/CHANGELOG.md).
+Moved to a new file: [CHANGELOG.md](https://github.com/microsoft/CanvasTools-for-VOTT/blob/master/CHANGELOG.md).
