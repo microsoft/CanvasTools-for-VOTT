@@ -327,6 +327,10 @@ export class RegionsManager {
         regions.forEach((region) => {
             region.updateTags(tagsDescriptor, this.tagsUpdateOptions);
         });
+
+        regions.forEach((region) => {
+            region.unselect();
+        })
     }
 
     /**
@@ -844,6 +848,7 @@ export class RegionsManager {
         this.regions.push(region);
 
         this.menu.showOnRegion(region);
+        region.unselect();
     }
 
     /**

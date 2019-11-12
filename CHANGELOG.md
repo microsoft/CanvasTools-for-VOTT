@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.2.2
+*CT Library Changes*
+* Update `registerRegion()` in `RegionsManager` to unselect the region after it is registered.
+* Unselect all regions after updating tags in `updateTagsForSelectedRegions` in `RegionsManager`.
+
 ### 2.2.1 
 Update repo links and add new interface method `getAllRegions` in `RegionsManager`. Also available in `Editor` through `RM` or `api`.
 
