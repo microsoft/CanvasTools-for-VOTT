@@ -68,7 +68,10 @@ module.exports = function (env) {
         optimization: {
             minimize: settings.minimize
         },
-
+        devServer: {
+            contentBase: path.join(__dirname, 'samples'),
+            port: 9000
+        },
         module: {
             rules: [
                 {

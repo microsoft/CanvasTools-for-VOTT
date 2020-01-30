@@ -55,6 +55,12 @@
     pointer-events: none;
 }
 
+.CanvasToolsContainer {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
 /* 2. RegionsManager
 
 .regionManager
