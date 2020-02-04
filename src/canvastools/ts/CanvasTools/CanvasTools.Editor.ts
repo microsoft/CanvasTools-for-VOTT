@@ -6,6 +6,7 @@ import { RegionData } from "./Core/RegionData";
 import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
 import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
 import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
+import { ZoomUpdateFunction } from "./Interface/IZoomCallbacks";
 import { SelectionMode } from "./Interface/ISelectorSettings";
 
 import { RegionComponent } from "./Region/Component/RegionComponent";
@@ -274,7 +275,7 @@ export class Editor {
             action: "zoom-in",
             iconFile: "zoom-in.svg",
             tooltip: "Zoom in",
-            keycode: "",
+            keycode: "NumpadAdd",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingIn();
             },
@@ -285,7 +286,7 @@ export class Editor {
             action: "zoom-out",
             iconFile: "zoom-out.svg",
             tooltip: "Zoom out",
-            keycode: "",
+            keycode: "NumpadSubtract",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingOut();
             },
@@ -378,6 +379,11 @@ export class Editor {
      * Callback for `AreaSelector` called when user ended selecting (creating) new region.
      */
     public onSelectionEnd: SelectionConfirmFunction;
+
+    /**
+     * Callback when user ended zoom function.
+     */
+    public onZoomEnd: ZoomUpdateFunction;
 
     /**
      * Internal reference to the proxi of APIs.
@@ -489,6 +495,7 @@ export class Editor {
         
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
+        this.editorContainerDiv.tabIndex = 0;
         
         this.editorDiv = this.createDivElement();
         this.editorDiv.classList.add("CanvasToolsEditor");
@@ -496,13 +503,6 @@ export class Editor {
         this.editorDiv.append(this.contentCanvas);
         this.editorDiv.append(this.editorSVG);
         this.editorContainerDiv.append(this.editorDiv);
-
-        // automatically resize internals on window resize
-        window.addEventListener("resize", (e) => {
-            if (this.autoResize) {
-                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-            }
-        });
 
         // Init regionsManager
         const rmCallbacks = {
@@ -596,7 +596,7 @@ export class Editor {
                 this.onZoom(Zoom.In);
             }
         }
-        this.zoomManager = new ZoomManager(false, initZoomCallbacks);
+        this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
         if (isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
         }
@@ -635,6 +635,8 @@ export class Editor {
                 }
             },
         }) as any;
+
+        this.subscribeToEvents();
     }
 
     /**
@@ -904,6 +906,25 @@ export class Editor {
 
             this.areaSelector.resize(this.frameWidth, this.frameHeight);
             this.regionsManager.resize(this.frameWidth, this.frameHeight);
+
+            if (typeof this.onZoomEnd == "function") {
+                this.onZoomEnd(zoomData);
+            }
+
+            // focus on the editor container div so that scroll bar can be used via arrow keys
+            this.editorContainerDiv.focus();
         }
+    }
+
+    /**
+     * Helper function to subscribe manager to keyboard events.
+     */
+    private subscribeToEvents() {
+        // automatically resize internals on window resize
+        window.addEventListener("resize", (e) => {
+            if (this.autoResize) {
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            }
+        });
     }
 }

@@ -25,6 +25,7 @@
         <div>
             <button id="getRegion">Get Region !</button>
         </div>
+        <div id="showZoomFactor"></div>
     </div>
 </body>
 <script src="./../shared/js/ct.js"></script>
@@ -186,8 +187,14 @@
 
         var getRegionButton = document.getElementById("getRegion");
         getRegionButton.addEventListener("click", (e) => {
-            console.log(editor.RM.getAllRegions());
+            var x = editor.RM.getAllRegions()[0].regionData;
+            console.log(x);
         });
+
+        var showZoomDiv = document.getElementById("showZoomFactor");
+        editor.onZoomEnd = function (zoom) {
+            showZoomDiv.innerText = "Image zoomed at " + zoom.currentZoomScale*100 + " %";
+        }
     });
 
     // Builds select element using provided list of images 

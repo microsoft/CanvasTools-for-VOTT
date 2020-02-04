@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1749,10 +1749,10 @@ exports.SRGBColor = SRGBColor;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const ToolbarIcon_1 = __webpack_require__(3);
-const ToolbarSelectIcon_1 = __webpack_require__(29);
-const ToolbarSeparator_1 = __webpack_require__(30);
-const ToolbarSwitchIcon_1 = __webpack_require__(31);
-const ToolbarTriggerIcon_1 = __webpack_require__(32);
+const ToolbarSelectIcon_1 = __webpack_require__(30);
+const ToolbarSeparator_1 = __webpack_require__(31);
+const ToolbarSwitchIcon_1 = __webpack_require__(32);
+const ToolbarTriggerIcon_1 = __webpack_require__(33);
 class Toolbar {
     constructor(svgHost) {
         this.iconSpace = 8;
@@ -1886,14 +1886,15 @@ exports.Toolbar = Toolbar;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const ZoomManager_1 = __webpack_require__(22);
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const IRegionCallbacks_1 = __webpack_require__(4);
-const RectRegion_1 = __webpack_require__(22);
-const PointRegion_1 = __webpack_require__(23);
-const PolygonRegion_1 = __webpack_require__(38);
-const PolylineRegion_1 = __webpack_require__(42);
-const RegionMenu_1 = __webpack_require__(46);
+const RectRegion_1 = __webpack_require__(23);
+const PointRegion_1 = __webpack_require__(24);
+const PolygonRegion_1 = __webpack_require__(39);
+const PolylineRegion_1 = __webpack_require__(43);
+const RegionMenu_1 = __webpack_require__(47);
 const RegionData_1 = __webpack_require__(2);
 class RegionsManager {
     constructor(svgHost, callbacks) {
@@ -2005,7 +2006,7 @@ class RegionsManager {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: region.regionData,
+                regionData: this.scaleRegionToOriginalSize(region.regionData),
             };
         });
     }
@@ -2014,7 +2015,7 @@ class RegionsManager {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: region.regionData,
+                regionData: this.scaleRegionToOriginalSize(region.regionData),
             };
         });
     }
@@ -2104,6 +2105,19 @@ class RegionsManager {
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
         });
+    }
+    scaleRegion(regionData, sf) {
+        const rd = regionData.copy();
+        rd.scale(sf, sf);
+        return rd;
+    }
+    scaleRegionToOriginalSize(regionData) {
+        const zm = ZoomManager_1.ZoomManager.getInstance();
+        if (zm && zm.isZoomEnabled) {
+            const sf = 1 / zm.currentZoomScale;
+            return this.scaleRegion(regionData, sf);
+        }
+        return regionData;
     }
     lookupRegionByID(id) {
         let region = null;
@@ -2431,11 +2445,64 @@ exports.RegionsManager = RegionsManager;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Zoom;
+(function (Zoom) {
+    Zoom[Zoom["In"] = 0] = "In";
+    Zoom[Zoom["Out"] = 1] = "Out";
+})(Zoom = exports.Zoom || (exports.Zoom = {}));
+class ZoomManager {
+    constructor(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+        this.minZoomScale = 1;
+        this.maxZoomScale = 4;
+        this.zoomScale = 0.5;
+        this.isZoomEnabled = isZoomEnabled;
+        this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
+        this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
+        this.currentZoomScale = this.minZoomScale;
+        this.callbacks = zoomCallbacks;
+    }
+    static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+        if (!ZoomManager.instance) {
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+        }
+        return ZoomManager.instance;
+    }
+    getZoomScale(zoomType) {
+        let zoomData = {
+            minZoomScale: this.minZoomScale,
+            maxZoomScale: this.maxZoomScale,
+            currentZoomScale: this.currentZoomScale,
+            previousZoomScale: this.currentZoomScale
+        };
+        let updatedZoomScale;
+        if (zoomType == Zoom.In) {
+            updatedZoomScale = this.currentZoomScale + this.zoomScale;
+        }
+        if (zoomType == Zoom.Out) {
+            updatedZoomScale = this.currentZoomScale - this.zoomScale;
+        }
+        if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
+            this.currentZoomScale = updatedZoomScale;
+            zoomData.currentZoomScale = updatedZoomScale;
+            return zoomData;
+        }
+    }
+}
+exports.ZoomManager = ZoomManager;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(9);
-const AnchorsElements_1 = __webpack_require__(33);
-const DragElement_1 = __webpack_require__(34);
-const TagsElement_1 = __webpack_require__(35);
+const AnchorsElements_1 = __webpack_require__(34);
+const DragElement_1 = __webpack_require__(35);
+const TagsElement_1 = __webpack_require__(36);
 class RectRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -2480,15 +2547,15 @@ exports.RectRegion = RectRegion;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Region_1 = __webpack_require__(9);
-const DragElement_1 = __webpack_require__(36);
-const TagsElement_1 = __webpack_require__(37);
+const DragElement_1 = __webpack_require__(37);
+const TagsElement_1 = __webpack_require__(38);
 class PointRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
@@ -2516,7 +2583,7 @@ exports.PointRegion = PointRegion;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2524,11 +2591,11 @@ exports.PointRegion = PointRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const ISelectorSettings_1 = __webpack_require__(16);
-const PointSelector_1 = __webpack_require__(47);
-const PolylineSelector_1 = __webpack_require__(48);
-const PolygonSelector_1 = __webpack_require__(49);
-const RectCopySelector_1 = __webpack_require__(50);
-const RectSelector_1 = __webpack_require__(51);
+const PointSelector_1 = __webpack_require__(48);
+const PolylineSelector_1 = __webpack_require__(49);
+const PolygonSelector_1 = __webpack_require__(50);
+const RectCopySelector_1 = __webpack_require__(51);
+const RectSelector_1 = __webpack_require__(52);
 class AreaSelector {
     constructor(svgHost, callbacks) {
         this.isVisible = true;
@@ -2659,7 +2726,7 @@ exports.AreaSelector = AreaSelector;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2700,7 +2767,7 @@ exports.RectElement = RectElement;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2981,7 +3048,7 @@ exports.FilterPipeline = FilterPipeline;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3092,7 +3159,7 @@ exports.Tag = Tag;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3100,17 +3167,17 @@ exports.Tag = Tag;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Toolbar_1 = __webpack_require__(20);
 const RegionsManager_1 = __webpack_require__(21);
-const PointRegion_1 = __webpack_require__(23);
-const RectRegion_1 = __webpack_require__(22);
-const AreaSelector_1 = __webpack_require__(24);
+const PointRegion_1 = __webpack_require__(24);
+const RectRegion_1 = __webpack_require__(23);
+const AreaSelector_1 = __webpack_require__(25);
 const ISelectorSettings_1 = __webpack_require__(16);
-const CanvasTools_Filter_1 = __webpack_require__(26);
+const CanvasTools_Filter_1 = __webpack_require__(27);
 const Rect_1 = __webpack_require__(1);
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
-const Tag_1 = __webpack_require__(27);
-const TagsDescriptor_1 = __webpack_require__(52);
-const CanvasTools_Editor_1 = __webpack_require__(53);
+const Tag_1 = __webpack_require__(28);
+const TagsDescriptor_1 = __webpack_require__(53);
+const CanvasTools_Editor_1 = __webpack_require__(54);
 const RGBColor_1 = __webpack_require__(12);
 const LABColor_1 = __webpack_require__(8);
 const XYZColor_1 = __webpack_require__(13);
@@ -3159,7 +3226,7 @@ __webpack_require__(58);
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3230,7 +3297,7 @@ exports.ToolbarSelectIcon = ToolbarSelectIcon;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3270,7 +3337,7 @@ exports.ToolbarSeparator = ToolbarSeparator;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3341,7 +3408,7 @@ exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3411,7 +3478,7 @@ exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3647,7 +3714,7 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3677,7 +3744,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3947,7 +4014,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3976,7 +4043,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4135,7 +4202,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4143,9 +4210,9 @@ exports.TagsElement = TagsElement;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(9);
-const AnchorsElement_1 = __webpack_require__(39);
-const DragElement_1 = __webpack_require__(40);
-const TagsElement_1 = __webpack_require__(41);
+const AnchorsElement_1 = __webpack_require__(40);
+const DragElement_1 = __webpack_require__(41);
+const TagsElement_1 = __webpack_require__(42);
 class PolygonRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4190,7 +4257,7 @@ exports.PolygonRegion = PolygonRegion;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4401,7 +4468,7 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4431,7 +4498,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4660,7 +4727,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4668,9 +4735,9 @@ exports.TagsElement = TagsElement;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(9);
-const AnchorsElement_1 = __webpack_require__(43);
-const DragElement_1 = __webpack_require__(44);
-const TagsElement_1 = __webpack_require__(45);
+const AnchorsElement_1 = __webpack_require__(44);
+const DragElement_1 = __webpack_require__(45);
+const TagsElement_1 = __webpack_require__(46);
 class PolylineRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4715,7 +4782,7 @@ exports.PolylineRegion = PolylineRegion;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4918,7 +4985,7 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4948,7 +5015,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5153,7 +5220,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5288,7 +5355,7 @@ exports.MenuElement = MenuElement;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5380,7 +5447,7 @@ exports.PointSelector = PointSelector;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5563,7 +5630,7 @@ exports.PolylineSelector = PolylineSelector;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5752,7 +5819,7 @@ exports.PolygonSelector = PolygonSelector;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5762,7 +5829,7 @@ const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
 const CrossElement_1 = __webpack_require__(6);
-const RectElement_1 = __webpack_require__(25);
+const RectElement_1 = __webpack_require__(26);
 const Selector_1 = __webpack_require__(7);
 class RectCopySelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, copyRect, callbacks) {
@@ -5897,7 +5964,7 @@ exports.RectCopySelector = RectCopySelector;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5907,7 +5974,7 @@ const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
 const CrossElement_1 = __webpack_require__(6);
-const RectElement_1 = __webpack_require__(25);
+const RectElement_1 = __webpack_require__(26);
 const Selector_1 = __webpack_require__(7);
 var SelectionModificator;
 (function (SelectionModificator) {
@@ -6097,13 +6164,13 @@ exports.RectSelector = RectSelector;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Tag_1 = __webpack_require__(27);
+const Tag_1 = __webpack_require__(28);
 class TagsDescriptor {
     static BuildFromJSON(data) {
         let p = null;
@@ -6202,18 +6269,18 @@ exports.TagsDescriptor = TagsDescriptor;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CanvasTools_Filter_1 = __webpack_require__(26);
+const CanvasTools_Filter_1 = __webpack_require__(27);
 const Rect_1 = __webpack_require__(1);
 const ISelectorSettings_1 = __webpack_require__(16);
 const RegionsManager_1 = __webpack_require__(21);
-const ZoomManager_1 = __webpack_require__(54);
-const AreaSelector_1 = __webpack_require__(24);
+const ZoomManager_1 = __webpack_require__(22);
+const AreaSelector_1 = __webpack_require__(25);
 const ToolbarIcon_1 = __webpack_require__(3);
 const Toolbar_1 = __webpack_require__(20);
 class Editor {
@@ -6224,16 +6291,12 @@ class Editor {
         this.editorSVG = this.createSVGElement();
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
+        this.editorContainerDiv.tabIndex = 0;
         this.editorDiv = this.createDivElement();
         this.editorDiv.classList.add("CanvasToolsEditor");
         this.editorDiv.append(this.contentCanvas);
         this.editorDiv.append(this.editorSVG);
         this.editorContainerDiv.append(this.editorDiv);
-        window.addEventListener("resize", (e) => {
-            if (this.autoResize) {
-                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-            }
-        });
         const rmCallbacks = {
             onChange: null,
             onManipulationBegin: (region) => {
@@ -6319,7 +6382,7 @@ class Editor {
                 this.onZoom(ZoomManager_1.Zoom.In);
             }
         };
-        this.zoomManager = new ZoomManager_1.ZoomManager(false, initZoomCallbacks);
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
         if (isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
         }
@@ -6357,6 +6420,7 @@ class Editor {
                 }
             },
         });
+        this.subscribeToEvents();
     }
     get api() {
         return this.mergedAPI;
@@ -6538,7 +6602,18 @@ class Editor {
             this.frameHeight = scaledFrameHeight;
             this.areaSelector.resize(this.frameWidth, this.frameHeight);
             this.regionsManager.resize(this.frameWidth, this.frameHeight);
+            if (typeof this.onZoomEnd == "function") {
+                this.onZoomEnd(zoomData);
+            }
+            this.editorContainerDiv.focus();
         }
+    }
+    subscribeToEvents() {
+        window.addEventListener("resize", (e) => {
+            if (this.autoResize) {
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            }
+        });
     }
 }
 Editor.FullToolbarSet = [
@@ -6760,7 +6835,7 @@ Editor.ZoomIconGroupToolbar = [
         action: "zoom-in",
         iconFile: "zoom-in.svg",
         tooltip: "Zoom in",
-        keycode: "",
+        keycode: "NumpadAdd",
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingIn();
         },
@@ -6771,7 +6846,7 @@ Editor.ZoomIconGroupToolbar = [
         action: "zoom-out",
         iconFile: "zoom-out.svg",
         tooltip: "Zoom out",
-        keycode: "",
+        keycode: "NumpadSubtract",
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingOut();
         },
@@ -6798,53 +6873,6 @@ Editor.SVGDefsTemplate = `
             </filter>
         </defs>`;
 exports.Editor = Editor;
-
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Zoom;
-(function (Zoom) {
-    Zoom[Zoom["In"] = 0] = "In";
-    Zoom[Zoom["Out"] = 1] = "Out";
-})(Zoom = exports.Zoom || (exports.Zoom = {}));
-class ZoomManager {
-    constructor(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
-        this.minZoomScale = 1;
-        this.maxZoomScale = 4;
-        this.zoomScale = 0.5;
-        this.isZoomEnabled = isZoomEnabled;
-        this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
-        this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
-        this.currentZoomScale = this.minZoomScale;
-        this.callbacks = zoomCallbacks;
-    }
-    getZoomScale(zoomType) {
-        let zoomData = {
-            minZoomScale: this.minZoomScale,
-            maxZoomScale: this.maxZoomScale,
-            currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.currentZoomScale
-        };
-        let updatedZoomScale;
-        if (zoomType == Zoom.In) {
-            updatedZoomScale = this.currentZoomScale + this.zoomScale;
-        }
-        if (zoomType == Zoom.Out) {
-            updatedZoomScale = this.currentZoomScale - this.zoomScale;
-        }
-        if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
-            this.currentZoomScale = updatedZoomScale;
-            zoomData.currentZoomScale = updatedZoomScale;
-            return zoomData;
-        }
-    }
-}
-exports.ZoomManager = ZoomManager;
 
 
 /***/ }),

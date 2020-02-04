@@ -54,12 +54,21 @@ export class ZoomManager {
      */
     public currentZoomScale: number;
 
-    constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
+    private static instance: ZoomManager;
+
+    private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
         this.isZoomEnabled = isZoomEnabled;
         this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
+    }
+
+    public static getInstance(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
+        if (!ZoomManager.instance) {
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+          }
+          return ZoomManager.instance;
     }
 
     public getZoomScale(zoomType: Zoom): ZoomData {
