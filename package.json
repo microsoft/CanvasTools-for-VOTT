@@ -1,6 +1,6 @@
 {
   "name": "vott-ct",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
@@ -19,7 +19,6 @@
     "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib",
     "serve": "webpack-dev-server --config webpack.config.js --env.mode=prod",
     "start": "webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
-    "copy": "copyfiles -f dist/ct.js samples/shared/js/",
     "watch": "onchange src/canvastools/ts/**/*.ts -- npm run start"
   },
   "author": "Konstantin Kichinsky",

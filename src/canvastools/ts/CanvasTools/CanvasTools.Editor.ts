@@ -20,12 +20,6 @@ import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
 import { IToolbarIcon } from "./Interface/IToolbarIcon";
 
-
-/**
- * Internal type to describe toolbar action function  
- */
-type ToolbarActionFunction = () => void;
-
 /**
  * Internal type to describe toolbar presets
  */
@@ -866,7 +860,7 @@ export class Editor {
             throw new Error("Zoom feature is not enabled");
         }
 
-        const zoomData = this.zoomManager.getZoomScale(zoomType);
+        const zoomData = this.zoomManager.updateZoomScale(zoomType);
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;

@@ -71,7 +71,7 @@ export class ZoomManager {
           return ZoomManager.instance;
     }
 
-    public getZoomScale(zoomType: Zoom): ZoomData {
+    public updateZoomScale(zoomType: Zoom): ZoomData {
         let zoomData = {
             minZoomScale: this.minZoomScale,
             maxZoomScale: this.maxZoomScale,
