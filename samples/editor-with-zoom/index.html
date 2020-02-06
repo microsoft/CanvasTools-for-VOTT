@@ -98,12 +98,14 @@
         editor.onRegionMoveEnd = (id, regionData) => {
             console.log(`Ended moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
         };
-        editor.onRegionSelected = (id, multiselection) => {
-            console.log(`Selected ${id}: multiselection = ${multiselection}`);
+        editor.onRegionSelected = (id, multiSelection) => {
+            console.log(`Selected ${id}: multiSelection = ${multiSelection}`);
         }
         editor.onRegionDelete = (id, regionData) => {
             console.log(`Deleted ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
         };
+
+        editor.ZM.setMaxZoomScale(10);
 
         // Short references to Colors.* classes
         const Color = CanvasTools.Core.Colors.Color;
@@ -115,7 +117,7 @@
         const primaryTags = [
             new CanvasTools.Core.Tag("Awesome", new Color("#c48de7")),
             new CanvasTools.Core.Tag("Amazing", new Color("#3b1")),
-            new CanvasTools.Core.Tag("Brilliante", new Color("#f94c48")),
+            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48")),
         ];
 
         // Collection of secondary tags. Use hex-string to define color.
@@ -125,7 +127,7 @@
             new CanvasTools.Core.Tag("Unknown", "#999"),
         ];
 
-        // Collection of ternary tags. Use varios color formats to define color.
+        // Collection of ternary tags. Use various color formats to define color.
         const ternaryTags = [
             new CanvasTools.Core.Tag("one", new Color(new RGBColor(0.55, 0.24, 0.25))),
             new CanvasTools.Core.Tag("two", new Color(new HSLColor(0.32, 0.27, 0.51))),
@@ -194,6 +196,7 @@
         var showZoomDiv = document.getElementById("showZoomFactor");
         editor.onZoomEnd = function (zoom) {
             showZoomDiv.innerText = "Image zoomed at " + zoom.currentZoomScale*100 + " %";
+            console.log(zoom.maxZoomScale);
         }
     });
 
@@ -218,10 +221,10 @@
     }
 
     // Load an image from specified path and notify when it is loaded.
-    function loadImage(path, onready) {
+    function loadImage(path, onReady) {
         const image = new Image();
         image.addEventListener("load", (e) => {
-            onready(e.target);                
+            onReady(e.target);                
         });
         image.src = path;
     }

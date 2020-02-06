@@ -12,7 +12,7 @@ import { SelectionMode } from "./Interface/ISelectorSettings";
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 
-import { Zoom, ZoomManager } from "./Core/ZoomManager"
+import { ZoomDirection, ZoomManager } from "./Core/ZoomManager"
 
 import { AreaSelector } from "./Selection/AreaSelector";
 
@@ -226,8 +226,8 @@ export class Editor {
             type: ToolbarItemType.TRIGGER,
             action: "delete-all-select",
             iconFile: "delete-all-selection.svg",
-            tooltip: "Delete all regions",
-            keycode: "",
+            tooltip: "Delete all regions (D)",
+            keycode: "KeyD",
             actionCallback: (action, rm, sl) => {
                 rm.deleteAllRegions();
             },
@@ -268,7 +268,7 @@ export class Editor {
             type: ToolbarItemType.TRIGGER,
             action: "zoom-in",
             iconFile: "zoom-in.svg",
-            tooltip: "Zoom in",
+            tooltip: "Zoom in (+)",
             keycode: "NumpadAdd",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingIn();
@@ -279,7 +279,7 @@ export class Editor {
             type: ToolbarItemType.TRIGGER,
             action: "zoom-out",
             iconFile: "zoom-out.svg",
-            tooltip: "Zoom out",
+            tooltip: "Zoom out (-)",
             keycode: "NumpadSubtract",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingOut();
@@ -325,7 +325,7 @@ export class Editor {
      * `FilterPipeline` (`FP`).
      * @remarks As of now those apis do not overlap, so all methods/properties might be mapped from unified API.
      */
-    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline {
+    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager {
         return this.mergedAPI;
     }
 
@@ -380,9 +380,9 @@ export class Editor {
     public onZoomEnd: ZoomUpdateFunction;
 
     /**
-     * Internal reference to the proxi of APIs.
+     * Internal reference to the proxy of APIs.
      */
-    private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline;
+    private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager;
 
     /**
      * Internal reference to the `Toolbar` component.
@@ -584,10 +584,10 @@ export class Editor {
         // Init zoom manager
         const initZoomCallbacks = {
             onZoomingOut: () => {
-                this.onZoom(Zoom.Out);
+                this.onZoom(ZoomDirection.Out);
             },
             onZoomingIn: () => {
-                this.onZoom(Zoom.In);
+                this.onZoom(ZoomDirection.In);
             }
         }
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
@@ -616,7 +616,11 @@ export class Editor {
                 } else if (prop in target.filterPipeline) {
                     t = target.FP;
                     p = t[prop];
-                } else {
+                } else if (prop in target.zoomManager) {
+                    t = target.FP;
+                    p = t[prop];
+                }
+                else {
                     p = undefined;
                 }
 
@@ -781,6 +785,13 @@ export class Editor {
     }
 
     /**
+     * Short reference to the `RegionsManager` component.
+     */
+    public get ZM(): ZoomManager {
+        return this.zoomManager;
+    }
+
+    /**
      * Scales the `RegionData` object from frame to source size.
      * @param regionData - The `RegionData` object.
      * @param sourceWidth - [Optional] The source width.
@@ -855,7 +866,7 @@ export class Editor {
      * and a scroll bar needs to appear.
      * @param zoomType - A type that indicates whether we are zooming in or out.
      */
-    private onZoom(zoomType: Zoom): void {
+    private onZoom(zoomType: ZoomDirection): void {
         if (!this.zoomManager.isZoomEnabled) {
             throw new Error("Zoom feature is not enabled");
         }

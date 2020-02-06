@@ -13,7 +13,7 @@ export type ZoomData = {
 /**
  * Enum indicating zoom behavior
  */
-export enum Zoom {
+export enum ZoomDirection {
     In,
     Out
 }
@@ -23,6 +23,11 @@ export enum Zoom {
  */
 export class ZoomManager {
     /**
+     * This decides whether zoom is enabled for the project.
+     */
+    public isZoomEnabled: boolean;
+
+    /**
      * The collection of zoom callbacks.
      */
     public callbacks: IZoomCallbacks;
@@ -31,28 +36,23 @@ export class ZoomManager {
      * The minimum zoom factor.
      * Defaults to 1 or 100%.
      */
-    public minZoomScale: number = 1;
+    private minZoomScale: number = 1;
 
     /**
      * The maximum zoom factor.
      * Defaults to 4 or 400%.
      */
-    public maxZoomScale: number = 4;
+    private maxZoomScale: number = 4;
 
     /**
      * The factor or scale at which the zoom in / zoom out works incrementally.
      */
-    public zoomScale = 0.5;
-
-    /**
-     * This decides whether zoom is enabled for the project.
-     */
-    public isZoomEnabled: boolean;
+    private zoomScale: number = 0.5;
 
     /**
      * This holds the current scale at which the image is zoomed at.
      */
-    public currentZoomScale: number;
+    private currentZoomScale: number;
 
     private static instance: ZoomManager;
 
@@ -71,7 +71,7 @@ export class ZoomManager {
           return ZoomManager.instance;
     }
 
-    public updateZoomScale(zoomType: Zoom): ZoomData {
+    public updateZoomScale(zoomType: ZoomDirection): ZoomData {
         let zoomData = {
             minZoomScale: this.minZoomScale,
             maxZoomScale: this.maxZoomScale,
@@ -80,11 +80,11 @@ export class ZoomManager {
         };
 
         let updatedZoomScale;
-        if (zoomType == Zoom.In) {
+        if (zoomType == ZoomDirection.In) {
             updatedZoomScale = this.currentZoomScale + this.zoomScale;
         }
 
-        if (zoomType == Zoom.Out) {
+        if (zoomType == ZoomDirection.Out) {
             updatedZoomScale = this.currentZoomScale - this.zoomScale;
         }
 
@@ -93,5 +93,17 @@ export class ZoomManager {
             zoomData.currentZoomScale = updatedZoomScale;
             return zoomData;
         }
+    }
+
+    public setMaxZoomScale(maxZoomScale: number): void {
+        this.maxZoomScale = maxZoomScale;
+    }
+
+    public setZoomScale(zoomScale: number): void {
+        this.zoomScale = zoomScale;
+    }
+
+    public getCurrentZoomScale(): number {
+        return this.currentZoomScale;
     }
 }

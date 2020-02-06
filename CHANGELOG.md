@@ -17,6 +17,7 @@
                 // callback function implementation
             }
         ```
+    * `setMaxZoomScale` and `setZoomScale` are added to ZoomManager. Also available in `Editor` through `ZM`.
 
 *CT Toolbar*
 * Zoom in and Zoom out buttons are added to Rect only toolbar set.
