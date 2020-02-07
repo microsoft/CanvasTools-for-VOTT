@@ -481,6 +481,18 @@ export class Editor {
     constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
                 filterPipeline: FilterPipeline);
 
+    /**
+     * Creates a new `Editor` in specified div-container and with custom building components.
+     * @remarks - Originally created for testing purposes.
+     * @param container - The div-container for the editor.
+     * @param areaSelector [Optional]- The `AresSelector` component to use.
+     * @param regionsManager [Optional]- The `RegionsManager` component to use.
+     * @param filterPipeline [Optional]- The `FilterPipeline` component to use.
+     * @param isZoomEnabled [Optional]- This indicates if the zoom functionality is enabled
+     */
+    constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
+        filterPipeline?: FilterPipeline, isZoomEnabled?: boolean);
+
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
                 filterPipeline?: FilterPipeline, isZoomEnabled?: boolean) {
         // Create SVG Element
