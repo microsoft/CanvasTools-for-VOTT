@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.2.3
+### 2.2.4
 *CT Library Changes*
 * Zoom feature is introduced to zoom in/out the image for region selection & manipulation.
     * The feature is specifically introduced only for Rect related region selection and can be optionally initialized.
