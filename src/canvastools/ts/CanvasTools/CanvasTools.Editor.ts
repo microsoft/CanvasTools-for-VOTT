@@ -6,10 +6,13 @@ import { RegionData } from "./Core/RegionData";
 import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
 import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
 import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
+import { ZoomUpdateFunction } from "./Interface/IZoomCallbacks";
 import { SelectionMode } from "./Interface/ISelectorSettings";
 
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
+
+import { ZoomDirection, ZoomManager } from "./Core/ZoomManager"
 
 import { AreaSelector } from "./Selection/AreaSelector";
 
@@ -26,7 +29,7 @@ type ToolbarIconDescription = {
     iconFile: string,
     tooltip: string,
     keycode: string,
-    actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector) => void,
+    actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void,
     width?: number,
     height?: number,
     activate: boolean,
@@ -223,8 +226,8 @@ export class Editor {
             type: ToolbarItemType.TRIGGER,
             action: "delete-all-select",
             iconFile: "delete-all-selection.svg",
-            tooltip: "Delete all regions",
-            keycode: "",
+            tooltip: "Delete all regions (D)",
+            keycode: "KeyD",
             actionCallback: (action, rm, sl) => {
                 rm.deleteAllRegions();
             },
@@ -254,7 +257,44 @@ export class Editor {
                 rm.toggleBackground();
             },
             activate: false,
+        }
+    ];
+
+    /**
+     * The toolbar icon group with only zoom related features.
+     */
+    private static ZoomIconGroupToolbar: ToolbarIconDescription[] = [
+        {
+            type: ToolbarItemType.TRIGGER,
+            action: "zoom-in",
+            iconFile: "zoom-in.svg",
+            tooltip: "Zoom in (+)",
+            keycode: "NumpadAdd",
+            actionCallback: (action, rm, sl, zm) => {
+                zm.callbacks.onZoomingIn();
+            },
+            activate: false,
         },
+        {
+            type: ToolbarItemType.TRIGGER,
+            action: "zoom-out",
+            iconFile: "zoom-out.svg",
+            tooltip: "Zoom out (-)",
+            keycode: "NumpadSubtract",
+            actionCallback: (action, rm, sl, zm) => {
+                zm.callbacks.onZoomingOut();
+            },
+            activate: false,
+        }
+    ];
+
+    /**
+     * The toolbar icon group with only separator.
+     */
+    private static SeparatorIconGroupToolbar: ToolbarIconDescription[] = [
+        {
+            type: ToolbarItemType.SEPARATOR,
+        }
     ];
 
     /**
@@ -281,11 +321,11 @@ export class Editor {
     public autoResize: boolean = true;
 
     /**
-     * A proxi wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
+     * A proxy wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
      * `FilterPipeline` (`FP`).
      * @remarks As of now those apis do not overlap, so all methods/properties might be mapped from unified API.
      */
-    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline {
+    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager {
         return this.mergedAPI;
     }
 
@@ -335,9 +375,14 @@ export class Editor {
     public onSelectionEnd: SelectionConfirmFunction;
 
     /**
-     * Internal reference to the proxi of APIs.
+     * Callback when user ended zoom function.
      */
-    private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline;
+    public onZoomEnd: ZoomUpdateFunction;
+
+    /**
+     * Internal reference to the proxy of APIs.
+     */
+    private mergedAPI: Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager;
 
     /**
      * Internal reference to the `Toolbar` component.
@@ -360,6 +405,11 @@ export class Editor {
     private filterPipeline: FilterPipeline;
 
     /**
+     * Internal reference to the `ZoomManager` component.
+     */
+    private zoomManager: ZoomManager;
+
+    /**
      * Reference to the host SVG element.
      */
     private editorSVG: SVGSVGElement;
@@ -373,6 +423,11 @@ export class Editor {
      * Reference to the host div element (contains SVG and Canvas elements).
      */
     private editorDiv: HTMLDivElement;
+
+    /**
+     * Reference to the host container div element (contains editor div).
+     */
+    private editorContainerDiv: HTMLDivElement;
 
     /**
      * Internal reference to the RegionsManager freezing state.
@@ -421,28 +476,27 @@ export class Editor {
      * @param areaSelector - The `AresSelector` component to use.
      * @param regionsManager - The `RegionsManager` component to use.
      * @param filterPipeline - The `FilterPipeline` component to use.
+     * @param isZoomEnabled - This indicates if the zoom functionality is enabled
      */
     constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
                 filterPipeline: FilterPipeline);
 
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-                filterPipeline?: FilterPipeline) {
+                filterPipeline?: FilterPipeline, isZoomEnabled?: boolean) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
-
-        this.editorDiv = container;
-
+        
+        this.editorContainerDiv = container;
+        this.editorContainerDiv.classList.add("CanvasToolsContainer");
+        this.editorContainerDiv.tabIndex = 0;
+        
+        this.editorDiv = this.createDivElement();
         this.editorDiv.classList.add("CanvasToolsEditor");
+
         this.editorDiv.append(this.contentCanvas);
         this.editorDiv.append(this.editorSVG);
-
-        // automatically resize internals on window resize
-        window.addEventListener("resize", (e) => {
-            if (this.autoResize) {
-                this.resize(this.editorDiv.offsetWidth, this.editorDiv.offsetHeight);
-            }
-        });
+        this.editorContainerDiv.append(this.editorDiv);
 
         // Init regionsManager
         const rmCallbacks = {
@@ -493,7 +547,7 @@ export class Editor {
             this.regionsManager = new RegionsManager(this.editorSVG, rmCallbacks);
         }
 
-        // Init areaSeletor
+        // Init areaSelector
         const asCallbacks = {
             onSelectionBegin: () => {
                 this.isRMFrozen = this.regionsManager.isFrozen;
@@ -527,6 +581,20 @@ export class Editor {
             this.filterPipeline = new FilterPipeline();
         }
 
+        // Init zoom manager
+        const initZoomCallbacks = {
+            onZoomingOut: () => {
+                this.onZoom(ZoomDirection.Out);
+            },
+            onZoomingIn: () => {
+                this.onZoom(ZoomDirection.In);
+            }
+        }
+        this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
+        if (isZoomEnabled) {
+            this.zoomManager.isZoomEnabled = true;
+        }
+
         // Adjust editor size
         this.resize(container.offsetWidth, container.offsetHeight);
 
@@ -548,7 +616,11 @@ export class Editor {
                 } else if (prop in target.filterPipeline) {
                     t = target.FP;
                     p = t[prop];
-                } else {
+                } else if (prop in target.zoomManager) {
+                    t = target.FP;
+                    p = t[prop];
+                }
+                else {
                     p = undefined;
                 }
 
@@ -561,6 +633,8 @@ export class Editor {
                 }
             },
         }) as any;
+
+        this.subscribeToEvents();
     }
 
     /**
@@ -579,6 +653,11 @@ export class Editor {
             toolbarSet = Editor.FullToolbarSet;
         }
 
+        // enable zoom feature in the toolbar for RectToolbarSet only
+        if (this.zoomManager.isZoomEnabled && toolbarSet === Editor.RectToolbarSet) {
+            toolbarSet = toolbarSet.concat(Editor.SeparatorIconGroupToolbar).concat(Editor.ZoomIconGroupToolbar);
+        }
+
         let activeSelector: string;
         toolbarSet.forEach((item) => {
             if (item.type === ToolbarItemType.SEPARATOR) {
@@ -594,7 +673,7 @@ export class Editor {
                 };
 
                 const actionFn = (action) => {
-                    item.actionCallback(action, this.regionsManager, this.areaSelector);
+                    item.actionCallback(action, this.regionsManager, this.areaSelector, this.zoomManager);
                 };
 
                 if (item.type === ToolbarItemType.SELECTOR) {
@@ -644,8 +723,8 @@ export class Editor {
             const imgContext = this.contentCanvas.getContext("2d");
             imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
         }).then(() => {
-            // resize the editor size to adjust to the new content size
-            this.resize(this.editorDiv.offsetWidth, this.editorDiv.offsetHeight);
+            // resize the container of editor size to adjust to the new content size
+            this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
         });
     }
 
@@ -703,6 +782,13 @@ export class Editor {
      */
     public get FP(): FilterPipeline {
         return this.filterPipeline;
+    }
+
+    /**
+     * Short reference to the `RegionsManager` component.
+     */
+    public get ZM(): ZoomManager {
+        return this.zoomManager;
     }
 
     /**
@@ -764,5 +850,86 @@ export class Editor {
     private createCanvasElement(): HTMLCanvasElement {
         const canvas = document.createElement("canvas");
         return canvas;
+    }
+
+    /**
+     * Internal helper to create a new HTMLDiv element.
+     */
+    private createDivElement(): HTMLDivElement {
+        const div = document.createElement("div");
+        return div;
+    }
+
+    /**
+     * Internal helper to set the editor container size properties.
+     * Necessary for zoom feature, where the internal editor may container bigger content,
+     * and a scroll bar needs to appear.
+     * @param zoomType - A type that indicates whether we are zooming in or out.
+     */
+    private onZoom(zoomType: ZoomDirection): void {
+        if (!this.zoomManager.isZoomEnabled) {
+            throw new Error("Zoom feature is not enabled");
+        }
+
+        const zoomData = this.zoomManager.updateZoomScale(zoomType);
+        if (zoomData) {
+            const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+            const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+
+            const containerWidth = this.editorContainerDiv.offsetWidth;
+            const containerHeight = this.editorContainerDiv.offsetHeight;
+
+            let hpadding = 0;
+            let vpadding = 0;
+
+            if (scaledFrameWidth < containerWidth) {
+                hpadding = (containerWidth - scaledFrameWidth) / 2;
+                if (hpadding > 0) {
+                    this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+                } else {
+                    this.editorDiv.style.width = `${scaledFrameWidth}px`;
+                }
+            } else {
+                this.editorDiv.style.width = `${scaledFrameWidth}px`;
+            }
+
+            if (scaledFrameHeight < containerHeight) {
+                vpadding = (containerHeight - scaledFrameHeight) / 2;
+                if (vpadding > 0) {
+                    this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+                } else {
+                    this.editorDiv.style.height =`${scaledFrameHeight}px`;
+                }
+            } else {
+                this.editorDiv.style.height =`${scaledFrameHeight}px`;
+            }
+
+            this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+            
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
+
+            this.areaSelector.resize(this.frameWidth, this.frameHeight);
+            this.regionsManager.resize(this.frameWidth, this.frameHeight);
+
+            if (typeof this.onZoomEnd == "function") {
+                this.onZoomEnd(zoomData);
+            }
+
+            // focus on the editor container div so that scroll bar can be used via arrow keys
+            this.editorContainerDiv.focus();
+        }
+    }
+
+    /**
+     * Helper function to subscribe manager to keyboard events.
+     */
+    private subscribeToEvents() {
+        // automatically resize internals on window resize
+        window.addEventListener("resize", (e) => {
+            if (this.autoResize) {
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            }
+        });
     }
 }

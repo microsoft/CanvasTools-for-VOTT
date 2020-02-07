@@ -1,5 +1,31 @@
 ## Changelog
 
+### 2.2.3
+*CT Library Changes*
+* Zoom feature is introduced to zoom in/out the image for region selection & manipulation.
+    * The feature is specifically introduced only for Rect related region selection and can be optionally initialized.
+    * Max zoom is set to 400% and min zoom at 100%. The scale to increase or decrease zoom is 50%.
+    * CanvasTools.Editor api is updated to include `isZoomEnabled`
+    ```js
+        var editor = new CanvasTools.Editor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
+                    filterPipeline?: FilterPipeline) {
+                    filterPipeline?: FilterPipeline, isZoomEnabled?: boolean).api
+    ```
+    * `onZoomEnd` is introduced on `Editor.api` as a callback which is called after zoom is updated.
+        ```js
+            editor.onZoomEnd = (zoom: ZoomData) => { 
+                // callback function implementation
+            }
+        ```
+    * `setMaxZoomScale` and `setZoomScale` are added to ZoomManager. Also available in `Editor` through `ZM`.
+
+*CT Toolbar*
+* Zoom in and Zoom out buttons are added to Rect only toolbar set.
+
+*Samples*
+* The samples folder has new example to showcase zoom feature. 
+* Eg. [`samples/editor-with-zoom/index.html` folder](https://github.com/microsoft/CanvasTools-for-VOTT/blob/master/samples/editor-with-zoom/index.html)
+
 ### 2.2.2
 *CT Library Changes*
 * Update `registerRegion()` in `RegionsManager` to unselect the region after it is registered.
@@ -10,11 +36,11 @@ Update repo links and add new interface method `getAllRegions` in `RegionsManage
 
 ### 2.2.0-beta.0
 
-*New versioning aproach*
-2.2.0 and futher updates will consider releasing new features/fixes under beta-version packages till stabilization.
+*New versioning approach*
+2.2.0 and further updates will consider releasing new features/fixes under beta-version packages till stabilization.
 
 *CT Library Changes*
-* Fixed major compatiblity issues with Edge and Firefox.
+* Fixed major compatibility issues with Edge and Firefox.
 * Fixed minor interaction bugs and visual glitches.
 * Changed model for emitting (internal) `onManipulation*` events. Reduced number of generated events and internal emitters.
 * Removed mask from rect-selection.
@@ -31,8 +57,8 @@ Fix to missing /Core folder in the package.
 ### 2.1.26 - Background toggling from the [v2-toolbar-background-toggle](https://github.com/microsoft/CanvasTools-for-VOTT/tree/v2-toolbar-background-toggle) branch
 
 *CT Library Changes*
-* Exposed the `toggleBackgroun` method for `RegionsManager` as public.
-* Removed `KeyB`-event listener from the `RegionsManager`. Use toolbar insted.
+* Exposed the `toggleBackground` method for `RegionsManager` as public.
+* Removed `KeyB`-event listener from the `RegionsManager`. Use toolbar instead.
 * Updated styles for the light theme without background.
 
 *CT Toolbar*

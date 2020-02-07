@@ -1,6 +1,6 @@
-# CanvasTools librarary for VoTT
+# CanvasTools library for VoTT
 
-`CanvasTools` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library impelements the following core features:
+`CanvasTools` is one of the UI modules used in the [VoTT project](https://github.com/Microsoft/VoTT/). The library implements the following core features:
 
 * Region (box, point, polyline & polygon) selection & manipulation
 * Filters pipeline for underlaying canvas element
@@ -63,7 +63,7 @@ lib/
 1. Add container elements to host SVG elements for the toolbar and the editor.
 
     ```html
-    <div id="canvasTiilsDiv">
+    <div id="canvasToolsDiv">
         <div id="toolbarDiv"></div>
         <div id="selectionDiv">
             <div id="editorDiv"></div>
@@ -135,6 +135,11 @@ image.addEventListener("load", (e) => {
 });
 image.src = imagePath;
 ```
+
+### Examples
+Samples on the usage of the library are located at [`samples` folder](https://github.com/microsoft/CanvasTools-for-VOTT/tree/master/samples).
+To view the sample CanvasTools UI module, load the index.html present in one of the samples folder. Eg. [`samples/editor/index.html` folder](https://github.com/microsoft/CanvasTools-for-VOTT/blob/master/samples/editor/index.html)
+
 
 ## Changelog
 Moved to a new file: [CHANGELOG.md](https://github.com/microsoft/CanvasTools-for-VOTT/blob/master/CHANGELOG.md).

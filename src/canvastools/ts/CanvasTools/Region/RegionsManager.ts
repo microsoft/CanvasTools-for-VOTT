@@ -1,3 +1,4 @@
+import { ZoomManager } from './../Core/ZoomManager';
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { ChangeEventType } from "../Interface/IRegionCallbacks";
@@ -260,7 +261,7 @@ export class RegionsManager {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: region.regionData,
+                regionData: this.scaleRegionToOriginalSize(region.regionData),
             };
         });
     }
@@ -273,7 +274,7 @@ export class RegionsManager {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: region.regionData,
+                regionData: this.scaleRegionToOriginalSize(region.regionData),
             };
         });
     }
@@ -424,6 +425,32 @@ export class RegionsManager {
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
         });
+    }
+
+    /**
+     * Scales the `RegionData` object by scale factor.
+     * @param regionData - The `RegionData` object.
+     * @returns Resized `RegionData` object.
+     */
+    private scaleRegion(regionData: RegionData, sf: number): RegionData {
+        const rd = regionData.copy();
+        rd.scale(sf, sf);
+        return rd;
+    }
+
+    /**
+     * Scales the `RegionData` object by zoom factor.
+     * @param regionData - The `RegionData` object.
+     * @returns Original `RegionData` object without the zoom factor
+     */
+    private scaleRegionToOriginalSize(regionData: RegionData): RegionData {
+        const zm = ZoomManager.getInstance();
+        if (zm && zm.isZoomEnabled) {
+            const sf = 1 / zm.getCurrentZoomScale();
+            return this.scaleRegion(regionData, sf);
+        }
+
+        return regionData;
     }
 
     /**
@@ -652,7 +679,7 @@ export class RegionsManager {
     }
 
     /**
-     * The callback function fot internal components.
+     * The callback function for internal components.
      * @param component - Reference to the UI component.
      * @param regionData - New RegionData object.
      * @param state - New state of the region.

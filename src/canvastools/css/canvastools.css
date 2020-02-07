@@ -55,6 +55,16 @@
     pointer-events: none;
 }
 
+.CanvasToolsContainer {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.CanvasToolsContainer:focus {
+    outline: none;
+}
+
 /* 2. RegionsManager
 
 .regionManager
