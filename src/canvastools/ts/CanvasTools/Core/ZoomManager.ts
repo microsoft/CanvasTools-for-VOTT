@@ -54,6 +54,14 @@ export class ZoomManager {
      */
     private currentZoomScale: number;
 
+     /**
+     * boolean that states if the zoom needs to be reset on content update. Defaults to false.
+     */
+    private _resetZoomOnContentLoad: boolean;
+
+     /**
+     * This holds the current instance of zoomManager.
+     */
     private static instance: ZoomManager;
 
     private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
@@ -62,6 +70,15 @@ export class ZoomManager {
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
+        this._resetZoomOnContentLoad = false;
+    }
+
+    public get resetZoomOnContentLoad(): boolean {
+        return this._resetZoomOnContentLoad;
+    }
+
+    public set resetZoomOnContentLoad(reset: boolean) {
+        this._resetZoomOnContentLoad = reset;
     }
 
     public static getInstance(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
@@ -72,12 +89,7 @@ export class ZoomManager {
     }
 
     public updateZoomScale(zoomType: ZoomDirection): ZoomData {
-        let zoomData = {
-            minZoomScale: this.minZoomScale,
-            maxZoomScale: this.maxZoomScale,
-            currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.currentZoomScale
-        };
+        let zoomData = this.getZoomData();
 
         let updatedZoomScale;
         if (zoomType == ZoomDirection.In) {
@@ -105,5 +117,16 @@ export class ZoomManager {
 
     public getCurrentZoomScale(): number {
         return this.currentZoomScale;
+    }
+
+    public getZoomData(): ZoomData {
+        let zoomData = {
+            minZoomScale: this.minZoomScale,
+            maxZoomScale: this.maxZoomScale,
+            currentZoomScale: this.currentZoomScale,
+            previousZoomScale: this.currentZoomScale
+        };
+
+        return zoomData;
     }
 }

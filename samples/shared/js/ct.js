@@ -2460,6 +2460,13 @@ class ZoomManager {
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
+        this._resetZoomOnContentLoad = false;
+    }
+    get resetZoomOnContentLoad() {
+        return this._resetZoomOnContentLoad;
+    }
+    set resetZoomOnContentLoad(reset) {
+        this._resetZoomOnContentLoad = reset;
     }
     static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
         if (!ZoomManager.instance) {
@@ -2468,12 +2475,7 @@ class ZoomManager {
         return ZoomManager.instance;
     }
     updateZoomScale(zoomType) {
-        let zoomData = {
-            minZoomScale: this.minZoomScale,
-            maxZoomScale: this.maxZoomScale,
-            currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.currentZoomScale
-        };
+        let zoomData = this.getZoomData();
         let updatedZoomScale;
         if (zoomType == ZoomDirection.In) {
             updatedZoomScale = this.currentZoomScale + this.zoomScale;
@@ -2495,6 +2497,15 @@ class ZoomManager {
     }
     getCurrentZoomScale() {
         return this.currentZoomScale;
+    }
+    getZoomData() {
+        let zoomData = {
+            minZoomScale: this.minZoomScale,
+            maxZoomScale: this.maxZoomScale,
+            currentZoomScale: this.currentZoomScale,
+            previousZoomScale: this.currentZoomScale
+        };
+        return zoomData;
     }
 }
 exports.ZoomManager = ZoomManager;
@@ -6503,6 +6514,12 @@ class Editor {
             imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
         }).then(() => {
             this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+                let zoomData = this.zoomManager.getZoomData();
+                const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
+                const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
+                this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            }
         });
     }
     resize(containerWidth, containerHeight) {
@@ -6585,44 +6602,47 @@ class Editor {
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
-            const containerWidth = this.editorContainerDiv.offsetWidth;
-            const containerHeight = this.editorContainerDiv.offsetHeight;
-            let hpadding = 0;
-            let vpadding = 0;
-            if (scaledFrameWidth < containerWidth) {
-                hpadding = (containerWidth - scaledFrameWidth) / 2;
-                if (hpadding > 0) {
-                    this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-                }
-                else {
-                    this.editorDiv.style.width = `${scaledFrameWidth}px`;
-                }
-            }
-            else {
-                this.editorDiv.style.width = `${scaledFrameWidth}px`;
-            }
-            if (scaledFrameHeight < containerHeight) {
-                vpadding = (containerHeight - scaledFrameHeight) / 2;
-                if (vpadding > 0) {
-                    this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-                }
-                else {
-                    this.editorDiv.style.height = `${scaledFrameHeight}px`;
-                }
-            }
-            else {
-                this.editorDiv.style.height = `${scaledFrameHeight}px`;
-            }
-            this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-            this.frameWidth = scaledFrameWidth;
-            this.frameHeight = scaledFrameHeight;
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
             this.areaSelector.resize(this.frameWidth, this.frameHeight);
             this.regionsManager.resize(this.frameWidth, this.frameHeight);
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
             }
-            this.editorContainerDiv.focus();
         }
+    }
+    zoomEditorToScale(scaledFrameWidth, scaledFrameHeight) {
+        const containerWidth = this.editorContainerDiv.offsetWidth;
+        const containerHeight = this.editorContainerDiv.offsetHeight;
+        let hpadding = 0;
+        let vpadding = 0;
+        if (scaledFrameWidth < containerWidth) {
+            hpadding = (containerWidth - scaledFrameWidth) / 2;
+            if (hpadding > 0) {
+                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+            }
+            else {
+                this.editorDiv.style.width = `${scaledFrameWidth}px`;
+            }
+        }
+        else {
+            this.editorDiv.style.width = `${scaledFrameWidth}px`;
+        }
+        if (scaledFrameHeight < containerHeight) {
+            vpadding = (containerHeight - scaledFrameHeight) / 2;
+            if (vpadding > 0) {
+                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+            }
+            else {
+                this.editorDiv.style.height = `${scaledFrameHeight}px`;
+            }
+        }
+        else {
+            this.editorDiv.style.height = `${scaledFrameHeight}px`;
+        }
+        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+        this.frameWidth = scaledFrameWidth;
+        this.frameHeight = scaledFrameHeight;
+        this.editorContainerDiv.focus();
     }
     subscribeToEvents() {
         window.addEventListener("resize", (e) => {

@@ -12,7 +12,7 @@ import { SelectionMode } from "./Interface/ISelectorSettings";
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 
-import { ZoomDirection, ZoomManager } from "./Core/ZoomManager"
+import { ZoomData, ZoomDirection, ZoomManager } from "./Core/ZoomManager"
 
 import { AreaSelector } from "./Selection/AreaSelector";
 
@@ -737,6 +737,14 @@ export class Editor {
         }).then(() => {
             // resize the container of editor size to adjust to the new content size
             this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+
+            // check if the editor needs to be zoomed based on previous content source.
+            if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+                let zoomData = this.zoomManager.getZoomData();
+                const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
+                const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
+                this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            }
         });
     }
 
@@ -887,50 +895,54 @@ export class Editor {
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
-
-            const containerWidth = this.editorContainerDiv.offsetWidth;
-            const containerHeight = this.editorContainerDiv.offsetHeight;
-
-            let hpadding = 0;
-            let vpadding = 0;
-
-            if (scaledFrameWidth < containerWidth) {
-                hpadding = (containerWidth - scaledFrameWidth) / 2;
-                if (hpadding > 0) {
-                    this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-                } else {
-                    this.editorDiv.style.width = `${scaledFrameWidth}px`;
-                }
-            } else {
-                this.editorDiv.style.width = `${scaledFrameWidth}px`;
-            }
-
-            if (scaledFrameHeight < containerHeight) {
-                vpadding = (containerHeight - scaledFrameHeight) / 2;
-                if (vpadding > 0) {
-                    this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-                } else {
-                    this.editorDiv.style.height =`${scaledFrameHeight}px`;
-                }
-            } else {
-                this.editorDiv.style.height =`${scaledFrameHeight}px`;
-            }
-
-            this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-            
-            this.frameWidth = scaledFrameWidth;
-            this.frameHeight = scaledFrameHeight;
-
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
             this.areaSelector.resize(this.frameWidth, this.frameHeight);
             this.regionsManager.resize(this.frameWidth, this.frameHeight);
 
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
             }
-
-            // focus on the editor container div so that scroll bar can be used via arrow keys
-            this.editorContainerDiv.focus();
         }
+    }
+
+    /**
+     * Helper function to zoom the editor to given scale.
+     */
+    private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number): void {
+        const containerWidth = this.editorContainerDiv.offsetWidth;
+        const containerHeight = this.editorContainerDiv.offsetHeight;
+
+        let hpadding = 0;
+        let vpadding = 0;
+
+        if (scaledFrameWidth < containerWidth) {
+            hpadding = (containerWidth - scaledFrameWidth) / 2;
+            if (hpadding > 0) {
+                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+            } else {
+                this.editorDiv.style.width = `${scaledFrameWidth}px`;
+            }
+        } else {
+            this.editorDiv.style.width = `${scaledFrameWidth}px`;
+        }
+
+        if (scaledFrameHeight < containerHeight) {
+            vpadding = (containerHeight - scaledFrameHeight) / 2;
+            if (vpadding > 0) {
+                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+            } else {
+                this.editorDiv.style.height =`${scaledFrameHeight}px`;
+            }
+        } else {
+            this.editorDiv.style.height =`${scaledFrameHeight}px`;
+        }
+
+        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+        
+        this.frameWidth = scaledFrameWidth;
+        this.frameHeight = scaledFrameHeight;
+        // focus on the editor container div so that scroll bar can be used via arrow keys
+        this.editorContainerDiv.focus();
     }
 
     /**
