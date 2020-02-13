@@ -6410,6 +6410,8 @@ class Editor {
             }
         };
         this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
+        this.zoomManager.deleteInstance();
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
         if (isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
         }
@@ -6624,12 +6626,6 @@ class Editor {
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
-        }
-        if (this.zoomManager.isZoomEnabled && this.zoomManager.resetZoomOnContentLoad) {
-            if (typeof this.onZoomEnd == "function") {
-                let zoomData = this.zoomManager.getZoomData();
-                this.onZoomEnd(zoomData);
-            }
         }
     }
     zoomEditorToScale(scaledFrameWidth, scaledFrameHeight) {
