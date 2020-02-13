@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.2.4
+### 2.2.5
 *CT Library Changes*
 * `resetZoomOnContentLoad` is introduced on `ZoomManager` so that the zoom behavior can be reset before new content load.
 
