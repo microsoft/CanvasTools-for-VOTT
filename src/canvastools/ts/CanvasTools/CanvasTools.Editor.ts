@@ -464,7 +464,7 @@ export class Editor {
      * Creates a new `Editor` in specified div-container and with custom building components.
      * @remarks - Originally created for testing purposes.
      * @param container - The div-container for the editor.
-     * @param areaSelector - The `AresSelector` component to use.
+     * @param areaSelector - The `AreaSelector` component to use.
      * @param regionsManager - The `RegionsManager` component to use.
      */
     constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager);
@@ -602,7 +602,11 @@ export class Editor {
                 this.onZoom(ZoomDirection.In);
             }
         }
+
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
+        this.zoomManager.deleteInstance();
+        this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
+
         if (isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
         }
@@ -738,13 +742,7 @@ export class Editor {
             // resize the container of editor size to adjust to the new content size
             this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
-            // check if the editor needs to be zoomed based on previous content source.
-            if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
-                let zoomData = this.zoomManager.getZoomData();
-                const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
-                const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
-                this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            }
+            this.handleZoomAfterContentUpdate();
         });
     }
 
@@ -895,9 +893,11 @@ export class Editor {
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            this.areaSelector.resize(this.frameWidth, this.frameHeight);
-            this.regionsManager.resize(this.frameWidth, this.frameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
 
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
@@ -905,10 +905,29 @@ export class Editor {
         }
     }
 
+    private handleZoomAfterContentUpdate(): void {
+        // check if the editor needs to be zoomed based on previous content source.
+        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+            let zoomData = this.zoomManager.getZoomData();
+            const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
+            const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+        }
+    }
+
     /**
      * Helper function to zoom the editor to given scale.
      */
     private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number): void {
+        if (!this.editorContainerDiv.offsetWidth) {
+            this.editorContainerDiv = <HTMLDivElement>document.getElementsByClassName("CanvasToolsContainer")[0];
+            this.editorDiv = <HTMLDivElement>document.getElementsByClassName("CanvasToolsEditor")[0];
+        }
+        
         const containerWidth = this.editorContainerDiv.offsetWidth;
         const containerHeight = this.editorContainerDiv.offsetHeight;
 
@@ -938,9 +957,6 @@ export class Editor {
         }
 
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-        
-        this.frameWidth = scaledFrameWidth;
-        this.frameHeight = scaledFrameHeight;
         // focus on the editor container div so that scroll bar can be used via arrow keys
         this.editorContainerDiv.focus();
     }

@@ -25,5 +25,9 @@
     "include": [     
         "src/canvastools/ts/*.ts",
         "src/canvastools/ts/*.d.ts"
+    ],
+    "exclude": [     
+        "src/canvastools/ts/*spec.ts",
+        "src/canvastools/ts/*spec.js"
     ]
 }

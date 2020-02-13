@@ -178,6 +178,9 @@
             imageIndex = index;
             loadImage(path, (image) => {
                 editor.addContentSource(image);
+
+                var showZoomDiv = document.getElementById("showZoomFactor");
+                showZoomDiv.innerText = "Image zoomed at " + editor.ZM.getZoomData().currentZoomScale*100 + " %";
             });
 
             // Delete current regions on image change

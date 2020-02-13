@@ -2114,7 +2114,7 @@ class RegionsManager {
     scaleRegionToOriginalSize(regionData) {
         const zm = ZoomManager_1.ZoomManager.getInstance();
         if (zm && zm.isZoomEnabled) {
-            const sf = 1 / zm.getCurrentZoomScale();
+            const sf = 1 / zm.getZoomData().currentZoomScale;
             return this.scaleRegion(regionData, sf);
         }
         return regionData;
@@ -2459,6 +2459,7 @@ class ZoomManager {
         this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
+        this.previousZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
         this._resetZoomOnContentLoad = false;
     }
@@ -2467,6 +2468,9 @@ class ZoomManager {
     }
     set resetZoomOnContentLoad(reset) {
         this._resetZoomOnContentLoad = reset;
+        if (reset) {
+            this.previousZoomScale = this.currentZoomScale = 1;
+        }
     }
     static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
         if (!ZoomManager.instance) {
@@ -2475,6 +2479,7 @@ class ZoomManager {
         return ZoomManager.instance;
     }
     updateZoomScale(zoomType) {
+        this.previousZoomScale = this.currentZoomScale;
         let zoomData = this.getZoomData();
         let updatedZoomScale;
         if (zoomType == ZoomDirection.In) {
@@ -2495,17 +2500,19 @@ class ZoomManager {
     setZoomScale(zoomScale) {
         this.zoomScale = zoomScale;
     }
-    getCurrentZoomScale() {
-        return this.currentZoomScale;
-    }
     getZoomData() {
         let zoomData = {
             minZoomScale: this.minZoomScale,
             maxZoomScale: this.maxZoomScale,
             currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.currentZoomScale
+            previousZoomScale: this.previousZoomScale
         };
         return zoomData;
+    }
+    deleteInstance() {
+        if (ZoomManager.instance) {
+            delete ZoomManager.instance;
+        }
     }
 }
 exports.ZoomManager = ZoomManager;
@@ -6514,12 +6521,7 @@ class Editor {
             imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
         }).then(() => {
             this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-            if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
-                let zoomData = this.zoomManager.getZoomData();
-                const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
-                const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
-                this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            }
+            this.handleZoomAfterContentUpdate();
         });
     }
     resize(containerWidth, containerHeight) {
@@ -6602,15 +6604,39 @@ class Editor {
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            this.areaSelector.resize(this.frameWidth, this.frameHeight);
-            this.regionsManager.resize(this.frameWidth, this.frameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
             }
         }
     }
+    handleZoomAfterContentUpdate() {
+        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+            let zoomData = this.zoomManager.getZoomData();
+            const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
+            const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+        }
+        if (this.zoomManager.isZoomEnabled && this.zoomManager.resetZoomOnContentLoad) {
+            if (typeof this.onZoomEnd == "function") {
+                let zoomData = this.zoomManager.getZoomData();
+                this.onZoomEnd(zoomData);
+            }
+        }
+    }
     zoomEditorToScale(scaledFrameWidth, scaledFrameHeight) {
+        if (!this.editorContainerDiv.offsetWidth) {
+            this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0];
+            this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0];
+        }
         const containerWidth = this.editorContainerDiv.offsetWidth;
         const containerHeight = this.editorContainerDiv.offsetHeight;
         let hpadding = 0;
@@ -6640,8 +6666,6 @@ class Editor {
             this.editorDiv.style.height = `${scaledFrameHeight}px`;
         }
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-        this.frameWidth = scaledFrameWidth;
-        this.frameHeight = scaledFrameHeight;
         this.editorContainerDiv.focus();
     }
     subscribeToEvents() {
