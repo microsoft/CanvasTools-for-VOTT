@@ -1,5 +1,13 @@
 ## Changelog
 
+### 2.2.5
+*CT Library Changes*
+* `resetZoomOnContentLoad` is introduced on `ZoomManager` so that the zoom behavior can be reset before new content load.
+
+*Unit Tests*
+* Jest and ts-jest is setup now in this repo.
+* Added Unit tests for `ZoomManager` file.
+
 ### 2.2.4
 *CT Library Changes*
 * Zoom feature is introduced to zoom in/out the image for region selection & manipulation.

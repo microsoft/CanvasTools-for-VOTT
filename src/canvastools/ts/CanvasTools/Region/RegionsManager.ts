@@ -446,7 +446,7 @@ export class RegionsManager {
     private scaleRegionToOriginalSize(regionData: RegionData): RegionData {
         const zm = ZoomManager.getInstance();
         if (zm && zm.isZoomEnabled) {
-            const sf = 1 / zm.getCurrentZoomScale();
+            const sf = 1 / zm.getZoomData().currentZoomScale;
             return this.scaleRegion(regionData, sf);
         }
 

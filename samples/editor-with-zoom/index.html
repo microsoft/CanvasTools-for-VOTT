@@ -26,6 +26,8 @@
             <button id="getRegion">Get Region !</button>
         </div>
         <div id="showZoomFactor"></div>
+        <input id="resetZoomOnLoad" type="checkbox"></input>
+        <label id="resetZoomOnLoadLabel">Reset Zoom On Content Load</label>
     </div>
 </body>
 <script src="./../shared/js/ct.js"></script>
@@ -176,6 +178,9 @@
             imageIndex = index;
             loadImage(path, (image) => {
                 editor.addContentSource(image);
+
+                var showZoomDiv = document.getElementById("showZoomFactor");
+                showZoomDiv.innerText = "Image zoomed at " + editor.ZM.getZoomData().currentZoomScale*100 + " %";
             });
 
             // Delete current regions on image change
@@ -198,6 +203,19 @@
             showZoomDiv.innerText = "Image zoomed at " + zoom.currentZoomScale*100 + " %";
             console.log(zoom.maxZoomScale);
         }
+
+        // check if reset zoom is On.
+        var resetZoomInput = document.getElementById("resetZoomOnLoad");
+        if (resetZoomOnLoad.checked) {
+            editor.ZM.resetZoomOnContentLoad = true;
+        }
+        resetZoomInput.addEventListener("click", (e) => {
+            if (resetZoomOnLoad.checked) {
+                editor.ZM.resetZoomOnContentLoad = true;
+            } else {
+                editor.ZM.resetZoomOnContentLoad = false;
+            }
+        });
     });
 
     // Builds select element using provided list of images 

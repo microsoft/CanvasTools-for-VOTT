@@ -1,7 +1,7 @@
 import { IZoomCallbacks } from "../Interface/IZoomCallbacks";
 
 /**
- * represents zoom meta data
+ * Represents zoom meta data.
  */
 export type ZoomData = {
     minZoomScale: number;
@@ -54,6 +54,19 @@ export class ZoomManager {
      */
     private currentZoomScale: number;
 
+    /**
+     * This holds the previous scale at which the image is zoomed at.
+     */
+    private previousZoomScale: number;
+
+     /**
+     * boolean that states if the zoom needs to be reset on content update. Defaults to false.
+     */
+    private _resetZoomOnContentLoad: boolean;
+
+     /**
+     * This holds the current instance of zoomManager.
+     */
     private static instance: ZoomManager;
 
     private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
@@ -61,23 +74,50 @@ export class ZoomManager {
         this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
+        this.previousZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
+        this._resetZoomOnContentLoad = false;
     }
 
+    /**
+     * [Gets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
+     */
+    public get resetZoomOnContentLoad(): boolean {
+        return this._resetZoomOnContentLoad;
+    }
+
+    /**
+     * [Sets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
+     */
+    public set resetZoomOnContentLoad(reset: boolean) {
+        this._resetZoomOnContentLoad = reset;
+        if (reset) {
+            this.previousZoomScale = this.currentZoomScale = 1;
+        }
+    }
+
+    /**
+     * Gets the singleton instance of Zoom Manager.
+     * @param isZoomEnabled - Flag that indicates if zoom is enabled.
+     * @param zoomCallbacks - [Optional] The collection of zoom callbacks.
+     * @param maxZoom - [Optional] Maximum  zoom factor.
+     * @param zoomScale - [Optional] Incremental/Decremental zoom factor.
+     */
     public static getInstance(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
         if (!ZoomManager.instance) {
             ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
-          }
-          return ZoomManager.instance;
+        }
+        return ZoomManager.instance;
     }
 
+    /**
+     * Updates the zoom values based on the direction of zoom.
+     * @param zoomType - The direction of zoom.
+     * @returns - Zoom data object.
+     */
     public updateZoomScale(zoomType: ZoomDirection): ZoomData {
-        let zoomData = {
-            minZoomScale: this.minZoomScale,
-            maxZoomScale: this.maxZoomScale,
-            currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.currentZoomScale
-        };
+        this.previousZoomScale = this.currentZoomScale;
+        let zoomData = this.getZoomData();
 
         let updatedZoomScale;
         if (zoomType == ZoomDirection.In) {
@@ -95,15 +135,43 @@ export class ZoomManager {
         }
     }
 
+    /**
+     * Sets the maximum zoom scale.
+     * @param maxZoomScale - The maximum zoom scale.
+     */
     public setMaxZoomScale(maxZoomScale: number): void {
         this.maxZoomScale = maxZoomScale;
     }
 
+    /**
+     * Sets the zoom scale.
+     * @param zoomScale - Zoom factor.
+     */
     public setZoomScale(zoomScale: number): void {
         this.zoomScale = zoomScale;
     }
 
-    public getCurrentZoomScale(): number {
-        return this.currentZoomScale;
+    /**
+     * Gets the zoomData object.
+     * @returns - Zoom data object.
+     */
+    public getZoomData(): ZoomData {
+        let zoomData = {
+            minZoomScale: this.minZoomScale,
+            maxZoomScale: this.maxZoomScale,
+            currentZoomScale: this.currentZoomScale,
+            previousZoomScale: this.previousZoomScale
+        };
+
+        return zoomData;
+    }
+
+    /**
+     * Deletes the single instance of zoom manager.
+     */
+    public deleteInstance(): void {
+        if (ZoomManager.instance) {
+            delete ZoomManager.instance;
+        }
     }
 }
