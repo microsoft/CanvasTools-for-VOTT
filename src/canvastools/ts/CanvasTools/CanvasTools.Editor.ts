@@ -924,8 +924,8 @@ export class Editor {
      */
     private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number): void {
         if (!this.editorContainerDiv.offsetWidth) {
-            this.editorContainerDiv = <HTMLDivElement>document.getElementsByClassName("CanvasToolsContainer")[0];
-            this.editorDiv = <HTMLDivElement>document.getElementsByClassName("CanvasToolsEditor")[0];
+            this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
+            this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
         
         const containerWidth = this.editorContainerDiv.offsetWidth;
