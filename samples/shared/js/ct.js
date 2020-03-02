@@ -1848,15 +1848,10 @@ class Toolbar {
         this.recalculateToolbarSize(newIcon);
         this.updateToolbarSize();
     }
-    findIconByKeycode(keycode, key) {
+    findIconByKey(key) {
         return this.icons.find((icon) => {
             if (icon.description !== null) {
-                if (icon.description.key) {
-                    return (icon.description.key).toLowerCase() === key.toLowerCase();
-                }
-                if (icon.description.keycode) {
-                    return icon.description.keycode === keycode;
-                }
+                return icon.description.key.includes(key);
             }
             return false;
         });
@@ -1872,7 +1867,7 @@ class Toolbar {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
-                    const icon = this.findIconByKeycode(e.code, e.key);
+                    const icon = this.findIconByKey(e.key);
                     if (icon !== undefined) {
                         if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
                             || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
@@ -6486,7 +6481,6 @@ class Editor {
                     action: item.action,
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
-                    keycode: item.keycode,
                     key: item.key,
                     width: item.width,
                     height: item.height,
@@ -6685,7 +6679,7 @@ Editor.FullToolbarSet = [
         action: "none-select",
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
-        keycode: "KeyM",
+        key: ["M", "m"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
         },
@@ -6699,7 +6693,7 @@ Editor.FullToolbarSet = [
         action: "point-select",
         iconFile: "point-selection.svg",
         tooltip: "Point-selection (P)",
-        keycode: "KeyP",
+        key: ["P", "p"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POINT });
         },
@@ -6710,7 +6704,7 @@ Editor.FullToolbarSet = [
         action: "rect-select",
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
-        keycode: "KeyR",
+        key: ["R", "r"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
         },
@@ -6721,7 +6715,7 @@ Editor.FullToolbarSet = [
         action: "copy-select",
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
-        keycode: "KeyT",
+        key: ["T", "t"],
         actionCallback: (action, rm, sl) => {
             const regions = rm.getSelectedRegions();
             if (regions !== undefined && regions.length > 0) {
@@ -6745,7 +6739,7 @@ Editor.FullToolbarSet = [
         action: "polyline-select",
         iconFile: "polyline-selection.svg",
         tooltip: "Polyline-selection (Y)",
-        keycode: "KeyY",
+        key: ["Y", "y"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYLINE });
         },
@@ -6756,7 +6750,7 @@ Editor.FullToolbarSet = [
         action: "polygon-select",
         iconFile: "polygon-selection.svg",
         tooltip: "Polygon-selection (O)",
-        keycode: "KeyO",
+        key: ["O", "o"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
         },
@@ -6770,7 +6764,7 @@ Editor.FullToolbarSet = [
         action: "delete-all-select",
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions",
-        keycode: "",
+        key: ["D", "d"],
         actionCallback: (action, rm, sl) => {
             rm.deleteAllRegions();
         },
@@ -6784,7 +6778,7 @@ Editor.FullToolbarSet = [
         action: "selection-lock",
         iconFile: "selection-lock.svg",
         tooltip: "Lock/unlock regions (L)",
-        keycode: "KeyL",
+        key: ["L", "l"],
         actionCallback: (action, rm, sl) => {
             rm.toggleFreezeMode();
         },
@@ -6795,7 +6789,7 @@ Editor.FullToolbarSet = [
         action: "background-toggle",
         iconFile: "background-toggle.svg",
         tooltip: "Toggle Region Background (B)",
-        keycode: "KeyB",
+        key: ["B", "b"],
         actionCallback: (action, rm, sl) => {
             rm.toggleBackground();
         },
@@ -6808,8 +6802,7 @@ Editor.RectToolbarSet = [
         action: "none-select",
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
-        keycode: "KeyM",
-        key: "M",
+        key: ["M", "m"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
         },
@@ -6823,8 +6816,7 @@ Editor.RectToolbarSet = [
         action: "rect-select",
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
-        keycode: "KeyR",
-        key: "R",
+        key: ["R", "r"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
         },
@@ -6835,8 +6827,7 @@ Editor.RectToolbarSet = [
         action: "copy-select",
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
-        keycode: "KeyT",
-        key: "T",
+        key: ["T", "t"],
         actionCallback: (action, rm, sl) => {
             const regions = rm.getSelectedRegions();
             if (regions !== undefined && regions.length > 0) {
@@ -6863,8 +6854,7 @@ Editor.RectToolbarSet = [
         action: "delete-all-select",
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions (D)",
-        keycode: "KeyD",
-        key: "D",
+        key: ["D", "d"],
         actionCallback: (action, rm, sl) => {
             rm.deleteAllRegions();
         },
@@ -6878,8 +6868,7 @@ Editor.RectToolbarSet = [
         action: "selection-lock",
         iconFile: "selection-lock.svg",
         tooltip: "Lock/unlock regions (L)",
-        keycode: "KeyL",
-        key: "L",
+        key: ["L", "l"],
         actionCallback: (action, rm, sl) => {
             rm.toggleFreezeMode();
         },
@@ -6890,8 +6879,7 @@ Editor.RectToolbarSet = [
         action: "background-toggle",
         iconFile: "background-toggle.svg",
         tooltip: "Toggle Region Background (B)",
-        keycode: "KeyB",
-        key: "B",
+        key: ["B", "b"],
         actionCallback: (action, rm, sl) => {
             rm.toggleBackground();
         },
@@ -6904,8 +6892,7 @@ Editor.ZoomIconGroupToolbar = [
         action: "zoom-in",
         iconFile: "zoom-in.svg",
         tooltip: "Zoom in (+)",
-        keycode: "NumpadAdd",
-        key: "+",
+        key: ["+"],
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingIn();
         },
@@ -6916,8 +6903,7 @@ Editor.ZoomIconGroupToolbar = [
         action: "zoom-out",
         iconFile: "zoom-out.svg",
         tooltip: "Zoom out (-)",
-        keycode: "NumpadSubtract",
-        key: "-",
+        key: ["-"],
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingOut();
         },

@@ -28,9 +28,8 @@ type ToolbarIconDescription = {
     action: string,
     iconFile: string,
     tooltip: string,
-    keycode: string,
     actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void,
-    key?: string
+    key: string[],
     width?: number,
     height?: number,
     activate: boolean,
@@ -51,7 +50,7 @@ export class Editor {
             action: "none-select",
             iconFile: "none-selection.svg",
             tooltip: "Regions Manipulation (M)",
-            keycode: "KeyM",
+            key: ["M", "m"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.NONE });
             },
@@ -65,7 +64,7 @@ export class Editor {
             action: "point-select",
             iconFile: "point-selection.svg",
             tooltip: "Point-selection (P)",
-            keycode: "KeyP",
+            key: ["P", "p"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POINT });
             },
@@ -76,7 +75,7 @@ export class Editor {
             action: "rect-select",
             iconFile: "rect-selection.svg",
             tooltip: "Rectangular box (R)",
-            keycode: "KeyR",
+            key: ["R", "r"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.RECT });
             },
@@ -87,7 +86,7 @@ export class Editor {
             action: "copy-select",
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
-            keycode: "KeyT",
+            key: ["T", "t"],
             actionCallback: (action, rm, sl) => {
                 const regions = rm.getSelectedRegions();
                 if (regions !== undefined && regions.length > 0) {
@@ -110,7 +109,7 @@ export class Editor {
             action: "polyline-select",
             iconFile: "polyline-selection.svg",
             tooltip: "Polyline-selection (Y)",
-            keycode: "KeyY",
+            key: ["Y", "y"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POLYLINE });
             },
@@ -121,7 +120,7 @@ export class Editor {
             action: "polygon-select",
             iconFile: "polygon-selection.svg",
             tooltip: "Polygon-selection (O)",
-            keycode: "KeyO",
+            key: ["O", "o"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POLYGON });
             },
@@ -135,7 +134,7 @@ export class Editor {
             action: "delete-all-select",
             iconFile: "delete-all-selection.svg",
             tooltip: "Delete all regions",
-            keycode: "",
+            key: ["D", "d"],
             actionCallback: (action, rm, sl) => {
                 rm.deleteAllRegions();
             },
@@ -149,7 +148,7 @@ export class Editor {
             action: "selection-lock",
             iconFile: "selection-lock.svg",
             tooltip: "Lock/unlock regions (L)",
-            keycode: "KeyL",
+            key: ["L", "l"],
             actionCallback: (action, rm, sl) => {
                 rm.toggleFreezeMode();
             },
@@ -160,7 +159,7 @@ export class Editor {
             action: "background-toggle",
             iconFile: "background-toggle.svg",
             tooltip: "Toggle Region Background (B)",
-            keycode: "KeyB",
+            key: ["B", "b"],
             actionCallback: (action, rm, sl) => {
                 rm.toggleBackground();
             },
@@ -177,8 +176,7 @@ export class Editor {
             action: "none-select",
             iconFile: "none-selection.svg",
             tooltip: "Regions Manipulation (M)",
-            keycode: "KeyM",
-            key: "M",
+            key: ["M", "m"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.NONE });
             },
@@ -192,8 +190,7 @@ export class Editor {
             action: "rect-select",
             iconFile: "rect-selection.svg",
             tooltip: "Rectangular box (R)",
-            keycode: "KeyR",
-            key: "R",
+            key: ["R", "r"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.RECT });
             },
@@ -204,8 +201,7 @@ export class Editor {
             action: "copy-select",
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
-            keycode: "KeyT",
-            key: "T",
+            key: ["T", "t"],
             actionCallback: (action, rm, sl) => {
                 const regions = rm.getSelectedRegions();
                 if (regions !== undefined && regions.length > 0) {
@@ -231,8 +227,7 @@ export class Editor {
             action: "delete-all-select",
             iconFile: "delete-all-selection.svg",
             tooltip: "Delete all regions (D)",
-            keycode: "KeyD",
-            key: "D",
+            key: ["D", "d"],
             actionCallback: (action, rm, sl) => {
                 rm.deleteAllRegions();
             },
@@ -246,8 +241,7 @@ export class Editor {
             action: "selection-lock",
             iconFile: "selection-lock.svg",
             tooltip: "Lock/unlock regions (L)",
-            keycode: "KeyL",
-            key: "L",
+            key: ["L", "l"],
             actionCallback: (action, rm, sl) => {
                 rm.toggleFreezeMode();
             },
@@ -258,8 +252,7 @@ export class Editor {
             action: "background-toggle",
             iconFile: "background-toggle.svg",
             tooltip: "Toggle Region Background (B)",
-            keycode: "KeyB",
-            key: "B",
+            key: ["B", "b"],
             actionCallback: (action, rm, sl) => {
                 rm.toggleBackground();
             },
@@ -276,8 +269,7 @@ export class Editor {
             action: "zoom-in",
             iconFile: "zoom-in.svg",
             tooltip: "Zoom in (+)",
-            keycode: "NumpadAdd",
-            key: "+",
+            key: ["+"],
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingIn();
             },
@@ -288,8 +280,7 @@ export class Editor {
             action: "zoom-out",
             iconFile: "zoom-out.svg",
             tooltip: "Zoom out (-)",
-            keycode: "NumpadSubtract",
-            key: "-",
+            key: ["-"],
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingOut();
             },
@@ -692,7 +683,6 @@ export class Editor {
                     action: item.action,
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
-                    keycode: item.keycode,
                     key: item.key,
                     width: item.width,
                     height: item.height,

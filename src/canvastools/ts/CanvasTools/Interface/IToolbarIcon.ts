@@ -18,11 +18,6 @@ export interface IToolbarIcon {
     tooltip: string;
 
     /**
-     * The `keycode` to be used for keyboard shortcut.
-     */
-    keycode: string;
-
-    /**
      * The `width` of the icon.
      */
     width: number;
@@ -33,7 +28,7 @@ export interface IToolbarIcon {
     height: number;
 
     /**
-     * The `key` to be used for keyboard shortcut.
+     * The list of `key` to be used for keyboard shortcut.
      */
-    key?: string;
+    key: string[];
 }
