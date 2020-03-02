@@ -30,6 +30,7 @@ type ToolbarIconDescription = {
     tooltip: string,
     keycode: string,
     actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void,
+    key?: string
     width?: number,
     height?: number,
     activate: boolean,
@@ -177,6 +178,7 @@ export class Editor {
             iconFile: "none-selection.svg",
             tooltip: "Regions Manipulation (M)",
             keycode: "KeyM",
+            key: "M",
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.NONE });
             },
@@ -191,6 +193,7 @@ export class Editor {
             iconFile: "rect-selection.svg",
             tooltip: "Rectangular box (R)",
             keycode: "KeyR",
+            key: "R",
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.RECT });
             },
@@ -202,6 +205,7 @@ export class Editor {
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
             keycode: "KeyT",
+            key: "T",
             actionCallback: (action, rm, sl) => {
                 const regions = rm.getSelectedRegions();
                 if (regions !== undefined && regions.length > 0) {
@@ -228,6 +232,7 @@ export class Editor {
             iconFile: "delete-all-selection.svg",
             tooltip: "Delete all regions (D)",
             keycode: "KeyD",
+            key: "D",
             actionCallback: (action, rm, sl) => {
                 rm.deleteAllRegions();
             },
@@ -242,6 +247,7 @@ export class Editor {
             iconFile: "selection-lock.svg",
             tooltip: "Lock/unlock regions (L)",
             keycode: "KeyL",
+            key: "L",
             actionCallback: (action, rm, sl) => {
                 rm.toggleFreezeMode();
             },
@@ -253,6 +259,7 @@ export class Editor {
             iconFile: "background-toggle.svg",
             tooltip: "Toggle Region Background (B)",
             keycode: "KeyB",
+            key: "B",
             actionCallback: (action, rm, sl) => {
                 rm.toggleBackground();
             },
@@ -270,6 +277,7 @@ export class Editor {
             iconFile: "zoom-in.svg",
             tooltip: "Zoom in (+)",
             keycode: "NumpadAdd",
+            key: "+",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingIn();
             },
@@ -281,6 +289,7 @@ export class Editor {
             iconFile: "zoom-out.svg",
             tooltip: "Zoom out (-)",
             keycode: "NumpadSubtract",
+            key: "-",
             actionCallback: (action, rm, sl, zm) => {
                 zm.callbacks.onZoomingOut();
             },
@@ -684,6 +693,7 @@ export class Editor {
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
                     keycode: item.keycode,
+                    key: item.key,
                     width: item.width,
                     height: item.height,
                 };
@@ -936,24 +946,28 @@ export class Editor {
 
         if (scaledFrameWidth < containerWidth) {
             hpadding = (containerWidth - scaledFrameWidth) / 2;
-            if (hpadding > 0) {
-                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-            } else {
-                this.editorDiv.style.width = `${scaledFrameWidth}px`;
-            }
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
         } else {
             this.editorDiv.style.width = `${scaledFrameWidth}px`;
         }
 
         if (scaledFrameHeight < containerHeight) {
             vpadding = (containerHeight - scaledFrameHeight) / 2;
-            if (vpadding > 0) {
-                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-            } else {
-                this.editorDiv.style.height =`${scaledFrameHeight}px`;
-            }
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         } else {
             this.editorDiv.style.height =`${scaledFrameHeight}px`;
+        }
+
+        // existence of either a vertical or horizontal scroll bar
+        // clientWidth is the offsetWidth - scrollbarWidth
+        if (hpadding && !vpadding) {
+            hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+        }
+
+        if (!hpadding && vpadding) {
+            vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         }
 
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;

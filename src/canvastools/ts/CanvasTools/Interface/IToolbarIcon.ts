@@ -3,7 +3,7 @@
  */
 export interface IToolbarIcon {
     /**
-     * Unique icon `action` identificator.
+     * Unique icon `action` identifier.
      */
     action: string;
 
@@ -31,4 +31,9 @@ export interface IToolbarIcon {
      * The `height` of the icon.
      */
     height: number;
+
+    /**
+     * The `key` to be used for keyboard shortcut.
+     */
+    key?: string;
 }

@@ -1848,9 +1848,17 @@ class Toolbar {
         this.recalculateToolbarSize(newIcon);
         this.updateToolbarSize();
     }
-    findIconByKeycode(keycode) {
+    findIconByKeycode(keycode, key) {
         return this.icons.find((icon) => {
-            return icon.description !== null && icon.description.keycode === keycode;
+            if (icon.description !== null) {
+                if (icon.description.key) {
+                    return (icon.description.key).toLowerCase() === key.toLowerCase();
+                }
+                if (icon.description.keycode) {
+                    return icon.description.keycode === keycode;
+                }
+            }
+            return false;
         });
     }
     findIconByAction(action) {
@@ -1864,7 +1872,7 @@ class Toolbar {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
-                    const icon = this.findIconByKeycode(e.code);
+                    const icon = this.findIconByKeycode(e.code, e.key);
                     if (icon !== undefined) {
                         if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
                             || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
@@ -6479,6 +6487,7 @@ class Editor {
                     iconUrl: iconsPath + item.iconFile,
                     tooltip: item.tooltip,
                     keycode: item.keycode,
+                    key: item.key,
                     width: item.width,
                     height: item.height,
                 };
@@ -6639,27 +6648,25 @@ class Editor {
         let vpadding = 0;
         if (scaledFrameWidth < containerWidth) {
             hpadding = (containerWidth - scaledFrameWidth) / 2;
-            if (hpadding > 0) {
-                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-            }
-            else {
-                this.editorDiv.style.width = `${scaledFrameWidth}px`;
-            }
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
         }
         else {
             this.editorDiv.style.width = `${scaledFrameWidth}px`;
         }
         if (scaledFrameHeight < containerHeight) {
             vpadding = (containerHeight - scaledFrameHeight) / 2;
-            if (vpadding > 0) {
-                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-            }
-            else {
-                this.editorDiv.style.height = `${scaledFrameHeight}px`;
-            }
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         }
         else {
             this.editorDiv.style.height = `${scaledFrameHeight}px`;
+        }
+        if (hpadding && !vpadding) {
+            hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+        }
+        if (!hpadding && vpadding) {
+            vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         }
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
         this.editorContainerDiv.focus();
@@ -6802,6 +6809,7 @@ Editor.RectToolbarSet = [
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
         keycode: "KeyM",
+        key: "M",
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
         },
@@ -6816,6 +6824,7 @@ Editor.RectToolbarSet = [
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
         keycode: "KeyR",
+        key: "R",
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
         },
@@ -6827,6 +6836,7 @@ Editor.RectToolbarSet = [
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
         keycode: "KeyT",
+        key: "T",
         actionCallback: (action, rm, sl) => {
             const regions = rm.getSelectedRegions();
             if (regions !== undefined && regions.length > 0) {
@@ -6854,6 +6864,7 @@ Editor.RectToolbarSet = [
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions (D)",
         keycode: "KeyD",
+        key: "D",
         actionCallback: (action, rm, sl) => {
             rm.deleteAllRegions();
         },
@@ -6868,6 +6879,7 @@ Editor.RectToolbarSet = [
         iconFile: "selection-lock.svg",
         tooltip: "Lock/unlock regions (L)",
         keycode: "KeyL",
+        key: "L",
         actionCallback: (action, rm, sl) => {
             rm.toggleFreezeMode();
         },
@@ -6879,6 +6891,7 @@ Editor.RectToolbarSet = [
         iconFile: "background-toggle.svg",
         tooltip: "Toggle Region Background (B)",
         keycode: "KeyB",
+        key: "B",
         actionCallback: (action, rm, sl) => {
             rm.toggleBackground();
         },
@@ -6892,6 +6905,7 @@ Editor.ZoomIconGroupToolbar = [
         iconFile: "zoom-in.svg",
         tooltip: "Zoom in (+)",
         keycode: "NumpadAdd",
+        key: "+",
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingIn();
         },
@@ -6903,6 +6917,7 @@ Editor.ZoomIconGroupToolbar = [
         iconFile: "zoom-out.svg",
         tooltip: "Zoom out (-)",
         keycode: "NumpadSubtract",
+        key: "-",
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingOut();
         },
