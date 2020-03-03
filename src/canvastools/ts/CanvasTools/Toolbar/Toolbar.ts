@@ -138,9 +138,13 @@ export class Toolbar {
         this.updateToolbarSize();
     }
 
-    private findIconByKeycode(keycode: string): ToolbarIcon {
+    private findIconByKey(key: string): ToolbarIcon {
         return this.icons.find((icon) => {
-            return icon.description !== null && icon.description.keycode === keycode;
+            if (icon.description !== null) {
+                return icon.description.key.includes(key);
+            }
+
+            return false;
         });
     }
 
@@ -156,7 +160,7 @@ export class Toolbar {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
-                    const icon = this.findIconByKeycode(e.code);
+                    const icon = this.findIconByKey(e.key);
                     if (icon !== undefined) {
                         if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon
                             || icon instanceof ToolbarTriggerIcon) {
