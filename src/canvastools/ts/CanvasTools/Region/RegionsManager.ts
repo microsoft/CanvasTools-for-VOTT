@@ -303,6 +303,8 @@ export class RegionsManager {
         }
         this.regions = [];
         this.menu.hide();
+
+        this.callbacks.onManipulationEnd();
     }
 
     /**

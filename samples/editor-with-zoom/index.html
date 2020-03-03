@@ -24,6 +24,8 @@
         </div>
         <div>
             <button id="getRegion">Get Region !</button>
+            <button id="disableAS">Disable AS</button>
+            <button id="enableAS">Enable AS</button>
         </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
@@ -196,6 +198,16 @@
         getRegionButton.addEventListener("click", (e) => {
             var x = editor.RM.getAllRegions()[0].regionData;
             console.log(x);
+        });
+
+        var getRegionButton = document.getElementById("disableAS");
+        getRegionButton.addEventListener("click", (e) => {
+            editor.AS.hide();
+        });
+
+        var getRegionButton = document.getElementById("enableAS");
+        getRegionButton.addEventListener("click", (e) => {
+            editor.AS.show();
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");

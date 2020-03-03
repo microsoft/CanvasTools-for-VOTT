@@ -2036,6 +2036,7 @@ class RegionsManager {
         }
         this.regions = [];
         this.menu.hide();
+        this.callbacks.onManipulationEnd();
     }
     updateTagsById(id, tagsDescriptor) {
         const region = this.lookupRegionByID(id);
