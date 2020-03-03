@@ -67,6 +67,7 @@ export class Editor {
             key: ["P", "p"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POINT });
+                sl.show();
             },
             activate: false,
         },
@@ -78,6 +79,7 @@ export class Editor {
             key: ["R", "r"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.RECT });
+                sl.show();
             },
             activate: true,
         },
@@ -101,6 +103,7 @@ export class Editor {
                         template: new Rect(40, 40),
                     });
                 }
+                sl.show();
             },
             activate: false,
         },
@@ -112,6 +115,7 @@ export class Editor {
             key: ["Y", "y"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POLYLINE });
+                sl.show();
             },
             activate: false,
         },
@@ -123,6 +127,7 @@ export class Editor {
             key: ["O", "o"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.POLYGON });
+                sl.show();
             },
             activate: false,
         },
@@ -193,6 +198,7 @@ export class Editor {
             key: ["R", "r"],
             actionCallback: (action, rm, sl) => {
                 sl.setSelectionMode({ mode: SelectionMode.RECT });
+                sl.show();
             },
             activate: true,
         },

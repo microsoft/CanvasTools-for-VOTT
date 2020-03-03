@@ -6697,6 +6697,7 @@ Editor.FullToolbarSet = [
         key: ["P", "p"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POINT });
+            sl.show();
         },
         activate: false,
     },
@@ -6708,6 +6709,7 @@ Editor.FullToolbarSet = [
         key: ["R", "r"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
+            sl.show();
         },
         activate: true,
     },
@@ -6732,6 +6734,7 @@ Editor.FullToolbarSet = [
                     template: new Rect_1.Rect(40, 40),
                 });
             }
+            sl.show();
         },
         activate: false,
     },
@@ -6743,6 +6746,7 @@ Editor.FullToolbarSet = [
         key: ["Y", "y"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYLINE });
+            sl.show();
         },
         activate: false,
     },
@@ -6754,6 +6758,7 @@ Editor.FullToolbarSet = [
         key: ["O", "o"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
+            sl.show();
         },
         activate: false,
     },
@@ -6820,6 +6825,7 @@ Editor.RectToolbarSet = [
         key: ["R", "r"],
         actionCallback: (action, rm, sl) => {
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
+            sl.show();
         },
         activate: true,
     },
