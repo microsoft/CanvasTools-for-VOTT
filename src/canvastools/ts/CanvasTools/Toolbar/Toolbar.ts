@@ -141,14 +141,6 @@ export class Toolbar {
     private findIconByKey(key: string): ToolbarIcon {
         return this.icons.find((icon) => {
             if (icon.description !== null) {
-                // if (icon.description.key) {
-                //     // covering cases of m vs M. both should activate the key
-                //     return (icon.description.key).toLowerCase() === key.toLowerCase();
-                // }
-
-                // if (icon.description.keycode) {
-                //     return icon.description.keycode === keycode;
-                // }
                 return icon.description.key.includes(key);
             }
 
