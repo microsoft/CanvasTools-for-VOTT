@@ -332,14 +332,17 @@ export class RectSelector extends Selector {
             } else if (this.usingKeyboardCursor && !this.capturingState) {
                 // set crossA
                 this.capturingState = true;
-                this.curKeyboardCross = this.crossB;
-                this.moveCross(this.crossB, this.crossA);
+                this.moveCross(this.crossB, this.curKeyboardCross);
                 this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
                 this.showAll([this.crossA, this.crossB, this.selectionBox]);
+
+                if (typeof this.callbacks.onSelectionBegin === "function") {
+                    this.callbacks.onSelectionBegin();
+                }
+                this.curKeyboardCross = this.crossB;
             } else if (this.usingKeyboardCursor && this.capturingState) {
                 // set crossB
                 this.capturingState = false;
-                this.curKeyboardCross = this.crossA;
                 this.hideAll([this.crossB, this.selectionBox]);
 
                 if (typeof this.callbacks.onSelectionEnd === "function") {
@@ -350,7 +353,8 @@ export class RectSelector extends Selector {
 
                     this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
                 }
-                this.moveCross(this.curKeyboardCross, this.crossB);
+                this.moveCross(this.crossA, this.curKeyboardCross);
+                this.curKeyboardCross = this.crossA;
             }
         }
         if (!e.ctrlKey && this.usingKeyboardCursor) {
@@ -359,6 +363,9 @@ export class RectSelector extends Selector {
     }
 
     private moveKeyboardCursor(keyCode: number) {
+        if (!(37 <= keyCode && keyCode <= 40)) {
+            return;
+        }
         const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
         switch (keyCode) {
             // up
