@@ -55,6 +55,16 @@ export class RectSelector extends Selector {
     private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
     /**
+     * Internal flag for control mode.
+     */
+    private usingKeyboardCursor: boolean = false;
+
+    /**
+     * Internal flag for control mode.
+     */
+    private curKeyboardCross: CrossElement;
+
+    /**
      * Creates new `RectSelector` object.
      * @param parent - The parent SVG-element.
      * @param paper - The `Snap.Paper` element to draw on.
@@ -176,6 +186,7 @@ export class RectSelector extends Selector {
      */
     private onPointerDown(e: PointerEvent) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             if (!this.isTwoPoints) {
                 this.capturingState = true;
 
@@ -253,6 +264,7 @@ export class RectSelector extends Selector {
      */
     private onPointerMove(e: PointerEvent) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
             const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
 
@@ -280,6 +292,26 @@ export class RectSelector extends Selector {
     }
 
     /**
+     * Helper function to start the use of keyboard cursor controls.
+     */
+    private activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+        this.curKeyboardCross = this.crossA;
+        this.isTwoPoints = true;
+        this.capturingState = false;
+        this.showAll([this.crossA]);
+        this.hideAll([this.crossB, this.selectionBox]);
+    }
+
+    /**
+     * Helper function to stop the use of keyboard cursor controls.
+     */
+    private deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+        this.curKeyboardCross = null;
+    }
+
+    /**
      * Listener for the key down event.
      * @param e KeyboardEvent
      */
@@ -292,6 +324,64 @@ export class RectSelector extends Selector {
         if (e.ctrlKey && !this.capturingState) {
             this.isTwoPoints = true;
         }
+
+        if (e.keyCode === 32) {
+            if (!this.usingKeyboardCursor) {
+                // start keyboard mode
+                this.activateKeyboardCursor();
+            } else if (this.usingKeyboardCursor && !this.capturingState) {
+                // set crossA
+                this.capturingState = true;
+                this.curKeyboardCross = this.crossB;
+                this.moveCross(this.crossB, this.crossA);
+                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+                this.showAll([this.crossA, this.crossB, this.selectionBox]);
+            } else if (this.usingKeyboardCursor && this.capturingState) {
+                // set crossB
+                this.capturingState = false;
+                this.curKeyboardCross = this.crossA;
+                this.hideAll([this.crossB, this.selectionBox]);
+
+                if (typeof this.callbacks.onSelectionEnd === "function") {
+                    const x = Math.min(this.crossA.x, this.crossB.x);
+                    const y = Math.min(this.crossA.y, this.crossB.y);
+                    const w = Math.abs(this.crossA.x - this.crossB.x);
+                    const h = Math.abs(this.crossA.y - this.crossB.y);
+
+                    this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
+                }
+                this.moveCross(this.curKeyboardCross, this.crossB);
+            }
+        }
+        if (this.usingKeyboardCursor) {
+            this.moveKeyboardCursor(e.keyCode);
+        }
+    }
+
+    private moveKeyboardCursor(keyCode: number) {
+        const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
+        switch (keyCode) {
+            // up
+            case 38:
+                nextPos.y -= 20;
+                break;
+            // down
+            case 40:
+                nextPos.y += 20;
+                break;
+            // left
+            case 37:
+                nextPos.x -= 20;
+                break;
+            // right
+            case 39:
+                nextPos.x += 20;
+                break;
+            default:
+                break;
+        }
+
+        this.moveCross(this.curKeyboardCross, nextPos);
     }
 
     /**
