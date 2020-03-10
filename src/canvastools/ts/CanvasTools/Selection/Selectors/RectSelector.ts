@@ -353,7 +353,7 @@ export class RectSelector extends Selector {
                 this.moveCross(this.curKeyboardCross, this.crossB);
             }
         }
-        if (this.usingKeyboardCursor) {
+        if (!e.ctrlKey && this.usingKeyboardCursor) {
             this.moveKeyboardCursor(e.keyCode);
         }
     }
@@ -382,6 +382,7 @@ export class RectSelector extends Selector {
         }
 
         this.moveCross(this.curKeyboardCross, nextPos);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
     }
 
     /**
