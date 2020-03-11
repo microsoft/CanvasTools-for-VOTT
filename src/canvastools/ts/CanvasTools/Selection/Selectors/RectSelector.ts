@@ -55,12 +55,12 @@ export class RectSelector extends Selector {
     private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
     /**
-     * Internal flag for control mode.
+     * Internal flag to control keyboard cursor mode.
      */
     private usingKeyboardCursor: boolean = false;
 
     /**
-     * Internal reference to current cross the keyboard controls.
+     * Internal reference to the current keyboard cross element.
      */
     private curKeyboardCross: CrossElement;
 
