@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.2.7
+Keyboard controls are now available when using the RectSelector.
+
+### 2.2.6
+Bug fixes related to zoom feature
+
 ### 2.2.5
 *CT Library Changes*
 * `resetZoomOnContentLoad` is introduced on `ZoomManager` so that the zoom behavior can be reset before new content load.

@@ -55,6 +55,16 @@ export class RectSelector extends Selector {
     private selectionModificator: SelectionModificator = SelectionModificator.RECT;
 
     /**
+     * Internal flag to control keyboard cursor mode.
+     */
+    private usingKeyboardCursor: boolean = false;
+
+    /**
+     * Internal reference to the current keyboard cross element.
+     */
+    private curKeyboardCross: CrossElement;
+
+    /**
      * Creates new `RectSelector` object.
      * @param parent - The parent SVG-element.
      * @param paper - The `Snap.Paper` element to draw on.
@@ -176,6 +186,7 @@ export class RectSelector extends Selector {
      */
     private onPointerDown(e: PointerEvent) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             if (!this.isTwoPoints) {
                 this.capturingState = true;
 
@@ -220,28 +231,9 @@ export class RectSelector extends Selector {
                 }
             } else {
                 if (this.capturingState) {
-                    this.capturingState = false;
-                    this.hideAll([this.crossB, this.selectionBox]);
-
-                    if (typeof this.callbacks.onSelectionEnd === "function") {
-                        const x = Math.min(this.crossA.x, this.crossB.x);
-                        const y = Math.min(this.crossA.y, this.crossB.y);
-                        const w = Math.abs(this.crossA.x - this.crossB.x);
-                        const h = Math.abs(this.crossA.y - this.crossB.y);
-
-                        this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
-                    }
-                    this.moveCross(this.crossA, p);
-                    this.moveCross(this.crossB, p);
+                    this.endTwoPointSelection(p);
                 } else {
-                    this.capturingState = true;
-                    this.moveCross(this.crossB, p);
-                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                    this.showAll([this.crossA, this.crossB, this.selectionBox]);
-
-                    if (typeof this.callbacks.onSelectionBegin === "function") {
-                        this.callbacks.onSelectionBegin();
-                    }
+                    this.startTwoPointSelection(p);
                 }
             }
         });
@@ -253,6 +245,7 @@ export class RectSelector extends Selector {
      */
     private onPointerMove(e: PointerEvent) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
             const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
 
@@ -292,6 +285,25 @@ export class RectSelector extends Selector {
         if (e.ctrlKey && !this.capturingState) {
             this.isTwoPoints = true;
         }
+
+        if (e.key === " ") {
+            e.preventDefault();
+            if (!this.usingKeyboardCursor) {
+                // start keyboard mode
+                this.activateKeyboardCursor();
+            } else if (this.usingKeyboardCursor && !this.capturingState) {
+                // set crossA
+                this.startTwoPointSelection(this.curKeyboardCross);
+                this.curKeyboardCross = this.crossB;
+            } else if (this.usingKeyboardCursor && this.capturingState) {
+                // set crossB
+                this.endTwoPointSelection(this.curKeyboardCross);
+                this.curKeyboardCross = this.crossA;
+            }
+        }
+        if (!e.ctrlKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            this.moveKeyboardCursor(e.key);
+        }
     }
 
     /**
@@ -311,5 +323,98 @@ export class RectSelector extends Selector {
             this.moveCross(this.crossA, this.crossB);
             this.hideAll([this.crossB, this.selectionBox]);
         }
+    }
+
+    /**
+     * Helper function to start the use of keyboard cursor controls.
+     */
+    private activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+        this.curKeyboardCross = this.crossA;
+        this.isTwoPoints = true;
+        this.capturingState = false;
+        this.showAll([this.crossA]);
+        this.hideAll([this.crossB, this.selectionBox]);
+    }
+
+    /**
+     * Helper function to stop the use of keyboard cursor controls.
+     */
+    private deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+        this.curKeyboardCross = null;
+    }
+
+    /**
+     * Helper function for common logic to start a two point selection.
+     * @param curPoint IPoint2D
+     */
+    private startTwoPointSelection(curPoint: IPoint2D) {
+        this.capturingState = true;
+        this.moveCross(this.crossB, curPoint);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+        this.showAll([this.crossA, this.crossB, this.selectionBox]);
+
+        if (typeof this.callbacks.onSelectionBegin === "function") {
+            this.callbacks.onSelectionBegin();
+        }
+    }
+
+    /**
+     * Helper function for common logic to end a two point selection.
+     * @param curPoint IPoint2D
+     */
+    private endTwoPointSelection(curPoint: IPoint2D) {
+        this.capturingState = false;
+        this.hideAll([this.crossB, this.selectionBox]);
+
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            const x = Math.min(this.crossA.x, this.crossB.x);
+            const y = Math.min(this.crossA.y, this.crossB.y);
+            const w = Math.abs(this.crossA.x - this.crossB.x);
+            const h = Math.abs(this.crossA.y - this.crossB.y);
+
+            this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
+        }
+        this.moveCross(this.crossA, curPoint);
+        this.moveCross(this.crossB, curPoint);
+    }
+
+    /**
+     * Helper function to check if a key is used for controlling the keyboard cursor.
+     * @param key string
+     */
+    private isKeyboardControlKey(key: string) {
+        return key === "u" || key === "h" || key === "j" || key === "k";
+    }
+    /**
+     * Helper function for common logic to start a two point selection.
+     * @param key string
+     */
+    private moveKeyboardCursor(key: string) {
+        const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
+        switch (key) {
+            // up
+            case "u":
+                nextPos.y -= 20;
+                break;
+            // down
+            case "j":
+                nextPos.y += 20;
+                break;
+            // left
+            case "h":
+                nextPos.x -= 20;
+                break;
+            // right
+            case "k":
+                nextPos.x += 20;
+                break;
+            default:
+                break;
+        }
+
+        this.moveCross(this.curKeyboardCross, nextPos);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
     }
 }
