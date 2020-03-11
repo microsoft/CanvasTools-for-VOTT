@@ -307,6 +307,7 @@ export class RectSelector extends Selector {
         }
 
         if (e.keyCode === 32) {
+            e.preventDefault();
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();
@@ -320,7 +321,7 @@ export class RectSelector extends Selector {
                 this.curKeyboardCross = this.crossA;
             }
         }
-        if (!e.ctrlKey && this.usingKeyboardCursor) {
+        if (!e.ctrlKey && this.isKeyboardControlKey(e.keyCode) && this.usingKeyboardCursor) {
             this.moveKeyboardCursor(e.keyCode);
         }
     }
@@ -352,26 +353,27 @@ export class RectSelector extends Selector {
         this.moveCross(this.crossB, curPoint);
     }
 
+    private isKeyboardControlKey(keyCode: number) {
+        return keyCode === 89 || keyCode === 72 || keyCode === 71 || keyCode === 74;
+    }
+
     private moveKeyboardCursor(keyCode: number) {
-        if (!(37 <= keyCode && keyCode <= 40)) {
-            return;
-        }
         const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
         switch (keyCode) {
             // up
-            case 38:
+            case 89:
                 nextPos.y -= 20;
                 break;
             // down
-            case 40:
+            case 72:
                 nextPos.y += 20;
                 break;
             // left
-            case 37:
+            case 71:
                 nextPos.x -= 20;
                 break;
             // right
-            case 39:
+            case 74:
                 nextPos.x += 20;
                 break;
             default:
