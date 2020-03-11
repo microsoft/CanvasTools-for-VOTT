@@ -286,7 +286,7 @@ export class RectSelector extends Selector {
             this.isTwoPoints = true;
         }
 
-        if (e.keyCode === 32) {
+        if (e.key === " ") {
             e.preventDefault();
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
@@ -301,8 +301,8 @@ export class RectSelector extends Selector {
                 this.curKeyboardCross = this.crossA;
             }
         }
-        if (!e.ctrlKey && this.isKeyboardControlKey(e.keyCode) && this.usingKeyboardCursor) {
-            this.moveKeyboardCursor(e.keyCode);
+        if (!e.ctrlKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            this.moveKeyboardCursor(e.key);
         }
     }
 
@@ -381,33 +381,33 @@ export class RectSelector extends Selector {
     }
 
     /**
-     * Helper function to check if a keyCode is used for controlling the keyboard cursor.
-     * @param keyCode number
+     * Helper function to check if a key is used for controlling the keyboard cursor.
+     * @param key string
      */
-    private isKeyboardControlKey(keyCode: number) {
-        return keyCode === 72 || keyCode === 74 || keyCode === 75 || keyCode === 85;
+    private isKeyboardControlKey(key: string) {
+        return key === "u" || key === "h" || key === "j" || key === "k";
     }
     /**
      * Helper function for common logic to start a two point selection.
-     * @param keyCode number
+     * @param key string
      */
-    private moveKeyboardCursor(keyCode: number) {
+    private moveKeyboardCursor(key: string) {
         const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
-        switch (keyCode) {
+        switch (key) {
             // up
-            case 85:
+            case "u":
                 nextPos.y -= 20;
                 break;
             // down
-            case 74:
+            case "j":
                 nextPos.y += 20;
                 break;
             // left
-            case 72:
+            case "h":
                 nextPos.x -= 20;
                 break;
             // right
-            case 75:
+            case "k":
                 nextPos.x += 20;
                 break;
             default:
