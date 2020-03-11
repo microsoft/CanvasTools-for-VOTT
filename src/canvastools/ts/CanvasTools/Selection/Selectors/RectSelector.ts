@@ -231,28 +231,9 @@ export class RectSelector extends Selector {
                 }
             } else {
                 if (this.capturingState) {
-                    this.capturingState = false;
-                    this.hideAll([this.crossB, this.selectionBox]);
-
-                    if (typeof this.callbacks.onSelectionEnd === "function") {
-                        const x = Math.min(this.crossA.x, this.crossB.x);
-                        const y = Math.min(this.crossA.y, this.crossB.y);
-                        const w = Math.abs(this.crossA.x - this.crossB.x);
-                        const h = Math.abs(this.crossA.y - this.crossB.y);
-
-                        this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
-                    }
-                    this.moveCross(this.crossA, p);
-                    this.moveCross(this.crossB, p);
+                    this.endTwoPointSelection(p);
                 } else {
-                    this.capturingState = true;
-                    this.moveCross(this.crossB, p);
-                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                    this.showAll([this.crossA, this.crossB, this.selectionBox]);
-
-                    if (typeof this.callbacks.onSelectionBegin === "function") {
-                        this.callbacks.onSelectionBegin();
-                    }
+                    this.startTwoPointSelection(p);
                 }
             }
         });
@@ -331,35 +312,44 @@ export class RectSelector extends Selector {
                 this.activateKeyboardCursor();
             } else if (this.usingKeyboardCursor && !this.capturingState) {
                 // set crossA
-                this.capturingState = true;
-                this.moveCross(this.crossB, this.curKeyboardCross);
-                this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                this.showAll([this.crossA, this.crossB, this.selectionBox]);
-
-                if (typeof this.callbacks.onSelectionBegin === "function") {
-                    this.callbacks.onSelectionBegin();
-                }
+                this.startTwoPointSelection(this.curKeyboardCross);
                 this.curKeyboardCross = this.crossB;
             } else if (this.usingKeyboardCursor && this.capturingState) {
                 // set crossB
-                this.capturingState = false;
-                this.hideAll([this.crossB, this.selectionBox]);
-
-                if (typeof this.callbacks.onSelectionEnd === "function") {
-                    const x = Math.min(this.crossA.x, this.crossB.x);
-                    const y = Math.min(this.crossA.y, this.crossB.y);
-                    const w = Math.abs(this.crossA.x - this.crossB.x);
-                    const h = Math.abs(this.crossA.y - this.crossB.y);
-
-                    this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
-                }
-                this.moveCross(this.crossA, this.curKeyboardCross);
+                this.endTwoPointSelection(this.curKeyboardCross);
                 this.curKeyboardCross = this.crossA;
             }
         }
         if (!e.ctrlKey && this.usingKeyboardCursor) {
             this.moveKeyboardCursor(e.keyCode);
         }
+    }
+
+    private startTwoPointSelection(curPoint: IPoint2D) {
+        this.capturingState = true;
+        this.moveCross(this.crossB, curPoint);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+        this.showAll([this.crossA, this.crossB, this.selectionBox]);
+
+        if (typeof this.callbacks.onSelectionBegin === "function") {
+            this.callbacks.onSelectionBegin();
+        }
+    }
+
+    private endTwoPointSelection(curPoint: IPoint2D) {
+        this.capturingState = false;
+        this.hideAll([this.crossB, this.selectionBox]);
+
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            const x = Math.min(this.crossA.x, this.crossB.x);
+            const y = Math.min(this.crossA.y, this.crossB.y);
+            const w = Math.abs(this.crossA.x - this.crossB.x);
+            const h = Math.abs(this.crossA.y - this.crossB.y);
+
+            this.callbacks.onSelectionEnd(RegionData.BuildRectRegionData(x, y, w, h));
+        }
+        this.moveCross(this.crossA, curPoint);
+        this.moveCross(this.crossB, curPoint);
     }
 
     private moveKeyboardCursor(keyCode: number) {
