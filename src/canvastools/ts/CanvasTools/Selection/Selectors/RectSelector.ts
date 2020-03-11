@@ -60,7 +60,7 @@ export class RectSelector extends Selector {
     private usingKeyboardCursor: boolean = false;
 
     /**
-     * Internal flag for control mode.
+     * Internal reference to current cross the keyboard controls.
      */
     private curKeyboardCross: CrossElement;
 
