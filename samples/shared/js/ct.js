@@ -2022,6 +2022,15 @@ class RegionsManager {
             };
         });
     }
+    getSelectedRegionsWithZoomScale() {
+        return this.lookupSelectedRegions().map((region) => {
+            return {
+                id: region.ID,
+                tags: region.tags,
+                regionData: region.regionData,
+            };
+        });
+    }
     deleteRegionById(id) {
         const region = this.lookupRegionByID(id);
         if (region != null) {
@@ -2727,6 +2736,25 @@ class AreaSelector {
     }
     getSelectorSettings() {
         return this.selectorSettings;
+    }
+    updateRectCopyTemplateSelector(template) {
+        if (template !== undefined) {
+            this.rectCopySelector.setTemplate(template);
+        }
+        else {
+            this.rectCopySelector.setTemplate(AreaSelector.DefaultTemplateSize);
+        }
+    }
+    getRectCopyTemplate(regions) {
+        let template;
+        if (regions !== undefined && regions.length > 0) {
+            const r = regions[0];
+            template = new Rect_1.Rect(r.regionData.width, r.regionData.height);
+        }
+        else {
+            template = new Rect_1.Rect(40, 40);
+        }
+        return template;
     }
     buildUIElements() {
         this.paper = Snap(this.parentNode);
@@ -6019,6 +6047,7 @@ class RectSelector extends Selector_1.Selector {
         this.pointerCaptureId = -1;
         this.isTwoPoints = false;
         this.selectionModificator = SelectionModificator.RECT;
+        this.usingKeyboardCursor = false;
         this.buildUIElements();
         this.hide();
     }
@@ -6087,6 +6116,7 @@ class RectSelector extends Selector_1.Selector {
     }
     onPointerDown(e) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             if (!this.isTwoPoints) {
                 this.capturingState = true;
                 this.pointerCaptureId = e.pointerId;
@@ -6121,32 +6151,17 @@ class RectSelector extends Selector_1.Selector {
             }
             else {
                 if (this.capturingState) {
-                    this.capturingState = false;
-                    this.hideAll([this.crossB, this.selectionBox]);
-                    if (typeof this.callbacks.onSelectionEnd === "function") {
-                        const x = Math.min(this.crossA.x, this.crossB.x);
-                        const y = Math.min(this.crossA.y, this.crossB.y);
-                        const w = Math.abs(this.crossA.x - this.crossB.x);
-                        const h = Math.abs(this.crossA.y - this.crossB.y);
-                        this.callbacks.onSelectionEnd(RegionData_1.RegionData.BuildRectRegionData(x, y, w, h));
-                    }
-                    this.moveCross(this.crossA, p);
-                    this.moveCross(this.crossB, p);
+                    this.endTwoPointSelection(p);
                 }
                 else {
-                    this.capturingState = true;
-                    this.moveCross(this.crossB, p);
-                    this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
-                    this.showAll([this.crossA, this.crossB, this.selectionBox]);
-                    if (typeof this.callbacks.onSelectionBegin === "function") {
-                        this.callbacks.onSelectionBegin();
-                    }
+                    this.startTwoPointSelection(p);
                 }
             }
         });
     }
     onPointerMove(e) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
             const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
             if (!this.isTwoPoints) {
@@ -6178,6 +6193,23 @@ class RectSelector extends Selector_1.Selector {
         if (e.ctrlKey && !this.capturingState) {
             this.isTwoPoints = true;
         }
+        if (e.key === " ") {
+            e.preventDefault();
+            if (!this.usingKeyboardCursor) {
+                this.activateKeyboardCursor();
+            }
+            else if (this.usingKeyboardCursor && !this.capturingState) {
+                this.startTwoPointSelection(this.curKeyboardCross);
+                this.curKeyboardCross = this.crossB;
+            }
+            else if (this.usingKeyboardCursor && this.capturingState) {
+                this.endTwoPointSelection(this.curKeyboardCross);
+                this.curKeyboardCross = this.crossA;
+            }
+        }
+        if (!e.ctrlKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            this.moveKeyboardCursor(e.key);
+        }
     }
     onKeyUp(e) {
         if (!e.shiftKey) {
@@ -6189,6 +6221,64 @@ class RectSelector extends Selector_1.Selector {
             this.moveCross(this.crossA, this.crossB);
             this.hideAll([this.crossB, this.selectionBox]);
         }
+    }
+    activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+        this.curKeyboardCross = this.crossA;
+        this.isTwoPoints = true;
+        this.capturingState = false;
+        this.showAll([this.crossA]);
+        this.hideAll([this.crossB, this.selectionBox]);
+    }
+    deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+        this.curKeyboardCross = null;
+    }
+    startTwoPointSelection(curPoint) {
+        this.capturingState = true;
+        this.moveCross(this.crossB, curPoint);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
+        this.showAll([this.crossA, this.crossB, this.selectionBox]);
+        if (typeof this.callbacks.onSelectionBegin === "function") {
+            this.callbacks.onSelectionBegin();
+        }
+    }
+    endTwoPointSelection(curPoint) {
+        this.capturingState = false;
+        this.hideAll([this.crossB, this.selectionBox]);
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            const x = Math.min(this.crossA.x, this.crossB.x);
+            const y = Math.min(this.crossA.y, this.crossB.y);
+            const w = Math.abs(this.crossA.x - this.crossB.x);
+            const h = Math.abs(this.crossA.y - this.crossB.y);
+            this.callbacks.onSelectionEnd(RegionData_1.RegionData.BuildRectRegionData(x, y, w, h));
+        }
+        this.moveCross(this.crossA, curPoint);
+        this.moveCross(this.crossB, curPoint);
+    }
+    isKeyboardControlKey(key) {
+        return key === "u" || key === "h" || key === "j" || key === "k";
+    }
+    moveKeyboardCursor(key) {
+        const nextPos = { x: this.curKeyboardCross.x, y: this.curKeyboardCross.y };
+        switch (key) {
+            case "u":
+                nextPos.y -= 20;
+                break;
+            case "j":
+                nextPos.y += 20;
+                break;
+            case "h":
+                nextPos.x -= 20;
+                break;
+            case "k":
+                nextPos.x += 20;
+                break;
+            default:
+                break;
+        }
+        this.moveCross(this.curKeyboardCross, nextPos);
+        this.moveSelectionBox(this.selectionBox, this.crossA, this.crossB);
     }
 }
 exports.RectSelector = RectSelector;
@@ -6615,6 +6705,8 @@ class Editor {
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+            const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
+            this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
             }
@@ -6836,7 +6928,7 @@ Editor.RectToolbarSet = [
         tooltip: "Template-based box (T)",
         key: ["T", "t"],
         actionCallback: (action, rm, sl) => {
-            const regions = rm.getSelectedRegions();
+            const regions = rm.getSelectedRegionsWithZoomScale();
             if (regions !== undefined && regions.length > 0) {
                 const r = regions[0];
                 sl.setSelectionMode({

@@ -1,7 +1,7 @@
 import { IRect } from "./IRect";
 
 /**
- * Enum to define current selectio mode
+ * Enum to define current selection mode
  */
 export enum SelectionMode { NONE, POINT, RECT, COPYRECT, POLYLINE, POLYGON }
 
