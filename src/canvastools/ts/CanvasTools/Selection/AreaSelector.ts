@@ -1,8 +1,9 @@
 import { Rect } from "../Core/Rect";
-
+import { IRect } from "../Interface/IRect";
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 import { ISelectorSettings, SelectionMode } from "../Interface/ISelectorSettings";
-
+import { TagsDescriptor } from "../Core/TagsDescriptor";
+import { RegionData } from "../Core/RegionData";
 import { PointSelector } from "./Selectors/PointSelector";
 import { PolylineSelector } from "./Selectors/PolylineSelector";
 import { PolygonSelector } from "./Selectors/PolygonSelector";
@@ -208,7 +209,7 @@ export class AreaSelector {
             } else if (this.selectorSettings.mode === SelectionMode.POLYGON) {
                 this.selector = this.polygonSelector;
             }
-            // restore enablement status
+            // restore enabled status
             this.enable();
             if (this.isVisible) {
                 this.show();
@@ -223,6 +224,29 @@ export class AreaSelector {
      */
     public getSelectorSettings(): ISelectorSettings {
         return this.selectorSettings;
+    }
+
+    /**
+    * Would be called after zoom to update the template for rect copy selector
+    */
+    public updateRectCopyTemplateSelector(template: IRect): void {
+        if (template !== undefined) {
+            this.rectCopySelector.setTemplate(template);
+        } else {
+            this.rectCopySelector.setTemplate(AreaSelector.DefaultTemplateSize);
+        }
+    }
+
+    /**
+    * Get the template for rect copy selector
+    */
+    public getRectCopyTemplate(regions: Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }>): IRect {
+        if (regions !== undefined && regions.length > 0) {
+            const r = regions[0];
+            return new Rect(r.regionData.width, r.regionData.height);
+        } else {
+            return new Rect(40, 40);
+        }
     }
 
     /**

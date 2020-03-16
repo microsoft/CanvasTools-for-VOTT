@@ -209,7 +209,7 @@ export class Editor {
             tooltip: "Template-based box (T)",
             key: ["T", "t"],
             actionCallback: (action, rm, sl) => {
-                const regions = rm.getSelectedRegions();
+                const regions = rm.getSelectedRegionsWithZoomScale();
                 if (regions !== undefined && regions.length > 0) {
                     const r = regions[0];
                     sl.setSelectionMode({
@@ -902,8 +902,16 @@ export class Editor {
             this.frameWidth = scaledFrameWidth;
             this.frameHeight = scaledFrameHeight;
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+
+            // area selector updates after zoom
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+
+            // regions on the canvas updates after zoom
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+
+            // template box or rect copy selector updates after zoom.
+            const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
+            this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
 
             if (typeof this.onZoomEnd == "function") {
                 this.onZoomEnd(zoomData);
