@@ -19,7 +19,7 @@
     "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib",
     "serve": "webpack-dev-server --config webpack.config.js --env.mode=prod",
     "start": "webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
-    "watch": "onchange src/canvastools/ts/**/*.ts -- npm run start",
+    "watch": "onchange src/canvastools/ts/**/*.ts src/canvastools/css/canvastools.css -- npm run start",
     "test": "jest"
   },
   "author": "Konstantin Kichinsky",

@@ -301,7 +301,8 @@ export class RectSelector extends Selector {
                 this.curKeyboardCross = this.crossA;
             }
         }
-        if (!e.ctrlKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+        if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            e.preventDefault();
             this.moveKeyboardCursor(e.key);
         }
     }
@@ -385,7 +386,7 @@ export class RectSelector extends Selector {
      * @param key string
      */
     private isKeyboardControlKey(key: string) {
-        return key === "u" || key === "h" || key === "j" || key === "k";
+        return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
     }
     /**
      * Helper function for common logic to start a two point selection.
@@ -395,19 +396,19 @@ export class RectSelector extends Selector {
         const nextPos: IPoint2D = {x: this.curKeyboardCross.x, y: this.curKeyboardCross.y};
         switch (key) {
             // up
-            case "u":
+            case "ArrowUp":
                 nextPos.y -= 20;
                 break;
             // down
-            case "j":
+            case "ArrowDown":
                 nextPos.y += 20;
                 break;
             // left
-            case "h":
+            case "ArrowLeft":
                 nextPos.x -= 20;
                 break;
             // right
-            case "k":
+            case "ArrowRight":
                 nextPos.x += 20;
                 break;
             default:
