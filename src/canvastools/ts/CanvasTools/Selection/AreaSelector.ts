@@ -241,14 +241,12 @@ export class AreaSelector {
     * Get the template for rect copy selector
     */
     public getRectCopyTemplate(regions: Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }>): IRect {
-        let template;
         if (regions !== undefined && regions.length > 0) {
             const r = regions[0];
-            template = new Rect(r.regionData.width, r.regionData.height);
+            return new Rect(r.regionData.width, r.regionData.height);
         } else {
-            template = new Rect(40, 40);
+            return new Rect(40, 40);
         }
-        return template;
     }
 
     /**
