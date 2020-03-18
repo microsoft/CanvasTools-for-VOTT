@@ -4,7 +4,7 @@ import { CrossElement } from "./CrossElement";
 import { IPoint2D } from "../../Interface/IPoint2D";
 
 /**
- * The cross element for selectors.
+ * The alternating cross element for selectors.
  */
 export class AlternatingCrossElement extends CrossElement {
     /**
@@ -18,7 +18,7 @@ export class AlternatingCrossElement extends CrossElement {
     private vl2: Snap.Element;
 
     /**
-     * Creates new `CrossElement`.
+     * Creates new `AlternatingCrossElement`.
      * @param paper - The `Snap.Paper` object to draw on.
      * @param boundRect - The parent bounding box for selection.
      */
@@ -48,7 +48,7 @@ export class AlternatingCrossElement extends CrossElement {
     }
 
     /**
-     * Resizes the cross element to specified `width` and `height`.
+     * Resizes the alternating cross element to specified `width` and `height`.
      * @param width - The new `width`.
      * @param height - The new `height`.
      */
