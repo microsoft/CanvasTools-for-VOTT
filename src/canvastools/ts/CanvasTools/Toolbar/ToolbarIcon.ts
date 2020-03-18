@@ -18,6 +18,7 @@ export abstract class ToolbarIcon {
     protected x: number;
     protected y: number;
     protected isSelected: boolean = false;
+    protected focused: boolean = false;
 
     constructor(paper: Snap.Paper, icon?: IToolbarIcon) {
         this.paper = paper;
@@ -62,11 +63,23 @@ export abstract class ToolbarIcon {
         this.isSelected = false;
     }
 
+    public isFocused() {
+        return this.focused;
+    }
+
     protected toggleSelection() {
         if (this.isSelected) {
             this.unselect();
         } else {
             this.select();
         }
+    }
+
+    protected onfocusCallback() {
+        this.focused = true;
+    }
+
+    protected onfocusoutCallback() {
+        this.focused = false;
     }
 }

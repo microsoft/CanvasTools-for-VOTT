@@ -158,6 +158,12 @@ export class Toolbar {
         });
     }
 
+    private findFocusedIcon(): ToolbarIcon {
+        return this.icons.find((icon) => {
+            return icon.isFocused();
+        });
+    }
+
     private subscribeToKeyboardEvents() {
         window.addEventListener("keyup", (e) => {
             if (!(e.target instanceof HTMLInputElement) &&
@@ -171,6 +177,20 @@ export class Toolbar {
                             icon.activate();
                         }
                     }
+                }
+
+                if (e.key === " ") {
+                    const icon = this.findFocusedIcon();
+                    /*if (icon !== undefined) {
+                        if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon
+                            || icon instanceof ToolbarTriggerIcon) {
+                            // icon.activate();
+                            console.log(icon.description.action);
+                        }
+                    }
+                    else {
+                        console.log("none found");
+                    }*/
                 }
             }
         });

@@ -80,5 +80,8 @@ export class ToolbarTriggerIcon extends ToolbarIcon {
         this.node.click((e) => {
             this.activate();
         });
+
+        this.node.node.addEventListener("focus", this.onfocusCallback);
+        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
     }
 }
