@@ -316,25 +316,25 @@ svg:not(:root) .menuLayer {
 
 .menuRectStyle { 
     stroke-width:0;
-    fill: rgb(0, 0, 0);
+    fill: #000;
     filter: url(#black-glow); 
 }
 
 .menuItemBack {
     stroke-width: 1.5;
     stroke: rgba(198, 198, 198, 0.2);
-    fill:  rgb(0, 0, 0);
+    fill:  #000;
 }
 
 .menuIcon {
     font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 10pt;
-    fill: rgb(255, 255, 255);
+    fill: #fff;
 }
 
 .menuItem {
     stroke-width: 1.5;
-    stroke: rgb(255, 255, 255);
+    stroke: #fff;
     fill:transparent;
 }
 
@@ -542,11 +542,11 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.selector:hover .iconBGRectStyle {
-    fill: rgba(21, 127, 240, 1.0);
+    fill: rgb(21, 127, 240);
 }
 
 .iconStyle.selector.selected .iconBGRectStyle {
-    fill: rgba(21, 127, 240, 1.0);
+    fill: rgb(21, 127, 240);
 }
 
 .iconStyle .iconImageStyle * {
@@ -559,7 +559,7 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.switch:hover .iconBGRectStyle{
-    fill: rgba(21, 127, 240, 1.0);
+    fill: rgb(21, 127, 240);
 }
 
 .iconStyle.switch .iconImageStyle * {
