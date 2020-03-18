@@ -6,7 +6,7 @@ import { IPoint2D } from "../../Interface/IPoint2D";
 /**
  * The cross element for selectors.
  */
-export class AlternatingCrossElement extends CrossElement implements IPoint2D {
+export class AlternatingCrossElement extends CrossElement {
     /**
      * Horizontal line element.
      */
