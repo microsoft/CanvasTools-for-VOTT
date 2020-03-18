@@ -287,8 +287,7 @@ export class RectSelector extends Selector {
             this.isTwoPoints = true;
         }
 
-        if (e.key === " ") {
-            e.preventDefault();
+        if (e.key === "k" || e.key === "K") {
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();

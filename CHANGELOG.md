@@ -1,5 +1,12 @@
 ## Changelog
 
+### 2.2.9
+* Default colors have been changed.
+* `RectSelector.ts` now uses the more visible `AlternateCrossElement.ts`.
+* Keyboard controls have been changed in the following ways:
+    * The activation key is now "k" to avoid collision with other keyboard controls.
+    * The keyboard cursor is now moved with `Shift + arrow keys` instead of `UHJK`.
+
 ### 2.2.7
 Keyboard controls are now available when using the RectSelector.
 

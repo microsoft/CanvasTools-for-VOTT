@@ -8,12 +8,12 @@ import { IPoint2D } from "../../Interface/IPoint2D";
  */
 export class AlternatingCrossElement extends CrossElement {
     /**
-     * Horizontal line element.
+     * Horizontal line element that visually complements hl, the existing horizontal line element on CrossElement.
      */
     private hl2: Snap.Element;
 
     /**
-     * Vertical line element.
+     * Vertical line element that visually complements vl, the existing vertical line element on CrossElement.
      */
     private vl2: Snap.Element;
 
