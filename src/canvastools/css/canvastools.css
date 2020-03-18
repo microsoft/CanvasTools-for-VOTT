@@ -431,6 +431,20 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
+.crossStyle .blackDashes {
+    stroke-width:3;
+    stroke-dasharray: 3 3;
+    stroke: #000;
+    pointer-events: none; 
+}
+
+.crossStyle .whiteDashes {
+    stroke-width:3;
+    stroke-dasharray: 0 3 0;
+    stroke: #fff;
+    pointer-events: none; 
+}
+
 .selectionBoxStyle {
     fill: #fff;
     fill-opacity: 0.25;

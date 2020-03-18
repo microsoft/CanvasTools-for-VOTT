@@ -12,17 +12,17 @@ export class CrossElement extends Element implements IPoint2D {
     /**
      * Horizontal line element.
      */
-    private hl: Snap.Element;
+    protected hl: Snap.Element;
 
     /**
      * Vertical line element.
      */
-    private vl: Snap.Element;
+    protected vl: Snap.Element;
 
     /**
      * Visual center of the cross.
      */
-    private center: Point2D;
+    protected center: Point2D;
 
     /**
      * The `x`-coordinate of the cross center.
@@ -103,7 +103,7 @@ export class CrossElement extends Element implements IPoint2D {
     /**
      * Builds the visual presentation of the element.
      */
-    private buildUIElements() {
+    protected buildUIElements() {
         const verticalLine: Snap.Element = this.paper.line(0, 0, 0, this.boundRect.height);
         const horizontalLine: Snap.Element = this.paper.line(0, 0, this.boundRect.width, 0);
 

@@ -5,6 +5,7 @@ import { RegionData } from "../../Core/RegionData";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
+import { AlternatingCrossElement } from "../Component/AlternatingCrossElement";
 import { CrossElement } from "../Component/CrossElement";
 import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
@@ -22,12 +23,12 @@ export class RectSelector extends Selector {
     /**
      * The `CrossElement` to set the first corner of the rect.
      */
-    private crossA: CrossElement;
+    private crossA: AlternatingCrossElement;
 
     /**
      * The `CrossElement` to set the opposite corner of the rect.
      */
-    private crossB: CrossElement;
+    private crossB: AlternatingCrossElement;
 
     /**
      * The `RectElement` to draw selection box.
@@ -113,8 +114,8 @@ export class RectSelector extends Selector {
     private buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectSelector");
-        this.crossA = new CrossElement(this.paper, this.boundRect);
-        this.crossB = new CrossElement(this.paper, this.boundRect);
+        this.crossA = new AlternatingCrossElement(this.paper, this.boundRect);
+        this.crossB = new AlternatingCrossElement(this.paper, this.boundRect);
         this.selectionBox = new RectElement(this.paper, this.boundRect, new Rect(0, 0));
         this.selectionBox.node.addClass("selectionBoxStyle");
 
