@@ -133,6 +133,10 @@ export class Toolbar {
         this.icons.push(newIcon);
         this.iconsLayer.add(newIcon.node);
 
+        if (newIcon.description !== null) {
+            newIcon.node.attr({tabindex: 0});
+        }
+
         newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
         this.recalculateToolbarSize(newIcon);
         this.updateToolbarSize();
