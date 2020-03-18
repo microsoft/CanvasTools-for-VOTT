@@ -280,6 +280,19 @@ export class RegionsManager {
     }
 
     /**
+     * Returns a collection of selected regions with the zoom scale intact
+     */
+    public getSelectedRegionsWithZoomScale(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+        return this.lookupSelectedRegions().map((region) => {
+            return {
+                id: region.ID,
+                tags: region.tags,
+                regionData: region.regionData,
+            };
+        });
+    }
+
+    /**
      * Deletes a region with specified `id`.
      * @param id - Id of the region to delete.
      */
