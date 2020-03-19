@@ -2,6 +2,7 @@
 
 ### 2.2.9
 * The colors used for the styles of `RegionMenu.ts` and `Toolbar.ts` previously contained hues of gray with different shades and opacities. These changes are noted in the table below:
+
 class | property | previous color | current color
 --- | --- | --- | ---
 _.menuRectStyle_ | fill | rgba(64, 64, 64, 0.8) | #000
