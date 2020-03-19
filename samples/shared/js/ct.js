@@ -2746,15 +2746,13 @@ class AreaSelector {
         }
     }
     getRectCopyTemplate(regions) {
-        let template;
         if (regions !== undefined && regions.length > 0) {
             const r = regions[0];
-            template = new Rect_1.Rect(r.regionData.width, r.regionData.height);
+            return new Rect_1.Rect(r.regionData.width, r.regionData.height);
         }
         else {
-            template = new Rect_1.Rect(40, 40);
+            return new Rect_1.Rect(40, 40);
         }
-        return template;
     }
     buildUIElements() {
         this.paper = Snap(this.parentNode);
@@ -3235,15 +3233,15 @@ const Rect_1 = __webpack_require__(1);
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
 const Tag_1 = __webpack_require__(28);
-const TagsDescriptor_1 = __webpack_require__(53);
-const CanvasTools_Editor_1 = __webpack_require__(54);
+const TagsDescriptor_1 = __webpack_require__(54);
+const CanvasTools_Editor_1 = __webpack_require__(55);
 const RGBColor_1 = __webpack_require__(12);
 const LABColor_1 = __webpack_require__(8);
 const XYZColor_1 = __webpack_require__(13);
 const HSLColor_1 = __webpack_require__(14);
-const Palette_1 = __webpack_require__(55);
+const Palette_1 = __webpack_require__(56);
 const Color_1 = __webpack_require__(18);
-__webpack_require__(56);
+__webpack_require__(57);
 class CanvasTools {
 }
 CanvasTools.Core = {
@@ -3281,7 +3279,7 @@ CanvasTools.Filters = {
 CanvasTools.Editor = CanvasTools_Editor_1.Editor;
 CanvasTools.Toolbar = Toolbar_1.Toolbar;
 exports.CanvasTools = CanvasTools;
-__webpack_require__(58);
+__webpack_require__(59);
 
 
 /***/ }),
@@ -6032,7 +6030,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(6);
+const AlternatingCrossElement_1 = __webpack_require__(53);
 const RectElement_1 = __webpack_require__(26);
 const Selector_1 = __webpack_require__(7);
 var SelectionModificator;
@@ -6070,8 +6068,8 @@ class RectSelector extends Selector_1.Selector {
     buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectSelector");
-        this.crossA = new CrossElement_1.CrossElement(this.paper, this.boundRect);
-        this.crossB = new CrossElement_1.CrossElement(this.paper, this.boundRect);
+        this.crossA = new AlternatingCrossElement_1.AlternatingCrossElement(this.paper, this.boundRect);
+        this.crossB = new AlternatingCrossElement_1.AlternatingCrossElement(this.paper, this.boundRect);
         this.selectionBox = new RectElement_1.RectElement(this.paper, this.boundRect, new Rect_1.Rect(0, 0));
         this.selectionBox.node.addClass("selectionBoxStyle");
         this.node.add(this.crossA.node);
@@ -6193,8 +6191,7 @@ class RectSelector extends Selector_1.Selector {
         if (e.ctrlKey && !this.capturingState) {
             this.isTwoPoints = true;
         }
-        if (e.key === " ") {
-            e.preventDefault();
+        if (e.key === "k" || e.key === "K") {
             if (!this.usingKeyboardCursor) {
                 this.activateKeyboardCursor();
             }
@@ -6207,7 +6204,8 @@ class RectSelector extends Selector_1.Selector {
                 this.curKeyboardCross = this.crossA;
             }
         }
-        if (!e.ctrlKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+        if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            e.preventDefault();
             this.moveKeyboardCursor(e.key);
         }
     }
@@ -6257,21 +6255,21 @@ class RectSelector extends Selector_1.Selector {
         this.moveCross(this.crossB, curPoint);
     }
     isKeyboardControlKey(key) {
-        return key === "u" || key === "h" || key === "j" || key === "k";
+        return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
     }
     moveKeyboardCursor(key) {
         const nextPos = { x: this.curKeyboardCross.x, y: this.curKeyboardCross.y };
         switch (key) {
-            case "u":
+            case "ArrowUp":
                 nextPos.y -= 20;
                 break;
-            case "j":
+            case "ArrowDown":
                 nextPos.y += 20;
                 break;
-            case "h":
+            case "ArrowLeft":
                 nextPos.x -= 20;
                 break;
-            case "k":
+            case "ArrowRight":
                 nextPos.x += 20;
                 break;
             default:
@@ -6286,6 +6284,49 @@ exports.RectSelector = RectSelector;
 
 /***/ }),
 /* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const CrossElement_1 = __webpack_require__(6);
+class AlternatingCrossElement extends CrossElement_1.CrossElement {
+    constructor(paper, boundRect) {
+        super(paper, boundRect);
+        this.buildUIElements();
+        this.hide();
+    }
+    move(p, boundRect, square = false, ref = null) {
+        super.move(p, boundRect, square, ref);
+        this.vl2.node.setAttribute("x1", this.vl.attr("x1"));
+        this.vl2.node.setAttribute("x2", this.vl.attr("x2"));
+        this.vl2.node.setAttribute("y2", this.vl.attr("y2"));
+        this.hl2.node.setAttribute("y1", this.hl.attr("y1"));
+        this.hl2.node.setAttribute("x2", this.hl.attr("x2"));
+        this.hl2.node.setAttribute("y2", this.hl.attr("y2"));
+    }
+    resize(width, height) {
+        super.resize(width, height);
+    }
+    buildUIElements() {
+        super.buildUIElements();
+        const verticalLine2 = this.paper.line(0, 0, 0, this.boundRect.height);
+        const horizontalLine2 = this.paper.line(0, 0, this.boundRect.width, 0);
+        this.node.add(verticalLine2);
+        this.node.add(horizontalLine2);
+        this.vl2 = verticalLine2;
+        this.hl2 = horizontalLine2;
+        this.vl.addClass("blackDashes");
+        this.hl.addClass("blackDashes");
+        this.vl2.addClass("whiteDashes");
+        this.hl2.addClass("whiteDashes");
+    }
+}
+exports.AlternatingCrossElement = AlternatingCrossElement;
+
+
+/***/ }),
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6390,7 +6431,7 @@ exports.TagsDescriptor = TagsDescriptor;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7032,7 +7073,7 @@ exports.Editor = Editor;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7194,10 +7235,10 @@ exports.Palette = Palette;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
-window.eve = __webpack_require__(57)
+window.eve = __webpack_require__(58)
 
 // Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
 //
@@ -15345,7 +15386,7 @@ module.exports = Snap
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
@@ -15787,11 +15828,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c)
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(59);
+var content = __webpack_require__(60);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -15805,28 +15846,28 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(61)(content, options);
+var update = __webpack_require__(62)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
 if(false) {}
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(60)(false);
+exports = module.exports = __webpack_require__(61)(false);
 // imports
 
 
 // module
-exports.push([module.i, "/* CanvasTools.css */\n\n/* 1. Editor */\n/* 1.1. Cursors */\n.CanvasToolsEditor {\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\n}\n\n/* 1.2. Layout */\n.CanvasToolsEditor {\n    display: grid;\n    grid-template-rows: 1fr;\n    grid-template-columns: 1fr; \n    width: 100%;\n    height: 100%;\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor * {\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor canvas {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 100;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n    background-color: #111;\n}\n\n.CanvasToolsEditor svg {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 101;\n    width: 100%;\n    height: 100%;\n}\n\n.CanvasToolsEditor svg {\n    cursor: var(--cursor-pointer);\n}\n\n.CanvasToolsEditor svg title {\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.CanvasToolsContainer {\n    overflow: auto;\n    height: 100%;\n    width: 100%;\n}\n\n.CanvasToolsContainer:focus {\n    outline: none;\n}\n\n/* 2. RegionsManager\n\n.regionManager\n-->.regionStyle\n    --> .tagsLayer\n    --> .dragLayer\n    --> .anchorsLayer\n    \n--> .menuLayer\n    --> .menuRectStyle\n*/\n\n/* 2.1. General settings and layout */\n.regionManager {\n    pointer-events: none;\n}\n\n.regionStyle {\n    pointer-events: visiblePainted;\n}\n\n.dragRectStyle {\n    fill: transparent; \n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n}\n\n.dragPointStyle {\n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n    filter: url(#black-glow);\n}\n\n.tagsLayer {\n    pointer-events: none;\n}\n\n.primaryTagRectStyle {\n    stroke-width: 2;\n    stroke-dasharray: 0.5 4;\n    stroke-linecap: round;\n    filter: url(#black-glow);\n}\n\n.primaryTagPointStyle {\n    stroke-width: 1; \n}\n\n.primaryTagTextStyle {\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 9pt;\n    fill: #fff;\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.primaryTagTextStyle::selection {\n    background: none;\n    fill: #fff;\n}\n\n.secondaryTagStyle {\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.anchorStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle.ghost {\n    cursor: var(--cursor-resize);\n}\n\n.anchorStyle.ghost.delete {\n    cursor: var(--cursor-delete);\n}\n\n.anchorStyle.ghost.add {\n    cursor: var(--cursor-add);\n}\n\n.anchorStyle.ghost {\n    stroke-width: 0;\n}\n\n.primaryTagBoundRectStyle {\n    stroke-width: 0.5;\n}\n\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\n    stroke-width: 2;\n    stroke-linecap: round;\n    stroke-dasharray: 0.5 4;\n}\n\n/* 2.2. Default colors */\n.regionManager {\n    --default-color-pure: rgb(128, 128, 128);\n    --default-color-accent: rgba(128, 128, 128, 0.8);\n    --default-color-dark: rgba(64, 64, 64, 0.8);\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\n    --default-color-white: rgb(255, 255, 255);\n    --default-color-transparent: rgba(255, 255, 255, 0);\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\n    --default-color-delete: rgba(216, 24, 65, 1.0);\n    --default-color-add: rgba(21, 127, 240, 1.0);\n}\n\n/* 2.2.1. Shared colors */\n.secondaryTagStyle {\n    fill: var(--default-color-accent);\n}\n\n.anchorStyle {\n    stroke: var(--default-color-dark);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle:hover .anchorStyle {\n    stroke: var(--default-color-white);\n}\n\n.anchorStyle.ghost,\n.anchorStyle.ghost:hover,\n.regionStyle.selected .anchorStyle.ghost,\n.regionStyle.selected .anchorStyle.ghost:hover {\n    fill: var(--default-color-ghost);\n}\n\n.anchorStyle:hover {\n    stroke: var(--default-color-white);\n}\n\n/* 2.2.2. Rect region colors */\n.primaryTagRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n}\n\n.regionStyle:hover .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n}\n\n.regionStyle.selected .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke-dasharray: none;\n}\n\n.primaryTagTextBGStyle {\n    fill: var(--default-color-dark);\n}\n\n.anchorBoneStyle {\n    fill: var(--default-color-transparent);\n}\n\n/* 2.2.3. Point region  colors */\n.primaryTagPointStyle {\n    fill: var(--default-color-pure);\n    stroke:var(--default-color-white);\n}\n\n.dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 0.5;\n}\n\n.regionStyle:hover .dragPointStyle,\n.regionStyle.selected .dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 1.0;\n}\n\n/* 2.2.4. Polyline, polygon region colors */\n.primaryTagBoundRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n    opacity: 0.25;\n}\n\n.regionStyle.selected .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n}\n\n.regionStyle:hover .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n}\n\n.primaryTagPolylineStyle {\n    fill: var(--default-color-transparent);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolylineStyle {\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.primaryTagPolygonStyle {\n    fill: var(--default-color-shadow);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.regionStyle:hover .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n}\n\n.regionStyle:hover .anchorStyle.ghost.delete,\n.regionStyle.selected .anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete:hover {\n    stroke: var(--default-color-delete);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.regionStyle:hover .anchorStyle.ghost.add,\n.regionStyle.selected .anchorStyle.ghost.add,\n.anchorStyle.ghost.add,\n.anchorStyle.ghost.add:hover {\n    stroke: var(--default-color-add);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.anchorLineStyle {\n    fill: none;\n    stroke-width: 5;\n    stroke: var(--default-color-transparent);  \n}\n\nsvg:not(:root) .menuLayer {\n    overflow: visible;\n}\n\n.menuRectStyle { \n    stroke-width:0;\n    fill: rgba(64, 64, 64, 0.8);\n    filter: url(#black-glow); \n}\n\n.menuItemBack {\n    stroke-width: 1.5;\n    stroke: rgba(198, 198, 198, 0.2);\n    fill:  rgb(32, 32, 32);\n}\n\n.menuIcon {\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 10pt;\n    fill: rgb(64, 64, 64);\n}\n\n.menuItem {\n    stroke-width: 1.5;\n    stroke: rgba(198, 198, 198, 0.2);\n    fill:transparent;\n}\n\n.menuItem:hover {\n    stroke: rgba(198, 198, 198, 0.8);\n}\n\n/* Freezing regions */ \n\n.regionManager.frozen .regionStyle.old,\n.regionManager.frozen .regionStyle.old .dragRectStyle,\n.regionManager.frozen .regionStyle.old .dragPointStyle {\n    pointer-events: none;\n}\n\n.regionManager.frozen .regionStyle.old .dragRectStyle, \n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\n    cursor: default; \n}\n\n.regionManager.frozen .anchorStyle.ghost {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old, \n.regionManager.frozen .regionStyle.old:hover{\n    opacity: 0.5;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\n    stroke-width: 1;\n    stroke-dasharray: 0 0;\n}\n\n.regionManager.frozen .regionStyle.old .anchorStyle {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\n    opacity: 0.25;\n}\n\n/* AreaSelector\n\n.areaSelector\n-->.rectSelector\n    --> .maskStyle\n        [mask]\n            .maskInStyle\n            .maskOutStyle\n        .crossStyle\n            line\n            line\n-->.rectCopySelector\n    --> .crossStyle\n            line\n            line\n        .copyRectStyle\n-->.pointSelector\n    --> .crossStyle\n        .pointStyle\n-->.polylineSelector\n    --> .polylineStyle\n        .polylineGroupStyle\n        --> .polylinePointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n-->.polygonSelector\n    --> .polygonStyle\n        .polygonGroupStyle\n        --> .polygonPointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n*/\n\n#selectionOverlay {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n}\n\n.crossStyle line {\n    stroke-width:1;\n    stroke-dasharray: 3 3;\n    stroke: #666;\n    pointer-events: none; \n}\n\n.selectionBoxStyle {\n    fill: #fff;\n    fill-opacity: 0.25;\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.rectCopySelector .copyRectStyle {\n    stroke-width:1;\n    stroke: #666;\n    fill: transparent;\n    pointer-events: none; \n}\n\n.pointSelector .pointStyle {\n    stroke-width:2;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none; \n}\n\n.polylineSelector .polylineStyle {\n    fill: transparent;\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polylineSelector .polylinePointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polylineSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polylineSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n.polygonSelector .polygonStyle {\n    fill: rgba(255,255,255, 0.2);\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polygonSelector .polygonPointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polygonSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polygonSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n/* Toolbar \n\n.toolbarLayer\n--> .toolbarBGStyle\n--> .iconsLayerStyle\n    --> .iconStyle\n        --> .iconBGRectStyle\n            .iconImageStyle\n*/\n.toolbarBGStyle {\n    fill: #666;\n}\n\n.iconStyle {\n    pointer-events: all;\n}\n\n.iconStyle.selector .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.selector:hover .iconBGRectStyle{\n    fill: rgba(68, 68, 68, 0.5);\n}\n\n.iconStyle.selector.selected .iconBGRectStyle {\n    fill: #333;\n}\n\n.iconStyle .iconImageStyle * {\n    stroke: #fff;\n}\n\n\n.iconStyle.switch .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.switch:hover .iconBGRectStyle{\n    fill: rgba(68, 68, 68, 0.5);\n}\n\n.iconStyle.switch .iconImageStyle * {\n    stroke: #333;\n}\n\n.iconStyle.switch.selected .iconImageStyle * {\n    stroke: rgb(14, 186, 253);\n    stroke-width: 1.5;\n}\n\n.iconStyle .iconImageStyle .accent-f {\n    fill: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle .iconImageStyle .accent-s {\n    stroke: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle.separator line {\n    stroke: #333;\n    stroke-width: 0.5px;\n}", ""]);
+exports.push([module.i, "/* CanvasTools.css */\r\n\r\n/* 1. Editor */\r\n/* 1.1. Cursors */\r\n.CanvasToolsEditor {\r\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\r\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\r\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\r\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\r\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\r\n}\r\n\r\n/* 1.2. Layout */\r\n.CanvasToolsEditor {\r\n    display: grid;\r\n    grid-template-rows: 1fr;\r\n    grid-template-columns: 1fr; \r\n    width: 100%;\r\n    height: 100%;\r\n    box-sizing: content-box;\r\n}\r\n\r\n.CanvasToolsEditor * {\r\n    box-sizing: content-box;\r\n}\r\n\r\n.CanvasToolsEditor canvas {\r\n    position: relative;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    z-index: 100;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n    background-color: #111;\r\n}\r\n\r\n.CanvasToolsEditor svg {\r\n    position: relative;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    z-index: 101;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\n.CanvasToolsEditor svg {\r\n    cursor: var(--cursor-pointer);\r\n}\r\n\r\n.CanvasToolsEditor svg title {\r\n    -moz-user-select: none; /* Firefox */\r\n    -ms-user-select: none; /* Internet Explorer/Edge */\r\n    user-select: none;\r\n    pointer-events: none;\r\n}\r\n\r\n.CanvasToolsContainer {\r\n    overflow: auto;\r\n    height: 100%;\r\n    width: 100%;\r\n}\r\n\r\n.CanvasToolsContainer:focus {\r\n    outline: none;\r\n}\r\n\r\n/* 2. RegionsManager\r\n\r\n.regionManager\r\n-->.regionStyle\r\n    --> .tagsLayer\r\n    --> .dragLayer\r\n    --> .anchorsLayer\r\n    \r\n--> .menuLayer\r\n    --> .menuRectStyle\r\n*/\r\n\r\n/* 2.1. General settings and layout */\r\n.regionManager {\r\n    pointer-events: none;\r\n}\r\n\r\n.regionStyle {\r\n    pointer-events: visiblePainted;\r\n}\r\n\r\n.dragRectStyle {\r\n    fill: transparent; \r\n    stroke-width: 0;\r\n    pointer-events: all;\r\n    cursor: var(--cursor-move);\r\n}\r\n\r\n.dragPointStyle {\r\n    stroke-width: 0;\r\n    pointer-events: all;\r\n    cursor: var(--cursor-move);\r\n    filter: url(#black-glow);\r\n}\r\n\r\n.tagsLayer {\r\n    pointer-events: none;\r\n}\r\n\r\n.primaryTagRectStyle {\r\n    stroke-width: 2;\r\n    stroke-dasharray: 0.5 4;\r\n    stroke-linecap: round;\r\n    filter: url(#black-glow);\r\n}\r\n\r\n.primaryTagPointStyle {\r\n    stroke-width: 1; \r\n}\r\n\r\n.primaryTagTextStyle {\r\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\r\n    font-size: 9pt;\r\n    fill: #fff;\r\n    -moz-user-select: none; /* Firefox */\r\n    -ms-user-select: none; /* Internet Explorer/Edge */\r\n    user-select: none;\r\n    pointer-events: none;\r\n}\r\n\r\n.primaryTagTextStyle::selection {\r\n    background: none;\r\n    fill: #fff;\r\n}\r\n\r\n.secondaryTagStyle {\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.anchorStyle {\r\n    stroke-width: 2;\r\n}\r\n\r\n.anchorStyle.ghost {\r\n    cursor: var(--cursor-resize);\r\n}\r\n\r\n.anchorStyle.ghost.delete {\r\n    cursor: var(--cursor-delete);\r\n}\r\n\r\n.anchorStyle.ghost.add {\r\n    cursor: var(--cursor-add);\r\n}\r\n\r\n.anchorStyle.ghost {\r\n    stroke-width: 0;\r\n}\r\n\r\n.primaryTagBoundRectStyle {\r\n    stroke-width: 0.5;\r\n}\r\n\r\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\r\n    stroke-width: 2;\r\n    stroke-linecap: round;\r\n    stroke-dasharray: 0.5 4;\r\n}\r\n\r\n/* 2.2. Default colors */\r\n.regionManager {\r\n    --default-color-pure: rgb(128, 128, 128);\r\n    --default-color-accent: rgba(128, 128, 128, 0.8);\r\n    --default-color-dark: rgba(64, 64, 64, 0.8);\r\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\r\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\r\n    --default-color-white: rgb(255, 255, 255);\r\n    --default-color-transparent: rgba(255, 255, 255, 0);\r\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\r\n    --default-color-delete: rgba(216, 24, 65, 1.0);\r\n    --default-color-add: rgba(21, 127, 240, 1.0);\r\n}\r\n\r\n/* 2.2.1. Shared colors */\r\n.secondaryTagStyle {\r\n    fill: var(--default-color-accent);\r\n}\r\n\r\n.anchorStyle {\r\n    stroke: var(--default-color-dark);\r\n    fill: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle {\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n.anchorStyle.ghost,\r\n.anchorStyle.ghost:hover,\r\n.regionStyle.selected .anchorStyle.ghost,\r\n.regionStyle.selected .anchorStyle.ghost:hover {\r\n    fill: var(--default-color-ghost);\r\n}\r\n\r\n.anchorStyle:hover {\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n/* 2.2.2. Rect region colors */\r\n.primaryTagRectStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke:var(--default-color-accent);\r\n}\r\n\r\n.regionStyle:hover .primaryTagRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n.regionStyle.selected .primaryTagRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.primaryTagTextBGStyle {\r\n    fill: var(--default-color-dark);\r\n}\r\n\r\n.anchorBoneStyle {\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n/* 2.2.3. Point region  colors */\r\n.primaryTagPointStyle {\r\n    fill: var(--default-color-pure);\r\n    stroke:var(--default-color-white);\r\n}\r\n\r\n.dragPointStyle {\r\n    fill: var(--default-color-ghost);\r\n    opacity: 0.5;\r\n}\r\n\r\n.regionStyle:hover .dragPointStyle,\r\n.regionStyle.selected .dragPointStyle {\r\n    fill: var(--default-color-ghost);\r\n    opacity: 1.0;\r\n}\r\n\r\n/* 2.2.4. Polyline, polygon region colors */\r\n.primaryTagBoundRectStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke:var(--default-color-accent);\r\n    opacity: 0.25;\r\n}\r\n\r\n.regionStyle.selected .primaryTagBoundRectStyle {\r\n    fill: var(--default-color-highlight);\r\n}\r\n\r\n.regionStyle:hover .primaryTagBoundRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n.primaryTagPolylineStyle {\r\n    fill: var(--default-color-transparent);\r\n    stroke: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle.selected .primaryTagPolylineStyle {\r\n    filter: url(#black-glow);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.primaryTagPolygonStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle.selected .primaryTagPolygonStyle {\r\n    fill: var(--default-color-highlight);\r\n    filter: url(#black-glow);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.regionStyle:hover .primaryTagPolygonStyle {\r\n    fill: var(--default-color-highlight);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle.ghost.delete,\r\n.regionStyle.selected .anchorStyle.ghost.delete,\r\n.anchorStyle.ghost.delete,\r\n.anchorStyle.ghost.delete:hover {\r\n    stroke: var(--default-color-delete);\r\n    stroke-width: 2px;\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle.ghost.add,\r\n.regionStyle.selected .anchorStyle.ghost.add,\r\n.anchorStyle.ghost.add,\r\n.anchorStyle.ghost.add:hover {\r\n    stroke: var(--default-color-add);\r\n    stroke-width: 2px;\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n.anchorLineStyle {\r\n    fill: none;\r\n    stroke-width: 5;\r\n    stroke: var(--default-color-transparent);  \r\n}\r\n\r\nsvg:not(:root) .menuLayer {\r\n    overflow: visible;\r\n}\r\n\r\n.menuRectStyle { \r\n    stroke-width:0;\r\n    fill: #000;\r\n    filter: url(#black-glow); \r\n}\r\n\r\n.menuItemBack {\r\n    stroke-width: 1.5;\r\n    stroke: rgba(198, 198, 198, 0.2);\r\n    fill:  #000;\r\n}\r\n\r\n.menuIcon {\r\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\r\n    font-size: 10pt;\r\n    fill: #fff;\r\n}\r\n\r\n.menuItem {\r\n    stroke-width: 1.5;\r\n    stroke: #fff;\r\n    fill:transparent;\r\n}\r\n\r\n.menuItem:hover {\r\n    stroke: rgba(21, 127, 240);\r\n}\r\n\r\n/* Freezing regions */ \r\n\r\n.regionManager.frozen .regionStyle.old,\r\n.regionManager.frozen .regionStyle.old .dragRectStyle,\r\n.regionManager.frozen .regionStyle.old .dragPointStyle {\r\n    pointer-events: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .dragRectStyle, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\r\n    cursor: default; \r\n}\r\n\r\n.regionManager.frozen .anchorStyle.ghost {\r\n    display: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old, \r\n.regionManager.frozen .regionStyle.old:hover{\r\n    opacity: 0.5;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\r\n    stroke-width: 1;\r\n    stroke-dasharray: 0 0;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .anchorStyle {\r\n    display: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\r\n    opacity: 0.25;\r\n}\r\n\r\n/* AreaSelector\r\n\r\n.areaSelector\r\n-->.rectSelector\r\n    --> .maskStyle\r\n        [mask]\r\n            .maskInStyle\r\n            .maskOutStyle\r\n        .crossStyle\r\n            line\r\n            line\r\n-->.rectCopySelector\r\n    --> .crossStyle\r\n            line\r\n            line\r\n        .copyRectStyle\r\n-->.pointSelector\r\n    --> .crossStyle\r\n        .pointStyle\r\n-->.polylineSelector\r\n    --> .polylineStyle\r\n        .polylineGroupStyle\r\n        --> .polylinePointStyle\r\n        .nextSegmentStyle\r\n        .nextPointStyle\r\n-->.polygonSelector\r\n    --> .polygonStyle\r\n        .polygonGroupStyle\r\n        --> .polygonPointStyle\r\n        .nextSegmentStyle\r\n        .nextPointStyle\r\n*/\r\n\r\n#selectionOverlay {\r\n    position: relative;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n}\r\n\r\n.crossStyle line {\r\n    stroke-width:1;\r\n    stroke-dasharray: 3 3;\r\n    stroke: #666;\r\n    pointer-events: none; \r\n}\r\n\r\n.crossStyle .blackDashes {\r\n    stroke-width:3;\r\n    stroke-dasharray: 3 3;\r\n    stroke: #000;\r\n    pointer-events: none; \r\n}\r\n\r\n.crossStyle .whiteDashes {\r\n    stroke-width:3;\r\n    stroke-dasharray: 0 3 0;\r\n    stroke: #fff;\r\n    pointer-events: none; \r\n}\r\n\r\n.selectionBoxStyle {\r\n    fill: #fff;\r\n    fill-opacity: 0.25;\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.rectCopySelector .copyRectStyle {\r\n    stroke-width:1;\r\n    stroke: #666;\r\n    fill: transparent;\r\n    pointer-events: none; \r\n}\r\n\r\n.pointSelector .pointStyle {\r\n    stroke-width:2;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none; \r\n}\r\n\r\n.polylineSelector .polylineStyle {\r\n    fill: transparent;\r\n    stroke-width: 2px;\r\n    stroke:  rgba(21, 127, 240, 0.5);\r\n    pointer-events: none;\r\n}\r\n\r\n.polylineSelector .polylinePointStyle {\r\n    fill:  rgba(21, 127, 240, 1.0);\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.polylineSelector .nextSegmentStyle {\r\n    stroke-width:2;\r\n    stroke-dasharray: 3 3;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    pointer-events: none;\r\n}\r\n.polylineSelector .nextPointStyle {\r\n    stroke-width:2;\r\n    r: 6px;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .polygonStyle {\r\n    fill: rgba(255,255,255, 0.2);\r\n    stroke-width: 2px;\r\n    stroke:  rgba(21, 127, 240, 0.5);\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .polygonPointStyle {\r\n    fill:  rgba(21, 127, 240, 1.0);\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .nextSegmentStyle {\r\n    stroke-width:2;\r\n    stroke-dasharray: 3 3;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    pointer-events: none;\r\n}\r\n.polygonSelector .nextPointStyle {\r\n    stroke-width:2;\r\n    r: 6px;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none;\r\n}\r\n\r\n/* Toolbar \r\n\r\n.toolbarLayer\r\n--> .toolbarBGStyle\r\n--> .iconsLayerStyle\r\n    --> .iconStyle\r\n        --> .iconBGRectStyle\r\n            .iconImageStyle\r\n*/\r\n.toolbarBGStyle {\r\n    fill: #000;\r\n}\r\n\r\n.iconStyle {\r\n    pointer-events: all;\r\n}\r\n\r\n.iconStyle.selector .iconBGRectStyle{\r\n    fill: transparent;\r\n}\r\n\r\n.iconStyle.selector:hover .iconBGRectStyle {\r\n    fill: rgb(21, 127, 240);\r\n}\r\n\r\n.iconStyle.selector.selected .iconBGRectStyle {\r\n    fill: rgb(21, 127, 240);\r\n}\r\n\r\n.iconStyle .iconImageStyle * {\r\n    stroke: #fff;\r\n}\r\n\r\n\r\n.iconStyle.switch .iconBGRectStyle{\r\n    fill: transparent;\r\n}\r\n\r\n.iconStyle.switch:hover .iconBGRectStyle{\r\n    fill: rgb(21, 127, 240);\r\n}\r\n\r\n.iconStyle.switch .iconImageStyle * {\r\n    stroke: #fff;\r\n}\r\n\r\n.iconStyle.switch.selected .iconImageStyle * {\r\n    stroke: rgb(14, 186, 253);\r\n    stroke-width: 1.5;\r\n}\r\n\r\n.iconStyle .iconImageStyle .accent-f {\r\n    fill: rgba(21, 127, 240, 1.0);\r\n}\r\n\r\n.iconStyle .iconImageStyle .accent-s {\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n}\r\n\r\n.iconStyle.separator line {\r\n    stroke: #fff;\r\n    stroke-width: 0.5px;\r\n}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports) {
 
 /*
@@ -15908,7 +15949,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -15977,7 +16018,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(62);
+var	fixUrls = __webpack_require__(63);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -16312,7 +16353,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports) {
 
 

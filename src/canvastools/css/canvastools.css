@@ -339,7 +339,7 @@ svg:not(:root) .menuLayer {
 }
 
 .menuItem:hover {
-    stroke: rgba(21, 127, 240);
+    stroke: #157ff0;
 }
 
 /* Freezing regions */ 
@@ -542,11 +542,11 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.selector:hover .iconBGRectStyle {
-    fill: rgb(21, 127, 240);
+    fill: #157ff0;
 }
 
 .iconStyle.selector.selected .iconBGRectStyle {
-    fill: rgb(21, 127, 240);
+    fill: #157ff0;
 }
 
 .iconStyle .iconImageStyle * {
@@ -559,7 +559,7 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.switch:hover .iconBGRectStyle{
-    fill: rgb(21, 127, 240);
+    fill: #157ff0;
 }
 
 .iconStyle.switch .iconImageStyle * {
