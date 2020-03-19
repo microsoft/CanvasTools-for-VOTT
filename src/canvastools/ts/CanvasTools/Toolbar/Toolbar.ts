@@ -133,10 +133,6 @@ export class Toolbar {
         this.icons.push(newIcon);
         this.iconsLayer.add(newIcon.node);
 
-        if (newIcon.description !== null) {
-            newIcon.node.attr({tabindex: 0});
-        }
-
         newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
         this.recalculateToolbarSize(newIcon);
         this.updateToolbarSize();
@@ -179,18 +175,15 @@ export class Toolbar {
                     }
                 }
 
-                if (e.key === " ") {
+                if (e.key === " " || e.key === "Enter") {
+                    e.preventDefault();
                     const icon = this.findFocusedIcon();
-                    /*if (icon !== undefined) {
+                    if (icon !== undefined) {
                         if (icon instanceof ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon
                             || icon instanceof ToolbarTriggerIcon) {
-                            // icon.activate();
-                            console.log(icon.description.action);
+                            icon.activate();
                         }
                     }
-                    else {
-                        console.log("none found");
-                    }*/
                 }
             }
         });

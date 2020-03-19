@@ -75,11 +75,11 @@ export abstract class ToolbarIcon {
         }
     }
 
-    protected onfocusCallback() {
+    protected onfocusCallback = () => {
         this.focused = true;
     }
 
-    protected onfocusoutCallback() {
+    protected onfocusoutCallback = () => {
         this.focused = false;
     }
 }
