@@ -1,5 +1,27 @@
 ## Changelog
 
+### 2.2.9
+* The colors used for the styles of `RegionMenu.ts` and `Toolbar.ts` previously contained hues of gray with different shades and opacities. They have been changed to three colors, `#fff`, `#000`, and `#157ff0`, which all possess luminosity ratios above 3:1 against the other two. This is to ensure visibility for people with vision disabilities. These changes are noted in the table below:
+
+class | property | previous color | current color
+--- | --- | --- | ---
+_.menuRectStyle_ | fill | rgba(64, 64, 64, 0.8) | #000
+_.menuItemBack_ | fill | rgb(32, 32, 32) | #000
+_.menuIcon_ | fill | rgb(64, 64, 64) | #fff
+_.menuItem_ | stroke | rgba(198, 198, 198, 0.2) | #fff
+_.menuItem:hover_ | stroke | rgba(198, 198, 198, 0.8) | #157ff0
+_.toolbarBGStyle_ | fill | #666 | #000
+_.iconStyle.selector:hover .iconBGRectStyle_ | fill | rgba(68, 68, 68, 0.5) | #157ff0
+_.iconStyle.selector.selected .iconBGRectStyle_ | fill | #333 | #157ff0
+_.iconStyle.switch:hover .iconBGRectStyle_ | fill | rgba(68, 68, 68, 0.5) | #157ff0
+_.iconStyle.switch .iconImageStyle_ | stroke | #333 | #fff
+_.iconStyle.separator line | stroke | #333 | #fff
+
+* The `CrossElement` nodes of `RectSelector.ts` have been replaced with `AlternateCrossElement` nodes, which are derived from `CrossElement`. While `CrossElement` is composed of lines with a dotted grey pattern, `AlternateCrossElement` is composed of lines with an alternating black-and-white pattern. This ensures that the cross is visible on background images of all colors.
+* Keyboard controls have been changed in the following ways:
+    * In order to start using keyboard controls for the `RectSelector`, the user will now press the `K` key instead of the space bar. This is to avoid collision with existing HTML5 functionalities that use the space bar.
+    * While users previously used the `UHJK` keys to move the selection cross, the functionality has moved to holding the shift key in conjunction with the arrow keys. This reduces the number of keys with enhanced functionality.
+
 ### 2.2.7
 Keyboard controls are now available when using the RectSelector.
 

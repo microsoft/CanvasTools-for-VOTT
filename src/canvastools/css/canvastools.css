@@ -316,30 +316,30 @@ svg:not(:root) .menuLayer {
 
 .menuRectStyle { 
     stroke-width:0;
-    fill: rgba(64, 64, 64, 0.8);
+    fill: #000;
     filter: url(#black-glow); 
 }
 
 .menuItemBack {
     stroke-width: 1.5;
     stroke: rgba(198, 198, 198, 0.2);
-    fill:  rgb(32, 32, 32);
+    fill:  #000;
 }
 
 .menuIcon {
     font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 10pt;
-    fill: rgb(64, 64, 64);
+    fill: #fff;
 }
 
 .menuItem {
     stroke-width: 1.5;
-    stroke: rgba(198, 198, 198, 0.2);
+    stroke: #fff;
     fill:transparent;
 }
 
 .menuItem:hover {
-    stroke: rgba(198, 198, 198, 0.8);
+    stroke: #157ff0;
 }
 
 /* Freezing regions */ 
@@ -431,6 +431,20 @@ svg:not(:root) .menuLayer {
     pointer-events: none; 
 }
 
+.crossStyle .blackDashes {
+    stroke-width:3;
+    stroke-dasharray: 3 3;
+    stroke: #000;
+    pointer-events: none; 
+}
+
+.crossStyle .whiteDashes {
+    stroke-width:3;
+    stroke-dasharray: 0 3 0;
+    stroke: #fff;
+    pointer-events: none; 
+}
+
 .selectionBoxStyle {
     fill: #fff;
     fill-opacity: 0.25;
@@ -516,7 +530,7 @@ svg:not(:root) .menuLayer {
             .iconImageStyle
 */
 .toolbarBGStyle {
-    fill: #666;
+    fill: #000;
 }
 
 .iconStyle {
@@ -527,12 +541,12 @@ svg:not(:root) .menuLayer {
     fill: transparent;
 }
 
-.iconStyle.selector:hover .iconBGRectStyle{
-    fill: rgba(68, 68, 68, 0.5);
+.iconStyle.selector:hover .iconBGRectStyle {
+    fill: #157ff0;
 }
 
 .iconStyle.selector.selected .iconBGRectStyle {
-    fill: #333;
+    fill: #157ff0;
 }
 
 .iconStyle .iconImageStyle * {
@@ -545,11 +559,11 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.switch:hover .iconBGRectStyle{
-    fill: rgba(68, 68, 68, 0.5);
+    fill: #157ff0;
 }
 
 .iconStyle.switch .iconImageStyle * {
-    stroke: #333;
+    stroke: #fff;
 }
 
 .iconStyle.switch.selected .iconImageStyle * {
@@ -566,6 +580,6 @@ svg:not(:root) .menuLayer {
 }
 
 .iconStyle.separator line {
-    stroke: #333;
+    stroke: #fff;
     stroke-width: 0.5px;
 }
