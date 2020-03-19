@@ -1,7 +1,7 @@
 ## Changelog
 
 ### 2.2.9
-* The colors used for the styles of `RegionMenu.ts` and `Toolbar.ts` previously contained hues of gray with different shades and opacities. These changes are noted in the table below:
+* The colors used for the styles of `RegionMenu.ts` and `Toolbar.ts` previously contained hues of gray with different shades and opacities. They have been changed to three colors, `#fff`, `#000`, and `#157ff0`, which all possess luminosity ratios above 3:1 against the other two. This is to ensure visibility for people with vision disabilities. These changes are noted in the table below:
 
 class | property | previous color | current color
 --- | --- | --- | ---
