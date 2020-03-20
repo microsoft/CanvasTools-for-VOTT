@@ -1988,6 +1988,8 @@ class RegionsManager {
         }
         this.sortRegionsByArea();
         this.redrawAllRegions();
+        document.getElementById("regionAnnouncer").innerHTML =
+            tagsDescriptor.primary ? tagsDescriptor.primary.name : "";
     }
     addRectRegion(id, regionData, tagsDescriptor) {
         this.menu.hide();
@@ -6623,6 +6625,10 @@ class Editor {
             },
         });
         this.subscribeToEvents();
+        const regionAnnouncer = document.createElement("div");
+        regionAnnouncer.setAttribute("aria-live", "assertive");
+        regionAnnouncer.id = "regionAnnouncer";
+        container.appendChild(regionAnnouncer);
     }
     get api() {
         return this.mergedAPI;
