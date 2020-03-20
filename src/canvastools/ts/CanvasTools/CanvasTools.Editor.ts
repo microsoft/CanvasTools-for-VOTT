@@ -657,6 +657,13 @@ export class Editor {
         }) as any;
 
         this.subscribeToEvents();
+
+        // create aria live region for announcements
+        const regionAnnouncer = document.createElement("div");
+        regionAnnouncer.setAttribute("aria-live", "assertive");
+        regionAnnouncer.setAttribute("visibility", "hidden");
+        regionAnnouncer.id = "regionAnnouncer";
+        container.appendChild(regionAnnouncer);
     }
 
     /**

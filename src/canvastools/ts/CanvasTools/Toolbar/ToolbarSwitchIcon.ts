@@ -49,6 +49,7 @@ export class ToolbarSwitchIcon extends ToolbarIcon {
         this.node = this.paper.g();
         this.node.addClass("iconStyle");
         this.node.addClass("switch");
+        this.node.attr({tabindex: 0, role: "button"});
 
         this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
         this.iconBackgrounRect.addClass("iconBGRectStyle");
@@ -81,5 +82,8 @@ export class ToolbarSwitchIcon extends ToolbarIcon {
         this.node.click((e) => {
             this.activate();
         });
+
+        this.node.node.addEventListener("focus", this.onfocusCallback);
+        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
     }
 }
