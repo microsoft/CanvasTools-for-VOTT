@@ -161,7 +161,8 @@ export class RegionsManager {
         }
         this.sortRegionsByArea();
         this.redrawAllRegions();
-        document.getElementById("regionAnnouncer").innerHTML = tagsDescriptor.toString();
+        document.getElementById("regionAnnouncer").innerHTML =
+            tagsDescriptor.primary ? tagsDescriptor.primary.name : "";
     }
 
     /**
