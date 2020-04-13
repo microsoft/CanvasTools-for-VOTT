@@ -6059,10 +6059,8 @@ class RectCopySelector extends Selector_1.Selector {
         if (e.key === "z" || e.key === "Z") {
             if (!this.usingKeyboardCursor) {
                 this.activateKeyboardCursor();
-                console.log("starting");
             }
             else {
-                console.log("placing");
                 if (typeof this.callbacks.onSelectionEnd === "function") {
                     let p1 = new Point2D_1.Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
                     let p2 = new Point2D_1.Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
@@ -6076,7 +6074,6 @@ class RectCopySelector extends Selector_1.Selector {
             }
         }
         if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
-            console.log("moviung");
             e.preventDefault();
             this.moveKeyboardCursor(e.key);
         }
