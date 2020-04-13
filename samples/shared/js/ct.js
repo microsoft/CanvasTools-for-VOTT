@@ -1988,8 +1988,7 @@ class RegionsManager {
         }
         this.sortRegionsByArea();
         this.redrawAllRegions();
-        document.getElementById("regionAnnouncer").innerHTML =
-            tagsDescriptor.primary ? tagsDescriptor.primary.name : "";
+        document.getElementById("regionAnnouncer").innerHTML = tagsDescriptor.toString();
     }
     addRectRegion(id, regionData, tagsDescriptor) {
         this.menu.hide();
@@ -6627,6 +6626,7 @@ class Editor {
         this.subscribeToEvents();
         const regionAnnouncer = document.createElement("div");
         regionAnnouncer.setAttribute("aria-live", "assertive");
+        regionAnnouncer.setAttribute("visibility", "hidden");
         regionAnnouncer.id = "regionAnnouncer";
         container.appendChild(regionAnnouncer);
     }
