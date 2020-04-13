@@ -6,7 +6,7 @@ import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { IRect } from "../../Interface/IRect";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
-import { CrossElement } from "../Component/CrossElement";
+import { AlternatingCrossElement } from "../Component/AlternatingCrossElement";
 import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
 import { IPoint2D } from "../../Interface/IPoint2D";
@@ -23,7 +23,7 @@ export class RectCopySelector extends Selector {
     /**
      * The `CrossElement` to define rect center.
      */
-    private crossA: CrossElement;
+    private crossA: AlternatingCrossElement;
 
     /**
      * The `RectElement` to show current rect.
@@ -95,7 +95,7 @@ export class RectCopySelector extends Selector {
         this.node = this.paper.g();
         this.node.addClass("rectCopySelector");
 
-        this.crossA = new CrossElement(this.paper, this.boundRect);
+        this.crossA = new AlternatingCrossElement(this.paper, this.boundRect);
         this.copyRectEl = new RectElement(this.paper, this.boundRect, this.copyRect);
         this.copyRectEl.node.addClass("copyRectStyle");
 
@@ -251,16 +251,18 @@ export class RectCopySelector extends Selector {
                 this.activateKeyboardCursor();
             } else {
                 if (typeof this.callbacks.onSelectionEnd === "function") {
-                    let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
-                    let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
-    
+                    let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2,
+                        this.crossA.y - this.copyRect.height / 2);
+                    let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2,
+                        this.crossA.y + this.copyRect.height / 2);
+
                     p1 = p1.boundToRect(this.boundRect);
                     p2 = p2.boundToRect(this.boundRect);
                     const width = p2.x - p1.x;
                     const height = p2.y - p1.y;
-    
+
                     const regionData = RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
-    
+
                     this.callbacks.onSelectionEnd(regionData);
                 }
             }

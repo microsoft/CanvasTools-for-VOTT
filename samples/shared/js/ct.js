@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 29);
+/******/ 	return __webpack_require__(__webpack_require__.s = 30);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -580,69 +580,6 @@ exports.RegionComponent = RegionComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Point2D_1 = __webpack_require__(0);
-const Element_1 = __webpack_require__(17);
-class CrossElement extends Element_1.Element {
-    get x() {
-        return this.center.x;
-    }
-    get y() {
-        return this.center.y;
-    }
-    constructor(paper, boundRect) {
-        super(paper, boundRect);
-        this.buildUIElements();
-        this.hide();
-    }
-    boundToRect(rect) {
-        return new Point2D_1.Point2D(this.x, this.y).boundToRect(rect);
-    }
-    move(p, boundRect, square = false, ref = null) {
-        const np = new Point2D_1.Point2D(p).boundToRect(boundRect);
-        if (square) {
-            const dx = Math.abs(np.x - ref.x);
-            const vx = Math.sign(np.x - ref.x);
-            const dy = Math.abs(np.y - ref.y);
-            const vy = Math.sign(np.y - ref.y);
-            const d = Math.min(dx, dy);
-            np.x = ref.x + d * vx;
-            np.y = ref.y + d * vy;
-        }
-        this.center.move(np);
-        this.vl.node.setAttribute("x1", np.x.toString());
-        this.vl.node.setAttribute("x2", np.x.toString());
-        this.vl.node.setAttribute("y2", boundRect.height.toString());
-        this.hl.node.setAttribute("y1", np.y.toString());
-        this.hl.node.setAttribute("x2", boundRect.width.toString());
-        this.hl.node.setAttribute("y2", np.y.toString());
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.vl.node.setAttribute("y2", height.toString());
-        this.hl.node.setAttribute("x2", width.toString());
-    }
-    buildUIElements() {
-        const verticalLine = this.paper.line(0, 0, 0, this.boundRect.height);
-        const horizontalLine = this.paper.line(0, 0, this.boundRect.width, 0);
-        this.node = this.paper.g();
-        this.node.addClass("crossStyle");
-        this.node.add(verticalLine);
-        this.node.add(horizontalLine);
-        this.hl = horizontalLine;
-        this.vl = verticalLine;
-        this.center = new Point2D_1.Point2D(0, 0);
-    }
-}
-exports.CrossElement = CrossElement;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 const Element_1 = __webpack_require__(17);
 class Selector extends Element_1.Element {
     constructor(parent, paper, boundRect, callbacks) {
@@ -738,7 +675,7 @@ exports.Selector = Selector;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -857,7 +794,7 @@ exports.LABColor = LABColor;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -930,7 +867,7 @@ exports.Region = Region;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1035,7 +972,7 @@ exports.DragComponent = DragComponent;
 
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1081,6 +1018,69 @@ class TagsComponent extends RegionComponent_1.RegionComponent {
     }
 }
 exports.TagsComponent = TagsComponent;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Point2D_1 = __webpack_require__(0);
+const Element_1 = __webpack_require__(17);
+class CrossElement extends Element_1.Element {
+    get x() {
+        return this.center.x;
+    }
+    get y() {
+        return this.center.y;
+    }
+    constructor(paper, boundRect) {
+        super(paper, boundRect);
+        this.buildUIElements();
+        this.hide();
+    }
+    boundToRect(rect) {
+        return new Point2D_1.Point2D(this.x, this.y).boundToRect(rect);
+    }
+    move(p, boundRect, square = false, ref = null) {
+        const np = new Point2D_1.Point2D(p).boundToRect(boundRect);
+        if (square) {
+            const dx = Math.abs(np.x - ref.x);
+            const vx = Math.sign(np.x - ref.x);
+            const dy = Math.abs(np.y - ref.y);
+            const vy = Math.sign(np.y - ref.y);
+            const d = Math.min(dx, dy);
+            np.x = ref.x + d * vx;
+            np.y = ref.y + d * vy;
+        }
+        this.center.move(np);
+        this.vl.node.setAttribute("x1", np.x.toString());
+        this.vl.node.setAttribute("x2", np.x.toString());
+        this.vl.node.setAttribute("y2", boundRect.height.toString());
+        this.hl.node.setAttribute("y1", np.y.toString());
+        this.hl.node.setAttribute("x2", boundRect.width.toString());
+        this.hl.node.setAttribute("y2", np.y.toString());
+    }
+    resize(width, height) {
+        super.resize(width, height);
+        this.vl.node.setAttribute("y2", height.toString());
+        this.hl.node.setAttribute("x2", width.toString());
+    }
+    buildUIElements() {
+        const verticalLine = this.paper.line(0, 0, 0, this.boundRect.height);
+        const horizontalLine = this.paper.line(0, 0, this.boundRect.width, 0);
+        this.node = this.paper.g();
+        this.node.addClass("crossStyle");
+        this.node.add(verticalLine);
+        this.node.add(horizontalLine);
+        this.hl = horizontalLine;
+        this.vl = verticalLine;
+        this.center = new Point2D_1.Point2D(0, 0);
+    }
+}
+exports.CrossElement = CrossElement;
 
 
 /***/ }),
@@ -1141,7 +1141,7 @@ exports.RGBColor = RGBColor;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const RGBColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(8);
+const LABColor_1 = __webpack_require__(7);
 class XYZColor {
     constructor(x, y, z) {
         this.values = [x, y, z];
@@ -1540,7 +1540,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const RGBColor_1 = __webpack_require__(12);
 const SRGBColor_1 = __webpack_require__(19);
 const XYZColor_1 = __webpack_require__(13);
-const LABColor_1 = __webpack_require__(8);
+const LABColor_1 = __webpack_require__(7);
 const HSLColor_1 = __webpack_require__(14);
 class Color {
     get sRGB() {
@@ -1759,10 +1759,10 @@ exports.SRGBColor = SRGBColor;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const ToolbarIcon_1 = __webpack_require__(3);
-const ToolbarSelectIcon_1 = __webpack_require__(30);
-const ToolbarSeparator_1 = __webpack_require__(31);
-const ToolbarSwitchIcon_1 = __webpack_require__(32);
-const ToolbarTriggerIcon_1 = __webpack_require__(33);
+const ToolbarSelectIcon_1 = __webpack_require__(31);
+const ToolbarSeparator_1 = __webpack_require__(32);
+const ToolbarSwitchIcon_1 = __webpack_require__(33);
+const ToolbarTriggerIcon_1 = __webpack_require__(34);
 class Toolbar {
     constructor(svgHost) {
         this.iconSpace = 8;
@@ -1920,9 +1920,9 @@ const Rect_1 = __webpack_require__(1);
 const IRegionCallbacks_1 = __webpack_require__(4);
 const RectRegion_1 = __webpack_require__(23);
 const PointRegion_1 = __webpack_require__(24);
-const PolygonRegion_1 = __webpack_require__(39);
-const PolylineRegion_1 = __webpack_require__(43);
-const RegionMenu_1 = __webpack_require__(47);
+const PolygonRegion_1 = __webpack_require__(40);
+const PolylineRegion_1 = __webpack_require__(44);
+const RegionMenu_1 = __webpack_require__(48);
 const RegionData_1 = __webpack_require__(2);
 class RegionsManager {
     constructor(svgHost, callbacks) {
@@ -2565,10 +2565,10 @@ exports.ZoomManager = ZoomManager;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(9);
-const AnchorsElements_1 = __webpack_require__(34);
-const DragElement_1 = __webpack_require__(35);
-const TagsElement_1 = __webpack_require__(36);
+const Region_1 = __webpack_require__(8);
+const AnchorsElements_1 = __webpack_require__(35);
+const DragElement_1 = __webpack_require__(36);
+const TagsElement_1 = __webpack_require__(37);
 class RectRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -2619,9 +2619,9 @@ exports.RectRegion = RectRegion;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Region_1 = __webpack_require__(9);
-const DragElement_1 = __webpack_require__(37);
-const TagsElement_1 = __webpack_require__(38);
+const Region_1 = __webpack_require__(8);
+const DragElement_1 = __webpack_require__(38);
+const TagsElement_1 = __webpack_require__(39);
 class PointRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
@@ -2657,11 +2657,11 @@ exports.PointRegion = PointRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
 const ISelectorSettings_1 = __webpack_require__(16);
-const PointSelector_1 = __webpack_require__(48);
-const PolylineSelector_1 = __webpack_require__(49);
-const PolygonSelector_1 = __webpack_require__(50);
-const RectCopySelector_1 = __webpack_require__(51);
-const RectSelector_1 = __webpack_require__(52);
+const PointSelector_1 = __webpack_require__(49);
+const PolylineSelector_1 = __webpack_require__(50);
+const PolygonSelector_1 = __webpack_require__(51);
+const RectCopySelector_1 = __webpack_require__(52);
+const RectSelector_1 = __webpack_require__(53);
 class AreaSelector {
     constructor(svgHost, callbacks) {
         this.isVisible = true;
@@ -2815,6 +2815,49 @@ exports.AreaSelector = AreaSelector;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const CrossElement_1 = __webpack_require__(11);
+class AlternatingCrossElement extends CrossElement_1.CrossElement {
+    constructor(paper, boundRect) {
+        super(paper, boundRect);
+        this.buildUIElements();
+        this.hide();
+    }
+    move(p, boundRect, square = false, ref = null) {
+        super.move(p, boundRect, square, ref);
+        this.vl2.node.setAttribute("x1", this.vl.attr("x1"));
+        this.vl2.node.setAttribute("x2", this.vl.attr("x2"));
+        this.vl2.node.setAttribute("y2", this.vl.attr("y2"));
+        this.hl2.node.setAttribute("y1", this.hl.attr("y1"));
+        this.hl2.node.setAttribute("x2", this.hl.attr("x2"));
+        this.hl2.node.setAttribute("y2", this.hl.attr("y2"));
+    }
+    resize(width, height) {
+        super.resize(width, height);
+    }
+    buildUIElements() {
+        super.buildUIElements();
+        const verticalLine2 = this.paper.line(0, 0, 0, this.boundRect.height);
+        const horizontalLine2 = this.paper.line(0, 0, this.boundRect.width, 0);
+        this.node.add(verticalLine2);
+        this.node.add(horizontalLine2);
+        this.vl2 = verticalLine2;
+        this.hl2 = horizontalLine2;
+        this.vl.addClass("blackDashes");
+        this.hl.addClass("blackDashes");
+        this.vl2.addClass("whiteDashes");
+        this.hl2.addClass("whiteDashes");
+    }
+}
+exports.AlternatingCrossElement = AlternatingCrossElement;
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const Element_1 = __webpack_require__(17);
@@ -2850,7 +2893,7 @@ exports.RectElement = RectElement;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3131,7 +3174,7 @@ exports.FilterPipeline = FilterPipeline;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3139,7 +3182,7 @@ exports.FilterPipeline = FilterPipeline;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Color_1 = __webpack_require__(18);
 const HSLColor_1 = __webpack_require__(14);
-const LABColor_1 = __webpack_require__(8);
+const LABColor_1 = __webpack_require__(7);
 class Tag {
     constructor(name, color, id = "") {
         this.tagColorPure = "";
@@ -3242,7 +3285,7 @@ exports.Tag = Tag;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3254,15 +3297,15 @@ const PointRegion_1 = __webpack_require__(24);
 const RectRegion_1 = __webpack_require__(23);
 const AreaSelector_1 = __webpack_require__(25);
 const ISelectorSettings_1 = __webpack_require__(16);
-const CanvasTools_Filter_1 = __webpack_require__(27);
+const CanvasTools_Filter_1 = __webpack_require__(28);
 const Rect_1 = __webpack_require__(1);
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
-const Tag_1 = __webpack_require__(28);
+const Tag_1 = __webpack_require__(29);
 const TagsDescriptor_1 = __webpack_require__(54);
 const CanvasTools_Editor_1 = __webpack_require__(55);
 const RGBColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(8);
+const LABColor_1 = __webpack_require__(7);
 const XYZColor_1 = __webpack_require__(13);
 const HSLColor_1 = __webpack_require__(14);
 const Palette_1 = __webpack_require__(56);
@@ -3309,7 +3352,7 @@ __webpack_require__(59);
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3383,7 +3426,7 @@ exports.ToolbarSelectIcon = ToolbarSelectIcon;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3423,7 +3466,7 @@ exports.ToolbarSeparator = ToolbarSeparator;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3497,7 +3540,7 @@ exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3570,7 +3613,7 @@ exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3806,13 +3849,13 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const DragComponent_1 = __webpack_require__(10);
+const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -3836,13 +3879,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const TagsComponent_1 = __webpack_require__(11);
+const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -4106,13 +4149,13 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const DragComponent_1 = __webpack_require__(10);
+const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -4135,13 +4178,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const TagsComponent_1 = __webpack_require__(11);
+const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -4294,17 +4337,17 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(9);
-const AnchorsElement_1 = __webpack_require__(40);
-const DragElement_1 = __webpack_require__(41);
-const TagsElement_1 = __webpack_require__(42);
+const Region_1 = __webpack_require__(8);
+const AnchorsElement_1 = __webpack_require__(41);
+const DragElement_1 = __webpack_require__(42);
+const TagsElement_1 = __webpack_require__(43);
 class PolygonRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4349,7 +4392,7 @@ exports.PolygonRegion = PolygonRegion;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4560,13 +4603,13 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const DragComponent_1 = __webpack_require__(10);
+const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -4590,13 +4633,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const TagsComponent_1 = __webpack_require__(11);
+const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -4819,17 +4862,17 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(9);
-const AnchorsElement_1 = __webpack_require__(44);
-const DragElement_1 = __webpack_require__(45);
-const TagsElement_1 = __webpack_require__(46);
+const Region_1 = __webpack_require__(8);
+const AnchorsElement_1 = __webpack_require__(45);
+const DragElement_1 = __webpack_require__(46);
+const TagsElement_1 = __webpack_require__(47);
 class PolylineRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4874,7 +4917,7 @@ exports.PolylineRegion = PolylineRegion;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5077,13 +5120,13 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const DragComponent_1 = __webpack_require__(10);
+const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5107,13 +5150,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const TagsComponent_1 = __webpack_require__(11);
+const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -5312,7 +5355,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5447,7 +5490,7 @@ exports.MenuElement = MenuElement;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5455,8 +5498,8 @@ exports.MenuElement = MenuElement;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(6);
-const Selector_1 = __webpack_require__(7);
+const CrossElement_1 = __webpack_require__(11);
+const Selector_1 = __webpack_require__(6);
 class PointSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -5539,7 +5582,7 @@ exports.PointSelector = PointSelector;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5547,8 +5590,8 @@ exports.PointSelector = PointSelector;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(6);
-const Selector_1 = __webpack_require__(7);
+const CrossElement_1 = __webpack_require__(11);
+const Selector_1 = __webpack_require__(6);
 class PolylineSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -5722,7 +5765,7 @@ exports.PolylineSelector = PolylineSelector;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5730,8 +5773,8 @@ exports.PolylineSelector = PolylineSelector;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(6);
-const Selector_1 = __webpack_require__(7);
+const CrossElement_1 = __webpack_require__(11);
+const Selector_1 = __webpack_require__(6);
 class PolygonSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -5911,7 +5954,7 @@ exports.PolygonSelector = PolygonSelector;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5920,9 +5963,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(6);
-const RectElement_1 = __webpack_require__(26);
-const Selector_1 = __webpack_require__(7);
+const AlternatingCrossElement_1 = __webpack_require__(26);
+const RectElement_1 = __webpack_require__(27);
+const Selector_1 = __webpack_require__(6);
 class RectCopySelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, copyRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -5951,7 +5994,7 @@ class RectCopySelector extends Selector_1.Selector {
     buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectCopySelector");
-        this.crossA = new CrossElement_1.CrossElement(this.paper, this.boundRect);
+        this.crossA = new AlternatingCrossElement_1.AlternatingCrossElement(this.paper, this.boundRect);
         this.copyRectEl = new RectElement_1.RectElement(this.paper, this.boundRect, this.copyRect);
         this.copyRectEl.node.addClass("copyRectStyle");
         this.node.add(this.crossA.node);
@@ -6113,7 +6156,7 @@ exports.RectCopySelector = RectCopySelector;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6122,9 +6165,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
-const AlternatingCrossElement_1 = __webpack_require__(53);
-const RectElement_1 = __webpack_require__(26);
-const Selector_1 = __webpack_require__(7);
+const AlternatingCrossElement_1 = __webpack_require__(26);
+const RectElement_1 = __webpack_require__(27);
+const Selector_1 = __webpack_require__(6);
 var SelectionModificator;
 (function (SelectionModificator) {
     SelectionModificator[SelectionModificator["RECT"] = 0] = "RECT";
@@ -6375,56 +6418,13 @@ exports.RectSelector = RectSelector;
 
 
 /***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const CrossElement_1 = __webpack_require__(6);
-class AlternatingCrossElement extends CrossElement_1.CrossElement {
-    constructor(paper, boundRect) {
-        super(paper, boundRect);
-        this.buildUIElements();
-        this.hide();
-    }
-    move(p, boundRect, square = false, ref = null) {
-        super.move(p, boundRect, square, ref);
-        this.vl2.node.setAttribute("x1", this.vl.attr("x1"));
-        this.vl2.node.setAttribute("x2", this.vl.attr("x2"));
-        this.vl2.node.setAttribute("y2", this.vl.attr("y2"));
-        this.hl2.node.setAttribute("y1", this.hl.attr("y1"));
-        this.hl2.node.setAttribute("x2", this.hl.attr("x2"));
-        this.hl2.node.setAttribute("y2", this.hl.attr("y2"));
-    }
-    resize(width, height) {
-        super.resize(width, height);
-    }
-    buildUIElements() {
-        super.buildUIElements();
-        const verticalLine2 = this.paper.line(0, 0, 0, this.boundRect.height);
-        const horizontalLine2 = this.paper.line(0, 0, this.boundRect.width, 0);
-        this.node.add(verticalLine2);
-        this.node.add(horizontalLine2);
-        this.vl2 = verticalLine2;
-        this.hl2 = horizontalLine2;
-        this.vl.addClass("blackDashes");
-        this.hl.addClass("blackDashes");
-        this.vl2.addClass("whiteDashes");
-        this.hl2.addClass("whiteDashes");
-    }
-}
-exports.AlternatingCrossElement = AlternatingCrossElement;
-
-
-/***/ }),
 /* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Tag_1 = __webpack_require__(28);
+const Tag_1 = __webpack_require__(29);
 class TagsDescriptor {
     static BuildFromJSON(data) {
         let p = null;
@@ -6529,7 +6529,7 @@ exports.TagsDescriptor = TagsDescriptor;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CanvasTools_Filter_1 = __webpack_require__(27);
+const CanvasTools_Filter_1 = __webpack_require__(28);
 const Rect_1 = __webpack_require__(1);
 const ISelectorSettings_1 = __webpack_require__(16);
 const RegionsManager_1 = __webpack_require__(21);
@@ -7188,7 +7188,7 @@ var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _ar
     function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const LABColor_1 = __webpack_require__(8);
+const LABColor_1 = __webpack_require__(7);
 const Color_1 = __webpack_require__(18);
 class Palette {
     constructor(settings) {
