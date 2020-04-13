@@ -5926,6 +5926,7 @@ const Selector_1 = __webpack_require__(7);
 class RectCopySelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, copyRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
+        this.usingKeyboardCursor = false;
         this.copyRect = copyRect;
         this.buildUIElements();
         this.hide();
@@ -5962,6 +5963,7 @@ class RectCopySelector extends Selector_1.Selector {
             { event: "pointerup", listener: this.onPointerUp, base: this.parentNode, bypass: false },
             { event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false },
             { event: "wheel", listener: this.onWheel, base: this.parentNode, bypass: false },
+            { event: "keydown", listener: this.onKeyDown, base: window, bypass: false },
         ];
         this.subscribeToEvents(listeners);
     }
@@ -5983,6 +5985,7 @@ class RectCopySelector extends Selector_1.Selector {
     }
     onPointerDown(e) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             this.show();
             this.moveCopyRect(this.copyRectEl, this.crossA);
             if (typeof this.callbacks.onSelectionBegin === "function") {
@@ -6006,6 +6009,7 @@ class RectCopySelector extends Selector_1.Selector {
     }
     onPointerMove(e) {
         window.requestAnimationFrame(() => {
+            this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
             const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
             this.moveCross(this.crossA, p);
@@ -6050,6 +6054,62 @@ class RectCopySelector extends Selector_1.Selector {
             this.copyRectEl.resize(width, height);
             this.moveCopyRect(this.copyRectEl, this.crossA);
         });
+    }
+    onKeyDown(e) {
+        if (e.key === "z" || e.key === "Z") {
+            if (!this.usingKeyboardCursor) {
+                this.activateKeyboardCursor();
+                console.log("starting");
+            }
+            else {
+                console.log("placing");
+                if (typeof this.callbacks.onSelectionEnd === "function") {
+                    let p1 = new Point2D_1.Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
+                    let p2 = new Point2D_1.Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
+                    p1 = p1.boundToRect(this.boundRect);
+                    p2 = p2.boundToRect(this.boundRect);
+                    const width = p2.x - p1.x;
+                    const height = p2.y - p1.y;
+                    const regionData = RegionData_1.RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
+                    this.callbacks.onSelectionEnd(regionData);
+                }
+            }
+        }
+        if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
+            console.log("moviung");
+            e.preventDefault();
+            this.moveKeyboardCursor(e.key);
+        }
+    }
+    activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+    }
+    deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+    }
+    isKeyboardControlKey(key) {
+        return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
+    }
+    moveKeyboardCursor(key) {
+        const nextPos = { x: this.crossA.x, y: this.crossA.y };
+        switch (key) {
+            case "ArrowUp":
+                nextPos.y -= 20;
+                break;
+            case "ArrowDown":
+                nextPos.y += 20;
+                break;
+            case "ArrowLeft":
+                nextPos.x -= 20;
+                break;
+            case "ArrowRight":
+                nextPos.x += 20;
+                break;
+            default:
+                break;
+        }
+        this.moveCross(this.crossA, nextPos);
+        this.moveCopyRect(this.copyRectEl, this.crossA);
     }
 }
 exports.RectCopySelector = RectCopySelector;
