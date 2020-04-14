@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.2.11
+* The "Template-based box" selector can now be used with keyboard controls. Similar to the Rect selector keyboard controls, these controls are enabled by pressing `K` when the Template-based box selector is active.
+* The announcer that reads the TagsDescriptor after a region is added now reads from the TagsDescriptors `toString()` method instead of only its primary tag.
+
 ### 2.2.10
 * The `Toolbar` can now be navigated with standard HTML5 controls.
     * All `ToolbarIcon`s can now be tabbed through.
