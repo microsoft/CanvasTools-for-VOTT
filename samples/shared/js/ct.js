@@ -6040,16 +6040,7 @@ class RectCopySelector extends Selector_1.Selector {
     }
     onPointerUp(e) {
         window.requestAnimationFrame(() => {
-            if (typeof this.callbacks.onSelectionEnd === "function") {
-                let p1 = new Point2D_1.Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
-                let p2 = new Point2D_1.Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
-                p1 = p1.boundToRect(this.boundRect);
-                p2 = p2.boundToRect(this.boundRect);
-                const width = p2.x - p1.x;
-                const height = p2.y - p1.y;
-                const regionData = RegionData_1.RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
-                this.callbacks.onSelectionEnd(regionData);
-            }
+            this.createCopyRectBoundingBox();
         });
     }
     onPointerMove(e) {
@@ -6106,16 +6097,7 @@ class RectCopySelector extends Selector_1.Selector {
                 this.activateKeyboardCursor();
             }
             else {
-                if (typeof this.callbacks.onSelectionEnd === "function") {
-                    let p1 = new Point2D_1.Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
-                    let p2 = new Point2D_1.Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
-                    p1 = p1.boundToRect(this.boundRect);
-                    p2 = p2.boundToRect(this.boundRect);
-                    const width = p2.x - p1.x;
-                    const height = p2.y - p1.y;
-                    const regionData = RegionData_1.RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
-                    this.callbacks.onSelectionEnd(regionData);
-                }
+                this.createCopyRectBoundingBox();
             }
         }
         if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
@@ -6152,6 +6134,18 @@ class RectCopySelector extends Selector_1.Selector {
         }
         this.moveCross(this.crossA, nextPos);
         this.moveCopyRect(this.copyRectEl, this.crossA);
+    }
+    createCopyRectBoundingBox() {
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            let p1 = new Point2D_1.Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
+            let p2 = new Point2D_1.Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
+            p1 = p1.boundToRect(this.boundRect);
+            p2 = p2.boundToRect(this.boundRect);
+            const width = p2.x - p1.x;
+            const height = p2.y - p1.y;
+            const regionData = RegionData_1.RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
+            this.callbacks.onSelectionEnd(regionData);
+        }
     }
 }
 exports.RectCopySelector = RectCopySelector;

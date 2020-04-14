@@ -168,19 +168,7 @@ export class RectCopySelector extends Selector {
      */
     private onPointerUp(e: PointerEvent) {
         window.requestAnimationFrame(() => {
-            if (typeof this.callbacks.onSelectionEnd === "function") {
-                let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
-                let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
-
-                p1 = p1.boundToRect(this.boundRect);
-                p2 = p2.boundToRect(this.boundRect);
-                const width = p2.x - p1.x;
-                const height = p2.y - p1.y;
-
-                const regionData = RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
-
-                this.callbacks.onSelectionEnd(regionData);
-            }
+            this.createCopyRectBoundingBox();
         });
     }
 
@@ -254,21 +242,7 @@ export class RectCopySelector extends Selector {
                 // start keyboard mode
                 this.activateKeyboardCursor();
             } else {
-                if (typeof this.callbacks.onSelectionEnd === "function") {
-                    let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2,
-                        this.crossA.y - this.copyRect.height / 2);
-                    let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2,
-                        this.crossA.y + this.copyRect.height / 2);
-
-                    p1 = p1.boundToRect(this.boundRect);
-                    p2 = p2.boundToRect(this.boundRect);
-                    const width = p2.x - p1.x;
-                    const height = p2.y - p1.y;
-
-                    const regionData = RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
-
-                    this.callbacks.onSelectionEnd(regionData);
-                }
+                this.createCopyRectBoundingBox();
             }
         }
         if (!e.ctrlKey && e.shiftKey && this.isKeyboardControlKey(e.key) && this.usingKeyboardCursor) {
@@ -328,5 +302,25 @@ export class RectCopySelector extends Selector {
 
         this.moveCross(this.crossA, nextPos);
         this.moveCopyRect(this.copyRectEl, this.crossA);
+    }
+
+    /**
+     * Helper function for creating a bounding box based off of the copy rect
+     * @param key string
+     */
+    private createCopyRectBoundingBox() {
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            let p1 = new Point2D(this.crossA.x - this.copyRect.width / 2, this.crossA.y - this.copyRect.height / 2);
+            let p2 = new Point2D(this.crossA.x + this.copyRect.width / 2, this.crossA.y + this.copyRect.height / 2);
+
+            p1 = p1.boundToRect(this.boundRect);
+            p2 = p2.boundToRect(this.boundRect);
+            const width = p2.x - p1.x;
+            const height = p2.y - p1.y;
+
+            const regionData = RegionData.BuildRectRegionData(p1.x, p1.y, width, height);
+
+            this.callbacks.onSelectionEnd(regionData);
+        }
     }
 }
