@@ -244,6 +244,10 @@ export class RectCopySelector extends Selector {
         });
     }
 
+    /**
+     * Listener for the key down event.
+     * @param e KeyboardEvent
+     */
     private onKeyDown(e: KeyboardEvent) {
         if (e.key === "k" || e.key === "K") {
             if (!this.usingKeyboardCursor) {
