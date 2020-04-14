@@ -54,7 +54,8 @@ export class AlternatingCrossElement extends CrossElement {
      */
     public resize(width: number, height: number) {
         super.resize(width, height);
-        // resize second cross
+        this.vl2.node.setAttribute("y2", height.toString());
+        this.hl2.node.setAttribute("x2", width.toString());
     }
 
     /**

@@ -389,7 +389,7 @@ export class RectSelector extends Selector {
         return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
     }
     /**
-     * Helper function for common logic to start a two point selection.
+     * Helper function for common logic to move the keyboard cursor
      * @param key string
      */
     private moveKeyboardCursor(key: string) {
