@@ -6101,7 +6101,7 @@ class RectCopySelector extends Selector_1.Selector {
         });
     }
     onKeyDown(e) {
-        if (e.key === "z" || e.key === "Z") {
+        if (e.key === "k" || e.key === "K") {
             if (!this.usingKeyboardCursor) {
                 this.activateKeyboardCursor();
             }

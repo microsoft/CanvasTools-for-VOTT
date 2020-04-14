@@ -245,7 +245,7 @@ export class RectCopySelector extends Selector {
     }
 
     private onKeyDown(e: KeyboardEvent) {
-        if (e.key === "z" || e.key === "Z") {
+        if (e.key === "k" || e.key === "K") {
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();
