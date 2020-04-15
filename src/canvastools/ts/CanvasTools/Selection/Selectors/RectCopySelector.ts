@@ -89,6 +89,27 @@ export class RectCopySelector extends Selector {
     }
 
     /**
+     *  Returns the member variable `usingKeyboardCursor`
+     */
+    public getUsingKeyboardCursor() {
+        return this.usingKeyboardCursor;
+    }
+
+    /**
+     * Helper function to start the use of keyboard cursor controls.
+     */
+    public activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+    }
+
+    /**
+     * Helper function to stop the use of keyboard cursor controls.
+     */
+    public deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+    }
+
+    /**
      * Builds selector's UI.
      */
     private buildUIElements() {
@@ -249,20 +270,6 @@ export class RectCopySelector extends Selector {
             e.preventDefault();
             this.moveKeyboardCursor(e.key);
         }
-    }
-
-    /**
-     * Helper function to start the use of keyboard cursor controls.
-     */
-    private activateKeyboardCursor() {
-        this.usingKeyboardCursor = true;
-    }
-
-    /**
-     * Helper function to stop the use of keyboard cursor controls.
-     */
-    private deactivateKeyboardCursor() {
-        this.usingKeyboardCursor = false;
     }
 
     /**
