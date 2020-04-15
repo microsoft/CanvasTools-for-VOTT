@@ -258,7 +258,7 @@ export class RectCopySelector extends Selector {
      * @param e KeyboardEvent
      */
     private onKeyDown(e: KeyboardEvent) {
-        if (e.key === "k" || e.key === "K") {
+        if (e.key === "k" || e.key.toLocaleUpperCase() === "K") {
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();

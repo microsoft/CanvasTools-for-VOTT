@@ -314,7 +314,7 @@ export class RectSelector extends Selector {
             this.isTwoPoints = true;
         }
 
-        if (e.key === "k" || e.key === "K") {
+        if (e.key === "k" || e.key.toLocaleUpperCase() === "K") {
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();

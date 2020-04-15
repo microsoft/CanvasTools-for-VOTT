@@ -6101,7 +6101,7 @@ class RectCopySelector extends Selector_1.Selector {
         });
     }
     onKeyDown(e) {
-        if (e.key === "k" || e.key === "K") {
+        if (e.key === "k" || e.key.toLocaleUpperCase() === "K") {
             if (!this.usingKeyboardCursor) {
                 this.activateKeyboardCursor();
             }
@@ -6340,7 +6340,7 @@ class RectSelector extends Selector_1.Selector {
         if (e.ctrlKey && !this.capturingState) {
             this.isTwoPoints = true;
         }
-        if (e.key === "k" || e.key === "K") {
+        if (e.key === "k" || e.key.toLocaleUpperCase() === "K") {
             if (!this.usingKeyboardCursor) {
                 this.activateKeyboardCursor();
             }
