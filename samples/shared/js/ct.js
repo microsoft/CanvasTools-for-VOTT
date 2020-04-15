@@ -5993,6 +5993,15 @@ class RectCopySelector extends Selector_1.Selector {
         super.show();
         this.showAll([this.crossA, this.copyRectEl]);
     }
+    getUsingKeyboardCursor() {
+        return this.usingKeyboardCursor;
+    }
+    activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+    }
+    deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+    }
     buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("rectCopySelector");
@@ -6105,12 +6114,6 @@ class RectCopySelector extends Selector_1.Selector {
             this.moveKeyboardCursor(e.key);
         }
     }
-    activateKeyboardCursor() {
-        this.usingKeyboardCursor = true;
-    }
-    deactivateKeyboardCursor() {
-        this.usingKeyboardCursor = false;
-    }
     isKeyboardControlKey(key) {
         return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
     }
@@ -6195,6 +6198,21 @@ class RectSelector extends Selector_1.Selector {
     show() {
         super.show();
         this.crossA.show();
+    }
+    getUsingKeyboardCursor() {
+        return this.usingKeyboardCursor;
+    }
+    activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+        this.curKeyboardCross = this.crossA;
+        this.isTwoPoints = true;
+        this.capturingState = false;
+        this.showAll([this.crossA]);
+        this.hideAll([this.crossB, this.selectionBox]);
+    }
+    deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+        this.curKeyboardCross = null;
     }
     buildUIElements() {
         this.node = this.paper.g();
@@ -6350,18 +6368,6 @@ class RectSelector extends Selector_1.Selector {
             this.moveCross(this.crossA, this.crossB);
             this.hideAll([this.crossB, this.selectionBox]);
         }
-    }
-    activateKeyboardCursor() {
-        this.usingKeyboardCursor = true;
-        this.curKeyboardCross = this.crossA;
-        this.isTwoPoints = true;
-        this.capturingState = false;
-        this.showAll([this.crossA]);
-        this.hideAll([this.crossB, this.selectionBox]);
-    }
-    deactivateKeyboardCursor() {
-        this.usingKeyboardCursor = false;
-        this.curKeyboardCross = null;
     }
     startTwoPointSelection(curPoint) {
         this.capturingState = true;
