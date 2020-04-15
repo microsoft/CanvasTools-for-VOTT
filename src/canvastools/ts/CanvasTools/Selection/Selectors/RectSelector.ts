@@ -109,6 +109,33 @@ export class RectSelector extends Selector {
     }
 
     /**
+     *  Returns the member variable `usingKeyboardCursor`
+     */
+    public getUsingKeyboardCursor() {
+        return this.usingKeyboardCursor;
+    }
+
+    /**
+     * Helper function to start the use of keyboard cursor controls.
+     */
+    public activateKeyboardCursor() {
+        this.usingKeyboardCursor = true;
+        this.curKeyboardCross = this.crossA;
+        this.isTwoPoints = true;
+        this.capturingState = false;
+        this.showAll([this.crossA]);
+        this.hideAll([this.crossB, this.selectionBox]);
+    }
+
+    /**
+     * Helper function to stop the use of keyboard cursor controls.
+     */
+    public deactivateKeyboardCursor() {
+        this.usingKeyboardCursor = false;
+        this.curKeyboardCross = null;
+    }
+
+    /**
      * Builds selector's UI.
      */
     private buildUIElements() {
@@ -287,7 +314,7 @@ export class RectSelector extends Selector {
             this.isTwoPoints = true;
         }
 
-        if (e.key === "k" || e.key === "K") {
+        if (e.key === "k" || e.key.toLocaleUpperCase() === "K") {
             if (!this.usingKeyboardCursor) {
                 // start keyboard mode
                 this.activateKeyboardCursor();
@@ -324,26 +351,6 @@ export class RectSelector extends Selector {
             this.moveCross(this.crossA, this.crossB);
             this.hideAll([this.crossB, this.selectionBox]);
         }
-    }
-
-    /**
-     * Helper function to start the use of keyboard cursor controls.
-     */
-    private activateKeyboardCursor() {
-        this.usingKeyboardCursor = true;
-        this.curKeyboardCross = this.crossA;
-        this.isTwoPoints = true;
-        this.capturingState = false;
-        this.showAll([this.crossA]);
-        this.hideAll([this.crossB, this.selectionBox]);
-    }
-
-    /**
-     * Helper function to stop the use of keyboard cursor controls.
-     */
-    private deactivateKeyboardCursor() {
-        this.usingKeyboardCursor = false;
-        this.curKeyboardCross = null;
     }
 
     /**
@@ -389,7 +396,7 @@ export class RectSelector extends Selector {
         return key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight";
     }
     /**
-     * Helper function for common logic to start a two point selection.
+     * Helper function for common logic to move the keyboard cursor
      * @param key string
      */
     private moveKeyboardCursor(key: string) {

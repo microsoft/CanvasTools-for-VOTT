@@ -453,8 +453,8 @@ svg:not(:root) .menuLayer {
 }
 
 .rectCopySelector .copyRectStyle {
-    stroke-width:1;
-    stroke: #666;
+    stroke-width:3;
+    stroke: #000;
     fill: transparent;
     pointer-events: none; 
 }
