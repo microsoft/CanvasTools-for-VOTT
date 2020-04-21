@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.12
+* Removes a bug introduced in 2.2.10 in which the tag announced is displayed in an element under the editor.
+
 ### 2.2.11
 * The "Template-based box" selector can now be used with keyboard controls. Similar to the Rect selector keyboard controls, these controls are enabled by pressing `K` when the Template-based box selector is active.
 * Functions related to enabling and disabling keyboard controls are now made public to allow external scripts to incorporate those functions into their own logic.
