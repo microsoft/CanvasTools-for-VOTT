@@ -590,6 +590,7 @@ svg:not(:root) .menuLayer {
     height: 1px; 
     width: 1px;
     overflow: hidden;
-    clip: rect(1px, 1px, 1px, 1px);
+    clip: rect(0px, 0px, 0px, 0px);
+    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);
     white-space: nowrap;
 }
