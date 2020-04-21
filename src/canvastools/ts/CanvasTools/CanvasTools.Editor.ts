@@ -661,7 +661,7 @@ export class Editor {
         // create aria live region for announcements
         const regionAnnouncer = document.createElement("div");
         regionAnnouncer.setAttribute("aria-live", "assertive");
-        regionAnnouncer.setAttribute("visibility", "hidden");
+        regionAnnouncer.setAttribute("style", "display: none;");
         regionAnnouncer.id = "regionAnnouncer";
         container.appendChild(regionAnnouncer);
     }
