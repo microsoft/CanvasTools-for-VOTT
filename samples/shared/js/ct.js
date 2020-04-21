@@ -2453,8 +2453,10 @@ class RegionsManager {
                                 this.selectAllRegions();
                             }
                             break;
+                        case "Tab":
+                            e.preventDefault();
+                            break;
                     }
-                    e.preventDefault();
                 }
             }
         });
