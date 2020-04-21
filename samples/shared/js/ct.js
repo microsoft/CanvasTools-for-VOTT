@@ -2438,6 +2438,13 @@ class RegionsManager {
                         default: return;
                     }
                     e.preventDefault();
+                    e.stopPropagation();
+                    if (e.defaultPrevented) {
+                        console.log("default prevented");
+                    }
+                    else {
+                        console.log("default not prevented");
+                    }
                 }
             }
         });
