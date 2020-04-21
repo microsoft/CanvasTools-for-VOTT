@@ -864,16 +864,17 @@ export class RegionsManager {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (!this.isFrozen) {
-                    switch (e.code) {
-                        // ctrl + A, ctrl + a
-                        case "KeyA":
-                        case "Numpad1":
+                    switch (e.key) {
+                        case "a":
+                        case "A":
                             if (e.ctrlKey) {
                                 this.selectAllRegions();
                             }
                             break;
+                        case "Tab":
+                            e.preventDefault();
+                            break;
                     }
-                    // e.preventDefault();
                 }
             }
         });

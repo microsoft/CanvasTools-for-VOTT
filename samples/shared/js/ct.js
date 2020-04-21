@@ -2438,13 +2438,6 @@ class RegionsManager {
                         default: return;
                     }
                     e.preventDefault();
-                    e.stopPropagation();
-                    if (e.defaultPrevented) {
-                        console.log("default prevented");
-                    }
-                    else {
-                        console.log("default not prevented");
-                    }
                 }
             }
         });
@@ -2453,14 +2446,15 @@ class RegionsManager {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (!this.isFrozen) {
-                    switch (e.code) {
-                        case "KeyA":
-                        case "Numpad1":
+                    switch (e.key) {
+                        case "a":
+                        case "A":
                             if (e.ctrlKey) {
                                 this.selectAllRegions();
                             }
                             break;
                     }
+                    e.preventDefault();
                 }
             }
         });
