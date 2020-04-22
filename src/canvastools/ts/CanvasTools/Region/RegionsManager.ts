@@ -64,6 +64,11 @@ export class RegionsManager {
     private isFrozenState: boolean = false;
 
     /**
+     * Global focused state.
+     */
+    private isFocusedState: boolean = false;
+
+    /**
      * Internal manipulation flag.
      */
     private justManipulated = false;
@@ -78,6 +83,13 @@ export class RegionsManager {
      */
     public get isFrozen(): boolean {
         return this.isFrozenState;
+    }
+
+    /**
+     * Returns current focused state.
+     */
+    public get isFocused(): boolean {
+        return this.isFocusedState;
     }
 
     /**
@@ -419,6 +431,20 @@ export class RegionsManager {
         });
 
         this.isFrozenState = false;
+    }
+
+    /**
+     * Focuses the manager, allowing regions to be tabbed through.
+     */
+    public focus() {
+        this.isFocusedState = true;
+    }
+
+    /**
+     * Unfocuses the manager, preventing regions to be tabbed through.
+     */
+    public unfocus() {
+        this.isFocusedState = false;
     }
 
     /**
@@ -796,7 +822,9 @@ export class RegionsManager {
                     switch (e.keyCode) {
                         // tab
                         case 9:
-                            this.selectNextRegion();
+                            if (this.isFocused) {
+                                this.selectNextRegion();
+                            }
                             break;
 
                         // delete, backspace
@@ -872,7 +900,9 @@ export class RegionsManager {
                             }
                             break;
                         case "Tab":
-                            e.preventDefault();
+                            if (this.isFocused) {
+                                e.preventDefault();
+                            }
                             break;
                     }
                 }

@@ -1927,6 +1927,7 @@ const RegionData_1 = __webpack_require__(2);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
+        this.isFocusedState = false;
         this.justManipulated = false;
         this.manipulationLock = false;
         this.tagsUpdateOptions = {
@@ -1972,6 +1973,9 @@ class RegionsManager {
     }
     get isFrozen() {
         return this.isFrozenState;
+    }
+    get isFocused() {
+        return this.isFocusedState;
     }
     addRegion(id, regionData, tagsDescriptor) {
         if (regionData.type === RegionData_1.RegionDataType.Point) {
@@ -2130,6 +2134,12 @@ class RegionsManager {
             region.unfreeze();
         });
         this.isFrozenState = false;
+    }
+    focus() {
+        this.isFocusedState = true;
+    }
+    unfocus() {
+        this.isFocusedState = false;
     }
     toggleFreezeMode() {
         if (this.isFrozen) {
@@ -2377,7 +2387,9 @@ class RegionsManager {
                 if (!this.isFrozen) {
                     switch (e.keyCode) {
                         case 9:
-                            this.selectNextRegion();
+                            if (this.isFocused) {
+                                this.selectNextRegion();
+                            }
                             break;
                         case 46:
                         case 8:
@@ -2454,7 +2466,9 @@ class RegionsManager {
                             }
                             break;
                         case "Tab":
-                            e.preventDefault();
+                            if (this.isFocused) {
+                                e.preventDefault();
+                            }
                             break;
                     }
                 }
