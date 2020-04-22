@@ -1927,7 +1927,7 @@ const RegionData_1 = __webpack_require__(2);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
-        this.isFocusedState = false;
+        this.isFocusedState = true;
         this.justManipulated = false;
         this.manipulationLock = false;
         this.tagsUpdateOptions = {

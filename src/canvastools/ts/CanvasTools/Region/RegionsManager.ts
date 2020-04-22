@@ -66,7 +66,7 @@ export class RegionsManager {
     /**
      * Global focused state.
      */
-    private isFocusedState: boolean = false;
+    private isFocusedState: boolean = true;
 
     /**
      * Internal manipulation flag.
