@@ -2387,7 +2387,9 @@ class RegionsManager {
                     switch (e.keyCode) {
                         case 9:
                             if (this.isFocused) {
-                                this.selectNextRegion();
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    this.selectNextRegion();
+                                }
                             }
                             break;
                         case 46:
@@ -2466,7 +2468,9 @@ class RegionsManager {
                             break;
                         case "Tab":
                             if (this.isFocused) {
-                                e.preventDefault();
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    e.preventDefault();
+                                }
                             }
                             break;
                     }
@@ -2481,6 +2485,24 @@ class RegionsManager {
         this.regions.push(region);
         this.menu.showOnRegion(region);
         region.unselect();
+    }
+    shouldPreventTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.validNextRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+    }
+    validNextRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+    getIndexOfFirstSelectedRegion() {
+        let indexOfFirstSelectedRegion = -1;
+        for (let i = 0; i < this.regions.length; i++) {
+            if (this.regions[i].isSelected) {
+                indexOfFirstSelectedRegion = i;
+                break;
+            }
+        }
+        return indexOfFirstSelectedRegion;
     }
     functionGuard(f) {
         return (...args) => {

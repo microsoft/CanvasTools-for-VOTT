@@ -822,7 +822,9 @@ export class RegionsManager {
                         // tab
                         case 9:
                             if (this.isFocused) {
-                                this.selectNextRegion();
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    this.selectNextRegion();
+                                }
                             }
                             break;
 
@@ -900,7 +902,9 @@ export class RegionsManager {
                             break;
                         case "Tab":
                             if (this.isFocused) {
-                                e.preventDefault();
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    e.preventDefault();
+                                }
                             }
                             break;
                     }
@@ -922,6 +926,33 @@ export class RegionsManager {
 
         this.menu.showOnRegion(region);
         region.unselect();
+    }
+
+    private shouldPreventTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.validNextRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+    }
+
+    // a region is selected, and it's not the last
+    private validNextRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+
+    /**
+     * Helper function to find the index of the first selected region
+     */
+    private getIndexOfFirstSelectedRegion() {
+        let indexOfFirstSelectedRegion = -1;
+
+        for (let i = 0; i < this.regions.length; i++) {
+            if (this.regions[i].isSelected) {
+                indexOfFirstSelectedRegion = i;
+                break;
+            }
+        }
+
+        return indexOfFirstSelectedRegion;
     }
 
     /**
