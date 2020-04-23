@@ -2,6 +2,7 @@
 
 ### 2.2.13
 * The functionality of tabbing has been heavily changes
+
 | previous functionality | current functionality
 --- | --- | ---
 _Tab_ | Moves selection forward through region list, looping back to the start when it reaches the last selection. Does not prevent HTML focus movement | Moves selection forward through region list, unfocusing the editor if the last region is selected. Prevents HTML focus movement while the editor has focus
