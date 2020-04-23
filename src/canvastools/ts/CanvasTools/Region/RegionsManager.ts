@@ -660,6 +660,21 @@ export class RegionsManager {
     }
 
     /**
+     * Selects the previous region (based on current order, e.g., sorted by area).
+     */
+    private selectPrevRegion() {
+        let region = null;
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.validPrevRegion()) {
+            region = this.regions[firstIndex - 1];
+        } else if (firstIndex < 0 && this.regions.length > 0) {
+            region = this.regions[0];
+        }
+
+        this.selectRegion(region);
+    }
+
+    /**
      * Moves or changes region size
      * @param region - The region to be changed.
      * @param dx - x-coordinate shift.
@@ -824,6 +839,8 @@ export class RegionsManager {
                             if (this.isFocused) {
                                 if (!e.shiftKey && this.shouldPreventTabDefault()) {
                                     this.selectNextRegion();
+                                } else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    this.selectPrevRegion();
                                 }
                             }
                             break;
@@ -904,6 +921,8 @@ export class RegionsManager {
                             if (this.isFocused) {
                                 if (!e.shiftKey && this.shouldPreventTabDefault()) {
                                     e.preventDefault();
+                                } else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    e.preventDefault();
                                 }
                             }
                             break;
@@ -928,15 +947,36 @@ export class RegionsManager {
         region.unselect();
     }
 
+    /**
+     * Returns if Tab action should be prevent defaulted
+     */
     private shouldPreventTabDefault() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
         return this.validNextRegion() || ((firstIndex < 0) && (this.regions.length > 0));
     }
 
-    // a region is selected, and it's not the last
+    /**
+     * Returns if a region is selected and it's not the last
+     */
     private validNextRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
         return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+
+    /**
+     * Returns if Shift + Tab action should be prevent defaulted
+     */
+    private shouldPreventShiftTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.validPrevRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+    }
+
+    /**
+     * Returns if a region is selected and it's not the first
+     */
+    private validPrevRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (1 <= firstIndex);
     }
 
     /**

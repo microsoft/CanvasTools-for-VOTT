@@ -2278,6 +2278,17 @@ class RegionsManager {
         }
         this.selectRegion(region);
     }
+    selectPrevRegion() {
+        let region = null;
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.validPrevRegion()) {
+            region = this.regions[firstIndex - 1];
+        }
+        else if (firstIndex < 0 && this.regions.length > 0) {
+            region = this.regions[0];
+        }
+        this.selectRegion(region);
+    }
     reshapeRegion(region, dx, dy, dw, dh, inverse = false) {
         let w;
         let h;
@@ -2390,6 +2401,9 @@ class RegionsManager {
                                 if (!e.shiftKey && this.shouldPreventTabDefault()) {
                                     this.selectNextRegion();
                                 }
+                                else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    this.selectPrevRegion();
+                                }
                             }
                             break;
                         case 46:
@@ -2471,6 +2485,9 @@ class RegionsManager {
                                 if (!e.shiftKey && this.shouldPreventTabDefault()) {
                                     e.preventDefault();
                                 }
+                                else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    e.preventDefault();
+                                }
                             }
                             break;
                     }
@@ -2493,6 +2510,14 @@ class RegionsManager {
     validNextRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
         return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+    shouldPreventShiftTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.validPrevRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+    }
+    validPrevRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (1 <= firstIndex);
     }
     getIndexOfFirstSelectedRegion() {
         let indexOfFirstSelectedRegion = -1;
