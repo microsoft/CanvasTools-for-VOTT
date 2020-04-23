@@ -638,21 +638,10 @@ export class RegionsManager {
      */
     private selectNextRegion() {
         let region = null;
-        let i = 0;
-        const length = this.regions.length;
-
-        if (length === 1) {
-            region = this.regions[0];
-        } else if (length > 1) {
-            while (i < length && region == null) {
-                if (this.regions[i].isSelected) {
-                    region = (i === length - 1) ? this.regions[0] : this.regions[i + 1];
-                }
-                i++;
-            }
-        }
-
-        if (region == null && length > 0) {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.validNextRegion()) {
+            region = this.regions[firstIndex + 1];
+        } else if (firstIndex < 0 && this.regions.length > 0) {
             region = this.regions[0];
         }
 
