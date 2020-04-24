@@ -1,7 +1,7 @@
 ## Changelog
 
 ### 2.2.13
-* The functionality of tabbing has been heavily changes
+* The functionality of tabbing has been heavily changed
 
 key | previous functionality | current functionality
 --- | --- | ---
