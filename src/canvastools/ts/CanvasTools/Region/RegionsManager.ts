@@ -639,9 +639,9 @@ export class RegionsManager {
     private selectNextRegion() {
         let region = null;
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        if (this.validNextRegion()) {
+        if (this.regionSelectedAndValidNextRegion()) {
             region = this.regions[firstIndex + 1];
-        } else if (firstIndex < 0 && this.regions.length > 0) {
+        } else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
         }
 
@@ -654,9 +654,9 @@ export class RegionsManager {
     private selectPrevRegion() {
         let region = null;
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        if (this.validPrevRegion()) {
+        if (this.regionSelectedAndValidPrevRegion()) {
             region = this.regions[firstIndex - 1];
-        } else if (firstIndex < 0 && this.regions.length > 0) {
+        } else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
         }
 
@@ -942,13 +942,13 @@ export class RegionsManager {
      */
     private shouldPreventTabDefault() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        return this.validNextRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+        return this.regionSelectedAndValidNextRegion() || this.noRegionSelectedAndValidFirstRegion();
     }
 
     /**
      * Returns if a region is selected and it's not the last
      */
-    private validNextRegion() {
+    private regionSelectedAndValidNextRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
         return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
     }
@@ -958,15 +958,23 @@ export class RegionsManager {
      */
     private shouldPreventShiftTabDefault() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        return this.validPrevRegion() || ((firstIndex < 0) && (this.regions.length > 0));
+        return this.regionSelectedAndValidPrevRegion() || this.noRegionSelectedAndValidFirstRegion();
     }
 
     /**
      * Returns if a region is selected and it's not the first
      */
-    private validPrevRegion() {
+    private regionSelectedAndValidPrevRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
         return (1 <= firstIndex);
+    }
+
+    /**
+     * Returns if no region is selected and there is an available region
+     */
+    private noRegionSelectedAndValidFirstRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (firstIndex < 0) && (this.regions.length > 0);
     }
 
     /**
