@@ -5,8 +5,8 @@
 
 key | previous functionality | current functionality
 --- | --- | ---
-_Tab_ | Moves selection forward through region list, looping back to the start when it reaches the last selection. Does not prevent HTML focus movement | Moves selection forward through region list, unfocusing the editor if the last region is selected. Prevents HTML focus movement while the editor has focus
-_Shift + Tab_ | No Shift + Tab functionality | Moves selection backward through region list, unfocusing the editor if the first region is selected
+_Tab_ | Moves selection forward through region list, looping back to the start when it reaches the last selection. Does not prevent HTML focus movement. | Moves selection forward through region list, unfocusing the editor if the last region is selected. Prevents HTML focus movement while the editor has focus
+_Shift + Tab_ | No Shift + Tab functionality | Moves selection backward through region list, unfocusing the editor if the first region is selected. Prevents HTML focus movement while the editor has focus.
 
 ### 2.2.12
 * Removes a bug introduced in 2.2.10 in which the tag announced is displayed in an element under the editor.
