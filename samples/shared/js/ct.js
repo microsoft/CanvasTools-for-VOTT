@@ -2351,6 +2351,7 @@ class RegionsManager {
             else {
                 region.unselect();
                 this.menu.hide();
+                this.callbacks.onRegionSelected("", multiSelection);
             }
         }
     }
