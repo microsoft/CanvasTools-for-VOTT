@@ -1927,6 +1927,7 @@ const RegionData_1 = __webpack_require__(2);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
+        this.isFocusedState = true;
         this.justManipulated = false;
         this.manipulationLock = false;
         this.tagsUpdateOptions = {
@@ -1972,6 +1973,9 @@ class RegionsManager {
     }
     get isFrozen() {
         return this.isFrozenState;
+    }
+    get isFocused() {
+        return this.isFocusedState;
     }
     addRegion(id, regionData, tagsDescriptor) {
         if (regionData.type === RegionData_1.RegionDataType.Point) {
@@ -2131,6 +2135,12 @@ class RegionsManager {
         });
         this.isFrozenState = false;
     }
+    focus() {
+        this.isFocusedState = true;
+    }
+    unfocus() {
+        this.isFocusedState = false;
+    }
     toggleFreezeMode() {
         if (this.isFrozen) {
             this.unfreeze();
@@ -2250,20 +2260,22 @@ class RegionsManager {
     }
     selectNextRegion() {
         let region = null;
-        let i = 0;
-        const length = this.regions.length;
-        if (length === 1) {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.regionSelectedAndValidNextRegion()) {
+            region = this.regions[firstIndex + 1];
+        }
+        else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
         }
-        else if (length > 1) {
-            while (i < length && region == null) {
-                if (this.regions[i].isSelected) {
-                    region = (i === length - 1) ? this.regions[0] : this.regions[i + 1];
-                }
-                i++;
-            }
+        this.selectRegion(region);
+    }
+    selectPrevRegion() {
+        let region = null;
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.regionSelectedAndValidPrevRegion()) {
+            region = this.regions[firstIndex - 1];
         }
-        if (region == null && length > 0) {
+        else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
         }
         this.selectRegion(region);
@@ -2377,7 +2389,14 @@ class RegionsManager {
                 if (!this.isFrozen) {
                     switch (e.keyCode) {
                         case 9:
-                            this.selectNextRegion();
+                            if (this.isFocused) {
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    this.selectNextRegion();
+                                }
+                                else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    this.selectPrevRegion();
+                                }
+                            }
                             break;
                         case 46:
                         case 8:
@@ -2446,11 +2465,21 @@ class RegionsManager {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (!this.isFrozen) {
-                    switch (e.code) {
-                        case "KeyA":
-                        case "Numpad1":
+                    switch (e.key) {
+                        case "a":
+                        case "A":
                             if (e.ctrlKey) {
                                 this.selectAllRegions();
+                            }
+                            break;
+                        case "Tab":
+                            if (this.isFocused) {
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    e.preventDefault();
+                                }
+                                else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    e.preventDefault();
+                                }
                             }
                             break;
                     }
@@ -2465,6 +2494,36 @@ class RegionsManager {
         this.regions.push(region);
         this.menu.showOnRegion(region);
         region.unselect();
+    }
+    shouldPreventTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.regionSelectedAndValidNextRegion() || this.noRegionSelectedAndValidFirstRegion();
+    }
+    regionSelectedAndValidNextRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+    shouldPreventShiftTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.regionSelectedAndValidPrevRegion() || this.noRegionSelectedAndValidFirstRegion();
+    }
+    regionSelectedAndValidPrevRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (1 <= firstIndex);
+    }
+    noRegionSelectedAndValidFirstRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (firstIndex < 0) && (this.regions.length > 0);
+    }
+    getIndexOfFirstSelectedRegion() {
+        let indexOfFirstSelectedRegion = -1;
+        for (let i = 0; i < this.regions.length; i++) {
+            if (this.regions[i].isSelected) {
+                indexOfFirstSelectedRegion = i;
+                break;
+            }
+        }
+        return indexOfFirstSelectedRegion;
     }
     functionGuard(f) {
         return (...args) => {

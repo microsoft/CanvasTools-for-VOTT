@@ -64,6 +64,11 @@ export class RegionsManager {
     private isFrozenState: boolean = false;
 
     /**
+     * Global focused state.
+     */
+    private isFocusedState: boolean = true;
+
+    /**
      * Internal manipulation flag.
      */
     private justManipulated = false;
@@ -78,6 +83,13 @@ export class RegionsManager {
      */
     public get isFrozen(): boolean {
         return this.isFrozenState;
+    }
+
+    /**
+     * Returns current focused state.
+     */
+    public get isFocused(): boolean {
+        return this.isFocusedState;
     }
 
     /**
@@ -422,6 +434,20 @@ export class RegionsManager {
     }
 
     /**
+     * Focuses the manager, allowing regions to be tabbed through.
+     */
+    public focus() {
+        this.isFocusedState = true;
+    }
+
+    /**
+     * Unfocuses the manager, preventing regions to be tabbed through.
+     */
+    public unfocus() {
+        this.isFocusedState = false;
+    }
+
+    /**
      * Toggles freezing mode.
      */
     public toggleFreezeMode() {
@@ -612,21 +638,25 @@ export class RegionsManager {
      */
     private selectNextRegion() {
         let region = null;
-        let i = 0;
-        const length = this.regions.length;
-
-        if (length === 1) {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.regionSelectedAndValidNextRegion()) {
+            region = this.regions[firstIndex + 1];
+        } else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
-        } else if (length > 1) {
-            while (i < length && region == null) {
-                if (this.regions[i].isSelected) {
-                    region = (i === length - 1) ? this.regions[0] : this.regions[i + 1];
-                }
-                i++;
-            }
         }
 
-        if (region == null && length > 0) {
+        this.selectRegion(region);
+    }
+
+    /**
+     * Selects the previous region (based on current order, e.g., sorted by area).
+     */
+    private selectPrevRegion() {
+        let region = null;
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        if (this.regionSelectedAndValidPrevRegion()) {
+            region = this.regions[firstIndex - 1];
+        } else if (this.noRegionSelectedAndValidFirstRegion()) {
             region = this.regions[0];
         }
 
@@ -796,7 +826,13 @@ export class RegionsManager {
                     switch (e.keyCode) {
                         // tab
                         case 9:
-                            this.selectNextRegion();
+                            if (this.isFocused) {
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    this.selectNextRegion();
+                                } else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    this.selectPrevRegion();
+                                }
+                            }
                             break;
 
                         // delete, backspace
@@ -864,16 +900,23 @@ export class RegionsManager {
                 !(e.target instanceof HTMLTextAreaElement) &&
                 !(e.target instanceof HTMLSelectElement)) {
                 if (!this.isFrozen) {
-                    switch (e.code) {
-                        // ctrl + A, ctrl + a
-                        case "KeyA":
-                        case "Numpad1":
+                    switch (e.key) {
+                        case "a":
+                        case "A":
                             if (e.ctrlKey) {
                                 this.selectAllRegions();
                             }
                             break;
+                        case "Tab":
+                            if (this.isFocused) {
+                                if (!e.shiftKey && this.shouldPreventTabDefault()) {
+                                    e.preventDefault();
+                                } else if (e.shiftKey && this.shouldPreventShiftTabDefault()) {
+                                    e.preventDefault();
+                                }
+                            }
+                            break;
                     }
-                    // e.preventDefault();
                 }
             }
         });
@@ -892,6 +935,62 @@ export class RegionsManager {
 
         this.menu.showOnRegion(region);
         region.unselect();
+    }
+
+    /**
+     * Returns if Tab action should be prevent defaulted
+     */
+    private shouldPreventTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.regionSelectedAndValidNextRegion() || this.noRegionSelectedAndValidFirstRegion();
+    }
+
+    /**
+     * Returns if a region is selected and it's not the last
+     */
+    private regionSelectedAndValidNextRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+    }
+
+    /**
+     * Returns if Shift + Tab action should be prevent defaulted
+     */
+    private shouldPreventShiftTabDefault() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return this.regionSelectedAndValidPrevRegion() || this.noRegionSelectedAndValidFirstRegion();
+    }
+
+    /**
+     * Returns if a region is selected and it's not the first
+     */
+    private regionSelectedAndValidPrevRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (1 <= firstIndex);
+    }
+
+    /**
+     * Returns if no region is selected and there is an available region
+     */
+    private noRegionSelectedAndValidFirstRegion() {
+        const firstIndex = this.getIndexOfFirstSelectedRegion();
+        return (firstIndex < 0) && (this.regions.length > 0);
+    }
+
+    /**
+     * Helper function to find the index of the first selected region
+     */
+    private getIndexOfFirstSelectedRegion() {
+        let indexOfFirstSelectedRegion = -1;
+
+        for (let i = 0; i < this.regions.length; i++) {
+            if (this.regions[i].isSelected) {
+                indexOfFirstSelectedRegion = i;
+                break;
+            }
+        }
+
+        return indexOfFirstSelectedRegion;
     }
 
     /**
