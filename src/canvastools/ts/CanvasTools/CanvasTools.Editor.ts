@@ -6,7 +6,7 @@ import { RegionData } from "./Core/RegionData";
 import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
 import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
 import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
-import { ZoomUpdateFunction } from "./Interface/IZoomCallbacks";
+import { ZoomUpdateFunction, IZoomCallbacks } from "./Interface/IZoomCallbacks";
 import { SelectionMode } from "./Interface/ISelectorSettings";
 
 import { RegionComponent } from "./Region/Component/RegionComponent";
@@ -600,14 +600,21 @@ export class Editor {
         }
 
         // Init zoom manager
-        const initZoomCallbacks = {
+        const initZoomCallbacks: IZoomCallbacks = {
             onZoomingOut: () => {
                 this.onZoom(ZoomDirection.Out);
             },
             onZoomingIn: () => {
                 this.onZoom(ZoomDirection.In);
-            }
-        }
+            },
+            getZoomLevel: () => {
+                return this.zoomManager.getZoomData().currentZoomScale;
+            },
+            setZoomLevel: (newZoomScale: number) => {
+                this.onZoom(ZoomDirection.In, newZoomScale);
+                return this.zoomManager.getZoomData();
+            },
+        };
 
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
         this.zoomManager.deleteInstance();
@@ -682,8 +689,8 @@ export class Editor {
             toolbarSet = Editor.FullToolbarSet;
         }
 
-        // enable zoom feature in the toolbar for RectToolbarSet only
-        if (this.zoomManager.isZoomEnabled && toolbarSet === Editor.RectToolbarSet) {
+        // enable zoom feature in the toolbar
+        if (this.zoomManager.isZoomEnabled) {
             toolbarSet = toolbarSet.concat(Editor.SeparatorIconGroupToolbar).concat(Editor.ZoomIconGroupToolbar);
         }
 
@@ -897,12 +904,12 @@ export class Editor {
      * and a scroll bar needs to appear.
      * @param zoomType - A type that indicates whether we are zooming in or out.
      */
-    private onZoom(zoomType: ZoomDirection): void {
+    private onZoom(zoomType: ZoomDirection, newScale?: number): void {
         if (!this.zoomManager.isZoomEnabled) {
             throw new Error("Zoom feature is not enabled");
         }
 
-        const zoomData = this.zoomManager.updateZoomScale(zoomType);
+        const zoomData = this.zoomManager.updateZoomScale(zoomType, newScale);
         if (zoomData) {
             const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
@@ -920,7 +927,7 @@ export class Editor {
             const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
             this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
 
-            if (typeof this.onZoomEnd == "function") {
+            if (typeof this.onZoomEnd === "function") {
                 this.onZoomEnd(zoomData);
             }
         }
@@ -929,7 +936,7 @@ export class Editor {
     private handleZoomAfterContentUpdate(): void {
         // check if the editor needs to be zoomed based on previous content source.
         if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
-            let zoomData = this.zoomManager.getZoomData();
+            const zoomData = this.zoomManager.getZoomData();
             const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
             const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
             this.frameWidth = scaledFrameWidth;
@@ -948,7 +955,7 @@ export class Editor {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
-        
+
         const containerWidth = this.editorContainerDiv.offsetWidth;
         const containerHeight = this.editorContainerDiv.offsetHeight;
 

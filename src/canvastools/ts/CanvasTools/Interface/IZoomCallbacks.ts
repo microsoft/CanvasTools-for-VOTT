@@ -15,4 +15,14 @@ export interface IZoomCallbacks {
      * The callback to be called on zooming in.
      */
     onZoomingIn: ZoomFunction;
+
+    /**
+     * Get the current zoom level
+     */
+    getZoomLevel: () => number;
+
+    /**
+     * Set the current zoom level
+     */
+    setZoomLevel: (zoomScale: number) => ZoomData;
 }

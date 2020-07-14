@@ -156,7 +156,7 @@
 }
 
 .primaryTagBoundRectStyle {
-    stroke-width: 0.5;
+    stroke-width: 2;
 }
 
 .primaryTagPolylineStyle, .primaryTagPolygonStyle {
@@ -254,11 +254,13 @@
 
 .regionStyle.selected .primaryTagBoundRectStyle {
     fill: var(--default-color-highlight);
+    opacity: 1;
 }
 
 .regionStyle:hover .primaryTagBoundRectStyle {
     fill: var(--default-color-highlight);
     stroke: var(--default-color-white);
+    opacity: 0.75;
 }
 
 .primaryTagPolylineStyle {
@@ -587,8 +589,8 @@ svg:not(:root) .menuLayer {
 /* Announcer */
 #regionAnnouncer {
     position: absolute !important;
-    height: 1px; 
-    width: 1px;
+    height: 0px; 
+    width: 0px;
     overflow: hidden;
     clip: rect(0px, 0px, 0px, 0px);
     clip-path: polygon(0px 0px, 0px 0px, 0px 0px);

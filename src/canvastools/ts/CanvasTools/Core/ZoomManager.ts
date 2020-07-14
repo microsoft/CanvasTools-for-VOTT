@@ -60,13 +60,13 @@ export class ZoomManager {
     private previousZoomScale: number;
 
      /**
-     * boolean that states if the zoom needs to be reset on content update. Defaults to false.
-     */
+      * boolean that states if the zoom needs to be reset on content update. Defaults to false.
+      */
     private _resetZoomOnContentLoad: boolean;
 
      /**
-     * This holds the current instance of zoomManager.
-     */
+      * This holds the current instance of zoomManager.
+      */
     private static instance: ZoomManager;
 
     private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
@@ -115,16 +115,16 @@ export class ZoomManager {
      * @param zoomType - The direction of zoom.
      * @returns - Zoom data object.
      */
-    public updateZoomScale(zoomType: ZoomDirection): ZoomData {
+    public updateZoomScale(zoomType: ZoomDirection, newScale?: number): ZoomData {
         this.previousZoomScale = this.currentZoomScale;
-        let zoomData = this.getZoomData();
+        const zoomData = this.getZoomData();
 
         let updatedZoomScale;
-        if (zoomType == ZoomDirection.In) {
+        if (newScale !== undefined) {
+            updatedZoomScale = newScale;
+        } else if (zoomType === ZoomDirection.In) {
             updatedZoomScale = this.currentZoomScale + this.zoomScale;
-        }
-
-        if (zoomType == ZoomDirection.Out) {
+        } else if (zoomType === ZoomDirection.Out) {
             updatedZoomScale = this.currentZoomScale - this.zoomScale;
         }
 
@@ -156,14 +156,12 @@ export class ZoomManager {
      * @returns - Zoom data object.
      */
     public getZoomData(): ZoomData {
-        let zoomData = {
+        return {
             minZoomScale: this.minZoomScale,
             maxZoomScale: this.maxZoomScale,
             currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.previousZoomScale
+            previousZoomScale: this.previousZoomScale,
         };
-
-        return zoomData;
     }
 
     /**
