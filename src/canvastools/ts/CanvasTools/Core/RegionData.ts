@@ -41,6 +41,24 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     }
 
     /**
+     * Creates a new `RegionData` object with `rect`-type at provided `x`, `y`
+     * coordinates and of provided `width` and `height`
+     * @param x - `x`-coordinate
+     * @param y - `y`-coordinate
+     * @param width - `width` of the bounding rect
+     * @param height - `height` of the bounding rect
+     * @param points - the points that make up the polygon
+     * @returns A new `RegionData` object
+     */
+    public static BuildPolygonRegionData(x: number, y: number, width: number, height: number, points: Point2D[]): RegionData {
+        const region = new RegionData(x, y, width, height,
+            [new Point2D(x, y), new Point2D(x + width, y),
+             new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Polygon);
+        region.points = points;
+        return region;
+    }
+
+    /**
      * Creates a new `RegionData` object based on extracting specific properties from any provided object
      * @param data - An `IRegionData` object with `x`, `y`, `width`, `height`, `points` and `type` properties
      * @returns A new `RegionData` object

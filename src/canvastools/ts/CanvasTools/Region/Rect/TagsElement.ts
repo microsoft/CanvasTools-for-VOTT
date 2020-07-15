@@ -55,7 +55,7 @@ export class TagsElement extends TagsComponent {
         if (this.tags) {
             window.requestAnimationFrame(() => {
                 if (this.tags.primary !== undefined && this.tags.primary !== null) {
-                    // Update primaty tag rect
+                    // Update primary tag rect
                     this.primaryTagRect.attr({
                         height: this.height,
                         width: this.width,
