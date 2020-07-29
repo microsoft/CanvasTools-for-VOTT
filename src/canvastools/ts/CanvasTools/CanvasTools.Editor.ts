@@ -204,6 +204,18 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
+            action: "polygon-select",
+            iconFile: "polygon-selection.svg",
+            tooltip: "Polygon-selection (O)",
+            key: ["O", "o"],
+            actionCallback: (action, rm, sl) => {
+                sl.setSelectionMode({ mode: SelectionMode.POLYGON });
+                sl.show();
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
             action: "copy-select",
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
@@ -504,11 +516,11 @@ export class Editor {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
-        
+
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
         this.editorContainerDiv.tabIndex = 0;
-        
+
         this.editorDiv = this.createDivElement();
         this.editorDiv.classList.add("CanvasToolsEditor");
 
@@ -973,7 +985,7 @@ export class Editor {
             vpadding = (containerHeight - scaledFrameHeight) / 2;
             this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         } else {
-            this.editorDiv.style.height =`${scaledFrameHeight}px`;
+            this.editorDiv.style.height = `${scaledFrameHeight}px`;
         }
 
         // existence of either a vertical or horizontal scroll bar
