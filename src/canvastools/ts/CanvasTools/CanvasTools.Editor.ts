@@ -504,11 +504,11 @@ export class Editor {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
-        
+
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
         this.editorContainerDiv.tabIndex = 0;
-        
+
         this.editorDiv = this.createDivElement();
         this.editorDiv.classList.add("CanvasToolsEditor");
 
@@ -648,8 +648,7 @@ export class Editor {
                 } else if (prop in target.zoomManager) {
                     t = target.FP;
                     p = t[prop];
-                }
-                else {
+                } else {
                     p = undefined;
                 }
 
@@ -973,7 +972,7 @@ export class Editor {
             vpadding = (containerHeight - scaledFrameHeight) / 2;
             this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
         } else {
-            this.editorDiv.style.height =`${scaledFrameHeight}px`;
+            this.editorDiv.style.height = `${scaledFrameHeight}px`;
         }
 
         // existence of either a vertical or horizontal scroll bar

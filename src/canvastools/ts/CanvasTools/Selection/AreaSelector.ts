@@ -116,6 +116,7 @@ export class AreaSelector {
      * @param height - The new `height` for selector.
      */
     public resize(width: number, height: number): void {
+        const [oldWidth, oldHeight] = [this.boundRect.width, this.boundRect.height];
         if (width !== undefined && height !== undefined) {
             this.boundRect.resize(width, height);
         } else {
@@ -123,7 +124,7 @@ export class AreaSelector {
         }
 
         if (this.selector !== null) {
-            this.selector.resize(width, height);
+            this.selector.resize(width, height, oldWidth, oldHeight);
         }
     }
 
@@ -227,8 +228,8 @@ export class AreaSelector {
     }
 
     /**
-    * Would be called after zoom to update the template for rect copy selector
-    */
+     * Would be called after zoom to update the template for rect copy selector
+     */
     public updateRectCopyTemplateSelector(template: IRect): void {
         if (template !== undefined) {
             this.rectCopySelector.setTemplate(template);
@@ -238,8 +239,8 @@ export class AreaSelector {
     }
 
     /**
-    * Get the template for rect copy selector
-    */
+     * Get the template for rect copy selector
+     */
     public getRectCopyTemplate(regions: Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }>): IRect {
         if (regions !== undefined && regions.length > 0) {
             const r = regions[0];

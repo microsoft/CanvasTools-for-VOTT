@@ -233,6 +233,12 @@ class RegionData {
         return new RegionData(x, y, width, height, [new Point2D_1.Point2D(x, y), new Point2D_1.Point2D(x + width, y),
             new Point2D_1.Point2D(x + width, y + height), new Point2D_1.Point2D(x, y + height)], RegionDataType.Rect);
     }
+    static BuildPolygonRegionData(x, y, width, height, points) {
+        const region = new RegionData(x, y, width, height, [new Point2D_1.Point2D(x, y), new Point2D_1.Point2D(x + width, y),
+            new Point2D_1.Point2D(x + width, y + height), new Point2D_1.Point2D(x, y + height)], RegionDataType.Polygon);
+        region.points = points;
+        return region;
+    }
     static BuildFromJson(data) {
         return new RegionData(data.x, data.y, data.width, data.height, data.points.map((p) => new Point2D_1.Point2D(p.x, p.y)), data.type);
     }
@@ -1523,7 +1529,7 @@ class Element {
         this.node.node.setAttribute("visibility", "visible");
         this.isVisible = true;
     }
-    resize(width, height) {
+    resize(width, height, oldWidth, oldHeight) {
         this.boundRect.resize(width, height);
     }
 }
@@ -2602,13 +2608,12 @@ class ZoomManager {
         this.zoomScale = zoomScale;
     }
     getZoomData() {
-        let zoomData = {
+        return {
             minZoomScale: this.minZoomScale,
             maxZoomScale: this.maxZoomScale,
             currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.previousZoomScale
+            previousZoomScale: this.previousZoomScale,
         };
-        return zoomData;
     }
     deleteInstance() {
         if (ZoomManager.instance) {
@@ -2742,6 +2747,7 @@ class AreaSelector {
         this.buildUIElements();
     }
     resize(width, height) {
+        const [oldWidth, oldHeight] = [this.boundRect.width, this.boundRect.height];
         if (width !== undefined && height !== undefined) {
             this.boundRect.resize(width, height);
         }
@@ -2749,7 +2755,7 @@ class AreaSelector {
             this.boundRect.resize(this.parentNode.width.baseVal.value, this.parentNode.height.baseVal.value);
         }
         if (this.selector !== null) {
-            this.selector.resize(width, height);
+            this.selector.resize(width, height, oldWidth, oldHeight);
         }
     }
     enable() {
@@ -5895,9 +5901,16 @@ class PolygonSelector extends Selector_1.Selector {
         this.reset();
         this.hide();
     }
-    resize(width, height) {
-        super.resize(width, height);
-        this.crossA.resize(width, height);
+    resize(newWidth, newHeight, oldWidth, oldHeight) {
+        const [xScale, yScale] = [newWidth / oldWidth, newHeight / oldHeight];
+        super.resize(newWidth, newHeight);
+        this.crossA.resize(newWidth, newHeight);
+        if (this.lastPoint != null) {
+            this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
+            this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+        }
+        this.points = this.points.map((p) => new Point2D_1.Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
+        this.redrawPoints();
     }
     hide() {
         super.hide();
@@ -6044,12 +6057,16 @@ class PolygonSelector extends Selector_1.Selector {
         const point = this.paper.circle(x, y, PolygonSelector.DEFAULT_POINT_RADIUS);
         point.addClass("polygonPointStyle");
         this.pointsGroup.add(point);
-        let pointsStr = "";
-        this.points.forEach((p) => {
-            pointsStr += `${p.x},${p.y},`;
-        });
+        this.redrawPoints();
+    }
+    redrawPoints() {
         this.polygon.attr({
-            points: pointsStr.substr(0, pointsStr.length - 1),
+            points: this.points.map((p) => `${p.x},${p.y}`).join(","),
+        });
+        this.pointsGroup.children().forEach((child, index) => {
+            if (this.points[index]) {
+                child.attr({ cx: this.points[index].x, cy: this.points[index].y });
+            }
         });
     }
     submitPolygon() {

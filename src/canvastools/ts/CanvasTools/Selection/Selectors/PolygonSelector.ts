@@ -91,12 +91,23 @@ export class PolygonSelector extends Selector {
 
     /**
      * Resizes the selector to specified `width` and `height`.
-     * @param width - The new `width`.
-     * @param height - The new `height`.
+     * @param newWidth - The new `width`.
+     * @param newHeight - The new `height`.
+     * @param oldWidth - The previous `width` before the resize.
+     * @param oldHeight - The previous `height` before the resize.
      */
-    public resize(width: number, height: number) {
-        super.resize(width, height);
-        this.crossA.resize(width, height);
+    public resize(newWidth: number, newHeight: number, oldWidth?: number, oldHeight?: number) {
+        const [xScale, yScale] = [newWidth / oldWidth, newHeight / oldHeight];
+
+        super.resize(newWidth, newHeight);
+        this.crossA.resize(newWidth, newHeight);
+        if (this.lastPoint != null) {
+            this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
+            this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+        }
+
+        this.points = this.points.map((p) => new Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
+        this.redrawPoints();
     }
 
     /**
@@ -280,13 +291,17 @@ export class PolygonSelector extends Selector {
 
         this.pointsGroup.add(point);
 
-        let pointsStr = "";
-        this.points.forEach((p) => {
-            pointsStr += `${p.x},${p.y},`;
-        });
+        this.redrawPoints();
+    }
 
+    private redrawPoints() {
         this.polygon.attr({
-            points: pointsStr.substr(0, pointsStr.length - 1),
+            points: this.points.map((p) => `${p.x},${p.y}`).join(","),
+        });
+        this.pointsGroup.children().forEach((child, index) => {
+            if (this.points[index]) {
+                child.attr({ cx: this.points[index].x, cy: this.points[index].y });
+            }
         });
     }
 
