@@ -204,18 +204,6 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "polygon-select",
-            iconFile: "polygon-selection.svg",
-            tooltip: "Polygon-selection (O)",
-            key: ["O", "o"],
-            actionCallback: (action, rm, sl) => {
-                sl.setSelectionMode({ mode: SelectionMode.POLYGON });
-                sl.show();
-            },
-            activate: false,
-        },
-        {
-            type: ToolbarItemType.SELECTOR,
             action: "copy-select",
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
@@ -660,8 +648,7 @@ export class Editor {
                 } else if (prop in target.zoomManager) {
                     t = target.FP;
                     p = t[prop];
-                }
-                else {
+                } else {
                     p = undefined;
                 }
 

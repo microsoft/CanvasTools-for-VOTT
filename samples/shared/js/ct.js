@@ -6064,7 +6064,9 @@ class PolygonSelector extends Selector_1.Selector {
             points: this.points.map((p) => `${p.x},${p.y}`).join(","),
         });
         this.pointsGroup.children().forEach((child, index) => {
-            child.attr({ cx: this.points[index].x, cy: this.points[index].y });
+            if (this.points[index]) {
+                child.attr({ cx: this.points[index].x, cy: this.points[index].y });
+            }
         });
     }
     submitPolygon() {
@@ -7193,18 +7195,6 @@ Editor.RectToolbarSet = [
             sl.show();
         },
         activate: true,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "polygon-select",
-        iconFile: "polygon-selection.svg",
-        tooltip: "Polygon-selection (O)",
-        key: ["O", "o"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
-            sl.show();
-        },
-        activate: false,
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,

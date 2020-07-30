@@ -93,6 +93,8 @@ export class PolygonSelector extends Selector {
      * Resizes the selector to specified `width` and `height`.
      * @param newWidth - The new `width`.
      * @param newHeight - The new `height`.
+     * @param oldWidth - The previous `width` before the resize.
+     * @param oldHeight - The previous `height` before the resize.
      */
     public resize(newWidth: number, newHeight: number, oldWidth?: number, oldHeight?: number) {
         const [xScale, yScale] = [newWidth / oldWidth, newHeight / oldHeight];

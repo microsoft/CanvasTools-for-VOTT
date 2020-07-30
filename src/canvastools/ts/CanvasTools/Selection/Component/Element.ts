@@ -70,8 +70,8 @@ export abstract class Element implements IHideable, IResizable {
      * Resizes element to specified `width` and `height`.
      * @param width - New element `width`.
      * @param height - New element `height`.
-     * @param oldWidth - New element `height`.
-     * @param height - New element `height`.
+     * @param oldWidth - The previous `width` before the resize.
+     * @param oldHeight - The previous `height` before the resize.
      */
     public resize(width: number, height: number, oldWidth?: number, oldHeight?: number) {
         this.boundRect.resize(width, height);
