@@ -75,6 +75,12 @@ export class PolygonSelector extends Selector {
     private isCapturing: boolean = false;
 
     /**
+     * When undo is called, those points are pushed into this queue.
+     * If new points are added the redo queue is cleared.
+     */
+    private redoQueue: Point2D[];
+
+    /**
      * Creates new `PolygonSelector` object.
      * @param parent - The parent SVG-element.
      * @param paper - The `Snap.Paper` element to draw on.
@@ -83,6 +89,7 @@ export class PolygonSelector extends Selector {
      */
     constructor(parent: SVGSVGElement, paper: Snap.Paper, boundRect: Rect, callbacks?: ISelectorCallbacks) {
         super(parent, paper, boundRect, callbacks);
+        this.redoQueue = [];
 
         this.buildUIElements();
         this.reset();
@@ -101,13 +108,15 @@ export class PolygonSelector extends Selector {
 
         super.resize(newWidth, newHeight);
         this.crossA.resize(newWidth, newHeight);
-        if (this.lastPoint != null) {
-            this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
-            this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
-        }
+        if (oldWidth !== undefined || oldHeight !== undefined) {
+            if (this.lastPoint != null) {
+                this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
+                this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+            }
 
-        this.points = this.points.map((p) => new Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
-        this.redrawPoints();
+            this.points = this.points.map((p) => new Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
+            this.redrawPoints();
+        }
     }
 
     /**
@@ -124,6 +133,39 @@ export class PolygonSelector extends Selector {
     public show() {
         super.show();
         this.showAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
+    }
+
+    /**
+     * Undo the last point drawn, if there is something to undo
+     */
+    public undo() {
+        if (this.canUndo()) {
+            const pointToUndo = this.points.pop();
+            this.pointsGroup.children().pop().remove();
+            this.lastPoint = this.points[this.points.length - 1];
+
+            this.redoQueue.push(pointToUndo);
+
+            this.redrawPoints();
+        }
+    }
+
+    /**
+     * Redo the last point that was undone
+     */
+    public redo() {
+        if (this.canRedo()) {
+            const pointToRedo = this.redoQueue.pop();
+            this.addPoint(pointToRedo.x, pointToRedo.y);
+        }
+    }
+
+    public canRedo(): boolean {
+        return this.redoQueue.length > 0;
+    }
+
+    public canUndo(): boolean {
+        return this.points.length > 1;
     }
 
     /**
@@ -205,12 +247,19 @@ export class PolygonSelector extends Selector {
                 event: "click",
                 base: this.parentNode,
                 listener: (e: MouseEvent) => {
-                    if (e.detail <= 1) {
+                    if (e.detail <= 1 && this.isCapturing) {
                         window.requestAnimationFrame(() => {
                             const p = new Point2D(this.crossA.x, this.crossA.y);
                             this.addPoint(p.x, p.y);
                             this.lastPoint = p;
+                            if (this.redoQueue.length > 0) {
+                                this.redoQueue = [];
+                            }
                         });
+
+                        if (typeof this.callbacks.onNextSelectionPoint === "function") {
+                            this.callbacks.onNextSelectionPoint(new Point2D(this.crossA.x, this.crossA.y));
+                        }
                     }
                 },
                 bypass: false,

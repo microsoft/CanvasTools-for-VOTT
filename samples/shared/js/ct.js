@@ -4493,6 +4493,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             }
             else {
                 window.requestAnimationFrame(() => {
+                    console.log("PolygonAnchorsElement.redraw()", this.regionData.points);
                     this.regionData.points.forEach((p, index) => {
                         this.anchors[index].attr({
                             cx: p.x,
@@ -5066,6 +5067,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             }
             else {
                 window.requestAnimationFrame(() => {
+                    console.log("AnchorsElement.redraw", this.regionData.points);
                     this.regionData.points.forEach((p, index) => {
                         this.anchors[index].attr({
                             cx: p.x,
@@ -5905,12 +5907,14 @@ class PolygonSelector extends Selector_1.Selector {
         const [xScale, yScale] = [newWidth / oldWidth, newHeight / oldHeight];
         super.resize(newWidth, newHeight);
         this.crossA.resize(newWidth, newHeight);
-        if (this.lastPoint != null) {
-            this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
-            this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+        if (oldWidth !== undefined || oldHeight !== undefined) {
+            if (this.lastPoint != null) {
+                this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
+                this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+            }
+            this.points = this.points.map((p) => new Point2D_1.Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
+            this.redrawPoints();
         }
-        this.points = this.points.map((p) => new Point2D_1.Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
-        this.redrawPoints();
     }
     hide() {
         super.hide();
@@ -6060,6 +6064,7 @@ class PolygonSelector extends Selector_1.Selector {
         this.redrawPoints();
     }
     redrawPoints() {
+        console.log("redrawPoints", this.points.length === this.pointsGroup.children().length, this.points, this.pointsGroup.children());
         this.polygon.attr({
             points: this.points.map((p) => `${p.x},${p.y}`).join(","),
         });
