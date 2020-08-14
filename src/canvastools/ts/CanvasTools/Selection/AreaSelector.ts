@@ -103,6 +103,7 @@ export class AreaSelector {
                 onLocked: null,
                 onSelectionBegin: null,
                 onSelectionEnd: null,
+                onNextSelectionPoint: null,
                 onUnlocked: null,
             };
         }
@@ -161,6 +162,44 @@ export class AreaSelector {
     public hide() {
         this.disable();
         this.isVisible = false;
+    }
+
+    /**
+     * Undo the last point drawn, if there is something to undo
+     */
+    public undo(): void {
+        if (this.selectorSettings.mode === SelectionMode.POLYGON) {
+            this.polygonSelector.undo();
+        }
+    }
+
+    /**
+     * Redo the last point that was undone
+     */
+    public redo() {
+        if (this.selectorSettings.mode === SelectionMode.POLYGON) {
+            this.polygonSelector.redo();
+        }
+    }
+
+    /**
+     * Returns whether or not a redo action can be performed, currently only supported for `PolygonSelector`
+     */
+    public canRedo(): boolean {
+        if (this.selectorSettings.mode === SelectionMode.POLYGON) {
+            return this.polygonSelector.canRedo();
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether or not an undo action can be performed, currently only supported for `PolygonSelector`
+     */
+    public canUndo(): boolean {
+        if (this.selectorSettings.mode === SelectionMode.POLYGON) {
+            return this.polygonSelector.canUndo();
+        }
+        return false;
     }
 
     /**

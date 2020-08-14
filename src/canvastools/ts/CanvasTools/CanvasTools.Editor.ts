@@ -5,7 +5,7 @@ import { RegionData } from "./Core/RegionData";
 
 import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
 import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
-import { SelectionNotifyFunction, SelectionConfirmFunction } from "./Interface/ISelectorCallbacks";
+import { SelectionNotifyFunction, SelectionConfirmFunction, PointSelectionNotifyFunction } from "./Interface/ISelectorCallbacks";
 import { ZoomUpdateFunction, IZoomCallbacks } from "./Interface/IZoomCallbacks";
 import { SelectionMode } from "./Interface/ISelectorSettings";
 
@@ -19,6 +19,7 @@ import { AreaSelector } from "./Selection/AreaSelector";
 import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
 import { IToolbarIcon } from "./Interface/IToolbarIcon";
+import { Point2D } from "./Core/Point2D";
 
 /**
  * Internal type to describe toolbar presets
@@ -381,6 +382,11 @@ export class Editor {
     public onSelectionEnd: SelectionConfirmFunction;
 
     /**
+     * Callback for `AreaSelector` called when the next point in `PolygonSelector` is drawn.
+     */
+    public onNextSelectionPoint: PointSelectionNotifyFunction;
+
+    /**
      * Callback when user ended zoom function.
      */
     public onZoomEnd: ZoomUpdateFunction;
@@ -582,6 +588,11 @@ export class Editor {
 
                 if (typeof this.onSelectionEnd === "function") {
                     this.onSelectionEnd(regionData);
+                }
+            },
+            onNextSelectionPoint: (point: Point2D) => {
+                if (typeof this.onNextSelectionPoint === "function") {
+                    this.onNextSelectionPoint(point);
                 }
             },
         };

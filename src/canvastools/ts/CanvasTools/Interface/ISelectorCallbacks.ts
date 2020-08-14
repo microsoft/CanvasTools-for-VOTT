@@ -1,6 +1,8 @@
 import { RegionData } from "../Core/RegionData";
+import { Point2D } from "../Core/Point2D";
 
 export type SelectionNotifyFunction = () => void;
+export type PointSelectionNotifyFunction = (point: Point2D) => void;
 export type SelectionConfirmFunction = (regionData: RegionData) => void;
 /**
  * Defines a collection of callbacks passed to the `AreaSelector` constructor.
@@ -16,6 +18,12 @@ export interface ISelectorCallbacks {
      * @param regionData - The `RegionData` object describing new region.
      */
     onSelectionEnd: SelectionConfirmFunction;
+
+    /**
+     * The callback when a new point is drawn by the `PolygonSelector`
+     * @param point - The `Point2D` object describing the new point
+     */
+    onNextSelectionPoint?: PointSelectionNotifyFunction;
 
     /**
      * The callback to be called when the current selector is locked.

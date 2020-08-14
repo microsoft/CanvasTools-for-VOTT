@@ -2741,6 +2741,7 @@ class AreaSelector {
                 onLocked: null,
                 onSelectionBegin: null,
                 onSelectionEnd: null,
+                onNextSelectionPoint: null,
                 onUnlocked: null,
             };
         }
@@ -2776,6 +2777,28 @@ class AreaSelector {
     hide() {
         this.disable();
         this.isVisible = false;
+    }
+    undo() {
+        if (this.selectorSettings.mode === ISelectorSettings_1.SelectionMode.POLYGON) {
+            this.polygonSelector.undo();
+        }
+    }
+    redo() {
+        if (this.selectorSettings.mode === ISelectorSettings_1.SelectionMode.POLYGON) {
+            this.polygonSelector.redo();
+        }
+    }
+    canRedo() {
+        if (this.selectorSettings.mode === ISelectorSettings_1.SelectionMode.POLYGON) {
+            return this.polygonSelector.canRedo();
+        }
+        return false;
+    }
+    canUndo() {
+        if (this.selectorSettings.mode === ISelectorSettings_1.SelectionMode.POLYGON) {
+            return this.polygonSelector.canUndo();
+        }
+        return false;
     }
     setSelectionMode(settings) {
         let selectionSettings;
@@ -5897,6 +5920,7 @@ class PolygonSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
         this.isCapturing = false;
+        this.redoQueue = [];
         this.buildUIElements();
         this.reset();
         this.hide();
@@ -5905,12 +5929,14 @@ class PolygonSelector extends Selector_1.Selector {
         const [xScale, yScale] = [newWidth / oldWidth, newHeight / oldHeight];
         super.resize(newWidth, newHeight);
         this.crossA.resize(newWidth, newHeight);
-        if (this.lastPoint != null) {
-            this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
-            this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+        if (oldWidth !== undefined || oldHeight !== undefined) {
+            if (this.lastPoint != null) {
+                this.lastPoint.x = Math.round(this.lastPoint.x * xScale);
+                this.lastPoint.y = Math.round(this.lastPoint.y * yScale);
+            }
+            this.points = this.points.map((p) => new Point2D_1.Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
+            this.redrawPoints();
         }
-        this.points = this.points.map((p) => new Point2D_1.Point2D(Math.round(p.x * xScale), Math.round(p.y * yScale)));
-        this.redrawPoints();
     }
     hide() {
         super.hide();
@@ -5919,6 +5945,27 @@ class PolygonSelector extends Selector_1.Selector {
     show() {
         super.show();
         this.showAll([this.crossA, this.nextPoint, this.nextSegment, this.polygon, this.pointsGroup]);
+    }
+    undo() {
+        if (this.canUndo()) {
+            const pointToUndo = this.points.pop();
+            this.pointsGroup.children().pop().remove();
+            this.lastPoint = this.points[this.points.length - 1];
+            this.redoQueue.push(pointToUndo);
+            this.redrawPoints();
+        }
+    }
+    redo() {
+        if (this.canRedo()) {
+            const pointToRedo = this.redoQueue.pop();
+            this.addPoint(pointToRedo.x, pointToRedo.y);
+        }
+    }
+    canRedo() {
+        return this.redoQueue.length > 0;
+    }
+    canUndo() {
+        return this.points.length > 1;
     }
     disable() {
         super.disable();
@@ -5986,12 +6033,16 @@ class PolygonSelector extends Selector_1.Selector {
                 event: "click",
                 base: this.parentNode,
                 listener: (e) => {
-                    if (e.detail <= 1) {
+                    if (e.detail <= 1 && this.isCapturing) {
                         window.requestAnimationFrame(() => {
                             const p = new Point2D_1.Point2D(this.crossA.x, this.crossA.y);
                             this.addPoint(p.x, p.y);
                             this.lastPoint = p;
+                            this.redoQueue = [];
                         });
+                        if (typeof this.callbacks.onNextSelectionPoint === "function") {
+                            this.callbacks.onNextSelectionPoint(new Point2D_1.Point2D(this.crossA.x, this.crossA.y));
+                        }
                     }
                 },
                 bypass: false,
@@ -6741,6 +6792,11 @@ class Editor {
                 }
                 if (typeof this.onSelectionEnd === "function") {
                     this.onSelectionEnd(regionData);
+                }
+            },
+            onNextSelectionPoint: (point) => {
+                if (typeof this.onNextSelectionPoint === "function") {
+                    this.onNextSelectionPoint(point);
                 }
             },
         };
