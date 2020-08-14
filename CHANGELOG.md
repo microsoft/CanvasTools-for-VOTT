@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.2.16
+* Fix a bug with `PolygonSelector` where calling `.show` after deleting a box could cause an unwanted selection to start
+* Add `.undo()` and `.redo()` methods on `AreaSelector` (currently only works when the selector is a `PolygonSelector`)
+* Add `.onNextSelectionPoint()` callback for when a new point is drawn by the `PolygonSelector`
+
 ### 2.2.13
 * The functionality of tabbing has been heavily changed
 
