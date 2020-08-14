@@ -6038,9 +6038,7 @@ class PolygonSelector extends Selector_1.Selector {
                             const p = new Point2D_1.Point2D(this.crossA.x, this.crossA.y);
                             this.addPoint(p.x, p.y);
                             this.lastPoint = p;
-                            if (this.redoQueue.length > 0) {
-                                this.redoQueue = [];
-                            }
+                            this.redoQueue = [];
                         });
                         if (typeof this.callbacks.onNextSelectionPoint === "function") {
                             this.callbacks.onNextSelectionPoint(new Point2D_1.Point2D(this.crossA.x, this.crossA.y));

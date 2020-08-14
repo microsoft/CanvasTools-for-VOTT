@@ -252,9 +252,7 @@ export class PolygonSelector extends Selector {
                             const p = new Point2D(this.crossA.x, this.crossA.y);
                             this.addPoint(p.x, p.y);
                             this.lastPoint = p;
-                            if (this.redoQueue.length > 0) {
-                                this.redoQueue = [];
-                            }
+                            this.redoQueue = [];
                         });
 
                         if (typeof this.callbacks.onNextSelectionPoint === "function") {
