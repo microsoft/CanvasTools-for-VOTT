@@ -33,7 +33,7 @@ export class ZoomManager {
      * [Sets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
      */
     public set resetZoomOnContentLoad(reset: boolean) {
-        this.resetZoomOnContentLoad = reset;
+        this.shouldResetZoomOnContentLoad = reset;
         if (reset) {
             this.previousZoomScale = this.currentZoomScale = 1;
         }

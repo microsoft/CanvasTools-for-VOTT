@@ -16,7 +16,8 @@
         "object-literal-sort-keys": false,
         "no-shadowed-variable": false,
         "no-string-literal": false,
-        "unified-signatures": false
+        "unified-signatures": false,
+        "jsdoc-format": true
     },
     "rulesDirectory": []
 }

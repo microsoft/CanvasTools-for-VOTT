@@ -43,7 +43,6 @@
   },
   "devDependencies": {
     "@types/jest": "^25.1.2",
-    "@types/snapsvg": "^0.4.35",
     "copyfiles": "^2.3.0",
     "cpx": "^1.5.0",
     "css-loader": "^1.0.1",
