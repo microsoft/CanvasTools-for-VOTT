@@ -4,5 +4,6 @@
         "source.fixAll.tslint": true,
         "source.fixAll.stylelint": true
     },
-    "git.enableCommitSigning": true
+    "git.enableCommitSigning": true,
+    "git.alwaysSignOff": true
 }
