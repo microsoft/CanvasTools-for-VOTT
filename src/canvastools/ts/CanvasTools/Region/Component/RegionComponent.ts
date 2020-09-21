@@ -1,14 +1,14 @@
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
+import { type } from "os";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { IFreezable } from "../../Interface/IFreezable";
 import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
-import { IResizable } from "../../Interface/IResizable";
-import { IRegionCallbacks, ChangeEventType } from "../../Interface/IRegionCallbacks";
 import { IPoint2D } from "../../Interface/IPoint2D";
-import { type } from "os";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
+import { IResizable } from "../../Interface/IResizable";
 
 /**
  * An abstract visial component to define a component of region presentation UI.

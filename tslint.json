@@ -3,17 +3,20 @@
     "extends": [
         "tslint:recommended"
     ],
+    "linterOptions": {
+        "include": ["src/**/*.ts"],
+        "exclude": ["**/*.d.ts"]
+    },
     "jsRules": {},
     "rules": {
         "max-line-length": {
             "options": [120]
         },
+        "interface-name": false,
         "object-literal-sort-keys": false,
-        "no-console": false,
         "no-shadowed-variable": false,
-        "ordered-imports": false,
         "no-string-literal": false,
-        "unified-signatures": false
+        "unified-signatures": false,
     },
     "rulesDirectory": []
 }

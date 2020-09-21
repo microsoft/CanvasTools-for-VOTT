@@ -1,7 +1,7 @@
 import { Rect } from "../../Core/Rect";
 
-import { CrossElement } from "./CrossElement";
 import { IPoint2D } from "../../Interface/IPoint2D";
+import { CrossElement } from "./CrossElement";
 
 /**
  * The alternating cross element for selectors.
@@ -27,7 +27,6 @@ export class AlternatingCrossElement extends CrossElement {
         this.buildUIElements();
         this.hide();
     }
-
 
     /**
      * Moves cross to specified point, applying bounding and taking into account square movement modificator.

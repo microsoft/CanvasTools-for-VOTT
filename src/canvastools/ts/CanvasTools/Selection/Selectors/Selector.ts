@@ -5,9 +5,9 @@ import { IHideable } from "../../Interface/IHideadble";
 import { IResizable } from "../../Interface/IResizable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
-import { Element } from "../Component/Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
 import { CrossElement } from "../Component/CrossElement";
+import { Element } from "../Component/Element";
 
 /**
  * The abstract class to define region selectors.

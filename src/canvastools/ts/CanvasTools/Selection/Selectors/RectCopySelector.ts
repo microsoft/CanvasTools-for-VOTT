@@ -6,10 +6,10 @@ import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { IRect } from "../../Interface/IRect";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
+import { IPoint2D } from "../../Interface/IPoint2D";
 import { AlternatingCrossElement } from "../Component/AlternatingCrossElement";
 import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
-import { IPoint2D } from "../../Interface/IPoint2D";
 
 /**
  * The selector to define a rect-region using a template.

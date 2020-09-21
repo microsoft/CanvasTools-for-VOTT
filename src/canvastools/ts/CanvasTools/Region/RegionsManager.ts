@@ -1,18 +1,18 @@
-import { ZoomManager } from "./../Core/ZoomManager";
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
+import { RegionData, RegionDataType } from "../Core/RegionData";
+import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ChangeEventType } from "../Interface/IRegionCallbacks";
 import { IRegionsManagerCallbacks } from "../Interface/IRegionsManagerCallbacks";
-import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
-import { RectRegion } from "./Rect/RectRegion";
+import { ZoomManager } from "./../Core/ZoomManager";
+import { RegionComponent } from "./Component/RegionComponent";
 import { PointRegion } from "./Point/PointRegion";
 import { PolygonRegion } from "./Polygon/PolygonRegion";
 import { PolylineRegion } from "./Polyline/PolylineRegion";
-import { MenuElement } from "./RegionMenu";
-import { RegionData, RegionDataType } from "../Core/RegionData";
+import { RectRegion } from "./Rect/RectRegion";
 import { Region } from "./Region";
-import { RegionComponent } from "./Component/RegionComponent";
+import { MenuElement } from "./RegionMenu";
 
 /**
  * The manager for visual region objects.

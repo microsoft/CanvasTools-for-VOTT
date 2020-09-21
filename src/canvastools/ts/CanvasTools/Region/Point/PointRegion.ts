@@ -2,8 +2,8 @@ import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 
-import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
+import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 
 import { Region } from "../Region";
 import { DragElement } from "./DragElement";

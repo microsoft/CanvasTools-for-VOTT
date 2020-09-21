@@ -1,6 +1,6 @@
+import { LABColor } from "./LABColor";
 import { RGBColor } from "./RGBColor";
 import { SRGBColor } from "./SRGBColor";
-import { LABColor } from "./LABColor";
 
 /**
  * Represents the CIE XYZ color space.

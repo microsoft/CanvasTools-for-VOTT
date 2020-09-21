@@ -1,5 +1,5 @@
-import { RegionData } from "../Core/RegionData";
 import { Point2D } from "../Core/Point2D";
+import { RegionData } from "../Core/RegionData";
 
 export type SelectionNotifyFunction = () => void;
 export type PointSelectionNotifyFunction = (point: Point2D) => void;

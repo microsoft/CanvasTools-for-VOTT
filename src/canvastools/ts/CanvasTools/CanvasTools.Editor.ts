@@ -1,25 +1,23 @@
 import { FilterPipeline } from "./CanvasTools.Filter";
-
+import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
-
-import { RegionManipulationFunction, RegionChangeFunction } from "./Interface/IRegionCallbacks";
-import { RegionUpdateFunction, RegionSelectionFunction } from "./Interface/IRegionsManagerCallbacks";
-import { SelectionNotifyFunction, SelectionConfirmFunction, PointSelectionNotifyFunction } from "./Interface/ISelectorCallbacks";
-import { ZoomUpdateFunction, IZoomCallbacks } from "./Interface/IZoomCallbacks";
+import { ZoomDirection, ZoomManager } from "./Core/ZoomManager";
+import { RegionChangeFunction, RegionManipulationFunction } from "./Interface/IRegionCallbacks";
+import { RegionSelectionFunction, RegionUpdateFunction } from "./Interface/IRegionsManagerCallbacks";
+import {
+    PointSelectionNotifyFunction,
+    SelectionConfirmFunction,
+    SelectionNotifyFunction,
+} from "./Interface/ISelectorCallbacks";
 import { SelectionMode } from "./Interface/ISelectorSettings";
-
+import { IToolbarIcon } from "./Interface/IToolbarIcon";
+import { IZoomCallbacks, ZoomUpdateFunction } from "./Interface/IZoomCallbacks";
 import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
-
-import { ZoomData, ZoomDirection, ZoomManager } from "./Core/ZoomManager"
-
 import { AreaSelector } from "./Selection/AreaSelector";
-
-import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 import { Toolbar } from "./Toolbar/Toolbar";
-import { IToolbarIcon } from "./Interface/IToolbarIcon";
-import { Point2D } from "./Core/Point2D";
+import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
 
 /**
  * Internal type to describe toolbar presets
@@ -264,7 +262,7 @@ export class Editor {
                 rm.toggleBackground();
             },
             activate: false,
-        }
+        },
     ];
 
     /**
@@ -292,7 +290,7 @@ export class Editor {
                 zm.callbacks.onZoomingOut();
             },
             activate: false,
-        }
+        },
     ];
 
     /**
@@ -301,7 +299,7 @@ export class Editor {
     private static SeparatorIconGroupToolbar: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.SEPARATOR,
-        }
+        },
     ];
 
     /**
@@ -503,7 +501,7 @@ export class Editor {
      * @param isZoomEnabled [Optional]- This indicates if the zoom functionality is enabled
      */
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-        filterPipeline?: FilterPipeline, isZoomEnabled?: boolean);
+                filterPipeline?: FilterPipeline, isZoomEnabled?: boolean);
 
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
                 filterPipeline?: FilterPipeline, isZoomEnabled?: boolean) {

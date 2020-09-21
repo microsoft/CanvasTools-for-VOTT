@@ -2,8 +2,8 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { IMovable } from "../../Interface/IMovable";
 
-import { Element } from "./Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
+import { Element } from "./Element";
 
 /**
  * The cross element for selectors.

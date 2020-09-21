@@ -1,6 +1,6 @@
-import { XYZColor } from "./XYZColor";
 import { LABColor } from "./LABColor";
 import { SRGBColor } from "./SRGBColor";
+import { XYZColor } from "./XYZColor";
 
 /**
  * Represents the RGB color space.

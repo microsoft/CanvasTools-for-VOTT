@@ -1,12 +1,12 @@
 import { Rect } from "../Core/Rect";
+import { RegionData } from "../Core/RegionData";
+import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { IRect } from "../Interface/IRect";
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 import { ISelectorSettings, SelectionMode } from "../Interface/ISelectorSettings";
-import { TagsDescriptor } from "../Core/TagsDescriptor";
-import { RegionData } from "../Core/RegionData";
 import { PointSelector } from "./Selectors/PointSelector";
-import { PolylineSelector } from "./Selectors/PolylineSelector";
 import { PolygonSelector } from "./Selectors/PolygonSelector";
+import { PolylineSelector } from "./Selectors/PolylineSelector";
 import { RectCopySelector } from "./Selectors/RectCopySelector";
 import { RectSelector } from "./Selectors/RectSelector";
 import { Selector } from "./Selectors/Selector";

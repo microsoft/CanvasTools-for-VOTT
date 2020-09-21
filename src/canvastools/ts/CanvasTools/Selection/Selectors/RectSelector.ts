@@ -5,11 +5,11 @@ import { RegionData } from "../../Core/RegionData";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
+import { IPoint2D } from "../../Interface/IPoint2D";
 import { AlternatingCrossElement } from "../Component/AlternatingCrossElement";
 import { CrossElement } from "../Component/CrossElement";
 import { RectElement } from "../Component/RectElement";
 import { Selector } from "./Selector";
-import { IPoint2D } from "../../Interface/IPoint2D";
 
 /**
  * Enum to specify selection mode.

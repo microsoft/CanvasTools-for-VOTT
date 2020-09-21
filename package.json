@@ -20,7 +20,9 @@
     "start": "npm run build && webpack-dev-server --config webpack.config.js --env.mode=prod",
     "build": "webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
     "watch": "onchange src/canvastools/ts/**/*.ts src/canvastools/css/canvastools.css -- npm run start",
-    "test": "jest"
+    "test": "jest",
+    "lint": "tslint src/**/*.ts --exclude **/*.d.ts",
+    "lintfix": "tslint src/**/*.ts --exclude **/*.d.ts --fix"
   },
   "author": "Konstantin Kichinsky",
   "license": "MIT",

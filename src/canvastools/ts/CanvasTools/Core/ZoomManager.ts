@@ -3,7 +3,7 @@ import { IZoomCallbacks } from "../Interface/IZoomCallbacks";
 /**
  * Represents zoom meta data.
  */
-export type ZoomData = {
+export interface ZoomData {
     minZoomScale: number;
     maxZoomScale: number;
     previousZoomScale: number;
@@ -15,13 +15,54 @@ export type ZoomData = {
  */
 export enum ZoomDirection {
     In,
-    Out
+    Out,
 }
 
 /**
  * The manager for zoom functionality.
  */
 export class ZoomManager {
+
+    /**
+     * [Gets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
+     */
+    public get resetZoomOnContentLoad(): boolean {
+        return this.resetZoomOnContentLoad;
+    }
+
+    /**
+     * [Sets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
+     */
+    public set resetZoomOnContentLoad(reset: boolean) {
+        this.resetZoomOnContentLoad = reset;
+        if (reset) {
+            this.previousZoomScale = this.currentZoomScale = 1;
+        }
+    }
+
+    /**
+     * Gets the singleton instance of Zoom Manager.
+     * @param isZoomEnabled - Flag that indicates if zoom is enabled.
+     * @param zoomCallbacks - [Optional] The collection of zoom callbacks.
+     * @param maxZoom - [Optional] Maximum  zoom factor.
+     * @param zoomScale - [Optional] Incremental/Decremental zoom factor.
+     */
+    public static getInstance(
+        isZoomEnabled = false,
+        zoomCallbacks?: IZoomCallbacks,
+        maxZoom?: number,
+        zoomScale?: number,
+    ) {
+        if (!ZoomManager.instance) {
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+        }
+        return ZoomManager.instance;
+    }
+
+     /**
+      * This holds the current instance of zoomManager.
+      */
+    private static instance: ZoomManager;
     /**
      * This decides whether zoom is enabled for the project.
      */
@@ -62,12 +103,7 @@ export class ZoomManager {
      /**
       * boolean that states if the zoom needs to be reset on content update. Defaults to false.
       */
-    private _resetZoomOnContentLoad: boolean;
-
-     /**
-      * This holds the current instance of zoomManager.
-      */
-    private static instance: ZoomManager;
+    private resetZoomOnContentLoad: boolean;
 
     private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
         this.isZoomEnabled = isZoomEnabled;
@@ -76,38 +112,7 @@ export class ZoomManager {
         this.currentZoomScale = this.minZoomScale;
         this.previousZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
-        this._resetZoomOnContentLoad = false;
-    }
-
-    /**
-     * [Gets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
-     */
-    public get resetZoomOnContentLoad(): boolean {
-        return this._resetZoomOnContentLoad;
-    }
-
-    /**
-     * [Sets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
-     */
-    public set resetZoomOnContentLoad(reset: boolean) {
-        this._resetZoomOnContentLoad = reset;
-        if (reset) {
-            this.previousZoomScale = this.currentZoomScale = 1;
-        }
-    }
-
-    /**
-     * Gets the singleton instance of Zoom Manager.
-     * @param isZoomEnabled - Flag that indicates if zoom is enabled.
-     * @param zoomCallbacks - [Optional] The collection of zoom callbacks.
-     * @param maxZoom - [Optional] Maximum  zoom factor.
-     * @param zoomScale - [Optional] Incremental/Decremental zoom factor.
-     */
-    public static getInstance(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
-        if (!ZoomManager.instance) {
-            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
-        }
-        return ZoomManager.instance;
+        this.resetZoomOnContentLoad = false;
     }
 
     /**

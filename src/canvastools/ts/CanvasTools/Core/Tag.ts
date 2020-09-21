@@ -1,5 +1,5 @@
-import { ITag } from "../Interface/ITag";
 import { Color } from "../Core/Colors/Color";
+import { ITag } from "../Interface/ITag";
 import { HSLColor } from "./Colors/HSLColor";
 import { LABColor } from "./Colors/LABColor";
 
