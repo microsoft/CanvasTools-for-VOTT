@@ -1,4 +1,4 @@
-import { ZoomManager } from './../Core/ZoomManager';
+import { ZoomManager } from "./../Core/ZoomManager";
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { ChangeEventType } from "../Interface/IRegionCallbacks";
@@ -22,6 +22,11 @@ export class RegionsManager {
      * Reference to external callbacks.
      */
     public callbacks: IRegionsManagerCallbacks;
+
+    /**
+     * The element used for announcing region names when they are added
+     */
+    private regionAnnouncer: HTMLElement;
 
     /**
      * Reference to the host SVG element.
@@ -113,9 +118,9 @@ export class RegionsManager {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+        this.regionAnnouncer = document.getElementById("regionAnnouncer");
 
         this.regions = new Array<Region>();
-
         this.callbacks = {
             onChange: (region: Region, regionData: RegionData, state: ChangeEventType,
                        multiSelection: boolean = false) => {
@@ -173,7 +178,9 @@ export class RegionsManager {
         }
         this.sortRegionsByArea();
         this.redrawAllRegions();
-        document.getElementById("regionAnnouncer").innerHTML = tagsDescriptor.toString();
+        if (this.regionAnnouncer) {
+            this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
+        }
     }
 
     /**
@@ -280,6 +287,26 @@ export class RegionsManager {
     }
 
     /**
+     * Allows for easy toggling of visibility of regions matching a predicate
+     * @param shouldHideThisRegion the predicate for determining if a given `TagsDescriptor` and
+     * its corresponding region should have its visibility changed
+     * @param shouldShow whether or not the regions found should be marked as visible or invisible
+     */
+    public updateRegionVisibility(
+        shouldHideThisRegion: (tagsDescriptor: TagsDescriptor) => boolean,
+        shouldShow: boolean): void {
+        this.regions.forEach((region) => {
+            if (shouldHideThisRegion(region.tags)) {
+                if (shouldShow) {
+                    region.show();
+                } else {
+                    region.hide();
+                }
+            }
+        });
+    }
+
+    /**
      * Returns a collection of selected regions.
      */
     public getSelectedRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
@@ -359,7 +386,7 @@ export class RegionsManager {
 
         regions.forEach((region) => {
             region.unselect();
-        })
+        });
     }
 
     /**
@@ -774,7 +801,7 @@ export class RegionsManager {
     }
 
     /**
-     * Unselects all the regions, naybe except the one specified.
+     * Unselects all the regions, maybe except the one specified.
      * @param except - Region to ignore.
      */
     private unselectRegions(except?: Region) {

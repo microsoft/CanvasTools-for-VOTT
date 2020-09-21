@@ -112,18 +112,18 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * Switches the component presentstion to the hidden state.
+     * Switches the component presentation to the hidden state.
      */
     public hide() {
-        this.node.node.setAttribute("visibility", "hidden");
+        this.node.node.setAttribute("display", "none");
         this.isVisible = false;
     }
 
     /**
-     * Switches the component presentation to the visibile state.
+     * Switches the component presentation to the visible state.
      */
     public show() {
-        this.node.node.setAttribute("visibility", "visible");
+        this.node.node.setAttribute("display", "inherit");
         this.isVisible = true;
     }
 
@@ -136,7 +136,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * Unselecets the component.
+     * Unselects the component.
      */
     public unselect() {
         this.isSelected = false;
