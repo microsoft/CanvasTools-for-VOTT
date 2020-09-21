@@ -2,7 +2,7 @@
 
 ### 2.2.17
 * Add `.updateRegionVisibility()` to `RegionManager` for easier region visibility toggling
-* Fix a bug with add region accessability announcing
+* Fix a bug with add region accessibility announcing
 
 ### 2.2.16
 * Fix a bug with `PolygonSelector` where calling `.show` after deleting a box could cause an unwanted selection to start
