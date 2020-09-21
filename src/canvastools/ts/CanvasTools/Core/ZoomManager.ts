@@ -22,12 +22,11 @@ export enum ZoomDirection {
  * The manager for zoom functionality.
  */
 export class ZoomManager {
-
     /**
      * [Gets] The boolean flag that indicates if zoom settings needs to be reset when new content is loaded to canvas.
      */
     public get resetZoomOnContentLoad(): boolean {
-        return this.resetZoomOnContentLoad;
+        return this.shouldResetZoomOnContentLoad;
     }
 
     /**
@@ -103,7 +102,7 @@ export class ZoomManager {
      /**
       * boolean that states if the zoom needs to be reset on content update. Defaults to false.
       */
-    private resetZoomOnContentLoad: boolean;
+    private shouldResetZoomOnContentLoad: boolean;
 
     private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
         this.isZoomEnabled = isZoomEnabled;
@@ -112,7 +111,7 @@ export class ZoomManager {
         this.currentZoomScale = this.minZoomScale;
         this.previousZoomScale = this.minZoomScale;
         this.callbacks = zoomCallbacks;
-        this.resetZoomOnContentLoad = false;
+        this.shouldResetZoomOnContentLoad = false;
     }
 
     /**
