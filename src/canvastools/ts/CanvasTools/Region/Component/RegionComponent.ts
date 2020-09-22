@@ -1,14 +1,14 @@
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
+import { type } from "os";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { IFreezable } from "../../Interface/IFreezable";
 import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
-import { IResizable } from "../../Interface/IResizable";
-import { IRegionCallbacks, ChangeEventType } from "../../Interface/IRegionCallbacks";
 import { IPoint2D } from "../../Interface/IPoint2D";
-import { type } from "os";
+import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
+import { IResizable } from "../../Interface/IResizable";
 
 /**
  * An abstract visial component to define a component of region presentation UI.
@@ -112,18 +112,18 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * Switches the component presentstion to the hidden state.
+     * Switches the component presentation to the hidden state.
      */
     public hide() {
-        this.node.node.setAttribute("visibility", "hidden");
+        this.node.node.setAttribute("display", "none");
         this.isVisible = false;
     }
 
     /**
-     * Switches the component presentation to the visibile state.
+     * Switches the component presentation to the visible state.
      */
     public show() {
-        this.node.node.setAttribute("visibility", "visible");
+        this.node.node.setAttribute("display", "inherit");
         this.isVisible = true;
     }
 
@@ -136,7 +136,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * Unselecets the component.
+     * Unselects the component.
      */
     public unselect() {
         this.isSelected = false;

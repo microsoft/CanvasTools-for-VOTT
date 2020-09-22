@@ -1,9 +1,9 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 
-import { Element} from "./Element";
 import { IPoint2D } from "../../Interface/IPoint2D";
 import { IRect } from "../../Interface/IRect";
+import { Element} from "./Element";
 
 /**
  * The rect element for selectors

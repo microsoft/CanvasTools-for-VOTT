@@ -1,7 +1,7 @@
 import { HSLColor } from "./HSLColor";
-import { XYZColor } from "./XYZColor";
 import { LABColor } from "./LABColor";
 import { RGBColor } from "./RGBColor";
+import { XYZColor } from "./XYZColor";
 
 /**
  * Represents the sRGB color space.

@@ -1,23 +1,23 @@
-import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
-import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
-import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
-import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
-import { AreaSelector } from "./CanvasTools/Selection/AreaSelector";
-import { SelectionMode } from "./CanvasTools/Interface/ISelectorSettings";
-import { InvertFilter, GrayscaleFilter, BlurDiffFilter, ContrastFilter,
-         BrightnessFilter, SaturationFilter } from "./CanvasTools/CanvasTools.Filter";
-import { Rect } from "./CanvasTools/Core/Rect";
+import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
+import { BlurDiffFilter, BrightnessFilter, ContrastFilter, GrayscaleFilter,
+         InvertFilter, SaturationFilter } from "./CanvasTools/CanvasTools.Filter";
+import { Color } from "./CanvasTools/Core/Colors/Color";
+import { HSLColor } from "./CanvasTools/Core/Colors/HSLColor";
+import { LABColor } from "./CanvasTools/Core/Colors/LABColor";
+import { Palette } from "./CanvasTools/Core/Colors/Palette";
+import { RGBColor } from "./CanvasTools/Core/Colors/RGBColor";
+import { XYZColor } from "./CanvasTools/Core/Colors/XYZColor";
 import { Point2D } from "./CanvasTools/Core/Point2D";
+import { Rect } from "./CanvasTools/Core/Rect";
 import { RegionData } from "./CanvasTools/Core/RegionData";
 import { Tag } from "./CanvasTools/Core/Tag";
 import { TagsDescriptor } from "./CanvasTools/Core/TagsDescriptor";
-import { Editor as CTEditor } from "./CanvasTools/CanvasTools.Editor";
-import { RGBColor } from "./CanvasTools/Core/Colors/RGBColor";
-import { LABColor } from "./CanvasTools/Core/Colors/LABColor";
-import { XYZColor } from "./CanvasTools/Core/Colors/XYZColor";
-import { HSLColor } from "./CanvasTools/Core/Colors/HSLColor";
-import { Palette } from "./CanvasTools/Core/Colors/Palette";
-import { Color } from "./CanvasTools/Core/Colors/Color";
+import { SelectionMode } from "./CanvasTools/Interface/ISelectorSettings";
+import { PointRegion } from "./CanvasTools/Region/Point/PointRegion";
+import { RectRegion } from "./CanvasTools/Region/Rect/RectRegion";
+import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
+import { AreaSelector } from "./CanvasTools/Selection/AreaSelector";
+import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
 
 import "snapsvg-cjs";
 /* import * as SNAPSVG_TYPE from "snapsvg";

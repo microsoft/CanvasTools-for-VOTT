@@ -1,10 +1,10 @@
 import { IMovable } from "../Interface/IMovable";
+import { IPoint2D } from "../Interface/IPoint2D";
+import { IRect } from "../Interface/IRect";
 import { IRegionData } from "../Interface/IRegionData";
 import { IResizable } from "../Interface/IResizable";
-import { IRect } from "../Interface/IRect";
 import { Point2D } from "./Point2D";
 import { Rect } from "./Rect";
-import { IPoint2D } from "../Interface/IPoint2D";
 
 /**
  * Defines supported region types.
@@ -50,7 +50,13 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * @param points - the points that make up the polygon
      * @returns A new `RegionData` object
      */
-    public static BuildPolygonRegionData(x: number, y: number, width: number, height: number, points: Point2D[]): RegionData {
+    public static BuildPolygonRegionData(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        points: Point2D[],
+    ): RegionData {
         const region = new RegionData(x, y, width, height,
             [new Point2D(x, y), new Point2D(x + width, y),
              new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Polygon);

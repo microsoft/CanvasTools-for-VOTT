@@ -1,8 +1,8 @@
+import { HSLColor } from "./HSLColor";
+import { LABColor } from "./LABColor";
 import { RGBColor } from "./RGBColor";
 import { SRGBColor } from "./SRGBColor";
 import { XYZColor } from "./XYZColor";
-import { LABColor } from "./LABColor";
-import { HSLColor } from "./HSLColor";
 
 /**
  * A wrapper `Color` class to represent various color formats

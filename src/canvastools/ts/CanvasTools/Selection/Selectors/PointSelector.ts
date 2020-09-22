@@ -5,9 +5,9 @@ import { RegionData } from "../../Core/RegionData";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
+import { IPoint2D } from "../../Interface/IPoint2D";
 import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
-import { IPoint2D } from "../../Interface/IPoint2D";
 
 /**
  * The selector to define a point-region.

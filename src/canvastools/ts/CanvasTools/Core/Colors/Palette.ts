@@ -1,6 +1,6 @@
-import { LABColor, ILabColorPoint } from "./LABColor";
-import { SRGBColor } from "./SRGBColor";
 import { Color } from "./Color";
+import { ILabColorPoint, LABColor } from "./LABColor";
+import { SRGBColor } from "./SRGBColor";
 
 /**
  * Palette settings.

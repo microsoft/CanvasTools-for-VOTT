@@ -4,8 +4,8 @@ import { RegionData } from "../../Core/RegionData";
 
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { RegionComponent } from "./RegionComponent";
 import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { RegionComponent } from "./RegionComponent";
 
 /**
  * An abstract visual component used internall do allow dragging the whole region.

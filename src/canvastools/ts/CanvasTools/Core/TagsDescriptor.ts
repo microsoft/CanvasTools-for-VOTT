@@ -1,5 +1,5 @@
-import { Tag } from "./Tag";
 import { ITagsDescriptor } from "../Interface/ITagsDescriptor";
+import { Tag } from "./Tag";
 
 /**
  * Represents a composition of region tags
