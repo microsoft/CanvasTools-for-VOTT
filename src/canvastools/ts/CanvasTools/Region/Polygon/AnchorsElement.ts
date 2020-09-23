@@ -1,10 +1,15 @@
+import { ConfigurationManager } from "../../Core/ConfigurationManager";
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
-
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
-
 import { AnchorsComponent } from "../Component/AnchorsComponent";
+
+enum GhostAnchorAction {
+    Add = "Add",
+    Delete = "Delete",
+    None = "None",
+}
 
 /**
  * `AnchorsComponent` for the `PolygonRegion` class.
@@ -16,14 +21,9 @@ export class AnchorsElement extends AnchorsComponent {
     public static ANCHOR_POINT_LINE_SWITCH_THRESHOLD: number = 5;
 
     /**
-     * Internal flag to delete a point on pointer up event.
+     * The state of the current anchor action
      */
-    private deleteOnPointerUp: boolean = false;
-
-    /**
-     * Internal flat to add a point on pointer up event.
-     */
-    private addOnPointerUp: boolean = false;
+    private ghostAnchorAction: GhostAnchorAction = GhostAnchorAction.None;
 
     /**
      * Current number of anchors.
@@ -48,7 +48,7 @@ export class AnchorsElement extends AnchorsComponent {
     }
 
     /**
-     * Redraws the componnent.
+     * Redraws the component.
      */
     public redraw() {
         if (this.regionData.points !== null && this.regionData.points.length > 0) {
@@ -122,11 +122,11 @@ export class AnchorsElement extends AnchorsComponent {
                 base: anchor.node,
                 event: "pointermove",
                 listener: (e: PointerEvent) => {
-                    if (e.ctrlKey) {
+                    if (this.isModifyRegionOnlyModeEnabled(e)) {
                         this.activeAnchorIndex = -1;
                         const anchorPoint = this.getActiveAnchorPoint(e);
                         this.dragOrigin = anchorPoint;
-                        this.addOnPointerUp = true;
+                        this.ghostAnchorAction = GhostAnchorAction.Add;
                         window.requestAnimationFrame(() => {
                             this.ghostAnchor.attr({
                                 cx: anchorPoint.x,
@@ -135,7 +135,7 @@ export class AnchorsElement extends AnchorsComponent {
                             });
                         });
                     } else {
-                        this.addOnPointerUp = false;
+                        this.ghostAnchorAction = GhostAnchorAction.None;
                     }
                 },
                 bypass: false,
@@ -161,18 +161,17 @@ export class AnchorsElement extends AnchorsComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerEnter(e: PointerEvent) {
-        if (e.ctrlKey) {
-            if (this.addOnPointerUp && this.activeAnchorIndex < 0) {
+        if (this.isModifyRegionOnlyModeEnabled(e)) {
+            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex < 0) {
                 this.ghostAnchor.addClass("add");
-            } else if (this.regionData.points.length > 2) {
+            } else if (this.regionData.points.length > 3) {
                 this.ghostAnchor.addClass("delete");
-                this.deleteOnPointerUp = true;
-                this.addOnPointerUp = false;
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         } else {
             this.ghostAnchor.removeClass("delete");
             this.ghostAnchor.removeClass("add");
-            this.deleteOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
         }
 
         super.onGhostPointerEnter(e);
@@ -183,7 +182,7 @@ export class AnchorsElement extends AnchorsComponent {
      * @param e - PointerEvent object.
      */
     protected onGhostPointerMove(e: PointerEvent) {
-        if (e.ctrlKey && this.activeAnchorIndex !== 0) {
+        if (this.isModifyRegionOnlyModeEnabled(e) && this.activeAnchorIndex !== 0) {
             const p = this.getActiveAnchorPoint(e);
             let dist: number = Number.MAX_VALUE;
             let index: number = -1;
@@ -197,21 +196,19 @@ export class AnchorsElement extends AnchorsComponent {
 
             const swapToDelete: boolean = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
 
-            if (this.addOnPointerUp && this.activeAnchorIndex <= 0 && !swapToDelete) {
+            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
                 this.ghostAnchor.addClass("add");
                 this.activeAnchorIndex = -1;
-            } else if (this.regionData.points.length > 2 || swapToDelete) {
+            } else if (this.regionData.points.length > 3 && swapToDelete) {
                 this.ghostAnchor.removeClass("add");
                 this.ghostAnchor.addClass("delete");
                 this.activeAnchorIndex = index + 1;
-                this.deleteOnPointerUp = true;
-                this.addOnPointerUp = false;
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         } else {
             this.ghostAnchor.removeClass("delete");
             this.ghostAnchor.removeClass("add");
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
         }
 
         super.onGhostPointerMove(e);
@@ -223,19 +220,17 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected onGhostPointerUp(e: PointerEvent) {
         const rd = this.regionData.copy();
-
-        if (this.deleteOnPointerUp) {
+        if (this.ghostAnchorAction === GhostAnchorAction.Delete) {
             if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
                 const points = rd.points;
                 points.splice(this.activeAnchorIndex - 1, 1);
                 rd.setPoints(points);
             }
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
             this.ghostAnchor.removeClass("delete");
             this.ghostAnchor.removeClass("add");
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
-        } else if (this.addOnPointerUp) {
+        } else if (this.ghostAnchorAction === GhostAnchorAction.Add) {
             const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
             const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
             const point = new Point2D(offsetX, offsetY);
@@ -262,8 +257,8 @@ export class AnchorsElement extends AnchorsComponent {
             points.splice(index + 1, 0, point);
             rd.setPoints(points);
 
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
+            this.ghostAnchor.removeClass("add");
             this.ghostAnchor.addClass("delete");
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         }
@@ -284,5 +279,9 @@ export class AnchorsElement extends AnchorsComponent {
         } else {
             return null;
         }
+    }
+
+    private isModifyRegionOnlyModeEnabled(event?: PointerEvent): boolean {
+        return ConfigurationManager.isModifyRegionOnlyMode || event?.ctrlKey;
     }
 }
