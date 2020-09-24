@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 30);
+/******/ 	return __webpack_require__(__webpack_require__.s = 31);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -101,6 +101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Point2D = void 0;
 class Point2D {
     constructor(arg1, arg2) {
         if (typeof arg1 === "number" && typeof arg2 === "number") {
@@ -172,6 +173,7 @@ exports.Point2D = Point2D;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Rect = void 0;
 class Rect {
     constructor(width, height) {
         this.width = 0;
@@ -210,6 +212,7 @@ exports.Rect = Rect;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegionData = exports.RegionDataType = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 var RegionDataType;
@@ -407,6 +410,24 @@ exports.RegionData = RegionData;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChangeEventType = void 0;
+var ChangeEventType;
+(function (ChangeEventType) {
+    ChangeEventType[ChangeEventType["MOVEEND"] = 0] = "MOVEEND";
+    ChangeEventType[ChangeEventType["MOVING"] = 1] = "MOVING";
+    ChangeEventType[ChangeEventType["MOVEBEGIN"] = 2] = "MOVEBEGIN";
+    ChangeEventType[ChangeEventType["SELECTIONTOGGLE"] = 3] = "SELECTIONTOGGLE";
+})(ChangeEventType = exports.ChangeEventType || (exports.ChangeEventType = {}));
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarIcon = exports.ToolbarItemType = void 0;
 var ToolbarItemType;
 (function (ToolbarItemType) {
     ToolbarItemType[ToolbarItemType["SELECTOR"] = 0] = "SELECTOR";
@@ -480,28 +501,13 @@ ToolbarIcon.IconHeight = 48;
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ChangeEventType;
-(function (ChangeEventType) {
-    ChangeEventType[ChangeEventType["MOVEEND"] = 0] = "MOVEEND";
-    ChangeEventType[ChangeEventType["MOVING"] = 1] = "MOVING";
-    ChangeEventType[ChangeEventType["MOVEBEGIN"] = 2] = "MOVEBEGIN";
-    ChangeEventType[ChangeEventType["SELECTIONTOGGLE"] = 3] = "SELECTIONTOGGLE";
-})(ChangeEventType = exports.ChangeEventType || (exports.ChangeEventType = {}));
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegionComponent = void 0;
 class RegionComponent {
     constructor(paper, paperRect, regionData, callbacks = null) {
         this.isVisible = true;
@@ -531,11 +537,11 @@ class RegionComponent {
         return this.regionData.boundRect;
     }
     hide() {
-        this.node.node.setAttribute("visibility", "hidden");
+        this.node.node.setAttribute("display", "none");
         this.isVisible = false;
     }
     show() {
-        this.node.node.setAttribute("visibility", "visible");
+        this.node.node.setAttribute("display", "inherit");
         this.isVisible = true;
     }
     select() {
@@ -586,6 +592,7 @@ exports.RegionComponent = RegionComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Selector = void 0;
 const Element_1 = __webpack_require__(17);
 class Selector extends Element_1.Element {
     constructor(parent, paper, boundRect, callbacks) {
@@ -687,7 +694,8 @@ exports.Selector = Selector;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const XYZColor_1 = __webpack_require__(13);
+exports.LABColor = void 0;
+const XYZColor_1 = __webpack_require__(14);
 class LABColor {
     constructor(l, a, b) {
         this.values = [l, a, b];
@@ -806,6 +814,7 @@ exports.LABColor = LABColor;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Region = void 0;
 const RegionComponent_1 = __webpack_require__(5);
 class Region extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
@@ -879,8 +888,9 @@ exports.Region = Region;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragComponent = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(4);
+const IRegionCallbacks_1 = __webpack_require__(3);
 const RegionComponent_1 = __webpack_require__(5);
 class DragComponent extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -984,6 +994,7 @@ exports.DragComponent = DragComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsComponent = void 0;
 const RegionComponent_1 = __webpack_require__(5);
 class TagsComponent extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
@@ -1033,6 +1044,7 @@ exports.TagsComponent = TagsComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CrossElement = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Element_1 = __webpack_require__(17);
 class CrossElement extends Element_1.Element {
@@ -1096,111 +1108,7 @@ exports.CrossElement = CrossElement;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const XYZColor_1 = __webpack_require__(13);
-const SRGBColor_1 = __webpack_require__(19);
-class RGBColor {
-    constructor(r, g, b) {
-        this.values = [r, g, b];
-    }
-    get r() {
-        return this.values[0];
-    }
-    get g() {
-        return this.values[1];
-    }
-    get b() {
-        return this.values[2];
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toXYZ() {
-        const [r, g, b] = this.values;
-        const x = 0.4124 * r + 0.3576 * g + 0.1805 * b;
-        const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        const z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
-        return new XYZColor_1.XYZColor(x, y, z);
-    }
-    toSRGB() {
-        const values = this.values.map((v) => {
-            if (v < 0.0031308) {
-                return 12.92 * v;
-            }
-            else {
-                return 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
-            }
-        });
-        return new SRGBColor_1.SRGBColor(values[0], values[1], values[2]);
-    }
-    toLAB() {
-        return this.toXYZ().toLAB();
-    }
-}
-exports.RGBColor = RGBColor;
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const RGBColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(7);
-class XYZColor {
-    constructor(x, y, z) {
-        this.values = [x, y, z];
-    }
-    get x() {
-        return this.values[0];
-    }
-    get y() {
-        return this.values[1];
-    }
-    get z() {
-        return this.values[2];
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toRGB() {
-        const [x, y, z] = this.values;
-        const r = +3.2406255 * x - 1.5372080 * y - 0.4986286 * z;
-        const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
-        const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
-        return new RGBColor_1.RGBColor(r, g, b);
-    }
-    toSRGB() {
-        return this.toRGB().toSRGB();
-    }
-    toLAB() {
-        const x = this.x / XYZColor.D65.x;
-        const y = this.y / XYZColor.D65.y;
-        const z = this.z / XYZColor.D65.z;
-        const xyz = [x, y, z].map((v) => {
-            if (v > 0.008856451) {
-                return v ** (1 / 3);
-            }
-            else {
-                return 7.787037 * v + 16 / 116;
-            }
-        });
-        return new LABColor_1.LABColor((116 * xyz[1] - 16) / 100, 5 * (xyz[0] - xyz[1]), 2 * (xyz[1] - xyz[2]));
-    }
-}
-exports.XYZColor = XYZColor;
-XYZColor.D65 = new XYZColor(0.95047, 1.000, 1.08883);
-XYZColor.D50 = new XYZColor(0.966797, 1.000, 0.825188);
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.HSLColor = void 0;
 const SRGBColor_1 = __webpack_require__(19);
 class HSLColor {
     constructor(h, s, l) {
@@ -1272,14 +1180,141 @@ exports.HSLColor = HSLColor;
 
 
 /***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RGBColor = void 0;
+const SRGBColor_1 = __webpack_require__(19);
+const XYZColor_1 = __webpack_require__(14);
+class RGBColor {
+    constructor(r, g, b) {
+        this.values = [r, g, b];
+    }
+    get r() {
+        return this.values[0];
+    }
+    get g() {
+        return this.values[1];
+    }
+    get b() {
+        return this.values[2];
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toXYZ() {
+        const [r, g, b] = this.values;
+        const x = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+        const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+        return new XYZColor_1.XYZColor(x, y, z);
+    }
+    toSRGB() {
+        const values = this.values.map((v) => {
+            if (v < 0.0031308) {
+                return 12.92 * v;
+            }
+            else {
+                return 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+            }
+        });
+        return new SRGBColor_1.SRGBColor(values[0], values[1], values[2]);
+    }
+    toLAB() {
+        return this.toXYZ().toLAB();
+    }
+}
+exports.RGBColor = RGBColor;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.XYZColor = void 0;
+const LABColor_1 = __webpack_require__(7);
+const RGBColor_1 = __webpack_require__(13);
+class XYZColor {
+    constructor(x, y, z) {
+        this.values = [x, y, z];
+    }
+    get x() {
+        return this.values[0];
+    }
+    get y() {
+        return this.values[1];
+    }
+    get z() {
+        return this.values[2];
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toRGB() {
+        const [x, y, z] = this.values;
+        const r = +3.2406255 * x - 1.5372080 * y - 0.4986286 * z;
+        const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
+        const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
+        return new RGBColor_1.RGBColor(r, g, b);
+    }
+    toSRGB() {
+        return this.toRGB().toSRGB();
+    }
+    toLAB() {
+        const x = this.x / XYZColor.D65.x;
+        const y = this.y / XYZColor.D65.y;
+        const z = this.z / XYZColor.D65.z;
+        const xyz = [x, y, z].map((v) => {
+            if (v > 0.008856451) {
+                return v ** (1 / 3);
+            }
+            else {
+                return 7.787037 * v + 16 / 116;
+            }
+        });
+        return new LABColor_1.LABColor((116 * xyz[1] - 16) / 100, 5 * (xyz[0] - xyz[1]), 2 * (xyz[1] - xyz[2]));
+    }
+}
+exports.XYZColor = XYZColor;
+XYZColor.D65 = new XYZColor(0.95047, 1.000, 1.08883);
+XYZColor.D50 = new XYZColor(0.966797, 1.000, 0.825188);
+
+
+/***/ }),
 /* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SelectionMode = void 0;
+var SelectionMode;
+(function (SelectionMode) {
+    SelectionMode[SelectionMode["NONE"] = 0] = "NONE";
+    SelectionMode[SelectionMode["POINT"] = 1] = "POINT";
+    SelectionMode[SelectionMode["RECT"] = 2] = "RECT";
+    SelectionMode[SelectionMode["COPYRECT"] = 3] = "COPYRECT";
+    SelectionMode[SelectionMode["POLYLINE"] = 4] = "POLYLINE";
+    SelectionMode[SelectionMode["POLYGON"] = 5] = "POLYGON";
+})(SelectionMode = exports.SelectionMode || (exports.SelectionMode = {}));
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnchorsComponent = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(4);
+const IRegionCallbacks_1 = __webpack_require__(3);
 const RegionComponent_1 = __webpack_require__(5);
 class AnchorsComponent extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -1485,30 +1520,13 @@ AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS = 7;
 
 
 /***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var SelectionMode;
-(function (SelectionMode) {
-    SelectionMode[SelectionMode["NONE"] = 0] = "NONE";
-    SelectionMode[SelectionMode["POINT"] = 1] = "POINT";
-    SelectionMode[SelectionMode["RECT"] = 2] = "RECT";
-    SelectionMode[SelectionMode["COPYRECT"] = 3] = "COPYRECT";
-    SelectionMode[SelectionMode["POLYLINE"] = 4] = "POLYLINE";
-    SelectionMode[SelectionMode["POLYGON"] = 5] = "POLYGON";
-})(SelectionMode = exports.SelectionMode || (exports.SelectionMode = {}));
-
-
-/***/ }),
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Element = void 0;
 class Element {
     constructor(paper, boundRect) {
         this.isVisible = true;
@@ -1543,11 +1561,12 @@ exports.Element = Element;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const RGBColor_1 = __webpack_require__(12);
-const SRGBColor_1 = __webpack_require__(19);
-const XYZColor_1 = __webpack_require__(13);
+exports.Color = void 0;
+const HSLColor_1 = __webpack_require__(12);
 const LABColor_1 = __webpack_require__(7);
-const HSLColor_1 = __webpack_require__(14);
+const RGBColor_1 = __webpack_require__(13);
+const SRGBColor_1 = __webpack_require__(19);
+const XYZColor_1 = __webpack_require__(14);
 class Color {
     constructor(...args) {
         if (args.length === 1) {
@@ -1631,8 +1650,9 @@ exports.Color = Color;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const HSLColor_1 = __webpack_require__(14);
-const RGBColor_1 = __webpack_require__(12);
+exports.SRGBColor = void 0;
+const HSLColor_1 = __webpack_require__(12);
+const RGBColor_1 = __webpack_require__(13);
 class SRGBColor {
     constructor(r, g, b) {
         this.values = [r, g, b];
@@ -1763,154 +1783,279 @@ exports.SRGBColor = SRGBColor;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Rect_1 = __webpack_require__(1);
-const ToolbarIcon_1 = __webpack_require__(3);
-const ToolbarSelectIcon_1 = __webpack_require__(31);
-const ToolbarSeparator_1 = __webpack_require__(32);
-const ToolbarSwitchIcon_1 = __webpack_require__(33);
-const ToolbarTriggerIcon_1 = __webpack_require__(34);
-class Toolbar {
-    constructor(svgHost) {
-        this.iconSpace = 8;
-        this.areHotKeysEnabled = true;
-        this.icons = new Array();
-        this.buildUIElements(svgHost);
+exports.FilterPipeline = exports.SaturationFilter = exports.ContrastFilter = exports.BrightnessFilter = exports.BlurDiffFilter = exports.GrayscaleFilter = exports.InvertFilter = void 0;
+function InvertFilter(canvas) {
+    const context = canvas.getContext("2d");
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const buff = document.createElement("canvas");
+    buff.width = canvas.width;
+    buff.height = canvas.height;
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = 255 - data[i];
+        data[i + 1] = 255 - data[i + 1];
+        data[i + 2] = 255 - data[i + 2];
     }
-    addSelector(icon, actor) {
-        const newIcon = new ToolbarSelectIcon_1.ToolbarSelectIcon(this.paper, icon, (action) => {
-            this.select(action);
-            actor(action);
-        });
-        this.addIcon(newIcon);
+    buff.getContext("2d").putImageData(imageData, 0, 0);
+    return new Promise((resolve, reject) => {
+        return resolve(buff);
+    });
+}
+exports.InvertFilter = InvertFilter;
+function GrayscaleFilter(canvas) {
+    const context = canvas.getContext("2d");
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const buff = document.createElement("canvas");
+    buff.width = canvas.width;
+    buff.height = canvas.height;
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
     }
-    addSwitch(icon, actor) {
-        const newIcon = new ToolbarSwitchIcon_1.ToolbarSwitchIcon(this.paper, icon, (action) => {
-            actor(action);
-        });
-        this.addIcon(newIcon);
+    buff.getContext("2d").putImageData(imageData, 0, 0);
+    return new Promise((resolve, reject) => {
+        return resolve(buff);
+    });
+}
+exports.GrayscaleFilter = GrayscaleFilter;
+function BlurDiffFilter(factor) {
+    function boxesForGauss(sigma, n) {
+        const wIdeal = Math.sqrt((12 * sigma * sigma / n) + 1);
+        let wl = Math.floor(wIdeal);
+        if (wl % 2 === 0) {
+            wl--;
+        }
+        const wu = wl + 2;
+        const mIdeal = (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
+        const m = Math.round(mIdeal);
+        const sizes = [];
+        for (let i = 0; i < n; i++) {
+            sizes.push(i < m ? wl : wu);
+        }
+        return sizes;
     }
-    addSeparator() {
-        const newIcon = new ToolbarSeparator_1.ToolbarSeparator(this.paper, ToolbarIcon_1.ToolbarIcon.IconWidth);
-        this.addIcon(newIcon);
+    function gaussBlur_4(scl, tcl, w, h, r) {
+        const bxs = boxesForGauss(r, 3);
+        boxBlur_4(scl, tcl, w, h, (bxs[0] - 1) / 2);
+        boxBlur_4(tcl, scl, w, h, (bxs[1] - 1) / 2);
+        boxBlur_4(scl, tcl, w, h, (bxs[2] - 1) / 2);
     }
-    addTrigger(icon, actor) {
-        const newIcon = new ToolbarTriggerIcon_1.ToolbarTriggerIcon(this.paper, icon, (action) => {
-            actor(action);
-        });
-        this.addIcon(newIcon);
+    function boxBlur_4(scl, tcl, w, h, r) {
+        for (let i = 0; i < scl.length; i++) {
+            tcl[i] = scl[i];
+        }
+        boxBlurH_4(tcl, scl, w, h, r);
+        boxBlurT_4(scl, tcl, w, h, r);
     }
-    select(action) {
-        this.icons.forEach((icon) => {
-            if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon) {
-                if (icon.description.action !== action) {
-                    icon.unselect();
-                }
-                else {
-                    icon.select();
-                }
+    function boxBlurH_4(scl, tcl, w, h, r) {
+        const iarr = 1 / (r + r + 1);
+        for (let i = 0; i < h; i++) {
+            let ti = i * w;
+            let li = ti;
+            let ri = ti + r;
+            const fv = scl[ti];
+            const lv = scl[ti + w - 1];
+            let val = (r + 1) * fv;
+            for (let j = 0; j < r; j++) {
+                val += scl[ti + j];
             }
-        });
-    }
-    setSwitch(action, on) {
-        const switchIcon = this.findIconByAction(action);
-        if (switchIcon !== undefined && switchIcon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon) {
-            (on) ? switchIcon.select() : switchIcon.unselect();
+            for (let j = 0; j <= r; j++) {
+                val += scl[ri++] - fv;
+                tcl[ti++] = Math.round(val * iarr);
+            }
+            for (let j = r + 1; j < w - r; j++) {
+                val += scl[ri++] - scl[li++];
+                tcl[ti++] = Math.round(val * iarr);
+            }
+            for (let j = w - r; j < w; j++) {
+                val += lv - scl[li++];
+                tcl[ti++] = Math.round(val * iarr);
+            }
         }
     }
-    enableHotkeys() {
-        this.areHotKeysEnabled = true;
-    }
-    disableHotkeys() {
-        this.areHotKeysEnabled = false;
-    }
-    buildUIElements(svgHost) {
-        this.baseParent = svgHost;
-        this.paper = Snap(svgHost);
-        this.paperRect = new Rect_1.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
-        const toolbarGroup = this.paper.g();
-        toolbarGroup.addClass("toolbarLayer");
-        this.recalculateToolbarSize();
-        this.backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.toolbarHeight);
-        this.backgroundRect.addClass("toolbarBGStyle");
-        toolbarGroup.add(this.backgroundRect);
-        this.iconsLayer = this.paper.g();
-        this.iconsLayer.addClass("iconsLayerStyle");
-        toolbarGroup.add(this.iconsLayer);
-        this.subscribeToKeyboardEvents();
-    }
-    recalculateToolbarSize(newIcon) {
-        if (newIcon === undefined) {
-            this.toolbarWidth = ToolbarIcon_1.ToolbarIcon.IconWidth + 2 * this.iconSpace;
-            this.toolbarHeight = this.icons.length * (ToolbarIcon_1.ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+    function boxBlurT_4(scl, tcl, w, h, r) {
+        const iarr = 1 / (r + r + 1);
+        for (let i = 0; i < w; i++) {
+            let ti = i;
+            let li = ti;
+            let ri = ti + r * w;
+            const fv = scl[ti];
+            const lv = scl[ti + w * (h - 1)];
+            let val = (r + 1) * fv;
+            for (let j = 0; j < r; j++) {
+                val += scl[ti + j * w];
+            }
+            for (let j = 0; j <= r; j++) {
+                val += scl[ri] - fv;
+                tcl[ti] = Math.round(val * iarr);
+                ri += w;
+                ti += w;
+            }
+            for (let j = r + 1; j < h - r; j++) {
+                val += scl[ri] - scl[li];
+                tcl[ti] = Math.round(val * iarr);
+                li += w;
+                ri += w;
+                ti += w;
+            }
+            for (let j = h - r; j < h; j++) {
+                val += lv - scl[li];
+                tcl[ti] = Math.round(val * iarr);
+                li += w;
+                ti += w;
+            }
         }
-        else {
-            const width = newIcon.width + 2 * this.iconSpace;
-            if (width > this.toolbarWidth) {
-                this.toolbarWidth = width;
-            }
-            this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
+    }
+    return (canvas) => {
+        const context = canvas.getContext("2d");
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const buff = document.createElement("canvas");
+        buff.width = canvas.width;
+        buff.height = canvas.height;
+        const bludData = buff.getContext("2d").createImageData(buff.width, buff.height);
+        const idata = imageData.data;
+        const bdata = bludData.data;
+        const pixelsNumber = canvas.width * canvas.height;
+        const dataR = new Uint8ClampedArray(pixelsNumber);
+        const dataG = new Uint8ClampedArray(pixelsNumber);
+        const dataB = new Uint8ClampedArray(pixelsNumber);
+        const dataA = new Uint8ClampedArray(pixelsNumber);
+        for (let i = 0; i < pixelsNumber; i++) {
+            dataR[i] = idata[4 * i];
+            dataG[i] = idata[4 * i + 1];
+            dataB[i] = idata[4 * i + 2];
+            dataA[i] = idata[4 * i + 3];
         }
-    }
-    updateToolbarSize() {
-        this.backgroundRect.attr({
-            height: this.toolbarHeight,
-            width: this.toolbarWidth,
+        const blurR = new Uint8ClampedArray(pixelsNumber);
+        const blurG = new Uint8ClampedArray(pixelsNumber);
+        const blurB = new Uint8ClampedArray(pixelsNumber);
+        const blurR2 = new Uint8ClampedArray(pixelsNumber);
+        const blurG2 = new Uint8ClampedArray(pixelsNumber);
+        const blurB2 = new Uint8ClampedArray(pixelsNumber);
+        const halfFactor = factor / 2;
+        gaussBlur_4(dataR, blurR, buff.width, buff.height, halfFactor);
+        gaussBlur_4(dataG, blurG, buff.width, buff.height, halfFactor);
+        gaussBlur_4(dataB, blurB, buff.width, buff.height, halfFactor);
+        gaussBlur_4(dataR, blurR2, buff.width, buff.height, factor);
+        gaussBlur_4(dataG, blurG2, buff.width, buff.height, factor);
+        gaussBlur_4(dataB, blurB2, buff.width, buff.height, factor);
+        const alphaStep = 127 / factor;
+        for (let i = 0; i < pixelsNumber; i++) {
+            const dr = Math.abs(blurR2[i] - blurR[i]);
+            const dg = Math.abs(blurG2[i] - blurG[i]);
+            const db = Math.abs(blurB2[i] - blurB[i]);
+            const d = 0.2358 * dr + 0.0700 * dg + 0.6742 * db;
+            const g = Math.round(0.2358 * idata[4 * i + 0] + 0.0700 * idata[4 * i + 1] + 0.6742 * idata[4 * i + 2]);
+            bdata[4 * i + 0] = (dr >= 0.2358 * halfFactor) ?
+                idata[4 * i + 0] : Math.round(g / factor) * factor;
+            bdata[4 * i + 1] = (dg >= 0.0700 * halfFactor) ?
+                idata[4 * i + 1] : Math.round(g / factor) * factor;
+            bdata[4 * i + 2] = (db >= 0.6742 * halfFactor) ?
+                idata[4 * i + 2] : Math.round(g / factor) * factor;
+            bdata[4 * i + 3] = (d >= factor) ? 255 : 0 + Math.round(d * alphaStep);
+        }
+        buff.getContext("2d").putImageData(bludData, 0, 0);
+        return new Promise((resolve, reject) => {
+            return resolve(buff);
         });
-    }
-    addIcon(newIcon) {
-        this.icons.push(newIcon);
-        this.iconsLayer.add(newIcon.node);
-        newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
-        this.recalculateToolbarSize(newIcon);
-        this.updateToolbarSize();
-    }
-    findIconByKey(key) {
-        return this.icons.find((icon) => {
-            if (icon.description !== null) {
-                return icon.description.key.includes(key);
-            }
-            return false;
+    };
+}
+exports.BlurDiffFilter = BlurDiffFilter;
+function BrightnessFilter(brightness) {
+    return (canvas) => {
+        const context = canvas.getContext("2d");
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const buff = document.createElement("canvas");
+        buff.width = canvas.width;
+        buff.height = canvas.height;
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            data[i + 0] = Math.max(0, Math.min(data[i + 0] + brightness, 255));
+            data[i + 1] = Math.max(0, Math.min(data[i + 1] + brightness, 255));
+            data[i + 2] = Math.max(0, Math.min(data[i + 2] + brightness, 255));
+        }
+        buff.getContext("2d").putImageData(imageData, 0, 0);
+        return new Promise((resolve, reject) => {
+            return resolve(buff);
         });
-    }
-    findIconByAction(action) {
-        return this.icons.find((icon) => {
-            return icon.description !== null && icon.description.action === action;
+    };
+}
+exports.BrightnessFilter = BrightnessFilter;
+function ContrastFilter(contrast) {
+    return (canvas) => {
+        const context = canvas.getContext("2d");
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const buff = document.createElement("canvas");
+        buff.width = canvas.width;
+        buff.height = canvas.height;
+        const data = imageData.data;
+        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+        for (let i = 0; i < data.length; i += 4) {
+            data[i + 0] = factor * (data[i] - 128) + 128;
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;
+        }
+        buff.getContext("2d").putImageData(imageData, 0, 0);
+        return new Promise((resolve, reject) => {
+            return resolve(buff);
         });
-    }
-    findFocusedIcon() {
-        return this.icons.find((icon) => {
-            return icon.isFocused();
+    };
+}
+exports.ContrastFilter = ContrastFilter;
+function SaturationFilter(saturation) {
+    return (canvas) => {
+        const context = canvas.getContext("2d");
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const buff = document.createElement("canvas");
+        buff.width = canvas.width;
+        buff.height = canvas.height;
+        const s = saturation / 255;
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i + 0];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const gr = 0.213 * r + 0.715 * g + 0.072 * b;
+            const nr = gr + s * (+0.787 * r - 0.715 * g - 0.072 * b);
+            const ng = gr + s * (-0.213 * r + 0.285 * g - 0.072 * b);
+            const nb = gr + s * (-0.213 * r - 0.715 * g + 0.928 * b);
+            data[i] = Math.round(nr);
+            data[i + 1] = Math.round(ng);
+            data[i + 2] = Math.round(nb);
+        }
+        buff.getContext("2d").putImageData(imageData, 0, 0);
+        return new Promise((resolve, reject) => {
+            return resolve(buff);
         });
+    };
+}
+exports.SaturationFilter = SaturationFilter;
+class FilterPipeline {
+    constructor() {
+        this.pipeline = new Array();
     }
-    subscribeToKeyboardEvents() {
-        window.addEventListener("keyup", (e) => {
-            if (!(e.target instanceof HTMLInputElement) &&
-                !(e.target instanceof HTMLTextAreaElement) &&
-                !(e.target instanceof HTMLSelectElement)) {
-                if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
-                    const icon = this.findIconByKey(e.key);
-                    if (icon !== undefined) {
-                        if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
-                            || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
-                            icon.activate();
-                        }
-                    }
-                }
-                if (e.key === " " || e.key === "Enter") {
-                    e.preventDefault();
-                    const icon = this.findFocusedIcon();
-                    if (icon !== undefined) {
-                        if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
-                            || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
-                            icon.activate();
-                        }
-                    }
-                }
-            }
+    addFilter(filter) {
+        this.pipeline.push(filter);
+    }
+    clearFilters() {
+        this.pipeline = new Array();
+    }
+    applyToCanvas(canvas) {
+        let promise = new Promise((resolve, reject) => {
+            return resolve(canvas);
         });
+        if (this.pipeline.length > 0) {
+            this.pipeline.forEach((filter) => {
+                promise = promise.then(filter);
+            });
+        }
+        return promise;
     }
 }
-exports.Toolbar = Toolbar;
+exports.FilterPipeline = FilterPipeline;
 
 
 /***/ }),
@@ -1920,16 +2065,114 @@ exports.Toolbar = Toolbar;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ZoomManager_1 = __webpack_require__(22);
+exports.ConfigurationManager = void 0;
+class ConfigurationManager {
+}
+exports.ConfigurationManager = ConfigurationManager;
+ConfigurationManager.isModifyRegionOnlyMode = false;
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ZoomManager = exports.ZoomDirection = void 0;
+var ZoomDirection;
+(function (ZoomDirection) {
+    ZoomDirection[ZoomDirection["In"] = 0] = "In";
+    ZoomDirection[ZoomDirection["Out"] = 1] = "Out";
+})(ZoomDirection = exports.ZoomDirection || (exports.ZoomDirection = {}));
+class ZoomManager {
+    constructor(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+        this.minZoomScale = 1;
+        this.maxZoomScale = 4;
+        this.zoomScale = 0.5;
+        this.isZoomEnabled = isZoomEnabled;
+        this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
+        this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
+        this.currentZoomScale = this.minZoomScale;
+        this.previousZoomScale = this.minZoomScale;
+        this.callbacks = zoomCallbacks;
+        this.shouldResetZoomOnContentLoad = false;
+    }
+    get resetZoomOnContentLoad() {
+        return this.shouldResetZoomOnContentLoad;
+    }
+    set resetZoomOnContentLoad(reset) {
+        this.shouldResetZoomOnContentLoad = reset;
+        if (reset) {
+            this.previousZoomScale = this.currentZoomScale = 1;
+        }
+    }
+    static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+        if (!ZoomManager.instance) {
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+        }
+        return ZoomManager.instance;
+    }
+    updateZoomScale(zoomType, newScale) {
+        this.previousZoomScale = this.currentZoomScale;
+        const zoomData = this.getZoomData();
+        let updatedZoomScale;
+        if (newScale !== undefined) {
+            updatedZoomScale = newScale;
+        }
+        else if (zoomType === ZoomDirection.In) {
+            updatedZoomScale = this.currentZoomScale + this.zoomScale;
+        }
+        else if (zoomType === ZoomDirection.Out) {
+            updatedZoomScale = this.currentZoomScale - this.zoomScale;
+        }
+        if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
+            this.currentZoomScale = updatedZoomScale;
+            zoomData.currentZoomScale = updatedZoomScale;
+            return zoomData;
+        }
+    }
+    setMaxZoomScale(maxZoomScale) {
+        this.maxZoomScale = maxZoomScale;
+    }
+    setZoomScale(zoomScale) {
+        this.zoomScale = zoomScale;
+    }
+    getZoomData() {
+        return {
+            minZoomScale: this.minZoomScale,
+            maxZoomScale: this.maxZoomScale,
+            currentZoomScale: this.currentZoomScale,
+            previousZoomScale: this.previousZoomScale,
+        };
+    }
+    deleteInstance() {
+        if (ZoomManager.instance) {
+            delete ZoomManager.instance;
+        }
+    }
+}
+exports.ZoomManager = ZoomManager;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegionsManager = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const IRegionCallbacks_1 = __webpack_require__(4);
-const RectRegion_1 = __webpack_require__(23);
-const PointRegion_1 = __webpack_require__(24);
-const PolygonRegion_1 = __webpack_require__(40);
-const PolylineRegion_1 = __webpack_require__(44);
-const RegionMenu_1 = __webpack_require__(48);
 const RegionData_1 = __webpack_require__(2);
+const IRegionCallbacks_1 = __webpack_require__(3);
+const ZoomManager_1 = __webpack_require__(22);
+const PointRegion_1 = __webpack_require__(24);
+const PolygonRegion_1 = __webpack_require__(35);
+const PolylineRegion_1 = __webpack_require__(39);
+const RectRegion_1 = __webpack_require__(25);
+const RegionMenu_1 = __webpack_require__(46);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
@@ -1942,6 +2185,7 @@ class RegionsManager {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect_1.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+        this.regionAnnouncer = document.getElementById("regionAnnouncer");
         this.regions = new Array();
         this.callbacks = {
             onChange: (region, regionData, state, multiSelection = false) => {
@@ -1998,7 +2242,9 @@ class RegionsManager {
         }
         this.sortRegionsByArea();
         this.redrawAllRegions();
-        document.getElementById("regionAnnouncer").innerHTML = tagsDescriptor.toString();
+        if (this.regionAnnouncer) {
+            this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
+        }
     }
     addRectRegion(id, regionData, tagsDescriptor) {
         this.menu.hide();
@@ -2047,6 +2293,18 @@ class RegionsManager {
                 tags: region.tags,
                 regionData: this.scaleRegionToOriginalSize(region.regionData),
             };
+        });
+    }
+    updateRegionVisibility(shouldHideThisRegion, shouldShow) {
+        this.regions.forEach((region) => {
+            if (shouldHideThisRegion(region.tags)) {
+                if (shouldShow) {
+                    region.show();
+                }
+                else {
+                    region.hide();
+                }
+            }
         });
     }
     getSelectedRegions() {
@@ -2342,8 +2600,8 @@ class RegionsManager {
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
-                this.callbacks.onRegionMoveEnd(region.ID, regionData);
             }
+            this.callbacks.onRegionMoveEnd(region.ID, regionData);
         }
         else if (state === IRegionCallbacks_1.ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {
             if (!region.isSelected) {
@@ -2543,99 +2801,55 @@ exports.RegionsManager = RegionsManager;
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ZoomDirection;
-(function (ZoomDirection) {
-    ZoomDirection[ZoomDirection["In"] = 0] = "In";
-    ZoomDirection[ZoomDirection["Out"] = 1] = "Out";
-})(ZoomDirection = exports.ZoomDirection || (exports.ZoomDirection = {}));
-class ZoomManager {
-    constructor(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
-        this.minZoomScale = 1;
-        this.maxZoomScale = 4;
-        this.zoomScale = 0.5;
-        this.isZoomEnabled = isZoomEnabled;
-        this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
-        this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
-        this.currentZoomScale = this.minZoomScale;
-        this.previousZoomScale = this.minZoomScale;
-        this.callbacks = zoomCallbacks;
-        this._resetZoomOnContentLoad = false;
+exports.PointRegion = void 0;
+const Region_1 = __webpack_require__(8);
+const DragElement_1 = __webpack_require__(33);
+const TagsElement_1 = __webpack_require__(34);
+class PointRegion extends Region_1.Region {
+    constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
+        super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
+        this.buildOn(paper);
     }
-    get resetZoomOnContentLoad() {
-        return this._resetZoomOnContentLoad;
+    updateTags(tags, options) {
+        super.updateTags(tags, options);
+        this.tagsNode.updateTags(tags, options);
+        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
     }
-    set resetZoomOnContentLoad(reset) {
-        this._resetZoomOnContentLoad = reset;
-        if (reset) {
-            this.previousZoomScale = this.currentZoomScale = 1;
-        }
-    }
-    static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
-        if (!ZoomManager.instance) {
-            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
-        }
-        return ZoomManager.instance;
-    }
-    updateZoomScale(zoomType, newScale) {
-        this.previousZoomScale = this.currentZoomScale;
-        const zoomData = this.getZoomData();
-        let updatedZoomScale;
-        if (newScale !== undefined) {
-            updatedZoomScale = newScale;
-        }
-        else if (zoomType === ZoomDirection.In) {
-            updatedZoomScale = this.currentZoomScale + this.zoomScale;
-        }
-        else if (zoomType === ZoomDirection.Out) {
-            updatedZoomScale = this.currentZoomScale - this.zoomScale;
-        }
-        if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
-            this.currentZoomScale = updatedZoomScale;
-            zoomData.currentZoomScale = updatedZoomScale;
-            return zoomData;
-        }
-    }
-    setMaxZoomScale(maxZoomScale) {
-        this.maxZoomScale = maxZoomScale;
-    }
-    setZoomScale(zoomScale) {
-        this.zoomScale = zoomScale;
-    }
-    getZoomData() {
-        return {
-            minZoomScale: this.minZoomScale,
-            maxZoomScale: this.maxZoomScale,
-            currentZoomScale: this.currentZoomScale,
-            previousZoomScale: this.previousZoomScale,
-        };
-    }
-    deleteInstance() {
-        if (ZoomManager.instance) {
-            delete ZoomManager.instance;
-        }
+    buildOn(paper) {
+        this.node = paper.g();
+        this.node.addClass("regionStyle");
+        this.node.addClass(this.styleID);
+        this.dragNode = new DragElement_1.DragElement(paper, this.paperRect, this.regionData, this.callbacks);
+        this.tagsNode = new TagsElement_1.TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
+        this.node.append(this.toolTip);
+        this.node.add(this.dragNode.node);
+        this.node.add(this.tagsNode.node);
+        this.UI.push(this.tagsNode, this.dragNode);
     }
 }
-exports.ZoomManager = ZoomManager;
+exports.PointRegion = PointRegion;
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RectRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(8);
-const AnchorsElements_1 = __webpack_require__(35);
-const DragElement_1 = __webpack_require__(36);
-const TagsElement_1 = __webpack_require__(37);
+const AnchorsElements_1 = __webpack_require__(43);
+const DragElement_1 = __webpack_require__(44);
+const TagsElement_1 = __webpack_require__(45);
 class RectRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -2680,55 +2894,20 @@ exports.RectRegion = RectRegion;
 
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Region_1 = __webpack_require__(8);
-const DragElement_1 = __webpack_require__(38);
-const TagsElement_1 = __webpack_require__(39);
-class PointRegion extends Region_1.Region {
-    constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
-        super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
-        this.buildOn(paper);
-    }
-    updateTags(tags, options) {
-        super.updateTags(tags, options);
-        this.tagsNode.updateTags(tags, options);
-        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
-    }
-    buildOn(paper) {
-        this.node = paper.g();
-        this.node.addClass("regionStyle");
-        this.node.addClass(this.styleID);
-        this.dragNode = new DragElement_1.DragElement(paper, this.paperRect, this.regionData, this.callbacks);
-        this.tagsNode = new TagsElement_1.TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
-        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
-        this.node.append(this.toolTip);
-        this.node.add(this.dragNode.node);
-        this.node.add(this.tagsNode.node);
-        this.UI.push(this.tagsNode, this.dragNode);
-    }
-}
-exports.PointRegion = PointRegion;
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.AreaSelector = void 0;
 const Rect_1 = __webpack_require__(1);
-const ISelectorSettings_1 = __webpack_require__(16);
-const PointSelector_1 = __webpack_require__(49);
-const PolylineSelector_1 = __webpack_require__(50);
-const PolygonSelector_1 = __webpack_require__(51);
-const RectCopySelector_1 = __webpack_require__(52);
-const RectSelector_1 = __webpack_require__(53);
+const ISelectorSettings_1 = __webpack_require__(15);
+const PointSelector_1 = __webpack_require__(47);
+const PolygonSelector_1 = __webpack_require__(48);
+const PolylineSelector_1 = __webpack_require__(49);
+const RectCopySelector_1 = __webpack_require__(50);
+const RectSelector_1 = __webpack_require__(51);
 class AreaSelector {
     constructor(svgHost, callbacks) {
         this.isVisible = true;
@@ -2900,12 +3079,13 @@ AreaSelector.DefaultTemplateSize = new Rect_1.Rect(20, 20);
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AlternatingCrossElement = void 0;
 const CrossElement_1 = __webpack_require__(11);
 class AlternatingCrossElement extends CrossElement_1.CrossElement {
     constructor(paper, boundRect) {
@@ -2945,12 +3125,13 @@ exports.AlternatingCrossElement = AlternatingCrossElement;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RectElement = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const Element_1 = __webpack_require__(17);
@@ -2986,295 +3167,173 @@ exports.RectElement = RectElement;
 
 
 /***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function InvertFilter(canvas) {
-    const context = canvas.getContext("2d");
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const buff = document.createElement("canvas");
-    buff.width = canvas.width;
-    buff.height = canvas.height;
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-        data[i] = 255 - data[i];
-        data[i + 1] = 255 - data[i + 1];
-        data[i + 2] = 255 - data[i + 2];
-    }
-    buff.getContext("2d").putImageData(imageData, 0, 0);
-    return new Promise((resolve, reject) => {
-        return resolve(buff);
-    });
-}
-exports.InvertFilter = InvertFilter;
-function GrayscaleFilter(canvas) {
-    const context = canvas.getContext("2d");
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const buff = document.createElement("canvas");
-    buff.width = canvas.width;
-    buff.height = canvas.height;
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-        const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-        data[i] = gray;
-        data[i + 1] = gray;
-        data[i + 2] = gray;
-    }
-    buff.getContext("2d").putImageData(imageData, 0, 0);
-    return new Promise((resolve, reject) => {
-        return resolve(buff);
-    });
-}
-exports.GrayscaleFilter = GrayscaleFilter;
-function BlurDiffFilter(factor) {
-    function boxesForGauss(sigma, n) {
-        const wIdeal = Math.sqrt((12 * sigma * sigma / n) + 1);
-        let wl = Math.floor(wIdeal);
-        if (wl % 2 === 0) {
-            wl--;
-        }
-        const wu = wl + 2;
-        const mIdeal = (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
-        const m = Math.round(mIdeal);
-        const sizes = [];
-        for (let i = 0; i < n; i++) {
-            sizes.push(i < m ? wl : wu);
-        }
-        return sizes;
-    }
-    function gaussBlur_4(scl, tcl, w, h, r) {
-        const bxs = boxesForGauss(r, 3);
-        boxBlur_4(scl, tcl, w, h, (bxs[0] - 1) / 2);
-        boxBlur_4(tcl, scl, w, h, (bxs[1] - 1) / 2);
-        boxBlur_4(scl, tcl, w, h, (bxs[2] - 1) / 2);
-    }
-    function boxBlur_4(scl, tcl, w, h, r) {
-        for (let i = 0; i < scl.length; i++) {
-            tcl[i] = scl[i];
-        }
-        boxBlurH_4(tcl, scl, w, h, r);
-        boxBlurT_4(scl, tcl, w, h, r);
-    }
-    function boxBlurH_4(scl, tcl, w, h, r) {
-        const iarr = 1 / (r + r + 1);
-        for (let i = 0; i < h; i++) {
-            let ti = i * w;
-            let li = ti;
-            let ri = ti + r;
-            const fv = scl[ti];
-            const lv = scl[ti + w - 1];
-            let val = (r + 1) * fv;
-            for (let j = 0; j < r; j++) {
-                val += scl[ti + j];
-            }
-            for (let j = 0; j <= r; j++) {
-                val += scl[ri++] - fv;
-                tcl[ti++] = Math.round(val * iarr);
-            }
-            for (let j = r + 1; j < w - r; j++) {
-                val += scl[ri++] - scl[li++];
-                tcl[ti++] = Math.round(val * iarr);
-            }
-            for (let j = w - r; j < w; j++) {
-                val += lv - scl[li++];
-                tcl[ti++] = Math.round(val * iarr);
-            }
-        }
-    }
-    function boxBlurT_4(scl, tcl, w, h, r) {
-        const iarr = 1 / (r + r + 1);
-        for (let i = 0; i < w; i++) {
-            let ti = i;
-            let li = ti;
-            let ri = ti + r * w;
-            const fv = scl[ti];
-            const lv = scl[ti + w * (h - 1)];
-            let val = (r + 1) * fv;
-            for (let j = 0; j < r; j++) {
-                val += scl[ti + j * w];
-            }
-            for (let j = 0; j <= r; j++) {
-                val += scl[ri] - fv;
-                tcl[ti] = Math.round(val * iarr);
-                ri += w;
-                ti += w;
-            }
-            for (let j = r + 1; j < h - r; j++) {
-                val += scl[ri] - scl[li];
-                tcl[ti] = Math.round(val * iarr);
-                li += w;
-                ri += w;
-                ti += w;
-            }
-            for (let j = h - r; j < h; j++) {
-                val += lv - scl[li];
-                tcl[ti] = Math.round(val * iarr);
-                li += w;
-                ti += w;
-            }
-        }
-    }
-    return (canvas) => {
-        const context = canvas.getContext("2d");
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const buff = document.createElement("canvas");
-        buff.width = canvas.width;
-        buff.height = canvas.height;
-        const bludData = buff.getContext("2d").createImageData(buff.width, buff.height);
-        const idata = imageData.data;
-        const bdata = bludData.data;
-        const pixelsNumber = canvas.width * canvas.height;
-        const dataR = new Uint8ClampedArray(pixelsNumber);
-        const dataG = new Uint8ClampedArray(pixelsNumber);
-        const dataB = new Uint8ClampedArray(pixelsNumber);
-        const dataA = new Uint8ClampedArray(pixelsNumber);
-        for (let i = 0; i < pixelsNumber; i++) {
-            dataR[i] = idata[4 * i];
-            dataG[i] = idata[4 * i + 1];
-            dataB[i] = idata[4 * i + 2];
-            dataA[i] = idata[4 * i + 3];
-        }
-        const blurR = new Uint8ClampedArray(pixelsNumber);
-        const blurG = new Uint8ClampedArray(pixelsNumber);
-        const blurB = new Uint8ClampedArray(pixelsNumber);
-        const blurR2 = new Uint8ClampedArray(pixelsNumber);
-        const blurG2 = new Uint8ClampedArray(pixelsNumber);
-        const blurB2 = new Uint8ClampedArray(pixelsNumber);
-        const halfFactor = factor / 2;
-        gaussBlur_4(dataR, blurR, buff.width, buff.height, halfFactor);
-        gaussBlur_4(dataG, blurG, buff.width, buff.height, halfFactor);
-        gaussBlur_4(dataB, blurB, buff.width, buff.height, halfFactor);
-        gaussBlur_4(dataR, blurR2, buff.width, buff.height, factor);
-        gaussBlur_4(dataG, blurG2, buff.width, buff.height, factor);
-        gaussBlur_4(dataB, blurB2, buff.width, buff.height, factor);
-        const alphaStep = 127 / factor;
-        for (let i = 0; i < pixelsNumber; i++) {
-            const dr = Math.abs(blurR2[i] - blurR[i]);
-            const dg = Math.abs(blurG2[i] - blurG[i]);
-            const db = Math.abs(blurB2[i] - blurB[i]);
-            const d = 0.2358 * dr + 0.0700 * dg + 0.6742 * db;
-            const g = Math.round(0.2358 * idata[4 * i + 0] + 0.0700 * idata[4 * i + 1] + 0.6742 * idata[4 * i + 2]);
-            bdata[4 * i + 0] = (dr >= 0.2358 * halfFactor) ?
-                idata[4 * i + 0] : Math.round(g / factor) * factor;
-            bdata[4 * i + 1] = (dg >= 0.0700 * halfFactor) ?
-                idata[4 * i + 1] : Math.round(g / factor) * factor;
-            bdata[4 * i + 2] = (db >= 0.6742 * halfFactor) ?
-                idata[4 * i + 2] : Math.round(g / factor) * factor;
-            bdata[4 * i + 3] = (d >= factor) ? 255 : 0 + Math.round(d * alphaStep);
-        }
-        buff.getContext("2d").putImageData(bludData, 0, 0);
-        return new Promise((resolve, reject) => {
-            return resolve(buff);
-        });
-    };
-}
-exports.BlurDiffFilter = BlurDiffFilter;
-function BrightnessFilter(brightness) {
-    return (canvas) => {
-        const context = canvas.getContext("2d");
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const buff = document.createElement("canvas");
-        buff.width = canvas.width;
-        buff.height = canvas.height;
-        const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            data[i + 0] = Math.max(0, Math.min(data[i + 0] + brightness, 255));
-            data[i + 1] = Math.max(0, Math.min(data[i + 1] + brightness, 255));
-            data[i + 2] = Math.max(0, Math.min(data[i + 2] + brightness, 255));
-        }
-        buff.getContext("2d").putImageData(imageData, 0, 0);
-        return new Promise((resolve, reject) => {
-            return resolve(buff);
-        });
-    };
-}
-exports.BrightnessFilter = BrightnessFilter;
-function ContrastFilter(contrast) {
-    return (canvas) => {
-        const context = canvas.getContext("2d");
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const buff = document.createElement("canvas");
-        buff.width = canvas.width;
-        buff.height = canvas.height;
-        const data = imageData.data;
-        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-        for (let i = 0; i < data.length; i += 4) {
-            data[i + 0] = factor * (data[i] - 128) + 128;
-            data[i + 1] = factor * (data[i + 1] - 128) + 128;
-            data[i + 2] = factor * (data[i + 2] - 128) + 128;
-        }
-        buff.getContext("2d").putImageData(imageData, 0, 0);
-        return new Promise((resolve, reject) => {
-            return resolve(buff);
-        });
-    };
-}
-exports.ContrastFilter = ContrastFilter;
-function SaturationFilter(saturation) {
-    return (canvas) => {
-        const context = canvas.getContext("2d");
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const buff = document.createElement("canvas");
-        buff.width = canvas.width;
-        buff.height = canvas.height;
-        const s = saturation / 255;
-        const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i + 0];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            const gr = 0.213 * r + 0.715 * g + 0.072 * b;
-            const nr = gr + s * (+0.787 * r - 0.715 * g - 0.072 * b);
-            const ng = gr + s * (-0.213 * r + 0.285 * g - 0.072 * b);
-            const nb = gr + s * (-0.213 * r - 0.715 * g + 0.928 * b);
-            data[i] = Math.round(nr);
-            data[i + 1] = Math.round(ng);
-            data[i + 2] = Math.round(nb);
-        }
-        buff.getContext("2d").putImageData(imageData, 0, 0);
-        return new Promise((resolve, reject) => {
-            return resolve(buff);
-        });
-    };
-}
-exports.SaturationFilter = SaturationFilter;
-class FilterPipeline {
-    constructor() {
-        this.pipeline = new Array();
-    }
-    addFilter(filter) {
-        this.pipeline.push(filter);
-    }
-    clearFilters() {
-        this.pipeline = new Array();
-    }
-    applyToCanvas(canvas) {
-        let promise = new Promise((resolve, reject) => {
-            return resolve(canvas);
-        });
-        if (this.pipeline.length > 0) {
-            this.pipeline.forEach((filter) => {
-                promise = promise.then(filter);
-            });
-        }
-        return promise;
-    }
-}
-exports.FilterPipeline = FilterPipeline;
-
-
-/***/ }),
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Toolbar = void 0;
+const Rect_1 = __webpack_require__(1);
+const ToolbarIcon_1 = __webpack_require__(4);
+const ToolbarSelectIcon_1 = __webpack_require__(52);
+const ToolbarSeparator_1 = __webpack_require__(53);
+const ToolbarSwitchIcon_1 = __webpack_require__(54);
+const ToolbarTriggerIcon_1 = __webpack_require__(55);
+class Toolbar {
+    constructor(svgHost) {
+        this.iconSpace = 8;
+        this.areHotKeysEnabled = true;
+        this.icons = new Array();
+        this.buildUIElements(svgHost);
+    }
+    addSelector(icon, actor) {
+        const newIcon = new ToolbarSelectIcon_1.ToolbarSelectIcon(this.paper, icon, (action) => {
+            this.select(action);
+            actor(action);
+        });
+        this.addIcon(newIcon);
+    }
+    addSwitch(icon, actor) {
+        const newIcon = new ToolbarSwitchIcon_1.ToolbarSwitchIcon(this.paper, icon, (action) => {
+            actor(action);
+        });
+        this.addIcon(newIcon);
+    }
+    addSeparator() {
+        const newIcon = new ToolbarSeparator_1.ToolbarSeparator(this.paper, ToolbarIcon_1.ToolbarIcon.IconWidth);
+        this.addIcon(newIcon);
+    }
+    addTrigger(icon, actor) {
+        const newIcon = new ToolbarTriggerIcon_1.ToolbarTriggerIcon(this.paper, icon, (action) => {
+            actor(action);
+        });
+        this.addIcon(newIcon);
+    }
+    select(action) {
+        this.icons.forEach((icon) => {
+            if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon) {
+                if (icon.description.action !== action) {
+                    icon.unselect();
+                }
+                else {
+                    icon.select();
+                }
+            }
+        });
+    }
+    setSwitch(action, on) {
+        const switchIcon = this.findIconByAction(action);
+        if (switchIcon !== undefined && switchIcon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon) {
+            (on) ? switchIcon.select() : switchIcon.unselect();
+        }
+    }
+    enableHotkeys() {
+        this.areHotKeysEnabled = true;
+    }
+    disableHotkeys() {
+        this.areHotKeysEnabled = false;
+    }
+    buildUIElements(svgHost) {
+        this.baseParent = svgHost;
+        this.paper = Snap(svgHost);
+        this.paperRect = new Rect_1.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
+        const toolbarGroup = this.paper.g();
+        toolbarGroup.addClass("toolbarLayer");
+        this.recalculateToolbarSize();
+        this.backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.toolbarHeight);
+        this.backgroundRect.addClass("toolbarBGStyle");
+        toolbarGroup.add(this.backgroundRect);
+        this.iconsLayer = this.paper.g();
+        this.iconsLayer.addClass("iconsLayerStyle");
+        toolbarGroup.add(this.iconsLayer);
+        this.subscribeToKeyboardEvents();
+    }
+    recalculateToolbarSize(newIcon) {
+        if (newIcon === undefined) {
+            this.toolbarWidth = ToolbarIcon_1.ToolbarIcon.IconWidth + 2 * this.iconSpace;
+            this.toolbarHeight = this.icons.length * (ToolbarIcon_1.ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+        }
+        else {
+            const width = newIcon.width + 2 * this.iconSpace;
+            if (width > this.toolbarWidth) {
+                this.toolbarWidth = width;
+            }
+            this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
+        }
+    }
+    updateToolbarSize() {
+        this.backgroundRect.attr({
+            height: this.toolbarHeight,
+            width: this.toolbarWidth,
+        });
+    }
+    addIcon(newIcon) {
+        this.icons.push(newIcon);
+        this.iconsLayer.add(newIcon.node);
+        newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
+        this.recalculateToolbarSize(newIcon);
+        this.updateToolbarSize();
+    }
+    findIconByKey(key) {
+        return this.icons.find((icon) => {
+            if (icon.description !== null) {
+                return icon.description.key.includes(key);
+            }
+            return false;
+        });
+    }
+    findIconByAction(action) {
+        return this.icons.find((icon) => {
+            return icon.description !== null && icon.description.action === action;
+        });
+    }
+    findFocusedIcon() {
+        return this.icons.find((icon) => {
+            return icon.isFocused();
+        });
+    }
+    subscribeToKeyboardEvents() {
+        window.addEventListener("keyup", (e) => {
+            if (!(e.target instanceof HTMLInputElement) &&
+                !(e.target instanceof HTMLTextAreaElement) &&
+                !(e.target instanceof HTMLSelectElement)) {
+                if (this.areHotKeysEnabled && !e.ctrlKey && !e.altKey) {
+                    const icon = this.findIconByKey(e.key);
+                    if (icon !== undefined) {
+                        if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
+                            || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
+                            icon.activate();
+                        }
+                    }
+                }
+                if (e.key === " " || e.key === "Enter") {
+                    e.preventDefault();
+                    const icon = this.findFocusedIcon();
+                    if (icon !== undefined) {
+                        if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon || icon instanceof ToolbarSwitchIcon_1.ToolbarSwitchIcon
+                            || icon instanceof ToolbarTriggerIcon_1.ToolbarTriggerIcon) {
+                            icon.activate();
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+exports.Toolbar = Toolbar;
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tag = void 0;
 const Color_1 = __webpack_require__(18);
-const HSLColor_1 = __webpack_require__(14);
+const HSLColor_1 = __webpack_require__(12);
 const LABColor_1 = __webpack_require__(7);
 class Tag {
     constructor(name, color, id = "") {
@@ -3378,32 +3437,33 @@ exports.Tag = Tag;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Toolbar_1 = __webpack_require__(20);
-const RegionsManager_1 = __webpack_require__(21);
-const PointRegion_1 = __webpack_require__(24);
-const RectRegion_1 = __webpack_require__(23);
-const AreaSelector_1 = __webpack_require__(25);
-const ISelectorSettings_1 = __webpack_require__(16);
-const CanvasTools_Filter_1 = __webpack_require__(28);
-const Rect_1 = __webpack_require__(1);
-const Point2D_1 = __webpack_require__(0);
-const RegionData_1 = __webpack_require__(2);
-const Tag_1 = __webpack_require__(29);
-const TagsDescriptor_1 = __webpack_require__(54);
-const CanvasTools_Editor_1 = __webpack_require__(55);
-const RGBColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(7);
-const XYZColor_1 = __webpack_require__(13);
-const HSLColor_1 = __webpack_require__(14);
-const Palette_1 = __webpack_require__(56);
+exports.CanvasTools = void 0;
+const CanvasTools_Editor_1 = __webpack_require__(32);
+const CanvasTools_Filter_1 = __webpack_require__(20);
 const Color_1 = __webpack_require__(18);
-__webpack_require__(57);
+const HSLColor_1 = __webpack_require__(12);
+const LABColor_1 = __webpack_require__(7);
+const Palette_1 = __webpack_require__(56);
+const RGBColor_1 = __webpack_require__(13);
+const XYZColor_1 = __webpack_require__(14);
+const Point2D_1 = __webpack_require__(0);
+const Rect_1 = __webpack_require__(1);
+const RegionData_1 = __webpack_require__(2);
+const Tag_1 = __webpack_require__(30);
+const TagsDescriptor_1 = __webpack_require__(57);
+const ISelectorSettings_1 = __webpack_require__(15);
+const PointRegion_1 = __webpack_require__(24);
+const RectRegion_1 = __webpack_require__(25);
+const RegionsManager_1 = __webpack_require__(23);
+const AreaSelector_1 = __webpack_require__(26);
+const Toolbar_1 = __webpack_require__(29);
+__webpack_require__(58);
 class CanvasTools {
 }
 exports.CanvasTools = CanvasTools;
@@ -3441,81 +3501,7 @@ CanvasTools.Filters = {
 };
 CanvasTools.Editor = CanvasTools_Editor_1.Editor;
 CanvasTools.Toolbar = Toolbar_1.Toolbar;
-__webpack_require__(59);
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const ToolbarIcon_1 = __webpack_require__(3);
-class ToolbarSelectIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
-        this.buildIconUI();
-    }
-    activate() {
-        this.onAction(this.description.action);
-        this.select();
-    }
-    move(x, y) {
-        super.move(x, y);
-        this.iconBackgrounRect.attr({ x, y });
-        if (this.iconImageSVG !== undefined) {
-            this.iconImageSVG.attr({ x, y });
-        }
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.iconBackgrounRect.attr({
-            height: this.height,
-            width: this.width,
-        });
-        this.iconImageSVG.attr({
-            height: this.height,
-            width: this.width,
-        });
-    }
-    buildIconUI() {
-        this.node = this.paper.g();
-        this.node.addClass("iconStyle");
-        this.node.addClass("selector");
-        this.node.attr({ tabindex: 0, role: "button" });
-        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
-        this.iconBackgrounRect.addClass("iconBGRectStyle");
-        this.iconImage = this.paper.g();
-        if (this.description.iconUrl !== undefined) {
-            Snap.load(this.description.iconUrl, (fragment) => {
-                this.iconImage.append(fragment);
-                this.iconImageSVG = this.iconImage.children().find((element) => {
-                    return (element.type === "svg");
-                });
-                if (this.iconImageSVG !== undefined) {
-                    this.iconImageSVG.attr({
-                        height: this.height,
-                        width: this.width,
-                    });
-                    this.move(this.x, this.y);
-                }
-            });
-        }
-        this.iconImage.addClass("iconImageStyle");
-        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
-        this.node.add(this.iconBackgrounRect);
-        this.node.add(this.iconImage);
-        this.node.append(title);
-        this.node.click((e) => {
-            this.activate();
-        });
-        this.node.node.addEventListener("focus", this.onfocusCallback);
-        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
-    }
-}
-exports.ToolbarSelectIcon = ToolbarSelectIcon;
+__webpack_require__(60);
 
 
 /***/ }),
@@ -3525,37 +3511,680 @@ exports.ToolbarSelectIcon = ToolbarSelectIcon;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ToolbarIcon_1 = __webpack_require__(3);
-class ToolbarSeparator extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, width) {
-        super(paper, null);
-        this.buildIconUI();
-        this.resize(width, 1);
+exports.Editor = void 0;
+const CanvasTools_Filter_1 = __webpack_require__(20);
+const ConfigurationManager_1 = __webpack_require__(21);
+const Rect_1 = __webpack_require__(1);
+const ZoomManager_1 = __webpack_require__(22);
+const ISelectorSettings_1 = __webpack_require__(15);
+const RegionsManager_1 = __webpack_require__(23);
+const AreaSelector_1 = __webpack_require__(26);
+const Toolbar_1 = __webpack_require__(29);
+const ToolbarIcon_1 = __webpack_require__(4);
+class Editor {
+    constructor(container, areaSelector, regionsManager, filterPipeline, isZoomEnabled) {
+        this.autoResize = true;
+        this.isRMFrozen = false;
+        this.contentCanvas = this.createCanvasElement();
+        this.editorSVG = this.createSVGElement();
+        this.editorContainerDiv = container;
+        this.editorContainerDiv.classList.add("CanvasToolsContainer");
+        this.editorContainerDiv.tabIndex = 0;
+        this.editorDiv = this.createDivElement();
+        this.editorDiv.classList.add("CanvasToolsEditor");
+        this.editorDiv.append(this.contentCanvas);
+        this.editorDiv.append(this.editorSVG);
+        this.editorContainerDiv.append(this.editorDiv);
+        const rmCallbacks = {
+            onChange: null,
+            onManipulationBegin: (region) => {
+                this.areaSelector.hide();
+                if (typeof this.onManipulationBegin === "function") {
+                    this.onManipulationBegin(region);
+                }
+            },
+            onManipulationEnd: (region) => {
+                this.areaSelector.show();
+                if (typeof this.onManipulationEnd === "function") {
+                    this.onManipulationEnd(region);
+                }
+            },
+            onRegionSelected: (id, multiselection) => {
+                if (typeof this.onRegionSelected === "function") {
+                    this.onRegionSelected(id, multiselection);
+                }
+            },
+            onRegionMove: (id, regionData) => {
+                if (typeof this.onRegionMove === "function") {
+                    this.onRegionMove(id, regionData);
+                }
+            },
+            onRegionMoveBegin: (id, regionData) => {
+                if (typeof this.onRegionMoveBegin === "function") {
+                    this.onRegionMoveBegin(id, regionData);
+                }
+            },
+            onRegionMoveEnd: (id, regionData) => {
+                if (typeof this.onRegionMoveEnd === "function") {
+                    this.onRegionMoveEnd(id, regionData);
+                }
+            },
+            onRegionDelete: (id, regionData) => {
+                if (typeof this.onRegionDelete === "function") {
+                    this.onRegionDelete(id, regionData);
+                }
+            },
+        };
+        if (regionsManager !== null && regionsManager !== undefined) {
+            this.regionsManager = regionsManager;
+            regionsManager.callbacks = rmCallbacks;
+        }
+        else {
+            this.regionsManager = new RegionsManager_1.RegionsManager(this.editorSVG, rmCallbacks);
+        }
+        const asCallbacks = {
+            onSelectionBegin: () => {
+                this.isRMFrozen = this.regionsManager.isFrozen;
+                this.regionsManager.freeze();
+                if (typeof this.onSelectionBegin === "function") {
+                    this.onSelectionBegin();
+                }
+            },
+            onSelectionEnd: (regionData) => {
+                if (!this.isRMFrozen) {
+                    this.regionsManager.unfreeze();
+                }
+                if (typeof this.onSelectionEnd === "function") {
+                    this.onSelectionEnd(regionData);
+                }
+            },
+            onNextSelectionPoint: (point) => {
+                if (typeof this.onNextSelectionPoint === "function") {
+                    this.onNextSelectionPoint(point);
+                }
+            },
+        };
+        if (areaSelector !== null && areaSelector !== undefined) {
+            this.areaSelector = areaSelector;
+            this.areaSelector.callbacks = asCallbacks;
+        }
+        else {
+            this.areaSelector = new AreaSelector_1.AreaSelector(this.editorSVG, asCallbacks);
+        }
+        if (filterPipeline !== undefined && filterPipeline !== null) {
+            this.filterPipeline = filterPipeline;
+        }
+        else {
+            this.filterPipeline = new CanvasTools_Filter_1.FilterPipeline();
+        }
+        const initZoomCallbacks = {
+            onZoomingOut: () => {
+                this.onZoom(ZoomManager_1.ZoomDirection.Out);
+            },
+            onZoomingIn: () => {
+                this.onZoom(ZoomManager_1.ZoomDirection.In);
+            },
+            getZoomLevel: () => {
+                return this.zoomManager.getZoomData().currentZoomScale;
+            },
+            setZoomLevel: (newZoomScale) => {
+                this.onZoom(ZoomManager_1.ZoomDirection.In, newZoomScale);
+                return this.zoomManager.getZoomData();
+            },
+        };
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
+        this.zoomManager.deleteInstance();
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
+        if (isZoomEnabled) {
+            this.zoomManager.isZoomEnabled = true;
+        }
+        this.resize(container.offsetWidth, container.offsetHeight);
+        this.mergedAPI = new Proxy(this, {
+            get: (target, prop) => {
+                let p;
+                let t;
+                if (prop in target) {
+                    t = target;
+                    p = t[prop];
+                }
+                else if (prop in target.regionsManager) {
+                    t = target.RM;
+                    p = t[prop];
+                }
+                else if (prop in target.areaSelector) {
+                    t = target.AS;
+                    p = t[prop];
+                }
+                else if (prop in target.filterPipeline) {
+                    t = target.FP;
+                    p = t[prop];
+                }
+                else if (prop in target.zoomManager) {
+                    t = target.FP;
+                    p = t[prop];
+                }
+                else {
+                    p = undefined;
+                }
+                if (typeof p === "function") {
+                    return (...args) => {
+                        p.apply(t, args);
+                    };
+                }
+                else {
+                    return p;
+                }
+            },
+        });
+        this.subscribeToEvents();
+        const regionAnnouncer = document.createElement("div");
+        regionAnnouncer.setAttribute("aria-live", "assertive");
+        regionAnnouncer.setAttribute("tabindex", "-1");
+        regionAnnouncer.id = "regionAnnouncer";
+        container.appendChild(regionAnnouncer);
     }
-    move(x, y) {
-        super.move(x, y);
-        this.iconSeparator.attr({
-            x1: x,
-            x2: x + this.width,
-            y1: y,
-            y2: y,
+    get api() {
+        return this.mergedAPI;
+    }
+    addToolbar(container, toolbarSet, iconsPath) {
+        const svg = this.createSVGElement();
+        container.append(svg);
+        this.toolbar = new Toolbar_1.Toolbar(svg);
+        if (toolbarSet === null || toolbarSet === undefined) {
+            toolbarSet = Editor.FullToolbarSet;
+        }
+        if (this.zoomManager.isZoomEnabled) {
+            toolbarSet = toolbarSet.concat(Editor.SeparatorIconGroupToolbar).concat(Editor.ZoomIconGroupToolbar);
+        }
+        let activeSelector;
+        toolbarSet.forEach((item) => {
+            if (item.type === ToolbarIcon_1.ToolbarItemType.SEPARATOR) {
+                this.toolbar.addSeparator();
+            }
+            else {
+                const toolbarItem = {
+                    action: item.action,
+                    iconUrl: iconsPath + item.iconFile,
+                    tooltip: item.tooltip,
+                    key: item.key,
+                    width: item.width,
+                    height: item.height,
+                };
+                const actionFn = (action) => {
+                    item.actionCallback(action, this.regionsManager, this.areaSelector, this.zoomManager);
+                };
+                if (item.type === ToolbarIcon_1.ToolbarItemType.SELECTOR) {
+                    this.toolbar.addSelector(toolbarItem, actionFn);
+                    if (item.activate) {
+                        activeSelector = item.action;
+                    }
+                }
+                else if (item.type === ToolbarIcon_1.ToolbarItemType.SWITCH) {
+                    this.toolbar.addSwitch(toolbarItem, actionFn);
+                    this.toolbar.setSwitch(item.action, item.activate);
+                }
+                else if (item.type === ToolbarIcon_1.ToolbarItemType.TRIGGER) {
+                    this.toolbar.addTrigger(toolbarItem, actionFn);
+                }
+            }
+        });
+        this.toolbar.select(activeSelector);
+    }
+    async addContentSource(source) {
+        const buffCnvs = document.createElement("canvas");
+        const context = buffCnvs.getContext("2d");
+        if (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement) {
+            this.sourceWidth = source.width;
+            this.sourceHeight = source.height;
+        }
+        else if (source instanceof HTMLVideoElement) {
+            this.sourceWidth = source.videoWidth;
+            this.sourceHeight = source.videoHeight;
+        }
+        buffCnvs.width = this.sourceWidth;
+        buffCnvs.height = this.sourceHeight;
+        context.drawImage(source, 0, 0, buffCnvs.width, buffCnvs.height);
+        return this.filterPipeline.applyToCanvas(buffCnvs).then((bcnvs) => {
+            this.contentCanvas.width = bcnvs.width;
+            this.contentCanvas.height = bcnvs.height;
+            const imgContext = this.contentCanvas.getContext("2d");
+            imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+        }).then(() => {
+            this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            this.handleZoomAfterContentUpdate();
         });
     }
-    resize(width, height) {
-        super.resize(width, 1);
-        this.iconSeparator.attr({
-            width: this.width,
-        });
+    resize(containerWidth, containerHeight) {
+        this.frameWidth = containerWidth;
+        this.frameHeight = containerHeight;
+        const imgRatio = this.contentCanvas.width / this.contentCanvas.height;
+        const containerRatio = containerWidth / containerHeight;
+        let hpadding = 0;
+        let vpadding = 0;
+        if (imgRatio > containerRatio) {
+            vpadding = (containerHeight - containerWidth / imgRatio) / 2;
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+            this.editorDiv.style.width = "";
+        }
+        else {
+            hpadding = (containerWidth - containerHeight * imgRatio) / 2;
+            this.editorDiv.style.height = "";
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+        }
+        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+        this.frameWidth = containerWidth - hpadding * 2;
+        this.frameHeight = containerHeight - vpadding * 2;
+        this.areaSelector.resize(this.frameWidth, this.frameHeight);
+        this.regionsManager.resize(this.frameWidth, this.frameHeight);
     }
-    buildIconUI() {
-        this.node = this.paper.g();
-        this.node.addClass("iconStyle");
-        this.node.addClass("separator");
-        this.iconSeparator = this.paper.line(0, 0, this.width, 0);
-        this.node.add(this.iconSeparator);
+    get RM() {
+        return this.regionsManager;
+    }
+    get AS() {
+        return this.areaSelector;
+    }
+    get FP() {
+        return this.filterPipeline;
+    }
+    get ZM() {
+        return this.zoomManager;
+    }
+    set isModifyRegionOnlyMode(value) {
+        ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = value;
+    }
+    get isModifyRegionOnlyMode() {
+        return ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode;
+    }
+    scaleRegionToSourceSize(regionData, sourceWidth, sourceHeight) {
+        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const xf = sw / this.frameWidth;
+        const yf = sh / this.frameHeight;
+        const rd = regionData.copy();
+        rd.scale(xf, yf);
+        return rd;
+    }
+    scaleRegionToFrameSize(regionData, sourceWidth, sourceHeight) {
+        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
+        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const xf = this.frameWidth / sw;
+        const yf = this.frameHeight / sh;
+        const rd = regionData.copy();
+        rd.scale(xf, yf);
+        return rd;
+    }
+    createSVGElement() {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.innerHTML = Editor.SVGDefsTemplate;
+        svg.ondragstart = () => {
+            return false;
+        };
+        svg.ondragend = () => {
+            return false;
+        };
+        return svg;
+    }
+    createCanvasElement() {
+        const canvas = document.createElement("canvas");
+        return canvas;
+    }
+    createDivElement() {
+        const div = document.createElement("div");
+        return div;
+    }
+    onZoom(zoomType, newScale) {
+        if (!this.zoomManager.isZoomEnabled) {
+            throw new Error("Zoom feature is not enabled");
+        }
+        const zoomData = this.zoomManager.updateZoomScale(zoomType, newScale);
+        if (zoomData) {
+            const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+            const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+            const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
+            this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
+            if (typeof this.onZoomEnd === "function") {
+                this.onZoomEnd(zoomData);
+            }
+        }
+    }
+    handleZoomAfterContentUpdate() {
+        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+            const zoomData = this.zoomManager.getZoomData();
+            const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
+            const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
+            this.frameWidth = scaledFrameWidth;
+            this.frameHeight = scaledFrameHeight;
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
+            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+        }
+    }
+    zoomEditorToScale(scaledFrameWidth, scaledFrameHeight) {
+        if (!this.editorContainerDiv.offsetWidth) {
+            this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0];
+            this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0];
+        }
+        const containerWidth = this.editorContainerDiv.offsetWidth;
+        const containerHeight = this.editorContainerDiv.offsetHeight;
+        let hpadding = 0;
+        let vpadding = 0;
+        if (scaledFrameWidth < containerWidth) {
+            hpadding = (containerWidth - scaledFrameWidth) / 2;
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+        }
+        else {
+            this.editorDiv.style.width = `${scaledFrameWidth}px`;
+        }
+        if (scaledFrameHeight < containerHeight) {
+            vpadding = (containerHeight - scaledFrameHeight) / 2;
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+        }
+        else {
+            this.editorDiv.style.height = `${scaledFrameHeight}px`;
+        }
+        if (hpadding && !vpadding) {
+            hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
+            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+        }
+        if (!hpadding && vpadding) {
+            vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
+            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+        }
+        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+        this.editorContainerDiv.focus();
+    }
+    subscribeToEvents() {
+        window.addEventListener("resize", (e) => {
+            if (this.autoResize) {
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+            }
+        });
     }
 }
-exports.ToolbarSeparator = ToolbarSeparator;
+exports.Editor = Editor;
+Editor.FullToolbarSet = [
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "none-select",
+        iconFile: "none-selection.svg",
+        tooltip: "Regions Manipulation (M)",
+        key: ["M", "m"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "point-select",
+        iconFile: "point-selection.svg",
+        tooltip: "Point-selection (P)",
+        key: ["P", "p"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POINT });
+            sl.show();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "rect-select",
+        iconFile: "rect-selection.svg",
+        tooltip: "Rectangular box (R)",
+        key: ["R", "r"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
+            sl.show();
+        },
+        activate: true,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "copy-select",
+        iconFile: "copy-t-selection.svg",
+        tooltip: "Template-based box (T)",
+        key: ["T", "t"],
+        actionCallback: (action, rm, sl) => {
+            const regions = rm.getSelectedRegions();
+            if (regions !== undefined && regions.length > 0) {
+                const r = regions[0];
+                sl.setSelectionMode({
+                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
+                    template: new Rect_1.Rect(r.regionData.width, r.regionData.height),
+                });
+            }
+            else {
+                sl.setSelectionMode({
+                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
+                    template: new Rect_1.Rect(40, 40),
+                });
+            }
+            sl.show();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "polyline-select",
+        iconFile: "polyline-selection.svg",
+        tooltip: "Polyline-selection (Y)",
+        key: ["Y", "y"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYLINE });
+            sl.show();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "polygon-select",
+        iconFile: "polygon-selection.svg",
+        tooltip: "Polygon-selection (O)",
+        key: ["O", "o"],
+        actionCallback: (action, rm, sl) => {
+            ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = false;
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
+            sl.show();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "pointer-add-remove-points-on-polygons",
+        iconFile: "pointer-add-polygon-point.svg",
+        tooltip: "Polygon add/remove points (U)",
+        key: ["U", "u"],
+        actionCallback: (action, rm, sl) => {
+            if (!ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode) {
+                ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = true;
+                sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
+                sl.show();
+            }
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
+        action: "delete-all-select",
+        iconFile: "delete-all-selection.svg",
+        tooltip: "Delete all regions",
+        key: ["D", "d"],
+        actionCallback: (action, rm, sl) => {
+            rm.deleteAllRegions();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
+        action: "selection-lock",
+        iconFile: "selection-lock.svg",
+        tooltip: "Lock/unlock regions (L)",
+        key: ["L", "l"],
+        actionCallback: (action, rm, sl) => {
+            rm.toggleFreezeMode();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
+        action: "background-toggle",
+        iconFile: "background-toggle.svg",
+        tooltip: "Toggle Region Background (B)",
+        key: ["B", "b"],
+        actionCallback: (action, rm, sl) => {
+            rm.toggleBackground();
+        },
+        activate: false,
+    },
+];
+Editor.RectToolbarSet = [
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "none-select",
+        iconFile: "none-selection.svg",
+        tooltip: "Regions Manipulation (M)",
+        key: ["M", "m"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "rect-select",
+        iconFile: "rect-selection.svg",
+        tooltip: "Rectangular box (R)",
+        key: ["R", "r"],
+        actionCallback: (action, rm, sl) => {
+            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
+            sl.show();
+        },
+        activate: true,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: "copy-select",
+        iconFile: "copy-t-selection.svg",
+        tooltip: "Template-based box (T)",
+        key: ["T", "t"],
+        actionCallback: (action, rm, sl) => {
+            const regions = rm.getSelectedRegionsWithZoomScale();
+            if (regions !== undefined && regions.length > 0) {
+                const r = regions[0];
+                sl.setSelectionMode({
+                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
+                    template: new Rect_1.Rect(r.regionData.width, r.regionData.height),
+                });
+            }
+            else {
+                sl.setSelectionMode({
+                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
+                    template: new Rect_1.Rect(40, 40),
+                });
+            }
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
+        action: "delete-all-select",
+        iconFile: "delete-all-selection.svg",
+        tooltip: "Delete all regions (D)",
+        key: ["D", "d"],
+        actionCallback: (action, rm, sl) => {
+            rm.deleteAllRegions();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
+        action: "selection-lock",
+        iconFile: "selection-lock.svg",
+        tooltip: "Lock/unlock regions (L)",
+        key: ["L", "l"],
+        actionCallback: (action, rm, sl) => {
+            rm.toggleFreezeMode();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
+        action: "background-toggle",
+        iconFile: "background-toggle.svg",
+        tooltip: "Toggle Region Background (B)",
+        key: ["B", "b"],
+        actionCallback: (action, rm, sl) => {
+            rm.toggleBackground();
+        },
+        activate: false,
+    },
+];
+Editor.ZoomIconGroupToolbar = [
+    {
+        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
+        action: "zoom-in",
+        iconFile: "zoom-in.svg",
+        tooltip: "Zoom in (+)",
+        key: ["+"],
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onZoomingIn();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
+        action: "zoom-out",
+        iconFile: "zoom-out.svg",
+        tooltip: "Zoom out (-)",
+        key: ["-"],
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onZoomingOut();
+        },
+        activate: false,
+    },
+];
+Editor.SeparatorIconGroupToolbar = [
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
+    },
+];
+Editor.SVGDefsTemplate = `
+        <defs>
+            <filter id="black-glow">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                <feOffset dx="0" dy="0" result="offsetblur" />
+                <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.8" />
+                </feComponentTransfer>
+                <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+        </defs>`;
 
 
 /***/ }),
@@ -3565,689 +4194,7 @@ exports.ToolbarSeparator = ToolbarSeparator;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ToolbarIcon_1 = __webpack_require__(3);
-class ToolbarSwitchIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
-        this.buildIconUI();
-    }
-    activate() {
-        this.onAction(this.description.action);
-        this.toggleSelection();
-    }
-    move(x, y) {
-        super.move(x, y);
-        this.iconBackgrounRect.attr({ x, y });
-        if (this.iconImageSVG !== undefined) {
-            this.iconImageSVG.attr({ x, y });
-        }
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.iconBackgrounRect.attr({
-            height: this.height,
-            width: this.width,
-        });
-        this.iconImageSVG.attr({
-            height: this.height,
-            width: this.width,
-        });
-    }
-    buildIconUI() {
-        this.node = this.paper.g();
-        this.node.addClass("iconStyle");
-        this.node.addClass("switch");
-        this.node.attr({ tabindex: 0, role: "button" });
-        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
-        this.iconBackgrounRect.addClass("iconBGRectStyle");
-        this.iconImage = this.paper.g();
-        if (this.description.iconUrl !== undefined) {
-            Snap.load(this.description.iconUrl, (fragment) => {
-                this.iconImage.append(fragment);
-                this.iconImageSVG = this.iconImage.children().find((element) => {
-                    return (element.type === "svg");
-                });
-                if (this.iconImageSVG !== undefined) {
-                    this.iconImageSVG.attr({
-                        height: this.height,
-                        width: this.width,
-                    });
-                    this.move(this.x, this.y);
-                }
-            });
-        }
-        this.iconImage.addClass("iconImageStyle");
-        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
-        this.node.add(this.iconBackgrounRect);
-        this.node.add(this.iconImage);
-        this.node.append(title);
-        this.node.click((e) => {
-            this.activate();
-        });
-        this.node.node.addEventListener("focus", this.onfocusCallback);
-        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
-    }
-}
-exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const ToolbarIcon_1 = __webpack_require__(3);
-class ToolbarTriggerIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
-        this.buildIconUI();
-    }
-    activate() {
-        this.onAction(this.description.action);
-    }
-    move(x, y) {
-        super.move(x, y);
-        this.iconBackgrounRect.attr({ x, y });
-        if (this.iconImageSVG !== undefined) {
-            this.iconImageSVG.attr({ x, y });
-        }
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.iconBackgrounRect.attr({
-            height: this.height,
-            width: this.width,
-        });
-        this.iconImageSVG.attr({
-            height: this.height,
-            width: this.width,
-        });
-    }
-    buildIconUI() {
-        this.node = this.paper.g();
-        this.node.addClass("iconStyle");
-        this.node.addClass("selector");
-        this.node.attr({ tabindex: 0, role: "button" });
-        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
-        this.iconBackgrounRect.addClass("iconBGRectStyle");
-        this.iconImage = this.paper.g();
-        if (this.description.iconUrl !== undefined) {
-            Snap.load(this.description.iconUrl, (fragment) => {
-                this.iconImage.append(fragment);
-                this.iconImageSVG = this.iconImage.children().find((element) => {
-                    return (element.type === "svg");
-                });
-                if (this.iconImageSVG !== undefined) {
-                    this.iconImageSVG.attr({
-                        height: this.height,
-                        width: this.width,
-                    });
-                    this.move(this.x, this.y);
-                }
-            });
-        }
-        this.iconImage.addClass("iconImageStyle");
-        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
-        this.node.add(this.iconBackgrounRect);
-        this.node.add(this.iconImage);
-        this.node.append(title);
-        this.node.click((e) => {
-            this.activate();
-        });
-        this.node.node.addEventListener("focus", this.onfocusCallback);
-        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
-    }
-}
-exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(4);
-const AnchorsComponent_1 = __webpack_require__(15);
-class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
-    constructor(paper, paperRect = null, regionData, callbacks) {
-        super(paper, paperRect, regionData, callbacks);
-    }
-    redraw() {
-        super.redraw();
-        const [x, y, width, height] = [this.regionData.x, this.regionData.y,
-            this.regionData.width, this.regionData.height];
-        const [tBone, rBone, bBone, lBone] = this.anchorBones;
-        window.requestAnimationFrame(() => {
-            tBone.attr({ x, y: y - this.boneThickness / 2, width, height: this.boneThickness });
-            rBone.attr({ x: x + width - this.boneThickness / 2, y, width: this.boneThickness, height });
-            bBone.attr({ x, y: y + height - this.boneThickness / 2, width, height: this.boneThickness });
-            lBone.attr({ x: x - this.boneThickness / 2, y, width: this.boneThickness, height });
-        });
-    }
-    buildAnchors() {
-        this.buildBoneAnchors();
-        super.buildAnchors();
-    }
-    buildPointAnchors() {
-        this.anchorPointStyles = ["TL", "TR", "BR", "BL"];
-        this.regionData.points.forEach((point, index) => {
-            const anchor = this.createAnchor(this.paper, point.x, point.y, this.anchorPointStyles[index]);
-            this.anchors.push(anchor);
-            this.anchorsNode.add(anchor);
-            this.subscribeAnchorToEvents(anchor, index + 1);
-        });
-    }
-    buildBoneAnchors() {
-        this.anchorBoneStyles = ["T", "R", "B", "L"];
-        this.anchorBones = [];
-        this.boneThickness = AnchorsComponent_1.AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS;
-        const [x, y, w, h] = [this.regionData.x, this.regionData.y, this.regionData.width, this.regionData.height];
-        const tBone = this.createAnchorBone(this.paper, x, y, w, 0, "T", this.boneThickness);
-        const rBone = this.createAnchorBone(this.paper, x + w, y, 0, h, "R", this.boneThickness);
-        const bBone = this.createAnchorBone(this.paper, x, y + h, w, 0, "B", this.boneThickness);
-        const lBone = this.createAnchorBone(this.paper, x, y, 0, h, "L", this.boneThickness);
-        const bones = [tBone, rBone, bBone, lBone];
-        this.anchorBones.push(...bones);
-        bones.forEach((bone, index) => {
-            this.anchorsNode.add(bone);
-            this.subscribeAnchorBoneToEvents(bone, -(index + 1));
-        });
-    }
-    createAnchorBone(paper, x, y, width, height, style, thickness = AnchorsComponent_1.AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS) {
-        let bone;
-        if (width === 0) {
-            bone = paper.rect(x - thickness / 2, y, thickness, height);
-        }
-        else if (height === 0) {
-            bone = paper.rect(x, y - thickness / 2, width, thickness);
-        }
-        else {
-            throw Error("Rect bones that are neither vertical or horizontal are not supported.");
-            return null;
-        }
-        bone.addClass("anchorBoneStyle");
-        if (style !== undefined && style !== "") {
-            bone.addClass(style);
-        }
-        return bone;
-    }
-    updateRegion(p) {
-        let x1 = p.x;
-        let y1 = p.y;
-        let x2;
-        let y2;
-        let flipX = false;
-        let flipY = false;
-        let activeAnchor = this.getActiveAnchor();
-        switch (activeAnchor) {
-            case "TL": {
-                x2 = this.x + this.width;
-                y2 = this.y + this.height;
-                flipX = x2 < x1;
-                flipY = y2 < y1;
-                break;
-            }
-            case "TR": {
-                x2 = this.x;
-                y2 = this.y + this.height;
-                flipX = x1 < x2;
-                flipY = y2 < y1;
-                break;
-            }
-            case "BL": {
-                y2 = this.y;
-                x2 = this.x + this.width;
-                flipX = x2 < x1;
-                flipY = y1 < y2;
-                break;
-            }
-            case "BR": {
-                x2 = this.x;
-                y2 = this.y;
-                flipX = x1 < x2;
-                flipY = y1 < y2;
-                break;
-            }
-            case "T": {
-                x1 = this.x;
-                x2 = this.x + this.width;
-                y2 = this.y + this.height;
-                flipY = y1 > y2;
-                break;
-            }
-            case "R": {
-                x2 = this.x;
-                y1 = this.y;
-                y2 = this.y + this.height;
-                flipX = x2 > x1;
-                break;
-            }
-            case "B": {
-                x1 = this.x;
-                x2 = this.x + this.width;
-                y2 = this.y;
-                flipY = y1 < y2;
-                break;
-            }
-            case "L": {
-                x2 = this.x + this.width;
-                y1 = this.y;
-                y2 = this.y + this.height;
-                flipX = x1 > x2;
-                break;
-            }
-        }
-        let newAA = "";
-        if (activeAnchor !== "" && activeAnchor.length === 2) {
-            newAA += (activeAnchor[0] === "T") ? (flipY ? "B" : "T") : (flipY ? "T" : "B");
-            newAA += (activeAnchor[1] === "L") ? (flipX ? "R" : "L") : (flipX ? "L" : "R");
-        }
-        if (activeAnchor !== "" && activeAnchor.length === 1) {
-            if (flipX) {
-                newAA = (activeAnchor === "R") ? "L" : "R";
-            }
-            else if (flipY) {
-                newAA = (activeAnchor === "T") ? "B" : "T";
-            }
-            else {
-                newAA = activeAnchor;
-            }
-        }
-        if (activeAnchor !== newAA) {
-            this.ghostAnchor.removeClass(activeAnchor);
-            if (newAA.length === 2) {
-                this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA) + 1;
-            }
-            else {
-                this.activeAnchorIndex = -(this.anchorBoneStyles.indexOf(newAA) + 1);
-            }
-            activeAnchor = newAA;
-            this.ghostAnchor.addClass(newAA);
-        }
-        const p1 = new Point2D_1.Point2D(Math.min(x1, x2), Math.min(y1, y2)).boundToRect(this.paperRect);
-        const p2 = new Point2D_1.Point2D(Math.max(x1, x2), Math.max(y1, y2)).boundToRect(this.paperRect);
-        const rd = this.regionData.copy();
-        rd.setPoints([p1, new Point2D_1.Point2D(p2.x, p1.y), p2, new Point2D_1.Point2D(p1.x, p2.y)]);
-        this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
-    }
-    onGhostPointerEnter(e) {
-        this.ghostAnchor.addClass(this.getActiveAnchor());
-        super.onGhostPointerEnter(e);
-    }
-    onGhostPointerLeave(e) {
-        this.ghostAnchor.removeClass(this.getActiveAnchor());
-        super.onGhostPointerLeave(e);
-    }
-    subscribeAnchorBoneToEvents(bone, index) {
-        this.subscribeToEvents([
-            {
-                event: "pointerenter",
-                base: bone.node,
-                listener: (e) => {
-                    if (!this.isFrozen) {
-                        this.activeAnchorIndex = index;
-                        const anchorPoint = this.getActiveAnchorPoint(e);
-                        window.requestAnimationFrame(() => {
-                            this.ghostAnchor.attr({
-                                cx: anchorPoint.x,
-                                cy: anchorPoint.y,
-                                display: "block",
-                            });
-                        });
-                    }
-                },
-                bypass: false,
-            },
-        ]);
-    }
-    getActiveAnchorPoint(e) {
-        if (this.activeAnchorIndex > 0) {
-            return this.regionData.points[this.activeAnchorIndex - 1];
-        }
-        else if (this.activeAnchorIndex < 0) {
-            if (e !== undefined) {
-                const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
-                const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
-                return new Point2D_1.Point2D(offsetX, offsetY);
-            }
-            else {
-                const boneBox = this.anchorBones[-this.activeAnchorIndex - 1].getBBox();
-                return new Point2D_1.Point2D(boneBox.cx, boneBox.cy);
-            }
-        }
-        else {
-            return null;
-        }
-    }
-    getActiveAnchor() {
-        if (this.activeAnchorIndex > 0) {
-            return this.anchorPointStyles[this.activeAnchorIndex - 1];
-        }
-        else if (this.activeAnchorIndex < 0) {
-            return this.anchorBoneStyles[-this.activeAnchorIndex - 1];
-        }
-        else {
-            return "";
-        }
-    }
-}
-exports.AnchorsElement = AnchorsElement;
-
-
-/***/ }),
-/* 36 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const DragComponent_1 = __webpack_require__(9);
-class DragElement extends DragComponent_1.DragComponent {
-    constructor(paper, paperRect = null, regionData, callbacks) {
-        super(paper, paperRect, regionData, callbacks);
-        this.dragNode = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
-        this.dragNode.addClass("dragRectStyle");
-        this.node.add(this.dragNode);
-        this.subscribeToDragEvents();
-    }
-    redraw() {
-        window.requestAnimationFrame(() => {
-            this.dragNode.attr({
-                height: this.height,
-                width: this.width,
-                x: this.x,
-                y: this.y,
-            });
-        });
-    }
-}
-exports.DragElement = DragElement;
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const TagsComponent_1 = __webpack_require__(10);
-class TagsElement extends TagsComponent_1.TagsComponent {
-    constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
-        super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
-        this.buildOn(paper, tags);
-    }
-    redraw(rebuildTags = false) {
-        if (this.tags) {
-            window.requestAnimationFrame(() => {
-                if (this.tags.primary !== undefined && this.tags.primary !== null) {
-                    this.primaryTagRect.attr({
-                        height: this.height,
-                        width: this.width,
-                        x: this.x,
-                        y: this.y,
-                    });
-                    if (rebuildTags) {
-                        this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
-                        this.textBox = this.primaryTagText.getBBox();
-                    }
-                    const showTextLabel = (this.textBox.width + 10 <= this.width)
-                        && (this.textBox.height <= this.height);
-                    if (showTextLabel) {
-                        this.primaryTagTextBG.attr({
-                            height: this.textBox.height + 5,
-                            width: this.textBox.width + 10,
-                            x: this.x + 1,
-                            y: this.y + 1,
-                        });
-                        this.primaryTagText.attr({
-                            visibility: "visible",
-                            x: this.x + 5,
-                            y: this.y + this.textBox.height,
-                        });
-                    }
-                    else {
-                        this.primaryTagTextBG.attr({
-                            height: Math.min(10, this.height),
-                            width: Math.min(10, this.width),
-                            x: this.x,
-                            y: this.y,
-                        });
-                        this.primaryTagText.attr({
-                            visibility: "hidden",
-                            x: this.x + 5,
-                            y: this.y + this.textBox.height,
-                        });
-                    }
-                }
-                else {
-                    this.primaryTagRect.attr({
-                        height: this.height,
-                        width: this.width,
-                        x: this.x,
-                        y: this.y,
-                    });
-                    this.primaryTagTextBG.attr({
-                        height: 0,
-                        width: 0,
-                    });
-                    this.primaryTagText.attr({
-                        visibility: "hidden",
-                        x: this.x + 5,
-                        y: this.y + this.textBox.height,
-                    });
-                }
-                if (rebuildTags) {
-                    this.secondaryTags.forEach((tag) => {
-                        tag.remove();
-                    });
-                    this.secondaryTags = [];
-                }
-                if (this.tags.secondary && this.tags.secondary.length > 0) {
-                    const s = 6;
-                    const cx = this.x + 0.5 * this.boundRect.width;
-                    const cy = this.y - s - 5;
-                    const length = this.tags.secondary.length;
-                    for (let i = 0; i < length; i++) {
-                        const stag = this.tags.secondary[i];
-                        const x = cx + (2 * i - length + 1) * s - s / 2;
-                        if (rebuildTags) {
-                            const tagel = this.paper.rect(x, cy, s, s);
-                            tagel.addClass("secondaryTagStyle");
-                            tagel.addClass(`secondaryTag-${stag.name}`);
-                            this.secondaryTagsNode.add(tagel);
-                            this.secondaryTags.push(tagel);
-                        }
-                        else {
-                            const tagel = this.secondaryTags[i];
-                            tagel.attr({
-                                x,
-                                y: cy,
-                            });
-                        }
-                    }
-                }
-            });
-        }
-        else {
-            window.requestAnimationFrame(() => {
-                this.primaryTagRect.attr({
-                    height: this.height,
-                    width: this.width,
-                    x: this.x,
-                    y: this.y,
-                });
-                this.primaryTagText.node.innerHTML = "";
-                this.primaryTagTextBG.attr({
-                    height: 0,
-                    width: 0,
-                });
-                this.secondaryTags.forEach((tag) => {
-                    tag.remove();
-                });
-                this.secondaryTags = [];
-            });
-        }
-    }
-    initStyleMaps(tags) {
-        if (tags !== null) {
-            if (tags.primary !== null) {
-                this.styleMap = [
-                    {
-                        rule: `.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorShadow};
-                                stroke:${tags.primary.colorAccent};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
-                                stroke: #fff;`,
-                    },
-                    {
-                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
-                                stroke:${tags.primary.colorAccent};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                        style: `fill:${tags.primary.colorAccent};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                        style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure}`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                        style: `stroke:#fff;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill: var(--default-color-ghost);`,
-                    },
-                ];
-                this.styleLightMap = [
-                    {
-                        rule: `.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorNoColor};
-                                stroke:${tags.primary.colorAccent};
-                                stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorHighlight};
-                                stroke: #fff;`,
-                    },
-                    {
-                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: ${tags.primary.colorNoColor};
-                                stroke:${tags.primary.colorAccent};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
-                        style: `fill:${tags.primary.colorNoColor};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
-                        style: `fill:${tags.primary.colorAccent};`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
-                        style: `opacity:0.25;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                        style: `stroke:${tags.primary.colorDark};
-                                fill: ${tags.primary.colorPure};
-                                stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
-                        style: `stroke:#fff;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill: var(--default-color-ghost);`,
-                    },
-                ];
-            }
-            else {
-                this.styleMap = [];
-                this.styleLightMap = [
-                    {
-                        rule: `.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: var(--default-color-transparent);
-                                stroke: var(--default-color-pure);
-                                stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
-                        style: `fill: var(--default-color-transparent);
-                                stroke: var(--default-color-pure);`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
-                        style: `stroke-width: 1px;`,
-                    },
-                    {
-                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
-                        style: `fill: var(--default-color-ghost);`,
-                    },
-                ];
-            }
-            if (tags.secondary !== null && tags.secondary !== undefined) {
-                tags.secondary.forEach((tag) => {
-                    const rule = {
-                        rule: `.secondaryTagStyle.secondaryTag-${tag.name}`,
-                        style: `fill: ${tag.colorAccent};`,
-                    };
-                    this.styleMap.push(rule);
-                    this.styleLightMap.push(rule);
-                });
-            }
-        }
-    }
-    rebuildTagLabels() {
-        this.redraw(true);
-    }
-    buildOn(paper, tags) {
-        this.primaryTagNode = paper.g();
-        this.primaryTagRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
-        this.primaryTagRect.addClass("primaryTagRectStyle");
-        this.primaryTagText = paper.text(this.x, this.y, "");
-        this.primaryTagText.addClass("primaryTagTextStyle");
-        this.textBox = this.primaryTagText.getBBox();
-        this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
-        this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
-        this.primaryTagNode.add(this.primaryTagRect);
-        this.primaryTagNode.add(this.primaryTagTextBG);
-        this.primaryTagNode.add(this.primaryTagText);
-        this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
-        this.secondaryTags = [];
-        this.node.add(this.primaryTagNode);
-        this.node.add(this.secondaryTagsNode);
-        this.initStyleMaps(tags);
-        this.updateTags(tags, this.tagsUpdateOptions);
-    }
-}
-exports.TagsElement = TagsElement;
-
-
-/***/ }),
-/* 38 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragElement = void 0;
 const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -4271,12 +4218,13 @@ DragElement.DEFAULT_DRAG_RADIUS = 6;
 
 
 /***/ }),
-/* 39 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsElement = void 0;
 const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
@@ -4430,17 +4378,18 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 40 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PolygonRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(8);
-const AnchorsElement_1 = __webpack_require__(41);
-const DragElement_1 = __webpack_require__(42);
-const TagsElement_1 = __webpack_require__(43);
+const AnchorsElement_1 = __webpack_require__(36);
+const DragElement_1 = __webpack_require__(37);
+const TagsElement_1 = __webpack_require__(38);
 class PolygonRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4485,21 +4434,37 @@ exports.PolygonRegion = PolygonRegion;
 
 
 /***/ }),
-/* 41 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnchorsElement = void 0;
+const ConfigurationManager_1 = __webpack_require__(21);
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(4);
-const AnchorsComponent_1 = __webpack_require__(15);
+const IRegionCallbacks_1 = __webpack_require__(3);
+const AnchorsComponent_1 = __webpack_require__(16);
+var GhostAnchorAction;
+(function (GhostAnchorAction) {
+    GhostAnchorAction["Add"] = "add";
+    GhostAnchorAction["Delete"] = "delete";
+    GhostAnchorAction["None"] = "";
+})(GhostAnchorAction || (GhostAnchorAction = {}));
 class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
-        this.deleteOnPointerUp = false;
-        this.addOnPointerUp = false;
+        this.ghostAnchorActionState = GhostAnchorAction.None;
         this.anchorsLength = regionData.points.length;
+    }
+    set ghostAnchorAction(newValue) {
+        this.ghostAnchor.removeClass("add");
+        this.ghostAnchor.removeClass("delete");
+        this.ghostAnchor.addClass(newValue);
+        this.ghostAnchorActionState = newValue;
+    }
+    get ghostAnchorAction() {
+        return this.ghostAnchorActionState;
     }
     redraw() {
         if (this.regionData.points !== null && this.regionData.points.length > 0) {
@@ -4555,11 +4520,11 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 base: anchor.node,
                 event: "pointermove",
                 listener: (e) => {
-                    if (e.ctrlKey) {
+                    if (this.isModifyRegionOnlyModeEnabled(e)) {
                         this.activeAnchorIndex = -1;
                         const anchorPoint = this.getActiveAnchorPoint(e);
                         this.dragOrigin = anchorPoint;
-                        this.addOnPointerUp = true;
+                        this.ghostAnchorAction = GhostAnchorAction.Add;
                         window.requestAnimationFrame(() => {
                             this.ghostAnchor.attr({
                                 cx: anchorPoint.x,
@@ -4569,7 +4534,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                         });
                     }
                     else {
-                        this.addOnPointerUp = false;
+                        this.ghostAnchorAction = GhostAnchorAction.None;
                     }
                 },
                 bypass: false,
@@ -4584,25 +4549,18 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
         this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
     }
     onGhostPointerEnter(e) {
-        if (e.ctrlKey) {
-            if (this.addOnPointerUp && this.activeAnchorIndex < 0) {
-                this.ghostAnchor.addClass("add");
-            }
-            else if (this.regionData.points.length > 2) {
-                this.ghostAnchor.addClass("delete");
-                this.deleteOnPointerUp = true;
-                this.addOnPointerUp = false;
+        if (this.isModifyRegionOnlyModeEnabled(e)) {
+            if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         }
         else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
-            this.deleteOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
         }
         super.onGhostPointerEnter(e);
     }
     onGhostPointerMove(e) {
-        if (e.ctrlKey && this.activeAnchorIndex !== 0) {
+        if (this.isModifyRegionOnlyModeEnabled(e) && this.activeAnchorIndex !== 0) {
             const p = this.getActiveAnchorPoint(e);
             let dist = Number.MAX_VALUE;
             let index = -1;
@@ -4614,41 +4572,32 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 }
             });
             const swapToDelete = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
-            if (this.addOnPointerUp && this.activeAnchorIndex <= 0 && !swapToDelete) {
-                this.ghostAnchor.addClass("add");
+            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
                 this.activeAnchorIndex = -1;
             }
-            else if (this.regionData.points.length > 2 || swapToDelete) {
-                this.ghostAnchor.removeClass("add");
-                this.ghostAnchor.addClass("delete");
+            else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
+                && swapToDelete) {
                 this.activeAnchorIndex = index + 1;
-                this.deleteOnPointerUp = true;
-                this.addOnPointerUp = false;
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         }
         else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
+            this.ghostAnchorAction = GhostAnchorAction.None;
         }
         super.onGhostPointerMove(e);
     }
     onGhostPointerUp(e) {
         const rd = this.regionData.copy();
-        if (this.deleteOnPointerUp) {
+        if (this.ghostAnchorAction === GhostAnchorAction.Delete) {
             if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
                 const points = rd.points;
                 points.splice(this.activeAnchorIndex - 1, 1);
                 rd.setPoints(points);
             }
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
+            this.ghostAnchorAction = GhostAnchorAction.None;
             this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
         }
-        else if (this.addOnPointerUp) {
+        else if (this.ghostAnchorAction === GhostAnchorAction.Add) {
             const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
             const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
             const point = new Point2D_1.Point2D(offsetX, offsetY);
@@ -4670,9 +4619,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             }
             points.splice(index + 1, 0, point);
             rd.setPoints(points);
-            this.deleteOnPointerUp = false;
-            this.addOnPointerUp = false;
-            this.ghostAnchor.addClass("delete");
+            this.ghostAnchorAction = GhostAnchorAction.None;
             this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
         }
         super.onGhostPointerUp(e);
@@ -4690,18 +4637,23 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             return null;
         }
     }
+    isModifyRegionOnlyModeEnabled(event) {
+        return ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode || (event === null || event === void 0 ? void 0 : event.ctrlKey);
+    }
 }
 exports.AnchorsElement = AnchorsElement;
 AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
+AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
 
 
 /***/ }),
-/* 42 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragElement = void 0;
 const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -4726,12 +4678,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 43 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsElement = void 0;
 const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
@@ -5003,17 +4956,18 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 44 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PolylineRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(8);
-const AnchorsElement_1 = __webpack_require__(45);
-const DragElement_1 = __webpack_require__(46);
-const TagsElement_1 = __webpack_require__(47);
+const AnchorsElement_1 = __webpack_require__(40);
+const DragElement_1 = __webpack_require__(41);
+const TagsElement_1 = __webpack_require__(42);
 class PolylineRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -5058,15 +5012,16 @@ exports.PolylineRegion = PolylineRegion;
 
 
 /***/ }),
-/* 45 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnchorsElement = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(4);
-const AnchorsComponent_1 = __webpack_require__(15);
+const IRegionCallbacks_1 = __webpack_require__(3);
+const AnchorsComponent_1 = __webpack_require__(16);
 class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5261,12 +5216,13 @@ AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
 
 
 /***/ }),
-/* 46 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragElement = void 0;
 const DragComponent_1 = __webpack_require__(9);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -5291,12 +5247,13 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 47 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsElement = void 0;
 const TagsComponent_1 = __webpack_require__(10);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
@@ -5496,12 +5453,552 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 48 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnchorsElement = void 0;
+const Point2D_1 = __webpack_require__(0);
+const IRegionCallbacks_1 = __webpack_require__(3);
+const AnchorsComponent_1 = __webpack_require__(16);
+class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+    }
+    redraw() {
+        super.redraw();
+        const [x, y, width, height] = [this.regionData.x, this.regionData.y,
+            this.regionData.width, this.regionData.height];
+        const [tBone, rBone, bBone, lBone] = this.anchorBones;
+        window.requestAnimationFrame(() => {
+            tBone.attr({ x, y: y - this.boneThickness / 2, width, height: this.boneThickness });
+            rBone.attr({ x: x + width - this.boneThickness / 2, y, width: this.boneThickness, height });
+            bBone.attr({ x, y: y + height - this.boneThickness / 2, width, height: this.boneThickness });
+            lBone.attr({ x: x - this.boneThickness / 2, y, width: this.boneThickness, height });
+        });
+    }
+    buildAnchors() {
+        this.buildBoneAnchors();
+        super.buildAnchors();
+    }
+    buildPointAnchors() {
+        this.anchorPointStyles = ["TL", "TR", "BR", "BL"];
+        this.regionData.points.forEach((point, index) => {
+            const anchor = this.createAnchor(this.paper, point.x, point.y, this.anchorPointStyles[index]);
+            this.anchors.push(anchor);
+            this.anchorsNode.add(anchor);
+            this.subscribeAnchorToEvents(anchor, index + 1);
+        });
+    }
+    buildBoneAnchors() {
+        this.anchorBoneStyles = ["T", "R", "B", "L"];
+        this.anchorBones = [];
+        this.boneThickness = AnchorsComponent_1.AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS;
+        const [x, y, w, h] = [this.regionData.x, this.regionData.y, this.regionData.width, this.regionData.height];
+        const tBone = this.createAnchorBone(this.paper, x, y, w, 0, "T", this.boneThickness);
+        const rBone = this.createAnchorBone(this.paper, x + w, y, 0, h, "R", this.boneThickness);
+        const bBone = this.createAnchorBone(this.paper, x, y + h, w, 0, "B", this.boneThickness);
+        const lBone = this.createAnchorBone(this.paper, x, y, 0, h, "L", this.boneThickness);
+        const bones = [tBone, rBone, bBone, lBone];
+        this.anchorBones.push(...bones);
+        bones.forEach((bone, index) => {
+            this.anchorsNode.add(bone);
+            this.subscribeAnchorBoneToEvents(bone, -(index + 1));
+        });
+    }
+    createAnchorBone(paper, x, y, width, height, style, thickness = AnchorsComponent_1.AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS) {
+        let bone;
+        if (width === 0) {
+            bone = paper.rect(x - thickness / 2, y, thickness, height);
+        }
+        else if (height === 0) {
+            bone = paper.rect(x, y - thickness / 2, width, thickness);
+        }
+        else {
+            throw Error("Rect bones that are neither vertical or horizontal are not supported.");
+            return null;
+        }
+        bone.addClass("anchorBoneStyle");
+        if (style !== undefined && style !== "") {
+            bone.addClass(style);
+        }
+        return bone;
+    }
+    updateRegion(p) {
+        let x1 = p.x;
+        let y1 = p.y;
+        let x2;
+        let y2;
+        let flipX = false;
+        let flipY = false;
+        let activeAnchor = this.getActiveAnchor();
+        switch (activeAnchor) {
+            case "TL": {
+                x2 = this.x + this.width;
+                y2 = this.y + this.height;
+                flipX = x2 < x1;
+                flipY = y2 < y1;
+                break;
+            }
+            case "TR": {
+                x2 = this.x;
+                y2 = this.y + this.height;
+                flipX = x1 < x2;
+                flipY = y2 < y1;
+                break;
+            }
+            case "BL": {
+                y2 = this.y;
+                x2 = this.x + this.width;
+                flipX = x2 < x1;
+                flipY = y1 < y2;
+                break;
+            }
+            case "BR": {
+                x2 = this.x;
+                y2 = this.y;
+                flipX = x1 < x2;
+                flipY = y1 < y2;
+                break;
+            }
+            case "T": {
+                x1 = this.x;
+                x2 = this.x + this.width;
+                y2 = this.y + this.height;
+                flipY = y1 > y2;
+                break;
+            }
+            case "R": {
+                x2 = this.x;
+                y1 = this.y;
+                y2 = this.y + this.height;
+                flipX = x2 > x1;
+                break;
+            }
+            case "B": {
+                x1 = this.x;
+                x2 = this.x + this.width;
+                y2 = this.y;
+                flipY = y1 < y2;
+                break;
+            }
+            case "L": {
+                x2 = this.x + this.width;
+                y1 = this.y;
+                y2 = this.y + this.height;
+                flipX = x1 > x2;
+                break;
+            }
+        }
+        let newAA = "";
+        if (activeAnchor !== "" && activeAnchor.length === 2) {
+            newAA += (activeAnchor[0] === "T") ? (flipY ? "B" : "T") : (flipY ? "T" : "B");
+            newAA += (activeAnchor[1] === "L") ? (flipX ? "R" : "L") : (flipX ? "L" : "R");
+        }
+        if (activeAnchor !== "" && activeAnchor.length === 1) {
+            if (flipX) {
+                newAA = (activeAnchor === "R") ? "L" : "R";
+            }
+            else if (flipY) {
+                newAA = (activeAnchor === "T") ? "B" : "T";
+            }
+            else {
+                newAA = activeAnchor;
+            }
+        }
+        if (activeAnchor !== newAA) {
+            this.ghostAnchor.removeClass(activeAnchor);
+            if (newAA.length === 2) {
+                this.activeAnchorIndex = this.anchorPointStyles.indexOf(newAA) + 1;
+            }
+            else {
+                this.activeAnchorIndex = -(this.anchorBoneStyles.indexOf(newAA) + 1);
+            }
+            activeAnchor = newAA;
+            this.ghostAnchor.addClass(newAA);
+        }
+        const p1 = new Point2D_1.Point2D(Math.min(x1, x2), Math.min(y1, y2)).boundToRect(this.paperRect);
+        const p2 = new Point2D_1.Point2D(Math.max(x1, x2), Math.max(y1, y2)).boundToRect(this.paperRect);
+        const rd = this.regionData.copy();
+        rd.setPoints([p1, new Point2D_1.Point2D(p2.x, p1.y), p2, new Point2D_1.Point2D(p1.x, p2.y)]);
+        this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
+    }
+    onGhostPointerEnter(e) {
+        this.ghostAnchor.addClass(this.getActiveAnchor());
+        super.onGhostPointerEnter(e);
+    }
+    onGhostPointerLeave(e) {
+        this.ghostAnchor.removeClass(this.getActiveAnchor());
+        super.onGhostPointerLeave(e);
+    }
+    subscribeAnchorBoneToEvents(bone, index) {
+        this.subscribeToEvents([
+            {
+                event: "pointerenter",
+                base: bone.node,
+                listener: (e) => {
+                    if (!this.isFrozen) {
+                        this.activeAnchorIndex = index;
+                        const anchorPoint = this.getActiveAnchorPoint(e);
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                cx: anchorPoint.x,
+                                cy: anchorPoint.y,
+                                display: "block",
+                            });
+                        });
+                    }
+                },
+                bypass: false,
+            },
+        ]);
+    }
+    getActiveAnchorPoint(e) {
+        if (this.activeAnchorIndex > 0) {
+            return this.regionData.points[this.activeAnchorIndex - 1];
+        }
+        else if (this.activeAnchorIndex < 0) {
+            if (e !== undefined) {
+                const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
+                const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
+                return new Point2D_1.Point2D(offsetX, offsetY);
+            }
+            else {
+                const boneBox = this.anchorBones[-this.activeAnchorIndex - 1].getBBox();
+                return new Point2D_1.Point2D(boneBox.cx, boneBox.cy);
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    getActiveAnchor() {
+        if (this.activeAnchorIndex > 0) {
+            return this.anchorPointStyles[this.activeAnchorIndex - 1];
+        }
+        else if (this.activeAnchorIndex < 0) {
+            return this.anchorBoneStyles[-this.activeAnchorIndex - 1];
+        }
+        else {
+            return "";
+        }
+    }
+}
+exports.AnchorsElement = AnchorsElement;
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragElement = void 0;
+const DragComponent_1 = __webpack_require__(9);
+class DragElement extends DragComponent_1.DragComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+        this.dragNode = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
+        this.dragNode.addClass("dragRectStyle");
+        this.node.add(this.dragNode);
+        this.subscribeToDragEvents();
+    }
+    redraw() {
+        window.requestAnimationFrame(() => {
+            this.dragNode.attr({
+                height: this.height,
+                width: this.width,
+                x: this.x,
+                y: this.y,
+            });
+        });
+    }
+}
+exports.DragElement = DragElement;
+
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsElement = void 0;
+const TagsComponent_1 = __webpack_require__(10);
+class TagsElement extends TagsComponent_1.TagsComponent {
+    constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
+        super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
+        this.buildOn(paper, tags);
+    }
+    redraw(rebuildTags = false) {
+        if (this.tags) {
+            window.requestAnimationFrame(() => {
+                if (this.tags.primary !== undefined && this.tags.primary !== null) {
+                    this.primaryTagRect.attr({
+                        height: this.height,
+                        width: this.width,
+                        x: this.x,
+                        y: this.y,
+                    });
+                    if (rebuildTags) {
+                        this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
+                        this.textBox = this.primaryTagText.getBBox();
+                    }
+                    const showTextLabel = (this.textBox.width + 10 <= this.width)
+                        && (this.textBox.height <= this.height);
+                    if (showTextLabel) {
+                        this.primaryTagTextBG.attr({
+                            height: this.textBox.height + 5,
+                            width: this.textBox.width + 10,
+                            x: this.x + 1,
+                            y: this.y + 1,
+                        });
+                        this.primaryTagText.attr({
+                            visibility: "visible",
+                            x: this.x + 5,
+                            y: this.y + this.textBox.height,
+                        });
+                    }
+                    else {
+                        this.primaryTagTextBG.attr({
+                            height: Math.min(10, this.height),
+                            width: Math.min(10, this.width),
+                            x: this.x,
+                            y: this.y,
+                        });
+                        this.primaryTagText.attr({
+                            visibility: "hidden",
+                            x: this.x + 5,
+                            y: this.y + this.textBox.height,
+                        });
+                    }
+                }
+                else {
+                    this.primaryTagRect.attr({
+                        height: this.height,
+                        width: this.width,
+                        x: this.x,
+                        y: this.y,
+                    });
+                    this.primaryTagTextBG.attr({
+                        height: 0,
+                        width: 0,
+                    });
+                    this.primaryTagText.attr({
+                        visibility: "hidden",
+                        x: this.x + 5,
+                        y: this.y + this.textBox.height,
+                    });
+                }
+                if (rebuildTags) {
+                    this.secondaryTags.forEach((tag) => {
+                        tag.remove();
+                    });
+                    this.secondaryTags = [];
+                }
+                if (this.tags.secondary && this.tags.secondary.length > 0) {
+                    const s = 6;
+                    const cx = this.x + 0.5 * this.boundRect.width;
+                    const cy = this.y - s - 5;
+                    const length = this.tags.secondary.length;
+                    for (let i = 0; i < length; i++) {
+                        const stag = this.tags.secondary[i];
+                        const x = cx + (2 * i - length + 1) * s - s / 2;
+                        if (rebuildTags) {
+                            const tagel = this.paper.rect(x, cy, s, s);
+                            tagel.addClass("secondaryTagStyle");
+                            tagel.addClass(`secondaryTag-${stag.name}`);
+                            this.secondaryTagsNode.add(tagel);
+                            this.secondaryTags.push(tagel);
+                        }
+                        else {
+                            const tagel = this.secondaryTags[i];
+                            tagel.attr({
+                                x,
+                                y: cy,
+                            });
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            window.requestAnimationFrame(() => {
+                this.primaryTagRect.attr({
+                    height: this.height,
+                    width: this.width,
+                    x: this.x,
+                    y: this.y,
+                });
+                this.primaryTagText.node.innerHTML = "";
+                this.primaryTagTextBG.attr({
+                    height: 0,
+                    width: 0,
+                });
+                this.secondaryTags.forEach((tag) => {
+                    tag.remove();
+                });
+                this.secondaryTags = [];
+            });
+        }
+    }
+    initStyleMaps(tags) {
+        if (tags !== null) {
+            if (tags.primary !== null) {
+                this.styleMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                                stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke: #fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                ];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                stroke:${tags.primary.colorAccent};
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover  .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke: #fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                stroke:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorNoColor};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextStyle`,
+                        style: `fill:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                ];
+            }
+            else {
+                this.styleMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: var(--default-color-transparent);
+                                stroke: var(--default-color-pure);
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagRectStyle`,
+                        style: `fill: var(--default-color-transparent);
+                                stroke: var(--default-color-pure);`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                ];
+            }
+            if (tags.secondary !== null && tags.secondary !== undefined) {
+                tags.secondary.forEach((tag) => {
+                    const rule = {
+                        rule: `.secondaryTagStyle.secondaryTag-${tag.name}`,
+                        style: `fill: ${tag.colorAccent};`,
+                    };
+                    this.styleMap.push(rule);
+                    this.styleLightMap.push(rule);
+                });
+            }
+        }
+    }
+    rebuildTagLabels() {
+        this.redraw(true);
+    }
+    buildOn(paper, tags) {
+        this.primaryTagNode = paper.g();
+        this.primaryTagRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
+        this.primaryTagRect.addClass("primaryTagRectStyle");
+        this.primaryTagText = paper.text(this.x, this.y, "");
+        this.primaryTagText.addClass("primaryTagTextStyle");
+        this.textBox = this.primaryTagText.getBBox();
+        this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
+        this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
+        this.primaryTagNode.add(this.primaryTagRect);
+        this.primaryTagNode.add(this.primaryTagTextBG);
+        this.primaryTagNode.add(this.primaryTagText);
+        this.secondaryTagsNode = paper.g();
+        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTags = [];
+        this.node.add(this.primaryTagNode);
+        this.node.add(this.secondaryTagsNode);
+        this.initStyleMaps(tags);
+        this.updateTags(tags, this.tagsUpdateOptions);
+    }
+}
+exports.TagsElement = TagsElement;
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MenuElement = void 0;
 const RegionComponent_1 = __webpack_require__(5);
 class MenuElement extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
@@ -5631,12 +6128,13 @@ MenuElement.PathCollection = {
 
 
 /***/ }),
-/* 49 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PointSelector = void 0;
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
 const CrossElement_1 = __webpack_require__(11);
@@ -5723,195 +6221,13 @@ PointSelector.DEFAULT_POINT_RADIUS = 6;
 
 
 /***/ }),
-/* 50 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Point2D_1 = __webpack_require__(0);
-const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(11);
-const Selector_1 = __webpack_require__(6);
-class PolylineSelector extends Selector_1.Selector {
-    constructor(parent, paper, boundRect, callbacks) {
-        super(parent, paper, boundRect, callbacks);
-        this.isCapturing = false;
-        this.buildUIElements();
-        this.reset();
-        this.hide();
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.crossA.resize(width, height);
-    }
-    hide() {
-        super.hide();
-        this.crossA.hide();
-        this.nextPoint.node.setAttribute("visibility", "hidden");
-        this.nextSegment.node.setAttribute("visibility", "hidden");
-        this.polyline.node.setAttribute("visibility", "hidden");
-        this.pointsGroup.node.setAttribute("visibility", "hidden");
-    }
-    show() {
-        super.show();
-        this.crossA.show();
-        this.nextPoint.node.setAttribute("visibility", "visible");
-        this.nextSegment.node.setAttribute("visibility", "visible");
-        this.polyline.node.setAttribute("visibility", "visible");
-        this.pointsGroup.node.setAttribute("visibility", "visible");
-    }
-    disable() {
-        this.reset();
-        super.disable();
-    }
-    buildUIElements() {
-        this.node = this.paper.g();
-        this.node.addClass("polylineSelector");
-        this.crossA = new CrossElement_1.CrossElement(this.paper, this.boundRect);
-        this.nextPoint = this.paper.circle(0, 0, PolylineSelector.DEFAULT_SELECTOR_RADIUS);
-        this.nextPoint.addClass("nextPointStyle");
-        this.nextSegment = this.paper.line(0, 0, 0, 0);
-        this.nextSegment.addClass("nextSegmentStyle");
-        this.pointsGroup = this.paper.g();
-        this.pointsGroup.addClass("polylineGroupStyle");
-        this.polyline = this.paper.polyline([]);
-        this.polyline.addClass("polylineStyle");
-        this.node.add(this.polyline);
-        this.node.add(this.pointsGroup);
-        this.node.add(this.crossA.node);
-        this.node.add(this.nextSegment);
-        this.node.add(this.nextPoint);
-        const listeners = [
-            { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
-            { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
-            { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },
-            { event: "click", listener: this.onClick, base: this.parentNode, bypass: false },
-            { event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false },
-            { event: "dblclick", listener: this.onDoubleClick, base: this.parentNode, bypass: false },
-            { event: "keyup", listener: this.onKeyUp, base: window, bypass: true },
-        ];
-        this.subscribeToEvents(listeners);
-    }
-    reset() {
-        this.points = new Array();
-        this.lastPoint = null;
-        let ps = this.pointsGroup.children();
-        while (ps.length > 0) {
-            ps[0].remove();
-            ps = this.pointsGroup.children();
-        }
-        this.polyline.attr({
-            points: "",
-        });
-        if (this.isCapturing) {
-            this.isCapturing = false;
-        }
-    }
-    addPoint(x, y) {
-        this.points.push(new Point2D_1.Point2D(x, y));
-        const point = this.paper.circle(x, y, PolylineSelector.DEFAULT_POINT_RADIUS);
-        point.addClass("polylinePointStyle");
-        this.pointsGroup.add(point);
-        let pointsStr = "";
-        this.points.forEach((p) => {
-            pointsStr += `${p.x},${p.y},`;
-        });
-        this.polyline.attr({
-            points: pointsStr.substr(0, pointsStr.length - 1),
-        });
-    }
-    onPointerEnter(e) {
-        window.requestAnimationFrame(() => {
-            this.show();
-        });
-    }
-    onPointerLeave(e) {
-        if (!this.isCapturing) {
-            window.requestAnimationFrame(() => {
-                this.hide();
-            });
-        }
-        else {
-            const rect = this.parentNode.getClientRects();
-            const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-            this.moveCross(this.crossA, p);
-            this.movePoint(this.nextPoint, p);
-        }
-    }
-    onPointerDown(e) {
-        if (!this.isCapturing) {
-            this.isCapturing = true;
-            if (typeof this.callbacks.onSelectionBegin === "function") {
-                this.callbacks.onSelectionBegin();
-            }
-        }
-    }
-    onClick(e) {
-        if (e.detail <= 1) {
-            window.requestAnimationFrame(() => {
-                const p = new Point2D_1.Point2D(this.crossA.x, this.crossA.y);
-                this.addPoint(p.x, p.y);
-                this.lastPoint = p;
-            });
-        }
-    }
-    onPointerMove(e) {
-        window.requestAnimationFrame(() => {
-            const rect = this.parentNode.getClientRects();
-            const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
-            this.show();
-            this.moveCross(this.crossA, p);
-            this.movePoint(this.nextPoint, p);
-            if (this.lastPoint != null) {
-                this.moveLine(this.nextSegment, this.lastPoint, p);
-            }
-            else {
-                this.moveLine(this.nextSegment, p, p);
-            }
-        });
-        e.preventDefault();
-    }
-    onDoubleClick(e) {
-        this.submitPolyline();
-    }
-    submitPolyline() {
-        if (typeof this.callbacks.onSelectionEnd === "function") {
-            const box = this.polyline.getBBox();
-            this.callbacks.onSelectionEnd(new RegionData_1.RegionData(box.x, box.y, box.width, box.height, this.getPolylinePoints(), RegionData_1.RegionDataType.Polyline));
-        }
-        this.reset();
-    }
-    getPolylinePoints(close = true, threshold = 5) {
-        const points = this.points.map((p) => p.copy());
-        if (points.length >= 3 && close) {
-            const fp = points[0];
-            const lp = points[points.length - 1];
-            const distanceSquare = (fp.x - lp.x) * (fp.x - lp.x) + (fp.y - lp.y) * (fp.y - lp.y);
-            if (distanceSquare <= threshold * threshold) {
-                points[points.length - 1] = fp.copy();
-            }
-        }
-        return points;
-    }
-    onKeyUp(e) {
-        if (e.code === "Escape") {
-            this.submitPolyline();
-        }
-    }
-}
-exports.PolylineSelector = PolylineSelector;
-PolylineSelector.DEFAULT_POINT_RADIUS = 3;
-PolylineSelector.DEFAULT_SELECTOR_RADIUS = 6;
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.PolygonSelector = void 0;
 const Point2D_1 = __webpack_require__(0);
 const RegionData_1 = __webpack_require__(2);
 const CrossElement_1 = __webpack_require__(11);
@@ -6134,17 +6450,202 @@ PolygonSelector.DEFAULT_SELECTOR_RADIUS = 6;
 
 
 /***/ }),
-/* 52 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PolylineSelector = void 0;
+const Point2D_1 = __webpack_require__(0);
+const RegionData_1 = __webpack_require__(2);
+const CrossElement_1 = __webpack_require__(11);
+const Selector_1 = __webpack_require__(6);
+class PolylineSelector extends Selector_1.Selector {
+    constructor(parent, paper, boundRect, callbacks) {
+        super(parent, paper, boundRect, callbacks);
+        this.isCapturing = false;
+        this.buildUIElements();
+        this.reset();
+        this.hide();
+    }
+    resize(width, height) {
+        super.resize(width, height);
+        this.crossA.resize(width, height);
+    }
+    hide() {
+        super.hide();
+        this.crossA.hide();
+        this.nextPoint.node.setAttribute("visibility", "hidden");
+        this.nextSegment.node.setAttribute("visibility", "hidden");
+        this.polyline.node.setAttribute("visibility", "hidden");
+        this.pointsGroup.node.setAttribute("visibility", "hidden");
+    }
+    show() {
+        super.show();
+        this.crossA.show();
+        this.nextPoint.node.setAttribute("visibility", "visible");
+        this.nextSegment.node.setAttribute("visibility", "visible");
+        this.polyline.node.setAttribute("visibility", "visible");
+        this.pointsGroup.node.setAttribute("visibility", "visible");
+    }
+    disable() {
+        this.reset();
+        super.disable();
+    }
+    buildUIElements() {
+        this.node = this.paper.g();
+        this.node.addClass("polylineSelector");
+        this.crossA = new CrossElement_1.CrossElement(this.paper, this.boundRect);
+        this.nextPoint = this.paper.circle(0, 0, PolylineSelector.DEFAULT_SELECTOR_RADIUS);
+        this.nextPoint.addClass("nextPointStyle");
+        this.nextSegment = this.paper.line(0, 0, 0, 0);
+        this.nextSegment.addClass("nextSegmentStyle");
+        this.pointsGroup = this.paper.g();
+        this.pointsGroup.addClass("polylineGroupStyle");
+        this.polyline = this.paper.polyline([]);
+        this.polyline.addClass("polylineStyle");
+        this.node.add(this.polyline);
+        this.node.add(this.pointsGroup);
+        this.node.add(this.crossA.node);
+        this.node.add(this.nextSegment);
+        this.node.add(this.nextPoint);
+        const listeners = [
+            { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
+            { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
+            { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },
+            { event: "click", listener: this.onClick, base: this.parentNode, bypass: false },
+            { event: "pointermove", listener: this.onPointerMove, base: this.parentNode, bypass: false },
+            { event: "dblclick", listener: this.onDoubleClick, base: this.parentNode, bypass: false },
+            { event: "keyup", listener: this.onKeyUp, base: window, bypass: true },
+        ];
+        this.subscribeToEvents(listeners);
+    }
+    reset() {
+        this.points = new Array();
+        this.lastPoint = null;
+        let ps = this.pointsGroup.children();
+        while (ps.length > 0) {
+            ps[0].remove();
+            ps = this.pointsGroup.children();
+        }
+        this.polyline.attr({
+            points: "",
+        });
+        if (this.isCapturing) {
+            this.isCapturing = false;
+        }
+    }
+    addPoint(x, y) {
+        this.points.push(new Point2D_1.Point2D(x, y));
+        const point = this.paper.circle(x, y, PolylineSelector.DEFAULT_POINT_RADIUS);
+        point.addClass("polylinePointStyle");
+        this.pointsGroup.add(point);
+        let pointsStr = "";
+        this.points.forEach((p) => {
+            pointsStr += `${p.x},${p.y},`;
+        });
+        this.polyline.attr({
+            points: pointsStr.substr(0, pointsStr.length - 1),
+        });
+    }
+    onPointerEnter(e) {
+        window.requestAnimationFrame(() => {
+            this.show();
+        });
+    }
+    onPointerLeave(e) {
+        if (!this.isCapturing) {
+            window.requestAnimationFrame(() => {
+                this.hide();
+            });
+        }
+        else {
+            const rect = this.parentNode.getClientRects();
+            const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            this.moveCross(this.crossA, p);
+            this.movePoint(this.nextPoint, p);
+        }
+    }
+    onPointerDown(e) {
+        if (!this.isCapturing) {
+            this.isCapturing = true;
+            if (typeof this.callbacks.onSelectionBegin === "function") {
+                this.callbacks.onSelectionBegin();
+            }
+        }
+    }
+    onClick(e) {
+        if (e.detail <= 1) {
+            window.requestAnimationFrame(() => {
+                const p = new Point2D_1.Point2D(this.crossA.x, this.crossA.y);
+                this.addPoint(p.x, p.y);
+                this.lastPoint = p;
+            });
+        }
+    }
+    onPointerMove(e) {
+        window.requestAnimationFrame(() => {
+            const rect = this.parentNode.getClientRects();
+            const p = new Point2D_1.Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            this.show();
+            this.moveCross(this.crossA, p);
+            this.movePoint(this.nextPoint, p);
+            if (this.lastPoint != null) {
+                this.moveLine(this.nextSegment, this.lastPoint, p);
+            }
+            else {
+                this.moveLine(this.nextSegment, p, p);
+            }
+        });
+        e.preventDefault();
+    }
+    onDoubleClick(e) {
+        this.submitPolyline();
+    }
+    submitPolyline() {
+        if (typeof this.callbacks.onSelectionEnd === "function") {
+            const box = this.polyline.getBBox();
+            this.callbacks.onSelectionEnd(new RegionData_1.RegionData(box.x, box.y, box.width, box.height, this.getPolylinePoints(), RegionData_1.RegionDataType.Polyline));
+        }
+        this.reset();
+    }
+    getPolylinePoints(close = true, threshold = 5) {
+        const points = this.points.map((p) => p.copy());
+        if (points.length >= 3 && close) {
+            const fp = points[0];
+            const lp = points[points.length - 1];
+            const distanceSquare = (fp.x - lp.x) * (fp.x - lp.x) + (fp.y - lp.y) * (fp.y - lp.y);
+            if (distanceSquare <= threshold * threshold) {
+                points[points.length - 1] = fp.copy();
+            }
+        }
+        return points;
+    }
+    onKeyUp(e) {
+        if (e.code === "Escape") {
+            this.submitPolyline();
+        }
+    }
+}
+exports.PolylineSelector = PolylineSelector;
+PolylineSelector.DEFAULT_POINT_RADIUS = 3;
+PolylineSelector.DEFAULT_SELECTOR_RADIUS = 6;
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RectCopySelector = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
-const AlternatingCrossElement_1 = __webpack_require__(26);
-const RectElement_1 = __webpack_require__(27);
+const AlternatingCrossElement_1 = __webpack_require__(27);
+const RectElement_1 = __webpack_require__(28);
 const Selector_1 = __webpack_require__(6);
 class RectCopySelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, copyRect, callbacks) {
@@ -6333,17 +6834,18 @@ exports.RectCopySelector = RectCopySelector;
 
 
 /***/ }),
-/* 53 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RectSelector = exports.SelectionModificator = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(2);
-const AlternatingCrossElement_1 = __webpack_require__(26);
-const RectElement_1 = __webpack_require__(27);
+const AlternatingCrossElement_1 = __webpack_require__(27);
+const RectElement_1 = __webpack_require__(28);
 const Selector_1 = __webpack_require__(6);
 var SelectionModificator;
 (function (SelectionModificator) {
@@ -6598,108 +7100,194 @@ exports.RectSelector = RectSelector;
 
 
 /***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarSelectIcon = void 0;
+const ToolbarIcon_1 = __webpack_require__(4);
+class ToolbarSelectIcon extends ToolbarIcon_1.ToolbarIcon {
+    constructor(paper, icon, onAction) {
+        super(paper, icon);
+        this.onAction = onAction;
+        this.buildIconUI();
+    }
+    activate() {
+        this.onAction(this.description.action);
+        this.select();
+    }
+    move(x, y) {
+        super.move(x, y);
+        this.iconBackgrounRect.attr({ x, y });
+        if (this.iconImageSVG !== undefined) {
+            this.iconImageSVG.attr({ x, y });
+        }
+    }
+    resize(width, height) {
+        super.resize(width, height);
+        this.iconBackgrounRect.attr({
+            height: this.height,
+            width: this.width,
+        });
+        this.iconImageSVG.attr({
+            height: this.height,
+            width: this.width,
+        });
+    }
+    buildIconUI() {
+        this.node = this.paper.g();
+        this.node.addClass("iconStyle");
+        this.node.addClass("selector");
+        this.node.attr({ tabindex: 0, role: "button" });
+        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
+        this.iconBackgrounRect.addClass("iconBGRectStyle");
+        this.iconImage = this.paper.g();
+        if (this.description.iconUrl !== undefined) {
+            Snap.load(this.description.iconUrl, (fragment) => {
+                this.iconImage.append(fragment);
+                this.iconImageSVG = this.iconImage.children().find((element) => {
+                    return (element.type === "svg");
+                });
+                if (this.iconImageSVG !== undefined) {
+                    this.iconImageSVG.attr({
+                        height: this.height,
+                        width: this.width,
+                    });
+                    this.move(this.x, this.y);
+                }
+            });
+        }
+        this.iconImage.addClass("iconImageStyle");
+        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
+        this.node.add(this.iconBackgrounRect);
+        this.node.add(this.iconImage);
+        this.node.append(title);
+        this.node.click((e) => {
+            this.activate();
+        });
+        this.node.node.addEventListener("focus", this.onfocusCallback);
+        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
+    }
+}
+exports.ToolbarSelectIcon = ToolbarSelectIcon;
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarSeparator = void 0;
+const ToolbarIcon_1 = __webpack_require__(4);
+class ToolbarSeparator extends ToolbarIcon_1.ToolbarIcon {
+    constructor(paper, width) {
+        super(paper, null);
+        this.buildIconUI();
+        this.resize(width, 1);
+    }
+    move(x, y) {
+        super.move(x, y);
+        this.iconSeparator.attr({
+            x1: x,
+            x2: x + this.width,
+            y1: y,
+            y2: y,
+        });
+    }
+    resize(width, height) {
+        super.resize(width, 1);
+        this.iconSeparator.attr({
+            width: this.width,
+        });
+    }
+    buildIconUI() {
+        this.node = this.paper.g();
+        this.node.addClass("iconStyle");
+        this.node.addClass("separator");
+        this.iconSeparator = this.paper.line(0, 0, this.width, 0);
+        this.node.add(this.iconSeparator);
+    }
+}
+exports.ToolbarSeparator = ToolbarSeparator;
+
+
+/***/ }),
 /* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Tag_1 = __webpack_require__(29);
-class TagsDescriptor {
-    constructor(arg1, arg2 = []) {
-        if (arg1 === undefined) {
-            this.primaryTag = null;
-            this.allTags = [];
-        }
-        else if (arg1 instanceof Tag_1.Tag) {
-            if (arg2 instanceof Array) {
-                this.allTags = new Array(arg1, ...arg2);
-            }
-            else {
-                this.allTags = [arg1];
-            }
-            this.primaryTag = arg1;
-        }
-        else if (arg1 instanceof Array) {
-            this.allTags = arg1.map((tag) => tag.copy());
-            if (arg1.length > 0) {
-                this.primaryTag = arg1[0];
-            }
-            else {
-                this.primaryTag = null;
-            }
-        }
-        else if (arg1 === null) {
-            if (arg2 instanceof Array) {
-                this.allTags = arg2.map((tag) => tag.copy());
-            }
-            else {
-                this.allTags = [];
-            }
-            this.primaryTag = null;
+exports.ToolbarSwitchIcon = void 0;
+const ToolbarIcon_1 = __webpack_require__(4);
+class ToolbarSwitchIcon extends ToolbarIcon_1.ToolbarIcon {
+    constructor(paper, icon, onAction) {
+        super(paper, icon);
+        this.onAction = onAction;
+        this.buildIconUI();
+    }
+    activate() {
+        this.onAction(this.description.action);
+        this.toggleSelection();
+    }
+    move(x, y) {
+        super.move(x, y);
+        this.iconBackgrounRect.attr({ x, y });
+        if (this.iconImageSVG !== undefined) {
+            this.iconImageSVG.attr({ x, y });
         }
     }
-    static BuildFromJSON(data) {
-        let p = null;
-        if (data.primary !== null && data.primary !== undefined) {
-            p = Tag_1.Tag.BuildFromJSON(data.primary);
-        }
-        const s = (data.secondary === undefined) ? [] : data.secondary.map((tag) => Tag_1.Tag.BuildFromJSON(tag));
-        return new TagsDescriptor(p, s);
+    resize(width, height) {
+        super.resize(width, height);
+        this.iconBackgrounRect.attr({
+            height: this.height,
+            width: this.width,
+        });
+        this.iconImageSVG.attr({
+            height: this.height,
+            width: this.width,
+        });
     }
-    get all() {
-        return this.allTags.map((tag) => tag.copy());
-    }
-    get primary() {
-        if (this.primaryTag !== null) {
-            return this.primaryTag.copy();
-        }
-        else {
-            return null;
-        }
-    }
-    get secondary() {
-        if (this.primaryTag !== null) {
-            return this.all.filter((tag) => {
-                return (tag.name !== this.primary.name);
+    buildIconUI() {
+        this.node = this.paper.g();
+        this.node.addClass("iconStyle");
+        this.node.addClass("switch");
+        this.node.attr({ tabindex: 0, role: "button" });
+        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
+        this.iconBackgrounRect.addClass("iconBGRectStyle");
+        this.iconImage = this.paper.g();
+        if (this.description.iconUrl !== undefined) {
+            Snap.load(this.description.iconUrl, (fragment) => {
+                this.iconImage.append(fragment);
+                this.iconImageSVG = this.iconImage.children().find((element) => {
+                    return (element.type === "svg");
+                });
+                if (this.iconImageSVG !== undefined) {
+                    this.iconImageSVG.attr({
+                        height: this.height,
+                        width: this.width,
+                    });
+                    this.move(this.x, this.y);
+                }
             });
         }
-        else {
-            return this.all;
-        }
-    }
-    toString() {
-        let str = "";
-        if (this.primaryTag !== null) {
-            str += this.primaryTag.name;
-            this.secondary.forEach((tag) => {
-                str += ", " + tag.name;
-            });
-        }
-        else {
-            this.secondary.forEach((tag) => {
-                str += ", " + tag.name;
-            });
-            str = str.substring(2, str.length);
-        }
-        return str;
-    }
-    toJSON() {
-        if (this.primaryTag !== null) {
-            return {
-                primary: this.primaryTag.toJSON(),
-                secondary: this.secondary.map((tag) => tag.toJSON()),
-            };
-        }
-        else {
-            return {
-                primary: null,
-                secondary: this.secondary.map((tag) => tag.toJSON()),
-            };
-        }
+        this.iconImage.addClass("iconImageStyle");
+        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
+        this.node.add(this.iconBackgrounRect);
+        this.node.add(this.iconImage);
+        this.node.append(title);
+        this.node.click((e) => {
+            this.activate();
+        });
+        this.node.node.addEventListener("focus", this.onfocusCallback);
+        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
     }
 }
-exports.TagsDescriptor = TagsDescriptor;
+exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
 
 
 /***/ }),
@@ -6709,656 +7297,71 @@ exports.TagsDescriptor = TagsDescriptor;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CanvasTools_Filter_1 = __webpack_require__(28);
-const Rect_1 = __webpack_require__(1);
-const ISelectorSettings_1 = __webpack_require__(16);
-const RegionsManager_1 = __webpack_require__(21);
-const ZoomManager_1 = __webpack_require__(22);
-const AreaSelector_1 = __webpack_require__(25);
-const ToolbarIcon_1 = __webpack_require__(3);
-const Toolbar_1 = __webpack_require__(20);
-class Editor {
-    constructor(container, areaSelector, regionsManager, filterPipeline, isZoomEnabled) {
-        this.autoResize = true;
-        this.isRMFrozen = false;
-        this.contentCanvas = this.createCanvasElement();
-        this.editorSVG = this.createSVGElement();
-        this.editorContainerDiv = container;
-        this.editorContainerDiv.classList.add("CanvasToolsContainer");
-        this.editorContainerDiv.tabIndex = 0;
-        this.editorDiv = this.createDivElement();
-        this.editorDiv.classList.add("CanvasToolsEditor");
-        this.editorDiv.append(this.contentCanvas);
-        this.editorDiv.append(this.editorSVG);
-        this.editorContainerDiv.append(this.editorDiv);
-        const rmCallbacks = {
-            onChange: null,
-            onManipulationBegin: (region) => {
-                this.areaSelector.hide();
-                if (typeof this.onManipulationBegin === "function") {
-                    this.onManipulationBegin(region);
-                }
-            },
-            onManipulationEnd: (region) => {
-                this.areaSelector.show();
-                if (typeof this.onManipulationEnd === "function") {
-                    this.onManipulationEnd(region);
-                }
-            },
-            onRegionSelected: (id, multiselection) => {
-                if (typeof this.onRegionSelected === "function") {
-                    this.onRegionSelected(id, multiselection);
-                }
-            },
-            onRegionMove: (id, regionData) => {
-                if (typeof this.onRegionMove === "function") {
-                    this.onRegionMove(id, regionData);
-                }
-            },
-            onRegionMoveBegin: (id, regionData) => {
-                if (typeof this.onRegionMoveBegin === "function") {
-                    this.onRegionMoveBegin(id, regionData);
-                }
-            },
-            onRegionMoveEnd: (id, regionData) => {
-                if (typeof this.onRegionMoveEnd === "function") {
-                    this.onRegionMoveEnd(id, regionData);
-                }
-            },
-            onRegionDelete: (id, regionData) => {
-                if (typeof this.onRegionDelete === "function") {
-                    this.onRegionDelete(id, regionData);
-                }
-            },
-        };
-        if (regionsManager !== null && regionsManager !== undefined) {
-            this.regionsManager = regionsManager;
-            regionsManager.callbacks = rmCallbacks;
+exports.ToolbarTriggerIcon = void 0;
+const ToolbarIcon_1 = __webpack_require__(4);
+class ToolbarTriggerIcon extends ToolbarIcon_1.ToolbarIcon {
+    constructor(paper, icon, onAction) {
+        super(paper, icon);
+        this.onAction = onAction;
+        this.buildIconUI();
+    }
+    activate() {
+        this.onAction(this.description.action);
+    }
+    move(x, y) {
+        super.move(x, y);
+        this.iconBackgrounRect.attr({ x, y });
+        if (this.iconImageSVG !== undefined) {
+            this.iconImageSVG.attr({ x, y });
         }
-        else {
-            this.regionsManager = new RegionsManager_1.RegionsManager(this.editorSVG, rmCallbacks);
-        }
-        const asCallbacks = {
-            onSelectionBegin: () => {
-                this.isRMFrozen = this.regionsManager.isFrozen;
-                this.regionsManager.freeze();
-                if (typeof this.onSelectionBegin === "function") {
-                    this.onSelectionBegin();
-                }
-            },
-            onSelectionEnd: (regionData) => {
-                if (!this.isRMFrozen) {
-                    this.regionsManager.unfreeze();
-                }
-                if (typeof this.onSelectionEnd === "function") {
-                    this.onSelectionEnd(regionData);
-                }
-            },
-            onNextSelectionPoint: (point) => {
-                if (typeof this.onNextSelectionPoint === "function") {
-                    this.onNextSelectionPoint(point);
-                }
-            },
-        };
-        if (areaSelector !== null && areaSelector !== undefined) {
-            this.areaSelector = areaSelector;
-            this.areaSelector.callbacks = asCallbacks;
-        }
-        else {
-            this.areaSelector = new AreaSelector_1.AreaSelector(this.editorSVG, asCallbacks);
-        }
-        if (filterPipeline !== undefined && filterPipeline !== null) {
-            this.filterPipeline = filterPipeline;
-        }
-        else {
-            this.filterPipeline = new CanvasTools_Filter_1.FilterPipeline();
-        }
-        const initZoomCallbacks = {
-            onZoomingOut: () => {
-                this.onZoom(ZoomManager_1.ZoomDirection.Out);
-            },
-            onZoomingIn: () => {
-                this.onZoom(ZoomManager_1.ZoomDirection.In);
-            },
-            getZoomLevel: () => {
-                return this.zoomManager.getZoomData().currentZoomScale;
-            },
-            setZoomLevel: (newZoomScale) => {
-                this.onZoom(ZoomManager_1.ZoomDirection.In, newZoomScale);
-                return this.zoomManager.getZoomData();
-            },
-        };
-        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
-        this.zoomManager.deleteInstance();
-        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
-        if (isZoomEnabled) {
-            this.zoomManager.isZoomEnabled = true;
-        }
-        this.resize(container.offsetWidth, container.offsetHeight);
-        this.mergedAPI = new Proxy(this, {
-            get: (target, prop) => {
-                let p;
-                let t;
-                if (prop in target) {
-                    t = target;
-                    p = t[prop];
-                }
-                else if (prop in target.regionsManager) {
-                    t = target.RM;
-                    p = t[prop];
-                }
-                else if (prop in target.areaSelector) {
-                    t = target.AS;
-                    p = t[prop];
-                }
-                else if (prop in target.filterPipeline) {
-                    t = target.FP;
-                    p = t[prop];
-                }
-                else if (prop in target.zoomManager) {
-                    t = target.FP;
-                    p = t[prop];
-                }
-                else {
-                    p = undefined;
-                }
-                if (typeof p === "function") {
-                    return (...args) => {
-                        p.apply(t, args);
-                    };
-                }
-                else {
-                    return p;
-                }
-            },
+    }
+    resize(width, height) {
+        super.resize(width, height);
+        this.iconBackgrounRect.attr({
+            height: this.height,
+            width: this.width,
         });
-        this.subscribeToEvents();
-        const regionAnnouncer = document.createElement("div");
-        regionAnnouncer.setAttribute("aria-live", "assertive");
-        regionAnnouncer.setAttribute("tabindex", "-1");
-        regionAnnouncer.id = "regionAnnouncer";
-        container.appendChild(regionAnnouncer);
-    }
-    get api() {
-        return this.mergedAPI;
-    }
-    addToolbar(container, toolbarSet, iconsPath) {
-        const svg = this.createSVGElement();
-        container.append(svg);
-        this.toolbar = new Toolbar_1.Toolbar(svg);
-        if (toolbarSet === null || toolbarSet === undefined) {
-            toolbarSet = Editor.FullToolbarSet;
-        }
-        if (this.zoomManager.isZoomEnabled) {
-            toolbarSet = toolbarSet.concat(Editor.SeparatorIconGroupToolbar).concat(Editor.ZoomIconGroupToolbar);
-        }
-        let activeSelector;
-        toolbarSet.forEach((item) => {
-            if (item.type === ToolbarIcon_1.ToolbarItemType.SEPARATOR) {
-                this.toolbar.addSeparator();
-            }
-            else {
-                const toolbarItem = {
-                    action: item.action,
-                    iconUrl: iconsPath + item.iconFile,
-                    tooltip: item.tooltip,
-                    key: item.key,
-                    width: item.width,
-                    height: item.height,
-                };
-                const actionFn = (action) => {
-                    item.actionCallback(action, this.regionsManager, this.areaSelector, this.zoomManager);
-                };
-                if (item.type === ToolbarIcon_1.ToolbarItemType.SELECTOR) {
-                    this.toolbar.addSelector(toolbarItem, actionFn);
-                    if (item.activate) {
-                        activeSelector = item.action;
-                    }
-                }
-                else if (item.type === ToolbarIcon_1.ToolbarItemType.SWITCH) {
-                    this.toolbar.addSwitch(toolbarItem, actionFn);
-                    this.toolbar.setSwitch(item.action, item.activate);
-                }
-                else if (item.type === ToolbarIcon_1.ToolbarItemType.TRIGGER) {
-                    this.toolbar.addTrigger(toolbarItem, actionFn);
-                }
-            }
-        });
-        this.toolbar.select(activeSelector);
-    }
-    async addContentSource(source) {
-        const buffCnvs = document.createElement("canvas");
-        const context = buffCnvs.getContext("2d");
-        if (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement) {
-            this.sourceWidth = source.width;
-            this.sourceHeight = source.height;
-        }
-        else if (source instanceof HTMLVideoElement) {
-            this.sourceWidth = source.videoWidth;
-            this.sourceHeight = source.videoHeight;
-        }
-        buffCnvs.width = this.sourceWidth;
-        buffCnvs.height = this.sourceHeight;
-        context.drawImage(source, 0, 0, buffCnvs.width, buffCnvs.height);
-        return this.filterPipeline.applyToCanvas(buffCnvs).then((bcnvs) => {
-            this.contentCanvas.width = bcnvs.width;
-            this.contentCanvas.height = bcnvs.height;
-            const imgContext = this.contentCanvas.getContext("2d");
-            imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
-        }).then(() => {
-            this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-            this.handleZoomAfterContentUpdate();
+        this.iconImageSVG.attr({
+            height: this.height,
+            width: this.width,
         });
     }
-    resize(containerWidth, containerHeight) {
-        this.frameWidth = containerWidth;
-        this.frameHeight = containerHeight;
-        const imgRatio = this.contentCanvas.width / this.contentCanvas.height;
-        const containerRatio = containerWidth / containerHeight;
-        let hpadding = 0;
-        let vpadding = 0;
-        if (imgRatio > containerRatio) {
-            vpadding = (containerHeight - containerWidth / imgRatio) / 2;
-            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-            this.editorDiv.style.width = "";
+    buildIconUI() {
+        this.node = this.paper.g();
+        this.node.addClass("iconStyle");
+        this.node.addClass("selector");
+        this.node.attr({ tabindex: 0, role: "button" });
+        this.iconBackgrounRect = this.paper.rect(0, 0, this.width, this.height);
+        this.iconBackgrounRect.addClass("iconBGRectStyle");
+        this.iconImage = this.paper.g();
+        if (this.description.iconUrl !== undefined) {
+            Snap.load(this.description.iconUrl, (fragment) => {
+                this.iconImage.append(fragment);
+                this.iconImageSVG = this.iconImage.children().find((element) => {
+                    return (element.type === "svg");
+                });
+                if (this.iconImageSVG !== undefined) {
+                    this.iconImageSVG.attr({
+                        height: this.height,
+                        width: this.width,
+                    });
+                    this.move(this.x, this.y);
+                }
+            });
         }
-        else {
-            hpadding = (containerWidth - containerHeight * imgRatio) / 2;
-            this.editorDiv.style.height = "";
-            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-        }
-        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-        this.frameWidth = containerWidth - hpadding * 2;
-        this.frameHeight = containerHeight - vpadding * 2;
-        this.areaSelector.resize(this.frameWidth, this.frameHeight);
-        this.regionsManager.resize(this.frameWidth, this.frameHeight);
-    }
-    get RM() {
-        return this.regionsManager;
-    }
-    get AS() {
-        return this.areaSelector;
-    }
-    get FP() {
-        return this.filterPipeline;
-    }
-    get ZM() {
-        return this.zoomManager;
-    }
-    scaleRegionToSourceSize(regionData, sourceWidth, sourceHeight) {
-        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
-        const xf = sw / this.frameWidth;
-        const yf = sh / this.frameHeight;
-        const rd = regionData.copy();
-        rd.scale(xf, yf);
-        return rd;
-    }
-    scaleRegionToFrameSize(regionData, sourceWidth, sourceHeight) {
-        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
-        const xf = this.frameWidth / sw;
-        const yf = this.frameHeight / sh;
-        const rd = regionData.copy();
-        rd.scale(xf, yf);
-        return rd;
-    }
-    createSVGElement() {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.innerHTML = Editor.SVGDefsTemplate;
-        svg.ondragstart = () => {
-            return false;
-        };
-        svg.ondragend = () => {
-            return false;
-        };
-        return svg;
-    }
-    createCanvasElement() {
-        const canvas = document.createElement("canvas");
-        return canvas;
-    }
-    createDivElement() {
-        const div = document.createElement("div");
-        return div;
-    }
-    onZoom(zoomType, newScale) {
-        if (!this.zoomManager.isZoomEnabled) {
-            throw new Error("Zoom feature is not enabled");
-        }
-        const zoomData = this.zoomManager.updateZoomScale(zoomType, newScale);
-        if (zoomData) {
-            const scaledFrameWidth = (this.frameWidth / zoomData.previousZoomScale) * zoomData.currentZoomScale;
-            const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
-            this.frameWidth = scaledFrameWidth;
-            this.frameHeight = scaledFrameHeight;
-            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
-            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
-            const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
-            this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
-            if (typeof this.onZoomEnd === "function") {
-                this.onZoomEnd(zoomData);
-            }
-        }
-    }
-    handleZoomAfterContentUpdate() {
-        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
-            const zoomData = this.zoomManager.getZoomData();
-            const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
-            const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
-            this.frameWidth = scaledFrameWidth;
-            this.frameHeight = scaledFrameHeight;
-            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
-            this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
-            this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
-        }
-    }
-    zoomEditorToScale(scaledFrameWidth, scaledFrameHeight) {
-        if (!this.editorContainerDiv.offsetWidth) {
-            this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0];
-            this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0];
-        }
-        const containerWidth = this.editorContainerDiv.offsetWidth;
-        const containerHeight = this.editorContainerDiv.offsetHeight;
-        let hpadding = 0;
-        let vpadding = 0;
-        if (scaledFrameWidth < containerWidth) {
-            hpadding = (containerWidth - scaledFrameWidth) / 2;
-            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-        }
-        else {
-            this.editorDiv.style.width = `${scaledFrameWidth}px`;
-        }
-        if (scaledFrameHeight < containerHeight) {
-            vpadding = (containerHeight - scaledFrameHeight) / 2;
-            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-        }
-        else {
-            this.editorDiv.style.height = `${scaledFrameHeight}px`;
-        }
-        if (hpadding && !vpadding) {
-            hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
-            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-        }
-        if (!hpadding && vpadding) {
-            vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
-            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-        }
-        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-        this.editorContainerDiv.focus();
-    }
-    subscribeToEvents() {
-        window.addEventListener("resize", (e) => {
-            if (this.autoResize) {
-                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-            }
+        this.iconImage.addClass("iconImageStyle");
+        const title = Snap.parse(`<title>${this.description.tooltip}</title>`);
+        this.node.add(this.iconBackgrounRect);
+        this.node.add(this.iconImage);
+        this.node.append(title);
+        this.node.click((e) => {
+            this.activate();
         });
+        this.node.node.addEventListener("focus", this.onfocusCallback);
+        this.node.node.addEventListener("focusout", this.onfocusoutCallback);
     }
 }
-exports.Editor = Editor;
-Editor.FullToolbarSet = [
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "none-select",
-        iconFile: "none-selection.svg",
-        tooltip: "Regions Manipulation (M)",
-        key: ["M", "m"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "point-select",
-        iconFile: "point-selection.svg",
-        tooltip: "Point-selection (P)",
-        key: ["P", "p"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POINT });
-            sl.show();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "rect-select",
-        iconFile: "rect-selection.svg",
-        tooltip: "Rectangular box (R)",
-        key: ["R", "r"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
-            sl.show();
-        },
-        activate: true,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "copy-select",
-        iconFile: "copy-t-selection.svg",
-        tooltip: "Template-based box (T)",
-        key: ["T", "t"],
-        actionCallback: (action, rm, sl) => {
-            const regions = rm.getSelectedRegions();
-            if (regions !== undefined && regions.length > 0) {
-                const r = regions[0];
-                sl.setSelectionMode({
-                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
-                    template: new Rect_1.Rect(r.regionData.width, r.regionData.height),
-                });
-            }
-            else {
-                sl.setSelectionMode({
-                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
-                    template: new Rect_1.Rect(40, 40),
-                });
-            }
-            sl.show();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "polyline-select",
-        iconFile: "polyline-selection.svg",
-        tooltip: "Polyline-selection (Y)",
-        key: ["Y", "y"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYLINE });
-            sl.show();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "polygon-select",
-        iconFile: "polygon-selection.svg",
-        tooltip: "Polygon-selection (O)",
-        key: ["O", "o"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
-            sl.show();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "delete-all-select",
-        iconFile: "delete-all-selection.svg",
-        tooltip: "Delete all regions",
-        key: ["D", "d"],
-        actionCallback: (action, rm, sl) => {
-            rm.deleteAllRegions();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "selection-lock",
-        iconFile: "selection-lock.svg",
-        tooltip: "Lock/unlock regions (L)",
-        key: ["L", "l"],
-        actionCallback: (action, rm, sl) => {
-            rm.toggleFreezeMode();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "background-toggle",
-        iconFile: "background-toggle.svg",
-        tooltip: "Toggle Region Background (B)",
-        key: ["B", "b"],
-        actionCallback: (action, rm, sl) => {
-            rm.toggleBackground();
-        },
-        activate: false,
-    },
-];
-Editor.RectToolbarSet = [
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "none-select",
-        iconFile: "none-selection.svg",
-        tooltip: "Regions Manipulation (M)",
-        key: ["M", "m"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "rect-select",
-        iconFile: "rect-selection.svg",
-        tooltip: "Rectangular box (R)",
-        key: ["R", "r"],
-        actionCallback: (action, rm, sl) => {
-            sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
-            sl.show();
-        },
-        activate: true,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "copy-select",
-        iconFile: "copy-t-selection.svg",
-        tooltip: "Template-based box (T)",
-        key: ["T", "t"],
-        actionCallback: (action, rm, sl) => {
-            const regions = rm.getSelectedRegionsWithZoomScale();
-            if (regions !== undefined && regions.length > 0) {
-                const r = regions[0];
-                sl.setSelectionMode({
-                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
-                    template: new Rect_1.Rect(r.regionData.width, r.regionData.height),
-                });
-            }
-            else {
-                sl.setSelectionMode({
-                    mode: ISelectorSettings_1.SelectionMode.COPYRECT,
-                    template: new Rect_1.Rect(40, 40),
-                });
-            }
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "delete-all-select",
-        iconFile: "delete-all-selection.svg",
-        tooltip: "Delete all regions (D)",
-        key: ["D", "d"],
-        actionCallback: (action, rm, sl) => {
-            rm.deleteAllRegions();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "selection-lock",
-        iconFile: "selection-lock.svg",
-        tooltip: "Lock/unlock regions (L)",
-        key: ["L", "l"],
-        actionCallback: (action, rm, sl) => {
-            rm.toggleFreezeMode();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "background-toggle",
-        iconFile: "background-toggle.svg",
-        tooltip: "Toggle Region Background (B)",
-        key: ["B", "b"],
-        actionCallback: (action, rm, sl) => {
-            rm.toggleBackground();
-        },
-        activate: false,
-    }
-];
-Editor.ZoomIconGroupToolbar = [
-    {
-        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "zoom-in",
-        iconFile: "zoom-in.svg",
-        tooltip: "Zoom in (+)",
-        key: ["+"],
-        actionCallback: (action, rm, sl, zm) => {
-            zm.callbacks.onZoomingIn();
-        },
-        activate: false,
-    },
-    {
-        type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "zoom-out",
-        iconFile: "zoom-out.svg",
-        tooltip: "Zoom out (-)",
-        key: ["-"],
-        actionCallback: (action, rm, sl, zm) => {
-            zm.callbacks.onZoomingOut();
-        },
-        activate: false,
-    }
-];
-Editor.SeparatorIconGroupToolbar = [
-    {
-        type: ToolbarIcon_1.ToolbarItemType.SEPARATOR,
-    }
-];
-Editor.SVGDefsTemplate = `
-        <defs>
-            <filter id="black-glow">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                <feOffset dx="0" dy="0" result="offsetblur" />
-                <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.8" />
-                </feComponentTransfer>
-                <feMerge>
-                    <feMergeNode />
-                    <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
-        </defs>`;
+exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
 
 
 /***/ }),
@@ -7380,8 +7383,9 @@ var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _ar
     function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const LABColor_1 = __webpack_require__(7);
+exports.Palette = void 0;
 const Color_1 = __webpack_require__(18);
+const LABColor_1 = __webpack_require__(7);
 class Palette {
     constructor(settings) {
         this.settings = {
@@ -7527,7 +7531,113 @@ exports.Palette = Palette;
 /* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
-window.eve = __webpack_require__(58)
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsDescriptor = void 0;
+const Tag_1 = __webpack_require__(30);
+class TagsDescriptor {
+    constructor(arg1, arg2 = []) {
+        if (arg1 === undefined) {
+            this.primaryTag = null;
+            this.allTags = [];
+        }
+        else if (arg1 instanceof Tag_1.Tag) {
+            if (arg2 instanceof Array) {
+                this.allTags = new Array(arg1, ...arg2);
+            }
+            else {
+                this.allTags = [arg1];
+            }
+            this.primaryTag = arg1;
+        }
+        else if (arg1 instanceof Array) {
+            this.allTags = arg1.map((tag) => tag.copy());
+            if (arg1.length > 0) {
+                this.primaryTag = arg1[0];
+            }
+            else {
+                this.primaryTag = null;
+            }
+        }
+        else if (arg1 === null) {
+            if (arg2 instanceof Array) {
+                this.allTags = arg2.map((tag) => tag.copy());
+            }
+            else {
+                this.allTags = [];
+            }
+            this.primaryTag = null;
+        }
+    }
+    static BuildFromJSON(data) {
+        let p = null;
+        if (data.primary !== null && data.primary !== undefined) {
+            p = Tag_1.Tag.BuildFromJSON(data.primary);
+        }
+        const s = (data.secondary === undefined) ? [] : data.secondary.map((tag) => Tag_1.Tag.BuildFromJSON(tag));
+        return new TagsDescriptor(p, s);
+    }
+    get all() {
+        return this.allTags.map((tag) => tag.copy());
+    }
+    get primary() {
+        if (this.primaryTag !== null) {
+            return this.primaryTag.copy();
+        }
+        else {
+            return null;
+        }
+    }
+    get secondary() {
+        if (this.primaryTag !== null) {
+            return this.all.filter((tag) => {
+                return (tag.name !== this.primary.name);
+            });
+        }
+        else {
+            return this.all;
+        }
+    }
+    toString() {
+        let str = "";
+        if (this.primaryTag !== null) {
+            str += this.primaryTag.name;
+            this.secondary.forEach((tag) => {
+                str += ", " + tag.name;
+            });
+        }
+        else {
+            this.secondary.forEach((tag) => {
+                str += ", " + tag.name;
+            });
+            str = str.substring(2, str.length);
+        }
+        return str;
+    }
+    toJSON() {
+        if (this.primaryTag !== null) {
+            return {
+                primary: this.primaryTag.toJSON(),
+                secondary: this.secondary.map((tag) => tag.toJSON()),
+            };
+        }
+        else {
+            return {
+                primary: null,
+                secondary: this.secondary.map((tag) => tag.toJSON()),
+            };
+        }
+    }
+}
+exports.TagsDescriptor = TagsDescriptor;
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+window.eve = __webpack_require__(59)
 
 // Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
 //
@@ -15675,7 +15785,7 @@ module.exports = Snap
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
@@ -16117,11 +16227,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c)
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(60);
+var content = __webpack_require__(61);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -16135,17 +16245,17 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(62)(content, options);
+var update = __webpack_require__(63)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
 if(false) {}
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(61)(false);
+exports = module.exports = __webpack_require__(62)(false);
 // imports
 
 
@@ -16156,7 +16266,7 @@ exports.push([module.i, "/* CanvasTools.css */\r\n\r\n/* 1. Editor */\r\n/* 1.1.
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports) {
 
 /*
@@ -16238,7 +16348,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -16307,7 +16417,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(63);
+var	fixUrls = __webpack_require__(64);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -16642,7 +16752,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports) {
 
 

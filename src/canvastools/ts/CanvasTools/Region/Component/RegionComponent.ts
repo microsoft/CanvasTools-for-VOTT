@@ -11,7 +11,7 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 import { IResizable } from "../../Interface/IResizable";
 
 /**
- * An abstract visial component to define a component of region presentation UI.
+ * An abstract visual component to define a component of region presentation UI.
  */
 export abstract class RegionComponent implements IHideable, IResizable, IMovable, IFreezable {
     /**
@@ -49,42 +49,42 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     protected paperRect: Rect;
 
     /**
-     * The `x`-coordinate of the component. Defined through the `regionaData`.
+     * The `x`-coordinate of the component. Defined through the `regionsData`.
      */
     public get x(): number {
         return this.regionData.x;
     }
 
     /**
-     * The `y`-coordinate of the component. Defined through the `regionaData`.
+     * The `y`-coordinate of the component. Defined through the `regionsData`.
      */
     public get y(): number {
         return this.regionData.y;
     }
 
     /**
-     * The `width` of the component. Defined through the `regionaData`.
+     * The `width` of the component. Defined through the `regionsData`.
      */
     public get width(): number {
         return this.regionData.boundRect.width;
     }
 
     /**
-     * The `height` of the component. Defined through the `regionaData`.
+     * The `height` of the component. Defined through the `regionsData`.
      */
     public get height(): number {
         return this.regionData.boundRect.height;
     }
 
     /**
-     * The `area` of the component. Defined through the `regionaData`.
+     * The `area` of the component. Defined through the `regionsData`.
      */
     public get area(): number {
         return this.regionData.area;
     }
 
     /**
-     * The `boundRect` of the component. Defined through the `regionaData`.
+     * The `boundRect` of the component. Defined through the `regionsData`.
      * @remarks Returns the `Rect` object of the same `width` and `height` as the component.
      */
     public get boundRect(): Rect {
@@ -200,7 +200,7 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
     }
 
     /**
-     * Subscrubes the component elements according to provided event descriptors. Binds to the `this` object.
+     * Subscribes the component elements according to provided event descriptors. Binds to the `this` object.
      * @param listeners - The collection of event descriptors.
      */
     protected subscribeToEvents(listeners: IEventDescriptor[]) {

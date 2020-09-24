@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.2.18
+* Fix bugs with ghost anchor (add and remove points) for polygon
+* Add new toolbar control for easier accessing ghost anchors
+
 ### 2.2.17
 * Add `.updateRegionVisibility()` to `RegionManager` for easier region visibility toggling
 * Fix a bug with add region accessibility announcing

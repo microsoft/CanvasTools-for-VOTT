@@ -1,6 +1,6 @@
 {
   "name": "vott-ct",
-  "version": "2.2.17",
+  "version": "2.2.18",
   "description": "CanvasTools editor for the VoTT project",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
@@ -18,7 +18,7 @@
     "clean-lib": "del-cli ./lib/",
     "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib",
     "start": "npm run build && webpack-dev-server --config webpack.config.js --env.mode=prod",
-    "build": "webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
+    "build": "npm run bundle-lib && webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
     "watch": "onchange src/canvastools/ts/**/*.ts src/canvastools/css/canvastools.css -- npm run start",
     "test": "jest",
     "lint": "tslint src/**/*.ts --exclude **/*.d.ts",

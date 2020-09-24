@@ -756,7 +756,7 @@ export class RegionsManager {
      * @param component - Reference to the UI component.
      * @param regionData - New RegionData object.
      * @param state - New state of the region.
-     * @param multiSelection - Flag for multiselection.
+     * @param multiSelection - Flag for multi-selection.
      */
     private onRegionChange(region: Region, regionData: RegionData, state: ChangeEventType,
                            multiSelection: boolean = false) {
@@ -780,8 +780,8 @@ export class RegionsManager {
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
                 this.redrawAllRegions();
-                this.callbacks.onRegionMoveEnd(region.ID, regionData);
             }
+            this.callbacks.onRegionMoveEnd(region.ID, regionData);
         } else if (state === ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {
             // select
             if (!region.isSelected) {

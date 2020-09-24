@@ -1,4 +1,5 @@
 import { FilterPipeline } from "./CanvasTools.Filter";
+import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
@@ -125,8 +126,24 @@ export class Editor {
             tooltip: "Polygon-selection (O)",
             key: ["O", "o"],
             actionCallback: (action, rm, sl) => {
+                ConfigurationManager.isModifyRegionOnlyMode = false;
                 sl.setSelectionMode({ mode: SelectionMode.POLYGON });
                 sl.show();
+            },
+            activate: false,
+        },
+        {
+            type: ToolbarItemType.SELECTOR,
+            action: "pointer-add-remove-points-on-polygons",
+            iconFile: "pointer-add-polygon-point.svg",
+            tooltip: "Polygon add/remove points (U)",
+            key: ["U", "u"],
+            actionCallback: (action, rm, sl) => {
+                if (!ConfigurationManager.isModifyRegionOnlyMode) {
+                    ConfigurationManager.isModifyRegionOnlyMode = true;
+                    sl.setSelectionMode({ mode: SelectionMode.POLYGON });
+                    sl.show();
+                }
             },
             activate: false,
         },
@@ -835,6 +852,17 @@ export class Editor {
      */
     public get ZM(): ZoomManager {
         return this.zoomManager;
+    }
+
+    /**
+     * Set polygon selection to be in add/remove points mode on anchors
+     */
+    public set isModifyRegionOnlyMode(value: boolean) {
+        ConfigurationManager.isModifyRegionOnlyMode = value;
+    }
+
+    public get isModifyRegionOnlyMode() {
+        return ConfigurationManager.isModifyRegionOnlyMode;
     }
 
     /**
