@@ -3789,6 +3789,12 @@ class Editor {
     get ZM() {
         return this.zoomManager;
     }
+    set isModifyRegionOnlyMode(value) {
+        ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = value;
+    }
+    get isModifyRegionOnlyMode() {
+        return ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode;
+    }
     scaleRegionToSourceSize(regionData, sourceWidth, sourceHeight) {
         const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
         const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
@@ -3994,7 +4000,7 @@ Editor.FullToolbarSet = [
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
         action: "pointer-add-polygon-point",
         iconFile: "pointer-add-polygon-point.svg",
-        tooltip: "Add or remove points on a polygon",
+        tooltip: "Polygon add/remove points (U)",
         key: ["U", "u"],
         actionCallback: (action, rm, sl) => {
             if (!ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode) {
@@ -4538,7 +4544,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex < 0) {
                 this.ghostAnchor.addClass("add");
             }
-            else if (this.regionData.points.length > 3) {
+            else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
                 this.ghostAnchor.addClass("delete");
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
@@ -4567,7 +4573,8 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 this.ghostAnchor.addClass("add");
                 this.activeAnchorIndex = -1;
             }
-            else if (this.regionData.points.length > 3 && swapToDelete) {
+            else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
+                && swapToDelete) {
                 this.ghostAnchor.removeClass("add");
                 this.ghostAnchor.addClass("delete");
                 this.activeAnchorIndex = index + 1;
@@ -4642,6 +4649,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
 }
 exports.AnchorsElement = AnchorsElement;
 AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
+AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
 
 
 /***/ }),

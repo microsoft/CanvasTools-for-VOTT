@@ -854,6 +854,9 @@ export class Editor {
         return this.zoomManager;
     }
 
+    /**
+     * Set polygon selection to be in add/remove points mode on anchors
+     */
     public set isModifyRegionOnlyMode(value: boolean) {
         ConfigurationManager.isModifyRegionOnlyMode = value;
     }
