@@ -21,6 +21,11 @@ export class AnchorsElement extends AnchorsComponent {
     public static ANCHOR_POINT_LINE_SWITCH_THRESHOLD: number = 5;
 
     /**
+     * The simplest polygon is a triangle, which has three points
+     */
+    public static MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
+
+    /**
      * The state of the current anchor action
      */
     private ghostAnchorAction: GhostAnchorAction = GhostAnchorAction.None;
@@ -164,7 +169,7 @@ export class AnchorsElement extends AnchorsComponent {
         if (this.isModifyRegionOnlyModeEnabled(e)) {
             if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex < 0) {
                 this.ghostAnchor.addClass("add");
-            } else if (this.regionData.points.length > 3) {
+            } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
                 this.ghostAnchor.addClass("delete");
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
@@ -199,7 +204,8 @@ export class AnchorsElement extends AnchorsComponent {
             if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
                 this.ghostAnchor.addClass("add");
                 this.activeAnchorIndex = -1;
-            } else if (this.regionData.points.length > 3 && swapToDelete) {
+            } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
+                       && swapToDelete) {
                 this.ghostAnchor.removeClass("add");
                 this.ghostAnchor.addClass("delete");
                 this.activeAnchorIndex = index + 1;
