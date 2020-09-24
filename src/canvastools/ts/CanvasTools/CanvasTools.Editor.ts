@@ -134,7 +134,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "pointer-add-polygon-point",
+            action: "pointer-add-remove-points-on-polygons",
             iconFile: "pointer-add-polygon-point.svg",
             tooltip: "Polygon add/remove points (U)",
             key: ["U", "u"],

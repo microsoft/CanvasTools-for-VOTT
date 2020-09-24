@@ -3998,7 +3998,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "pointer-add-polygon-point",
+        action: "pointer-add-remove-points-on-polygons",
         iconFile: "pointer-add-polygon-point.svg",
         tooltip: "Polygon add/remove points (U)",
         key: ["U", "u"],
@@ -4447,15 +4447,24 @@ const IRegionCallbacks_1 = __webpack_require__(3);
 const AnchorsComponent_1 = __webpack_require__(16);
 var GhostAnchorAction;
 (function (GhostAnchorAction) {
-    GhostAnchorAction["Add"] = "Add";
-    GhostAnchorAction["Delete"] = "Delete";
-    GhostAnchorAction["None"] = "None";
+    GhostAnchorAction["Add"] = "add";
+    GhostAnchorAction["Delete"] = "delete";
+    GhostAnchorAction["None"] = "";
 })(GhostAnchorAction || (GhostAnchorAction = {}));
 class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
-        this.ghostAnchorAction = GhostAnchorAction.None;
+        this.ghostAnchorActionState = GhostAnchorAction.None;
         this.anchorsLength = regionData.points.length;
+    }
+    set ghostAnchorAction(newValue) {
+        this.ghostAnchor.removeClass("add");
+        this.ghostAnchor.removeClass("delete");
+        this.ghostAnchor.addClass(newValue);
+        this.ghostAnchorActionState = newValue;
+    }
+    get ghostAnchorAction() {
+        return this.ghostAnchorActionState;
     }
     redraw() {
         if (this.regionData.points !== null && this.regionData.points.length > 0) {
@@ -4541,17 +4550,11 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     }
     onGhostPointerEnter(e) {
         if (this.isModifyRegionOnlyModeEnabled(e)) {
-            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex < 0) {
-                this.ghostAnchor.addClass("add");
-            }
-            else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
-                this.ghostAnchor.addClass("delete");
+            if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         }
         else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.ghostAnchorAction = GhostAnchorAction.None;
         }
         super.onGhostPointerEnter(e);
@@ -4570,20 +4573,15 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             });
             const swapToDelete = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
             if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
-                this.ghostAnchor.addClass("add");
                 this.activeAnchorIndex = -1;
             }
             else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
                 && swapToDelete) {
-                this.ghostAnchor.removeClass("add");
-                this.ghostAnchor.addClass("delete");
                 this.activeAnchorIndex = index + 1;
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         }
         else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.ghostAnchorAction = GhostAnchorAction.None;
         }
         super.onGhostPointerMove(e);
@@ -4597,8 +4595,6 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 rd.setPoints(points);
             }
             this.ghostAnchorAction = GhostAnchorAction.None;
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
         }
         else if (this.ghostAnchorAction === GhostAnchorAction.Add) {
@@ -4624,8 +4620,6 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             points.splice(index + 1, 0, point);
             rd.setPoints(points);
             this.ghostAnchorAction = GhostAnchorAction.None;
-            this.ghostAnchor.removeClass("add");
-            this.ghostAnchor.addClass("delete");
             this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
         }
         super.onGhostPointerUp(e);

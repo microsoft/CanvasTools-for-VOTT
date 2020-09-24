@@ -6,9 +6,9 @@ import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallba
 import { AnchorsComponent } from "../Component/AnchorsComponent";
 
 enum GhostAnchorAction {
-    Add = "Add",
-    Delete = "Delete",
-    None = "None",
+    Add = "add",
+    Delete = "delete",
+    None = "",
 }
 
 /**
@@ -28,7 +28,18 @@ export class AnchorsElement extends AnchorsComponent {
     /**
      * The state of the current anchor action
      */
-    private ghostAnchorAction: GhostAnchorAction = GhostAnchorAction.None;
+    private ghostAnchorActionState: GhostAnchorAction = GhostAnchorAction.None;
+
+    private set ghostAnchorAction(newValue: GhostAnchorAction) {
+        this.ghostAnchor.removeClass("add");
+        this.ghostAnchor.removeClass("delete");
+        this.ghostAnchor.addClass(newValue);
+        this.ghostAnchorActionState = newValue;
+    }
+
+    private get ghostAnchorAction() {
+        return this.ghostAnchorActionState;
+    }
 
     /**
      * Current number of anchors.
@@ -167,15 +178,10 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected onGhostPointerEnter(e: PointerEvent) {
         if (this.isModifyRegionOnlyModeEnabled(e)) {
-            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex < 0) {
-                this.ghostAnchor.addClass("add");
-            } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
-                this.ghostAnchor.addClass("delete");
+            if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         } else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.ghostAnchorAction = GhostAnchorAction.None;
         }
 
@@ -202,18 +208,13 @@ export class AnchorsElement extends AnchorsComponent {
             const swapToDelete: boolean = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
 
             if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
-                this.ghostAnchor.addClass("add");
                 this.activeAnchorIndex = -1;
             } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
                        && swapToDelete) {
-                this.ghostAnchor.removeClass("add");
-                this.ghostAnchor.addClass("delete");
                 this.activeAnchorIndex = index + 1;
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         } else {
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.ghostAnchorAction = GhostAnchorAction.None;
         }
 
@@ -233,8 +234,6 @@ export class AnchorsElement extends AnchorsComponent {
                 rd.setPoints(points);
             }
             this.ghostAnchorAction = GhostAnchorAction.None;
-            this.ghostAnchor.removeClass("delete");
-            this.ghostAnchor.removeClass("add");
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         } else if (this.ghostAnchorAction === GhostAnchorAction.Add) {
             const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
@@ -264,8 +263,6 @@ export class AnchorsElement extends AnchorsComponent {
             rd.setPoints(points);
 
             this.ghostAnchorAction = GhostAnchorAction.None;
-            this.ghostAnchor.removeClass("add");
-            this.ghostAnchor.addClass("delete");
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         }
 
