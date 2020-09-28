@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.19
+* Small bug fixed with ghost anchor
+
 ### 2.2.18
 * Fix bugs with ghost anchor (add and remove points) for polygon
 * Add new toolbar control for easier accessing ghost anchors
