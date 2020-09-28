@@ -178,7 +178,7 @@ export class AnchorsElement extends AnchorsComponent {
      */
     protected onGhostPointerEnter(e: PointerEvent) {
         if (this.isModifyRegionOnlyModeEnabled(e)) {
-            if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
+            if (this.regionData.points.length <= AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
         } else {
@@ -207,7 +207,8 @@ export class AnchorsElement extends AnchorsComponent {
 
             const swapToDelete: boolean = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
 
-            if (this.ghostAnchorAction === GhostAnchorAction.Add && this.activeAnchorIndex <= 0 && !swapToDelete) {
+            if (this.activeAnchorIndex <= 0 && !swapToDelete) {
+                this.ghostAnchorAction = GhostAnchorAction.Add;
                 this.activeAnchorIndex = -1;
             } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
                        && swapToDelete) {
