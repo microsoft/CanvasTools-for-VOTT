@@ -1009,6 +1009,14 @@ class TagsComponent extends RegionComponent_1.RegionComponent {
         this.node = paper.g();
         this.node.addClass("tagsLayer");
     }
+    static getCachedBBox(primaryTagNode) {
+        const tagName = primaryTagNode.node.innerHTML;
+        if (TagsComponent.bboxCache[tagName]) {
+            return TagsComponent.bboxCache[tagName];
+        }
+        TagsComponent.bboxCache[tagName] = primaryTagNode.getBBox();
+        return TagsComponent.bboxCache[tagName];
+    }
     updateTags(tags, options) {
         this.tags = tags;
         this.tagsUpdateOptions = options;
@@ -1035,6 +1043,7 @@ class TagsComponent extends RegionComponent_1.RegionComponent {
     }
 }
 exports.TagsComponent = TagsComponent;
+TagsComponent.bboxCache = {};
 
 
 /***/ }),
@@ -2241,7 +2250,6 @@ class RegionsManager {
             this.addPolygonRegion(id, regionData, tagsDescriptor);
         }
         this.sortRegionsByArea();
-        this.redrawAllRegions();
         if (this.regionAnnouncer) {
             this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
         }
@@ -2599,7 +2607,6 @@ class RegionsManager {
                 region.select();
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
-                this.redrawAllRegions();
             }
             this.callbacks.onRegionMoveEnd(region.ID, regionData);
         }
@@ -4363,7 +4370,7 @@ class TagsElement extends TagsComponent_1.TagsComponent {
         this.primaryTagNode = paper.circle(this.x, this.y, TagsElement.DEFAULT_PRIMARY_TAG_RADIUS);
         this.primaryTagNode.addClass("primaryTagPointStyle");
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
         this.node.add(this.primaryTagNode);
         this.node.add(this.secondaryTagsNode);
@@ -4712,7 +4719,7 @@ class TagsElement extends TagsComponent_1.TagsComponent {
             });
             if (rebuildTags) {
                 this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
-                this.textBox = this.primaryTagText.getBBox();
+                this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
             }
             const showTextLabel = (this.textBox.width + 10 <= this.width)
                 && (this.textBox.height <= this.height);
@@ -4925,7 +4932,7 @@ class TagsElement extends TagsComponent_1.TagsComponent {
         this.primaryTagBoundRect.addClass("primaryTagBoundRectStyle");
         this.primaryTagText = paper.text(this.x, this.y, "");
         this.primaryTagText.addClass("primaryTagTextStyle");
-        this.textBox = this.primaryTagText.getBBox();
+        this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
         const pointsData = [];
         this.regionData.points.forEach((p) => {
             pointsData.push(p.x, p.y);
@@ -5439,7 +5446,7 @@ class TagsElement extends TagsComponent_1.TagsComponent {
         this.primaryTagNode.add(this.primaryTagBoundRect);
         this.primaryTagNode.add(this.primaryTagPolyline);
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
         this.node.add(this.primaryTagNode);
         this.node.add(this.secondaryTagsNode);
@@ -5747,7 +5754,7 @@ class TagsElement extends TagsComponent_1.TagsComponent {
                     });
                     if (rebuildTags) {
                         this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
-                        this.textBox = this.primaryTagText.getBBox();
+                        this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
                     }
                     const showTextLabel = (this.textBox.width + 10 <= this.width)
                         && (this.textBox.height <= this.height);
@@ -5974,14 +5981,14 @@ class TagsElement extends TagsComponent_1.TagsComponent {
         this.primaryTagRect.addClass("primaryTagRectStyle");
         this.primaryTagText = paper.text(this.x, this.y, "");
         this.primaryTagText.addClass("primaryTagTextStyle");
-        this.textBox = this.primaryTagText.getBBox();
+        this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
         this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
         this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
         this.primaryTagNode.add(this.primaryTagRect);
         this.primaryTagNode.add(this.primaryTagTextBG);
         this.primaryTagNode.add(this.primaryTagText);
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
         this.node.add(this.primaryTagNode);
         this.node.add(this.secondaryTagsNode);

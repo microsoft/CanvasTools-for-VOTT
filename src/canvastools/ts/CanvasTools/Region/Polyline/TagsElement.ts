@@ -268,7 +268,7 @@ export class TagsElement extends TagsComponent {
         this.primaryTagNode.add(this.primaryTagPolyline);
 
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
 
         this.node.add(this.primaryTagNode);

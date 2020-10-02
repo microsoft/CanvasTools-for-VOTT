@@ -206,7 +206,7 @@ export class TagsElement extends TagsComponent {
         this.primaryTagNode.addClass("primaryTagPointStyle");
 
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
 
         this.node.add(this.primaryTagNode);

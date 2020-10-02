@@ -177,7 +177,6 @@ export class RegionsManager {
             this.addPolygonRegion(id, regionData, tagsDescriptor);
         }
         this.sortRegionsByArea();
-        this.redrawAllRegions();
         if (this.regionAnnouncer) {
             this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
         }
@@ -779,7 +778,6 @@ export class RegionsManager {
                 region.select();
                 this.menu.showOnRegion(region);
                 this.sortRegionsByArea();
-                this.redrawAllRegions();
             }
             this.callbacks.onRegionMoveEnd(region.ID, regionData);
         } else if (state === ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {

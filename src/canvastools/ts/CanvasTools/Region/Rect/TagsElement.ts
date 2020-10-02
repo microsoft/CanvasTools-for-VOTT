@@ -66,7 +66,7 @@ export class TagsElement extends TagsComponent {
                     // Update primary tag text
                     if (rebuildTags) {
                         this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
-                        this.textBox = this.primaryTagText.getBBox();
+                        this.textBox = TagsComponent.getCachedBBox(this.primaryTagText);
                     }
 
                     const showTextLabel = (this.textBox.width + 10 <= this.width)
@@ -320,7 +320,7 @@ export class TagsElement extends TagsComponent {
 
         this.primaryTagText = paper.text(this.x, this.y, "");
         this.primaryTagText.addClass("primaryTagTextStyle");
-        this.textBox = this.primaryTagText.getBBox();
+        this.textBox = TagsComponent.getCachedBBox(this.primaryTagText);
 
         // bound to region???
         this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
@@ -331,7 +331,7 @@ export class TagsElement extends TagsComponent {
         this.primaryTagNode.add(this.primaryTagText);
 
         this.secondaryTagsNode = paper.g();
-        this.secondaryTagsNode.addClass("secondatyTagsLayer");
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
         this.secondaryTags = [];
 
         this.node.add(this.primaryTagNode);
