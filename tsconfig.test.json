@@ -19,8 +19,8 @@
         ],
         "paths": {
         },
-        "outDir": "dist"
-        /* "outFile": "dist/ct.js" */
+        "outDir": "dist",
+        "outFile": "dist/ct.js"
     },
     "include": [     
         "src/canvastools/ts/*.ts"

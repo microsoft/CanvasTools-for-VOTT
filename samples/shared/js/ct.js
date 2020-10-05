@@ -3489,6 +3489,8 @@ CanvasTools.Core = {
         Color: Color_1.Color,
     },
 };
+CanvasTools.RegionData = RegionData_1.RegionData;
+CanvasTools.TagsDescriptor = TagsDescriptor_1.TagsDescriptor;
 CanvasTools.Selection = {
     AreaSelector: AreaSelector_1.AreaSelector,
     SelectionMode: ISelectorSettings_1.SelectionMode,
