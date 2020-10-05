@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.2.20
+* Improve render time significantly, by caching values expensive svg calculation call
+* Remove unnecessary re-render calls on add new region and complete region
+
 ### 2.2.19
 * Small bug fixed with ghost anchor
 

@@ -7,9 +7,25 @@ import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { RegionComponent } from "./RegionComponent";
 
 /**
- * An abstract visual component used internall do draw tags data for regions.
+ * An abstract visual component used internal do draw tags data for regions.
  */
 export abstract class TagsComponent extends RegionComponent {
+    /**
+     * Computing the bounding box of a given svg text element is an expensive rendering call,
+     * given tag styles don't change and there is a set number of primary tag names caching improves
+     * re-render performance significantly. https://bugzilla.mozilla.org/show_bug.cgi?id=1579181
+     * @param primaryTagNode a given tag node which the content string will be used to lookup in the cache
+     */
+    public static getCachedBBox(primaryTagNode: Snap.Element): Snap.BBox {
+        const tagName = primaryTagNode.node.innerHTML;
+        if (TagsComponent.bboxCache[tagName]) {
+            return TagsComponent.bboxCache[tagName];
+        }
+
+        TagsComponent.bboxCache[tagName] = primaryTagNode.getBBox();
+        return TagsComponent.bboxCache[tagName];
+    }
+    private static bboxCache: { [K: string]: Snap.BBox } = {};
     /**
      * The reference to region's `TagsDescriptor` object.
      */
@@ -62,7 +78,7 @@ export abstract class TagsComponent extends RegionComponent {
      * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
      * @param tags - The `TagsDescriptor` object presenting colors and names for region tags.
      * @param styleId - The unique css style id for region.
-     * @param styleSheet - The regerence to the stylesheet object for rules insection.
+     * @param styleSheet - The reference to the stylesheet object for rules insertion.
      * @param tagsUpdateOptions - The settings for redrawing tags.
      */
     constructor(paper: Snap.Paper, paperRect: Rect, regionData: RegionData, tags: TagsDescriptor,
@@ -103,7 +119,7 @@ export abstract class TagsComponent extends RegionComponent {
     protected abstract initStyleMaps(tags: TagsDescriptor);
 
     /**
-     * Rebulds the tags elements. Should be redefined in child classes.
+     * Rebuilds the tags elements. Should be redefined in child classes.
      */
     protected abstract rebuildTagLabels();
 
