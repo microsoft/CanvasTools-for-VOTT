@@ -3040,6 +3040,9 @@ class AreaSelector {
     getSelectorSettings() {
         return this.selectorSettings;
     }
+    reset() {
+        this.selector.reset();
+    }
     updateRectCopyTemplateSelector(template) {
         if (template !== undefined) {
             this.rectCopySelector.setTemplate(template);
@@ -3489,8 +3492,6 @@ CanvasTools.Core = {
         Color: Color_1.Color,
     },
 };
-CanvasTools.RegionData = RegionData_1.RegionData;
-CanvasTools.TagsDescriptor = TagsDescriptor_1.TagsDescriptor;
 CanvasTools.Selection = {
     AreaSelector: AreaSelector_1.AreaSelector,
     SelectionMode: ISelectorSettings_1.SelectionMode,
@@ -4629,7 +4630,7 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
             }
             points.splice(index + 1, 0, point);
             rd.setPoints(points);
-            this.ghostAnchorAction = GhostAnchorAction.None;
+            this.ghostAnchorAction = GhostAnchorAction.Delete;
             this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
         }
         super.onGhostPointerUp(e);
@@ -6155,6 +6156,9 @@ class PointSelector extends Selector_1.Selector {
         this.buildUIElements();
         this.hide();
     }
+    reset() {
+        this.buildUIElements();
+    }
     resize(width, height) {
         super.resize(width, height);
         this.crossA.resize(width, height);
@@ -6297,6 +6301,21 @@ class PolygonSelector extends Selector_1.Selector {
         super.disable();
         this.reset();
     }
+    reset() {
+        this.points = new Array();
+        this.lastPoint = null;
+        let ps = this.pointsGroup.children();
+        while (ps.length > 0) {
+            ps[0].remove();
+            ps = this.pointsGroup.children();
+        }
+        this.polygon.attr({
+            points: "",
+        });
+        if (this.isCapturing) {
+            this.isCapturing = false;
+        }
+    }
     buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("polygonSelector");
@@ -6414,21 +6433,6 @@ class PolygonSelector extends Selector_1.Selector {
         ];
         this.subscribeToEvents(listeners);
     }
-    reset() {
-        this.points = new Array();
-        this.lastPoint = null;
-        let ps = this.pointsGroup.children();
-        while (ps.length > 0) {
-            ps[0].remove();
-            ps = this.pointsGroup.children();
-        }
-        this.polygon.attr({
-            points: "",
-        });
-        if (this.isCapturing) {
-            this.isCapturing = false;
-        }
-    }
     addPoint(x, y) {
         this.points.push(new Point2D_1.Point2D(x, y));
         const point = this.paper.circle(x, y, PolygonSelector.DEFAULT_POINT_RADIUS);
@@ -6503,6 +6507,21 @@ class PolylineSelector extends Selector_1.Selector {
         this.reset();
         super.disable();
     }
+    reset() {
+        this.points = new Array();
+        this.lastPoint = null;
+        let ps = this.pointsGroup.children();
+        while (ps.length > 0) {
+            ps[0].remove();
+            ps = this.pointsGroup.children();
+        }
+        this.polyline.attr({
+            points: "",
+        });
+        if (this.isCapturing) {
+            this.isCapturing = false;
+        }
+    }
     buildUIElements() {
         this.node = this.paper.g();
         this.node.addClass("polylineSelector");
@@ -6530,21 +6549,6 @@ class PolylineSelector extends Selector_1.Selector {
             { event: "keyup", listener: this.onKeyUp, base: window, bypass: true },
         ];
         this.subscribeToEvents(listeners);
-    }
-    reset() {
-        this.points = new Array();
-        this.lastPoint = null;
-        let ps = this.pointsGroup.children();
-        while (ps.length > 0) {
-            ps[0].remove();
-            ps = this.pointsGroup.children();
-        }
-        this.polyline.attr({
-            points: "",
-        });
-        if (this.isCapturing) {
-            this.isCapturing = false;
-        }
     }
     addPoint(x, y) {
         this.points.push(new Point2D_1.Point2D(x, y));
@@ -6673,6 +6677,9 @@ class RectCopySelector extends Selector_1.Selector {
     resize(width, height) {
         super.resize(width, height);
         this.crossA.resize(width, height);
+    }
+    reset() {
+        this.buildUIElements();
     }
     hide() {
         super.hide();
@@ -6876,6 +6883,9 @@ class RectSelector extends Selector_1.Selector {
     resize(width, height) {
         super.resize(width, height);
         this.resizeAll([this.selectionBox, this.crossA, this.crossB]);
+    }
+    reset() {
+        this.buildUIElements();
     }
     hide() {
         super.hide();

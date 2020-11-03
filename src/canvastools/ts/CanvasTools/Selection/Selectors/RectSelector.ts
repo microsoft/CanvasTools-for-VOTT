@@ -89,6 +89,13 @@ export class RectSelector extends Selector {
     }
 
     /**
+     * Resets any in progress shape
+     */
+    public reset(): void {
+        this.buildUIElements();
+    }
+
+    /**
      * Hides the selector.
      */
     public hide() {

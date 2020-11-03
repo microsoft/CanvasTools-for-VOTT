@@ -42,6 +42,13 @@ export class PointSelector extends Selector {
     }
 
     /**
+     * Resets any in progress shape
+     */
+    public reset(): void {
+        this.buildUIElements();
+    }
+
+    /**
      * Resizes the selector to specified `width` and `height`.
      * @param width - The new `width`.
      * @param height - The new `height`.

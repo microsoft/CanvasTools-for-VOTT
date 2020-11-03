@@ -263,7 +263,7 @@ export class AnchorsElement extends AnchorsComponent {
             points.splice(index + 1, 0, point);
             rd.setPoints(points);
 
-            this.ghostAnchorAction = GhostAnchorAction.None;
+            this.ghostAnchorAction = GhostAnchorAction.Delete;
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
         }
 
