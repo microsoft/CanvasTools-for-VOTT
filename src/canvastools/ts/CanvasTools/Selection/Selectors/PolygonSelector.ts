@@ -177,6 +177,27 @@ export class PolygonSelector extends Selector {
     }
 
     /**
+     * Resets the selector.
+     */
+    public reset(): void {
+        this.points = new Array<Point2D>();
+        this.lastPoint = null;
+        let ps = this.pointsGroup.children();
+        while (ps.length > 0) {
+            ps[0].remove();
+            ps = this.pointsGroup.children();
+        }
+
+        this.polygon.attr({
+            points: "",
+        });
+
+        if (this.isCapturing) {
+            this.isCapturing = false;
+        }
+    }
+
+    /**
      * Builds selector's UI.
      */
     private buildUIElements() {
@@ -302,27 +323,6 @@ export class PolygonSelector extends Selector {
         ];
 
         this.subscribeToEvents(listeners);
-    }
-
-    /**
-     * Resets the selector.
-     */
-    private reset() {
-        this.points = new Array<Point2D>();
-        this.lastPoint = null;
-        let ps = this.pointsGroup.children();
-        while (ps.length > 0) {
-            ps[0].remove();
-            ps = this.pointsGroup.children();
-        }
-
-        this.polygon.attr({
-            points: "",
-        });
-
-        if (this.isCapturing) {
-            this.isCapturing = false;
-        }
     }
 
     /**

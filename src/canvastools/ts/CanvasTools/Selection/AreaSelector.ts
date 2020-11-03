@@ -267,6 +267,13 @@ export class AreaSelector {
     }
 
     /**
+     * Resets any in progress shape
+     */
+    public reset(): void {
+        this.selector.reset();
+    }
+
+    /**
      * Would be called after zoom to update the template for rect copy selector
      */
     public updateRectCopyTemplateSelector(template: IRect): void {

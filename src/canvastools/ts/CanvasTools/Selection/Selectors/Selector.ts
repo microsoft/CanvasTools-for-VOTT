@@ -52,9 +52,14 @@ export abstract class Selector extends Element {
     }
 
     /**
+     * Resets any in progress shape
+     */
+    public abstract reset(): void;
+
+    /**
      * Enables and shows this selector.
      */
-    public enable() {
+    public enable(): void {
         if (!this.isEnabled) {
             this.isEnabled = true;
             this.show();
@@ -64,7 +69,7 @@ export abstract class Selector extends Element {
     /**
      * Disables and hides this selector.
      */
-    public disable() {
+    public disable(): void {
         if (this.isEnabled) {
             this.isEnabled = false;
             this.hide();
