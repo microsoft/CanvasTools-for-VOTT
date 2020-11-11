@@ -270,7 +270,9 @@ export class AreaSelector {
      * Resets any in progress shape
      */
     public reset(): void {
-        this.selector.reset();
+        if (this.selector !== null) {
+            this.selector.reset();
+        }
     }
 
     /**
