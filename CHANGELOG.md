@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.22
+* Add `.reset()` null check for before if called before the editor is loaded or if no selector is present
+
 ### 2.2.21
 * Add public `.reset()` to `AreaSelector`
 
