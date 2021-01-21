@@ -35,7 +35,7 @@ export enum ZoomType {
 
     // This will zoom in/out based on the center of the portion of image currently visible
     // or view port of editor container
-    ViewPortCenter,
+    ViewportCenter,
 }
 
 /**

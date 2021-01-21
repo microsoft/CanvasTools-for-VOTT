@@ -1042,7 +1042,7 @@ export class Editor {
         }
 
         // when the zooming is around the center of the image currently in the view port of editor container.
-        if (this.zoomManager.zoomType === ZoomType.ViewPortCenter) {
+        if (this.zoomManager.zoomType === ZoomType.ViewportCenter) {
             // get the current scroll position
             const currentScrollPos = {
                 left: this.editorContainerDiv.scrollLeft,
