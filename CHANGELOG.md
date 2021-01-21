@@ -1,5 +1,16 @@
 ## Changelog
 
+### 2.2.23
+*CT Library Changes*
+* CanvasTools.Editor api is updated to include `zoomProperties`
+```js
+    var editor = new CanvasTools.Editor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
+                filterPipeline?: FilterPipeline) {
+                filterPipeline?: FilterPipeline, zoomProperties?: ZoomProperties).api
+```
+* ZoomType and isZoomEnabled can now be set on ZoomProperties.
+* ZoomType allows users to set the zoom around a point like image center or view port center.
+
 ### 2.2.22
 * Add `.reset()` null check for before if called before the editor is loaded or if no selector is present
 

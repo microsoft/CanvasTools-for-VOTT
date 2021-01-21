@@ -3,7 +3,7 @@ import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
-import { ZoomDirection, ZoomManager } from "./Core/ZoomManager";
+import { ZoomData, ZoomDirection, ZoomManager, ZoomProperties, ZoomType } from "./Core/ZoomManager";
 import { RegionChangeFunction, RegionManipulationFunction } from "./Interface/IRegionCallbacks";
 import { RegionSelectionFunction, RegionUpdateFunction } from "./Interface/IRegionsManagerCallbacks";
 import {
@@ -500,10 +500,9 @@ export class Editor {
      * Creates a new `Editor` in specified div-container and with custom building components.
      * @remarks - Originally created for testing purposes.
      * @param container - The div-container for the editor.
-     * @param areaSelector - The `AresSelector` component to use.
+     * @param areaSelector - The `AreaSelector` component to use.
      * @param regionsManager - The `RegionsManager` component to use.
      * @param filterPipeline - The `FilterPipeline` component to use.
-     * @param isZoomEnabled - This indicates if the zoom functionality is enabled
      */
     constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
                 filterPipeline: FilterPipeline);
@@ -512,16 +511,16 @@ export class Editor {
      * Creates a new `Editor` in specified div-container and with custom building components.
      * @remarks - Originally created for testing purposes.
      * @param container - The div-container for the editor.
-     * @param areaSelector [Optional]- The `AresSelector` component to use.
+     * @param areaSelector [Optional]- The `AreaSelector` component to use.
      * @param regionsManager [Optional]- The `RegionsManager` component to use.
      * @param filterPipeline [Optional]- The `FilterPipeline` component to use.
-     * @param isZoomEnabled [Optional]- This indicates if the zoom functionality is enabled
+     * @param zoomProperties [Optional]- The properties of Zoom Manager to set
      */
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-                filterPipeline?: FilterPipeline, isZoomEnabled?: boolean);
+                filterPipeline?: FilterPipeline, zoomProperties?: ZoomProperties);
 
     constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-                filterPipeline?: FilterPipeline, isZoomEnabled?: boolean) {
+                filterPipeline?: FilterPipeline, zoomProperties?: ZoomProperties) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
@@ -646,8 +645,9 @@ export class Editor {
         this.zoomManager.deleteInstance();
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
 
-        if (isZoomEnabled) {
+        if (zoomProperties && zoomProperties.isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
+            this.zoomManager.zoomType = zoomProperties.zoomType || ZoomType.Default;
         }
 
         // Adjust editor size
@@ -951,7 +951,7 @@ export class Editor {
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             this.frameWidth = scaledFrameWidth;
             this.frameHeight = scaledFrameHeight;
-            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight, zoomData);
 
             // area selector updates after zoom
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
@@ -977,7 +977,7 @@ export class Editor {
             const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
             this.frameWidth = scaledFrameWidth;
             this.frameHeight = scaledFrameHeight;
-            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight);
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight, zoomData);
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
         }
@@ -986,7 +986,7 @@ export class Editor {
     /**
      * Helper function to zoom the editor to given scale.
      */
-    private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number): void {
+    private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number, zoomData: ZoomData): void {
         if (!this.editorContainerDiv.offsetWidth) {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
@@ -1027,6 +1027,55 @@ export class Editor {
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
         // focus on the editor container div so that scroll bar can be used via arrow keys
         this.editorContainerDiv.focus();
+
+        // when the zooming is around the actual center of the image
+        if (this.zoomManager.zoomType === ZoomType.ImageCenter) {
+            if (this.editorContainerDiv.scrollHeight > this.editorContainerDiv.clientHeight) {
+                this.editorContainerDiv.scrollTop =
+                (this.editorDiv.clientHeight - this.editorContainerDiv.clientHeight) / 2;
+            }
+
+            if (this.editorContainerDiv.scrollWidth > this.editorContainerDiv.clientWidth) {
+                this.editorContainerDiv.scrollLeft =
+                (this.editorDiv.clientWidth - this.editorContainerDiv.clientWidth) / 2;
+            }
+        }
+
+        // when the zooming is around the center of the image currently in the view port of editor container.
+        if (this.zoomManager.zoomType === ZoomType.ViewportCenter) {
+            // get the current scroll position
+            const currentScrollPos = {
+                left: this.editorContainerDiv.scrollLeft,
+                top: this.editorContainerDiv.scrollTop,
+            };
+
+            // get the current center of the viewport
+            const currentCenterInView = {
+                x: (this.editorContainerDiv.clientWidth / 2) + currentScrollPos.left,
+                y: (this.editorContainerDiv.clientHeight / 2) + currentScrollPos.top,
+            };
+
+            // get the current center of the viewport once its is scaled based on zoom data
+            const zoomedCenterInView = {
+                x: (currentCenterInView.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+            };
+
+            // get the difference between the expected scaled viewport center and current viewport center
+            const expectedScrollPosDifference = {
+                left: zoomedCenterInView.x - currentCenterInView.x,
+                top: zoomedCenterInView.y - currentCenterInView.y,
+            };
+
+            // get the expected scaled scroll position
+            const expectedScrollPos = {
+                left: currentScrollPos.left + expectedScrollPosDifference.left,
+                top: currentScrollPos.top + expectedScrollPosDifference.top,
+            };
+
+            this.editorContainerDiv.scrollLeft = expectedScrollPos.left;
+            this.editorContainerDiv.scrollTop = expectedScrollPos.top;
+        }
     }
 
     /**

@@ -10,12 +10,32 @@ export interface ZoomData {
     currentZoomScale: number;
 }
 
+export interface ZoomProperties {
+    isZoomEnabled: boolean;
+    zoomType: ZoomType;
+}
+
 /**
  * Enum indicating zoom behavior
  */
 export enum ZoomDirection {
     In,
     Out,
+}
+
+/**
+ * This indicates the point around which an image will be zoomed in our out.
+ */
+export enum ZoomType {
+    // This will zoom in/out based on browser default behavior
+    Default,
+
+    // This will zoom in/out based on the actual center point of image
+    ImageCenter,
+
+    // This will zoom in/out based on the center of the portion of image currently visible
+    // or view port of editor container
+    ViewportCenter,
 }
 
 /**
@@ -66,6 +86,11 @@ export class ZoomManager {
      * This decides whether zoom is enabled for the project.
      */
     public isZoomEnabled: boolean;
+
+    /**
+     * This indicates the point around which an image will be zoomed in our out.
+     */
+    public zoomType: ZoomType;
 
     /**
      * The collection of zoom callbacks.
