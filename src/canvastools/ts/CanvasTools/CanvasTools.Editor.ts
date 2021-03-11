@@ -987,94 +987,95 @@ export class Editor {
      * Helper function to zoom the editor to given scale.
      */
     private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number, zoomData: ZoomData): void {
-        if (!this.editorContainerDiv.offsetWidth) {
+        if (!this.editorContainerDiv && !this.editorContainerDiv.offsetWidth) {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
+        if (!this.editorContainerDiv) {
+            const containerWidth = this.editorContainerDiv.offsetWidth;
+            const containerHeight = this.editorContainerDiv.offsetHeight;
 
-        const containerWidth = this.editorContainerDiv.offsetWidth;
-        const containerHeight = this.editorContainerDiv.offsetHeight;
+            let hpadding = 0;
+            let vpadding = 0;
 
-        let hpadding = 0;
-        let vpadding = 0;
-
-        if (scaledFrameWidth < containerWidth) {
-            hpadding = (containerWidth - scaledFrameWidth) / 2;
-            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-        } else {
-            this.editorDiv.style.width = `${scaledFrameWidth}px`;
-        }
-
-        if (scaledFrameHeight < containerHeight) {
-            vpadding = (containerHeight - scaledFrameHeight) / 2;
-            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-        } else {
-            this.editorDiv.style.height = `${scaledFrameHeight}px`;
-        }
-
-        // existence of either a vertical or horizontal scroll bar
-        // clientWidth is the offsetWidth - scrollbarWidth
-        if (hpadding && !vpadding) {
-            hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
-            this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
-        }
-
-        if (!hpadding && vpadding) {
-            vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
-            this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-        }
-
-        this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
-        // focus on the editor container div so that scroll bar can be used via arrow keys
-        this.editorContainerDiv.focus();
-
-        // when the zooming is around the actual center of the image
-        if (this.zoomManager.zoomType === ZoomType.ImageCenter) {
-            if (this.editorContainerDiv.scrollHeight > this.editorContainerDiv.clientHeight) {
-                this.editorContainerDiv.scrollTop =
-                (this.editorDiv.clientHeight - this.editorContainerDiv.clientHeight) / 2;
+            if (scaledFrameWidth < containerWidth) {
+                hpadding = (containerWidth - scaledFrameWidth) / 2;
+                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+            } else {
+                this.editorDiv.style.width = `${scaledFrameWidth}px`;
             }
 
-            if (this.editorContainerDiv.scrollWidth > this.editorContainerDiv.clientWidth) {
-                this.editorContainerDiv.scrollLeft =
-                (this.editorDiv.clientWidth - this.editorContainerDiv.clientWidth) / 2;
+            if (scaledFrameHeight < containerHeight) {
+                vpadding = (containerHeight - scaledFrameHeight) / 2;
+                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+            } else {
+                this.editorDiv.style.height = `${scaledFrameHeight}px`;
             }
-        }
 
-        // when the zooming is around the center of the image currently in the view port of editor container.
-        if (this.zoomManager.zoomType === ZoomType.ViewportCenter) {
-            // get the current scroll position
-            const currentScrollPos = {
-                left: this.editorContainerDiv.scrollLeft,
-                top: this.editorContainerDiv.scrollTop,
-            };
+            // existence of either a vertical or horizontal scroll bar
+            // clientWidth is the offsetWidth - scrollbarWidth
+            if (hpadding && !vpadding) {
+                hpadding = (this.editorContainerDiv.clientWidth - scaledFrameWidth) / 2;
+                this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
+            }
 
-            // get the current center of the viewport
-            const currentCenterInView = {
-                x: (this.editorContainerDiv.clientWidth / 2) + currentScrollPos.left,
-                y: (this.editorContainerDiv.clientHeight / 2) + currentScrollPos.top,
-            };
+            if (!hpadding && vpadding) {
+                vpadding = (this.editorContainerDiv.clientHeight - scaledFrameHeight) / 2;
+                this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
+            }
 
-            // get the current center of the viewport once its is scaled based on zoom data
-            const zoomedCenterInView = {
-                x: (currentCenterInView.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
-                y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
-            };
+            this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
+            // focus on the editor container div so that scroll bar can be used via arrow keys
+            this.editorContainerDiv.focus();
 
-            // get the difference between the expected scaled viewport center and current viewport center
-            const expectedScrollPosDifference = {
-                left: zoomedCenterInView.x - currentCenterInView.x,
-                top: zoomedCenterInView.y - currentCenterInView.y,
-            };
+            // when the zooming is around the actual center of the image
+            if (this.zoomManager.zoomType === ZoomType.ImageCenter) {
+                if (this.editorContainerDiv.scrollHeight > this.editorContainerDiv.clientHeight) {
+                    this.editorContainerDiv.scrollTop =
+                    (this.editorDiv.clientHeight - this.editorContainerDiv.clientHeight) / 2;
+                }
 
-            // get the expected scaled scroll position
-            const expectedScrollPos = {
-                left: currentScrollPos.left + expectedScrollPosDifference.left,
-                top: currentScrollPos.top + expectedScrollPosDifference.top,
-            };
+                if (this.editorContainerDiv.scrollWidth > this.editorContainerDiv.clientWidth) {
+                    this.editorContainerDiv.scrollLeft =
+                    (this.editorDiv.clientWidth - this.editorContainerDiv.clientWidth) / 2;
+                }
+            }
 
-            this.editorContainerDiv.scrollLeft = expectedScrollPos.left;
-            this.editorContainerDiv.scrollTop = expectedScrollPos.top;
+            // when the zooming is around the center of the image currently in the view port of editor container.
+            if (this.zoomManager.zoomType === ZoomType.ViewportCenter) {
+                // get the current scroll position
+                const currentScrollPos = {
+                    left: this.editorContainerDiv.scrollLeft,
+                    top: this.editorContainerDiv.scrollTop,
+                };
+
+                // get the current center of the viewport
+                const currentCenterInView = {
+                    x: (this.editorContainerDiv.clientWidth / 2) + currentScrollPos.left,
+                    y: (this.editorContainerDiv.clientHeight / 2) + currentScrollPos.top,
+                };
+
+                // get the current center of the viewport once its is scaled based on zoom data
+                const zoomedCenterInView = {
+                    x: (currentCenterInView.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                    y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                };
+
+                // get the difference between the expected scaled viewport center and current viewport center
+                const expectedScrollPosDifference = {
+                    left: zoomedCenterInView.x - currentCenterInView.x,
+                    top: zoomedCenterInView.y - currentCenterInView.y,
+                };
+
+                // get the expected scaled scroll position
+                const expectedScrollPos = {
+                    left: currentScrollPos.left + expectedScrollPosDifference.left,
+                    top: currentScrollPos.top + expectedScrollPosDifference.top,
+                };
+
+                this.editorContainerDiv.scrollLeft = expectedScrollPos.left;
+                this.editorContainerDiv.scrollTop = expectedScrollPos.top;
+            }
         }
     }
 
