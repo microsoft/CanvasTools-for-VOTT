@@ -987,13 +987,13 @@ export class Editor {
      * Helper function to zoom the editor to given scale.
      */
     private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number, zoomData: ZoomData): void {
-        if (!this.editorContainerDiv.offsetWidth) {
+        if (!this.editorContainerDiv && !this.editorContainerDiv.offsetWidth) {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
 
-        const containerWidth = this.editorContainerDiv.offsetWidth;
-        const containerHeight = this.editorContainerDiv.offsetHeight;
+        const containerWidth = this.editorContainerDiv?.offsetWidth;
+        const containerHeight = this.editorContainerDiv?.offsetHeight;
 
         let hpadding = 0;
         let vpadding = 0;
