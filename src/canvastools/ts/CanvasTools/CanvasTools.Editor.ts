@@ -991,7 +991,7 @@ export class Editor {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
-        if (!this.editorContainerDiv) {
+        if (this.editorContainerDiv) {
             const containerWidth = this.editorContainerDiv.offsetWidth;
             const containerHeight = this.editorContainerDiv.offsetHeight;
 
