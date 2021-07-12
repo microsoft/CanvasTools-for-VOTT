@@ -107,6 +107,7 @@ export class RegionsManager {
      */
     private tagsUpdateOptions: ITagsUpdateOptions = {
         showRegionBackground: true,
+        showTagsText: true,
     };
 
     /**
@@ -489,7 +490,16 @@ export class RegionsManager {
      */
     public toggleBackground() {
         this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
+        this.regions.forEach((r) => {
+            r.updateTags(r.tags, this.tagsUpdateOptions);
+        });
+    }
 
+    /**
+     * Changes the tags drawing setting to draw tags text or hide it.
+     */
+     public toggleTagsTextVisibility() {
+        this.tagsUpdateOptions.showTagsText = !this.tagsUpdateOptions.showTagsText;
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
         });

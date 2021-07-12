@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.2.26
+* Add `.toggleTagsTextVisibility()` to `RegionManager` for toggling visibility of tags text on region.
+
 ### 2.2.23
 *CT Library Changes*
 * CanvasTools.Editor api is updated to include `zoomProperties`
