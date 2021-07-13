@@ -110,6 +110,8 @@ export abstract class TagsComponent extends RegionComponent {
 
         const showBackground = (options !== undefined) ? options.showRegionBackground : true;
         this.applyStyleMaps(showBackground);
+        const showTagsText = (options !== undefined) ? options.showTagsText : true;
+        this.applyStyleForTagsVisibility(showTagsText);
     }
 
     /**
@@ -141,6 +143,31 @@ export abstract class TagsComponent extends RegionComponent {
         if (this.tags && this.tags.primary !== undefined) {
             window.requestAnimationFrame(() => {
                 const sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
+                for (const r of sm) {
+                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
+                }
+            });
+        }
+    }
+
+    /**
+     * Inserts the tags text visibility styling rule into the `styleSheet` object.
+     * @param showTagsText - The flag to display tags text or not.
+     */
+     protected applyStyleForTagsVisibility(showTagsText: boolean = true) {
+        if (this.tags && this.tags.primary !== undefined) {
+            const visibility = showTagsText ? "block" : "none";
+            const sm = [
+                {
+                    rule: `.${this.styleId} .primaryTagTextBGStyle`,
+                    style: `display: ${visibility};`,
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagTextStyle`,
+                    style: `display: ${visibility};`,
+                },
+            ];
+            window.requestAnimationFrame(() => {
                 for (const r of sm) {
                     this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                 }

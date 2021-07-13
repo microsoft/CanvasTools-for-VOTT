@@ -1025,6 +1025,8 @@ class TagsComponent extends RegionComponent_1.RegionComponent {
         this.initStyleMaps(tags);
         const showBackground = (options !== undefined) ? options.showRegionBackground : true;
         this.applyStyleMaps(showBackground);
+        const showTagsText = (options !== undefined) ? options.showTagsText : true;
+        this.applyStyleForTagsVisibility(showTagsText);
     }
     clearStyleMaps() {
         while (this.styleSheet.cssRules.length > 0) {
@@ -1035,6 +1037,26 @@ class TagsComponent extends RegionComponent_1.RegionComponent {
         if (this.tags && this.tags.primary !== undefined) {
             window.requestAnimationFrame(() => {
                 const sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
+                for (const r of sm) {
+                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
+                }
+            });
+        }
+    }
+    applyStyleForTagsVisibility(showTagsText = true) {
+        if (this.tags && this.tags.primary !== undefined) {
+            const visibility = showTagsText ? "block" : "none";
+            const sm = [
+                {
+                    rule: `.${this.styleId} .primaryTagTextBGStyle`,
+                    style: `display: ${visibility};`,
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagTextStyle`,
+                    style: `display: ${visibility};`,
+                },
+            ];
+            window.requestAnimationFrame(() => {
                 for (const r of sm) {
                     this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
                 }
@@ -2196,6 +2218,7 @@ class RegionsManager {
         this.manipulationLock = false;
         this.tagsUpdateOptions = {
             showRegionBackground: true,
+            showTagsText: true,
         };
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
@@ -2428,7 +2451,7 @@ class RegionsManager {
         }
     }
     toggleBackground() {
-        this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
+        this.tagsUpdateOptions.showTagsText = !this.tagsUpdateOptions.showTagsText;
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
         });
