@@ -2154,14 +2154,16 @@ class ZoomManager {
         this.previousZoomScale = this.currentZoomScale;
         const zoomData = this.getZoomData();
         let updatedZoomScale;
-        if (newScale !== undefined) {
+        if (newScale) {
             updatedZoomScale = newScale;
         }
-        else if (zoomType === ZoomDirection.In) {
-            updatedZoomScale = this.currentZoomScale + this.zoomScale;
-        }
-        else if (zoomType === ZoomDirection.Out) {
-            updatedZoomScale = this.currentZoomScale - this.zoomScale;
+        else {
+            if (zoomType === ZoomDirection.In) {
+                updatedZoomScale = this.currentZoomScale + this.zoomScale;
+            }
+            if (zoomType === ZoomDirection.Out) {
+                updatedZoomScale = this.currentZoomScale - this.zoomScale;
+            }
         }
         if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
             this.currentZoomScale = updatedZoomScale;
@@ -2451,6 +2453,12 @@ class RegionsManager {
         }
     }
     toggleBackground() {
+        this.tagsUpdateOptions.showRegionBackground = !this.tagsUpdateOptions.showRegionBackground;
+        this.regions.forEach((r) => {
+            r.updateTags(r.tags, this.tagsUpdateOptions);
+        });
+    }
+    toggleTagsTextVisibility() {
         this.tagsUpdateOptions.showTagsText = !this.tagsUpdateOptions.showTagsText;
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
@@ -3895,7 +3903,7 @@ class Editor {
         }
     }
     handleZoomAfterContentUpdate() {
-        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+        if (this.zoomManager.isZoomEnabled) {
             const zoomData = this.zoomManager.getZoomData();
             const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
             const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
@@ -3912,6 +3920,7 @@ class Editor {
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0];
         }
         if (this.editorContainerDiv) {
+            this.editorContainerDiv.style.overflow = zoomData.currentZoomScale === 1 ? "hidden" : "auto";
             const containerWidth = this.editorContainerDiv.offsetWidth;
             const containerHeight = this.editorContainerDiv.offsetHeight;
             let hpadding = 0;
@@ -3980,6 +3989,7 @@ class Editor {
         window.addEventListener("resize", (e) => {
             if (this.autoResize) {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+                this.handleZoomAfterContentUpdate();
             }
         });
     }

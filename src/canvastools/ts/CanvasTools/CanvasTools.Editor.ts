@@ -971,7 +971,7 @@ export class Editor {
 
     private handleZoomAfterContentUpdate(): void {
         // check if the editor needs to be zoomed based on previous content source.
-        if (this.zoomManager.isZoomEnabled && !this.zoomManager.resetZoomOnContentLoad) {
+        if (this.zoomManager.isZoomEnabled) {
             const zoomData = this.zoomManager.getZoomData();
             const scaledFrameWidth = this.frameWidth * zoomData.currentZoomScale;
             const scaledFrameHeight = this.frameHeight * zoomData.currentZoomScale;
@@ -992,6 +992,8 @@ export class Editor {
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
         }
         if (this.editorContainerDiv) {
+            // scroll
+            this.editorContainerDiv.style.overflow = zoomData.currentZoomScale === 1 ? "hidden" : "auto";
             const containerWidth = this.editorContainerDiv.offsetWidth;
             const containerHeight = this.editorContainerDiv.offsetHeight;
 
@@ -1087,6 +1089,7 @@ export class Editor {
         window.addEventListener("resize", (e) => {
             if (this.autoResize) {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+                this.handleZoomAfterContentUpdate();
             }
         });
     }
