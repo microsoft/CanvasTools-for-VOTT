@@ -3814,11 +3814,11 @@ class Editor {
         if (imgRatio > containerRatio) {
             vpadding = (containerHeight - containerWidth / imgRatio) / 2;
             this.editorDiv.style.height = `calc(100% - ${vpadding * 2}px)`;
-            this.editorDiv.style.width = "calc(100%)";
+            this.editorDiv.style.width = "";
         }
         else {
             hpadding = (containerWidth - containerHeight * imgRatio) / 2;
-            this.editorDiv.style.height = "calc(100%)";
+            this.editorDiv.style.height = "";
             this.editorDiv.style.width = `calc(100% - ${hpadding * 2}px)`;
         }
         this.editorDiv.style.padding = `${vpadding}px ${hpadding}px`;
