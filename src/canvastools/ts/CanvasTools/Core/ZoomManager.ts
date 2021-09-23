@@ -149,12 +149,15 @@ export class ZoomManager {
         const zoomData = this.getZoomData();
 
         let updatedZoomScale;
-        if (newScale !== undefined) {
+        if (newScale) {
             updatedZoomScale = newScale;
-        } else if (zoomType === ZoomDirection.In) {
-            updatedZoomScale = this.currentZoomScale + this.zoomScale;
-        } else if (zoomType === ZoomDirection.Out) {
-            updatedZoomScale = this.currentZoomScale - this.zoomScale;
+        } else {
+            if (zoomType === ZoomDirection.In) {
+                updatedZoomScale = this.currentZoomScale + this.zoomScale;
+            }
+            if (zoomType === ZoomDirection.Out) {
+                updatedZoomScale = this.currentZoomScale - this.zoomScale;
+            }
         }
 
         if (updatedZoomScale >= this.minZoomScale && updatedZoomScale <= this.maxZoomScale) {
