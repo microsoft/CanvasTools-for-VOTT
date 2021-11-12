@@ -135,6 +135,10 @@
     pointer-events: none;
 }
 
+.midpointStyle {
+    stroke-width: 2;
+}
+
 .anchorStyle {
     stroke-width: 2;
 }
@@ -184,6 +188,11 @@
     fill: var(--default-color-accent);
 }
 
+.midpointStyle {
+    stroke: none;
+    fill: none;
+}
+
 .anchorStyle {
     stroke: var(--default-color-dark);
     fill: var(--default-color-pure);
@@ -191,6 +200,11 @@
 
 .regionStyle:hover .anchorStyle {
     stroke: var(--default-color-white);
+}
+
+.regionStyle:hover .midpointStyle {
+    stroke: var(--default-color-white);
+    fill: var(--default-color-white);
 }
 
 .anchorStyle.ghost,

@@ -107,14 +107,14 @@ export class AnchorsElement extends AnchorsComponent {
      * Creates a collection on anchors.
      */
     protected buildAnchors() {
-        this.buildPolylineAnchors();
+        this.buildPolygonAnchors();
         super.buildAnchors();
     }
 
     /**
      * Creates a collection of anchor points.
      */
-    protected buildPolylineAnchors() {
+    protected buildPolygonAnchors() {
         const pointsData = [];
         this.regionData.points.forEach((p) => {
             pointsData.push(p.x, p.y);

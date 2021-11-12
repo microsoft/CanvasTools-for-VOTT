@@ -145,6 +145,39 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         return area;
     }
 
+    public getLineSegments(): Array<[Point2D, Point2D]> {
+        const points = this.regionPoints;
+        if (points.length < 2) {
+            return []
+        }
+        if (points.length === 2) {
+            return [[points[0], points[1]]]
+        }
+        const segments = [];
+        const pointsLength = points.length;
+        const loopLength = pointsLength - 1;
+        for (let i = 0; i < loopLength; i++) {
+            const nextPointIdx = i + 1;
+            if (nextPointIdx < pointsLength) {
+                segments.push([points[i], points[nextPointIdx]])
+            }
+        }
+        if (this.regionType == RegionDataType.Polygon) {
+            // closing line segment from last to first point
+            segments.push([points[pointsLength - 1], points[0]])
+        }
+        return segments;
+    }
+
+    public getLineMidpoints(): Point2D[] {
+        const lines = this.getLineSegments();
+        return lines.map(line => {
+            const x = line[0].x - ((line[0].x - line[1].x) / 2);
+            const y = line[0].y - ((line[0].y - line[1].y) / 2);
+            return new Point2D(x, y);
+        });
+    }
+
     /**
      * Gets the bounding box size of the region
      */
