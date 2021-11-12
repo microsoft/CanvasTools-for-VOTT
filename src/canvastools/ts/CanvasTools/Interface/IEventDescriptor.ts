@@ -3,7 +3,7 @@
  * @remarks Used as an array type to specify a collection of listeners that should
  * added to each of the elements in another array.
  */
-export interface IEventDescriptor {
+ export interface IEventDescriptor<T extends PointerEvent | MouseEvent | KeyboardEvent | WheelEvent> {
     /**
      * Event name used in the `addEventListener` method
      */
@@ -13,7 +13,7 @@ export interface IEventDescriptor {
      * Event listener passed to the `addEventListener` method
      * @param e - Event object of specified type
      */
-    listener: (e: PointerEvent | MouseEvent | KeyboardEvent | WheelEvent) => void;
+    listener: (e: T) => void;
 
     /**
      * Event broadcaster on which event listener should be subscribed
@@ -25,3 +25,10 @@ export interface IEventDescriptor {
      */
     bypass: boolean;
 }
+
+export interface IMouseEventDescriptor extends IEventDescriptor<MouseEvent> {}
+export interface IPointerEventDescriptor extends IEventDescriptor<PointerEvent> {}
+export interface IKeyboardEventDescriptor extends IEventDescriptor<KeyboardEvent> {}
+export interface IWheelEventDescriptor extends IEventDescriptor<WheelEvent> {}
+
+export type EventListeners = Array<IMouseEventDescriptor | IPointerEventDescriptor | IKeyboardEventDescriptor | IWheelEventDescriptor>;

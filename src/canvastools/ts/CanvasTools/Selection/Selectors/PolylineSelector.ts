@@ -2,7 +2,7 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData, RegionDataType } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { IMovable } from "../../Interface/IMovable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
@@ -168,7 +168,7 @@ export class PolylineSelector extends Selector {
         this.node.add(this.nextSegment);
         this.node.add(this.nextPoint);
 
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
             { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
             { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },
@@ -297,6 +297,10 @@ export class PolylineSelector extends Selector {
      */
     private submitPolyline() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
+            const points = this.getPolylinePoints();
+            if (points.length <= 0) {
+                return;
+            }
             const box = this.polyline.getBBox();
 
             this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height,

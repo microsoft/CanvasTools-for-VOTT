@@ -5,7 +5,7 @@
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
   "scripts": {
-    "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && cpx ./src/canvastools/ts/*.d.ts ./lib/js/ && tsc --project ./tsconfig.bundle.json",
+    "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && cpx ./types/*.d.ts ./lib/js/ && tsc --project ./tsconfig.bundle.json",
     "prepare": "npm run clean-dist && npm run clean-lib && npm run bundle-lib && npm run webpack-dist",
     "webpack-dist-prod": "webpack --config webpack.config.js --env.mode=prod",
     "webpack-dist-prod-min": "webpack --config webpack.config.js --env.mode=prod-min",
@@ -17,9 +17,8 @@
     "clean-dist": "del-cli ./dist/",
     "clean-lib": "del-cli ./lib/",
     "plato-report": "./node_modules/.bin/es6-plato -r -d ./plato-report lib",
-    "start": "npm run build && webpack-dev-server --config webpack.config.js --env.mode=prod",
+    "start": "webpack-dev-server --config webpack.config.js",
     "build": "npm run bundle-lib && webpack --config webpack.config.js --env.mode=prod && copyfiles -f dist/ct.js samples/shared/js/",
-    "watch": "onchange src/canvastools/ts/**/*.ts src/canvastools/css/canvastools.css -- npm run start",
     "test": "jest",
     "lint": "tslint src/**/*.ts --exclude **/*.d.ts",
     "lintfix": "tslint src/**/*.ts --exclude **/*.d.ts --fix"
@@ -53,7 +52,6 @@
     "handlebars": ">=4.5.3",
     "imports-loader": "^0.8.0",
     "jest": "^25.1.0",
-    "onchange": "^6.1.0",
     "serialize-javascript": ">=3.1.0",
     "style-loader": "^0.23.1",
     "ts-jest": "^25.2.0",

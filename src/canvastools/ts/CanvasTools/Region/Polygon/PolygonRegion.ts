@@ -7,6 +7,7 @@ import { RegionComponent } from "../Component/RegionComponent";
 import { Region } from "../Region";
 import { AnchorsElement } from "./AnchorsElement";
 import { DragElement } from "./DragElement";
+import { MidpointElement } from "./MidpointElement";
 import { TagsElement } from "./TagsElement";
 
 /**
@@ -17,7 +18,12 @@ export class PolygonRegion extends Region {
      * Reference to the internal AnchorsElement.
      */
     private anchorNode: AnchorsElement;
-
+    
+    /**
+     * Reference to midpoint node
+     */
+    private midpointNode: MidpointElement; 
+    
     /**
      * Reference to the internal DragElement.
      */
@@ -103,6 +109,7 @@ export class PolygonRegion extends Region {
         this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID,
                                         this.styleSheet, this.tagsUpdateOptions);
         this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, this.callbacks);
+        this.midpointNode = new MidpointElement(paper, this.paperRect, this.regionData, this.callbacks);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(this.toolTip as any);
@@ -110,7 +117,8 @@ export class PolygonRegion extends Region {
         this.node.add(this.dragNode.node);
         this.node.add(this.tagsNode.node);
         this.node.add(this.anchorNode.node);
+        this.node.add(this.midpointNode.node);
 
-        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode);
+        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode, this.midpointNode);
     }
 }

@@ -2,7 +2,7 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
 import { IPoint2D } from "../../Interface/IPoint2D";
@@ -157,7 +157,7 @@ export class RectSelector extends Selector {
         this.node.add(this.crossB.node);
         this.node.add(this.selectionBox.node);
 
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
             { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
             { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },

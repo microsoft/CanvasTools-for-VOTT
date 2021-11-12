@@ -2,7 +2,7 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData, RegionDataType } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { IMovable } from "../../Interface/IMovable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
@@ -228,7 +228,7 @@ export class PolygonSelector extends Selector {
         this.node.add(this.nextSegment);
         this.node.add(this.nextPoint);
 
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             {
                 event: "pointerenter",
                 base: this.parentNode,

@@ -2,7 +2,7 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { RegionComponent } from "./RegionComponent";
@@ -302,7 +302,7 @@ export abstract class AnchorsComponent extends RegionComponent {
      * Subscribe event listeners on the ghost anchor
      */
     protected subscribeGhostToEvents() {
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             {
                 event: "pointerenter",
                 base: this.ghostAnchor.node,
