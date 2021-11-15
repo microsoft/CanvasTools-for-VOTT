@@ -7,6 +7,7 @@ import { IRegionsManagerCallbacks } from "../Interface/IRegionsManagerCallbacks"
 import { ITagsUpdateOptions } from "../Interface/ITagsUpdateOptions";
 import { ZoomManager } from "./../Core/ZoomManager";
 import { RegionComponent } from "./Component/RegionComponent";
+import { PathRegion } from "./Path/PathRegion";
 import { PointRegion } from "./Point/PointRegion";
 import { PolygonRegion } from "./Polygon/PolygonRegion";
 import { PolylineRegion } from "./Polyline/PolylineRegion";
@@ -176,6 +177,8 @@ export class RegionsManager {
             this.addRectRegion(id, regionData, tagsDescriptor);
         } else if (regionData.type === RegionDataType.Polygon) {
             this.addPolygonRegion(id, regionData, tagsDescriptor);
+        } else if (regionData.type === RegionDataType.Path) {
+            this.addPathRegion(id, regionData, tagsDescriptor);
         }
         this.sortRegionsByArea();
         if (this.regionAnnouncer) {
@@ -238,6 +241,21 @@ export class RegionsManager {
         this.menu.hide();
 
         const region = new PolygonRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
+                                         this.tagsUpdateOptions);
+
+        this.registerRegion(region);
+    }
+
+    /**
+     * Add new path region to the manager.
+     * @param id - The region ID.
+     * @param regionData - The `RegionData` object defining region.
+     * @param tagsDescriptor - The tags descriptor object.
+     */
+     public addPathRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
+        this.menu.hide();
+
+        const region = new PathRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
                                          this.tagsUpdateOptions);
 
         this.registerRegion(region);

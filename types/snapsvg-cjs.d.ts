@@ -64,6 +64,8 @@ declare namespace Snap {
 
     export function closest(x: number, y: number, X: number, Y: number): boolean;
 
+    export const path: Path;
+
     export interface RGB {
         r:number;
         g:number;

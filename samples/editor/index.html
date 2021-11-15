@@ -68,7 +68,9 @@
         const toolbarContainer = document.getElementById("toolbarDiv");
 
         // Init the editor with toolbar.
-        const editor = new CanvasTools.Editor(editorContainer).api;
+        const editorCore = new CanvasTools.Editor(editorContainer)
+        editorCore.enablePathRegions(true);
+        const editor = editorCore.api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
         let incrementalRegionID = 100;

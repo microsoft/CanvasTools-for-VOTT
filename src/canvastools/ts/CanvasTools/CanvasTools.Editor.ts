@@ -792,6 +792,16 @@ export class Editor {
     }
 
     /**
+     * Enable path regions
+     * 
+     * @remarks - Any polygon region created by the editor will become a path region (allowing curved shapes) while this setting is enabled.
+     * @param enable - The new enabled state
+     */
+    public enablePathRegions(enable: boolean) {
+        ConfigurationManager.isPathRegionEnabled = enable;
+    }
+
+    /**
      * Resize editor to new width and height.
      * @remarks - Use if the `autoResize` is `false`.
      * @param containerWidth - The new container width.

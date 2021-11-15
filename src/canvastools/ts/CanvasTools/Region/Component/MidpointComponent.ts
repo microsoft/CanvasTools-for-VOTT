@@ -81,9 +81,13 @@ export abstract class MidpointComponent extends RegionComponent {
     this.midpointElements = [];
   }
 
-  protected buildMidpoints(regionMidpoints: Point2D[]) {
+  protected buildMidpoints(regionMidpoints: Array<Point2D | undefined>) {
     this.teardownMidpoints();
     regionMidpoints.forEach((point, index) => {
+      if (this.regionData.bezierControls[index]) {
+        // don't draw midpoints for curved lines
+        return;
+      }
       const midpoint = this.createMidpoint(this.paper, point.x, point.y);
       this.midpointElements.push(midpoint);
       this.midpointNode.add(midpoint);
@@ -92,8 +96,9 @@ export abstract class MidpointComponent extends RegionComponent {
   }
 
   public redraw() {
+    const bezierControls = this.regionData.bezierControls;
     const regionMidpoints = this.regionData.getLineMidpoints();
-    if (this.midpointElements.length !== regionMidpoints.length) {
+    if (this.midpointElements.length !== (regionMidpoints.length - bezierControls.length)) {
       // if # of midpoints has changed, rebuild them
       window.requestAnimationFrame(() => {
         this.buildMidpoints(regionMidpoints);
@@ -119,22 +124,12 @@ export abstract class MidpointComponent extends RegionComponent {
       {
         event: "pointerenter",
         base: midpoint.node,
-        listener: (e: PointerEvent) => {
-          e.stopPropagation();
+        listener: () => {
           console.log(`Midpoint entered. Index = ${index}`);
           this.activeMidpointIndex = index;
         },
         bypass: false
-      },
-      {
-        event: "click",
-        base: midpoint.node,
-        listener: (e: MouseEvent) => {
-          e.stopPropagation();
-          console.log("Midpoint component clicked", e);
-        },
-        bypass: false,
-      },
+      }
     ];
     this.subscribeToEvents(listeners);
   }

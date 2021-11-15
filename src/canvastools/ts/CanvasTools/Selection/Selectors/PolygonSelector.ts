@@ -3,12 +3,11 @@ import { Rect } from "../../Core/Rect";
 import { RegionData, RegionDataType } from "../../Core/RegionData";
 
 import { EventListeners } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
-import { IPoint2D } from "../../Interface/IPoint2D";
 import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
+import { ConfigurationManager } from "../../Core/ConfigurationManager";
 
 /**
  * The selector to define a polygon-region.
@@ -359,8 +358,9 @@ export class PolygonSelector extends Selector {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
 
+            const regionType = (ConfigurationManager.isPathRegionEnabled) ? RegionDataType.Path : RegionDataType.Polygon;
             this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height,
-                                          this.points.map((p) => p.copy()), RegionDataType.Polygon));
+                                          this.points.map((p) => p.copy()), regionType));
         }
         this.reset();
     }
