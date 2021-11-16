@@ -22,6 +22,10 @@
             <select id="imageSelect">
             </select>
         </div>
+        <div>
+            <label for="enablePathRegions">Enable path regions</label>
+            <input type="checkbox" id="enablePathRegions" name="enablePathRegions" checked />
+        </div>
     </div>
 </body>
 <script src="./../shared/js/ct.js"></script>
@@ -68,7 +72,9 @@
         const toolbarContainer = document.getElementById("toolbarDiv");
 
         // Init the editor with toolbar.
-        const editor = new CanvasTools.Editor(editorContainer).api;
+        const editorCore = new CanvasTools.Editor(editorContainer)
+        editorCore.enablePathRegions(true);
+        const editor = editorCore.api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
         let incrementalRegionID = 100;
@@ -180,6 +186,10 @@
         loadImage(images[imageIndex].path, (image) => {
             editor.addContentSource(image);
         });
+
+        initPathRegionCheckbox((isEnabled) => {
+            editorCore.enablePathRegions(isEnabled);
+        });
     });
 
     // Builds select element using provided list of images 
@@ -209,6 +219,13 @@
             onready(e.target);                
         });
         image.src = path;
+    }
+
+    function initPathRegionCheckbox(toggle) {
+        const checkboxElem = document.getElementById("enablePathRegions");
+        checkboxElem.addEventListener("change", (e) => {
+            toggle(!!e.checked);
+        });
     }
 </script>
 
