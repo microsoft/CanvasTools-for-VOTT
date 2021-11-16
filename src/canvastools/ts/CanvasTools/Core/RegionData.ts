@@ -1,4 +1,6 @@
+import { createLineSegment } from "../Core/Utils/createLineSegment";
 import { ICubicBezierControl } from "../Interface/ICubicBezierControl";
+import { ILineSegment } from "../Interface/ILineSegment";
 import { IMovable } from "../Interface/IMovable";
 import { IPoint2D } from "../Interface/IPoint2D";
 import { IRect } from "../Interface/IRect";
@@ -403,41 +405,28 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             this.regionPoints.map((p) => p.copy()), this.regionType, this.regionBezierControls);
     }
 
-    public getLineSegments(): Array<[Point2D, Point2D]> {
+    public getLineSegments(): ILineSegment[] {
         const points = this.regionPoints;
         if (points.length < 2) {
             return []
         }
         if (points.length === 2) {
-            return [[points[0], points[1]]]
+            return [createLineSegment(points[0], points[1])]
         }
-        const segments: Array<[Point2D, Point2D]> = [];
+        const segments: ILineSegment[] = [];
         const pointsLength = points.length;
         const loopLength = pointsLength - 1;
         for (let i = 0; i < loopLength; i++) {
             const nextPointIdx = i + 1;
             if (nextPointIdx < pointsLength) {
-                segments.push([points[i], points[nextPointIdx]])
+                segments.push(createLineSegment(points[i], points[nextPointIdx]));
             }
         }
         if ([RegionDataType.Polygon, RegionDataType.Path].includes(this.regionType)) {
             // closing line segment from last to first point
-            segments.push([points[pointsLength - 1], points[0]])
+            segments.push(createLineSegment(points[pointsLength - 1], points[0]));
         }
         return segments;
-    }
-
-    /**
-     * Calculate midpoints between points in region.
-     * @returns Array of midpoint Point2D objects.
-     */
-    public getLineMidpoints(): Point2D[] {
-        const lines = this.getLineSegments();
-        return lines.map(line => {
-            const x = line[0].x - ((line[0].x - line[1].x) / 2);
-            const y = line[0].y - ((line[0].y - line[1].y) / 2);
-            return new Point2D(x, y);
-        });
     }
 
     /**
@@ -472,19 +461,17 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             const line = lineSegments[i];
             if (i === 0) {
                 // move to first point
-                pathSegments.push(`M${line[0].x},${line[0].y}`);
+                pathSegments.push(`M${line.start.x},${line.start.y}`);
             }
             if (controlPoints[i]) {
                 // curved line
-                pathSegments.push(`C${controlPoints[i].c1.x},${controlPoints[i].c1.y} ${controlPoints[i].c2.x},${controlPoints[i].c2.y} ${line[1].x},${line[1].y}`);
+                pathSegments.push(`C${controlPoints[i].c1.x},${controlPoints[i].c1.y} ${controlPoints[i].c2.x},${controlPoints[i].c2.y} ${line.end.x},${line.end.y}`);
             } else {
                 // straight line
-                pathSegments.push(`L${line[1].x},${line[1].y}`);
+                pathSegments.push(`L${line.end.x},${line.end.y}`);
             }
         }
-        const path = pathSegments.join(" ");
-        console.log(`regionData to path: ${path}`);
-        return path;
+        return pathSegments.join(" ");
     }
 
     /**

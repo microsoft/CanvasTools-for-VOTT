@@ -23,7 +23,8 @@ export class MidpointElement extends MidpointComponent {
     private createBezierControl(e: MouseEvent, index: number) {
         const rd = this.regionData.copy();
         const bezierControls = rd.bezierControls;
-        bezierControls[index] = new CubicBezierControl({ x: 50, y: 50 }, { x: 50, y: 50 });
+        const line = rd.getLineSegments()[index];
+        bezierControls[index] = new CubicBezierControl(line.pointsAlongLine.oneThird, line.pointsAlongLine.twoThird);
         rd.setBezierControls(bezierControls);
         this.callbacks.onChange(this, rd);
     }
@@ -32,14 +33,12 @@ export class MidpointElement extends MidpointComponent {
    * Add event listeners to a midpoint's DOM node
    */
     protected subscribeMidpointToEvents(midpoint: Snap.Element, index: number) {
-        super.subscribeMidpointToEvents(midpoint, index);
         const listeners: EventListeners = [
             {
                 event: "click",
                 base: midpoint.node,
                 listener: (e: MouseEvent) => {
                     e.stopPropagation();
-                    console.log("Midpoint component clicked", e);
                     this.createBezierControl(e, index);
                 },
                 bypass: false,
