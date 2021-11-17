@@ -1,5 +1,4 @@
 import { ICubicBezierControl } from "../Interface/ICubicBezierControl";
-import { IPoint2D } from "../Interface/IPoint2D";
 import { IRect } from "../Interface/IRect";
 import { Point2D } from "./Point2D";
 
@@ -11,17 +10,17 @@ export class CubicBezierControl {
     public c2: Point2D;
 
     /**
-     * Creates a new point based on extracting specific properties from any provided object
-     * @param data - An `IPoint` object with `x` and `y` numeric properties
-     * @returns A new `Point2D` object
+     * Creates a new cubic bezier control based on extracting specific properties from any provided object
+     * @param data - An `ICubicBezierControl` object with `c1` and `c2` point properties
+     * @returns A new `CubicBezierControl` object
      */
-    public static BuildFromJSON(control1: IPoint2D, control2: IPoint2D): CubicBezierControl {
-        return new CubicBezierControl(control1, control2);
+    public static BuildFromJSON({ c1, c2 }: ICubicBezierControl): CubicBezierControl {
+        return new CubicBezierControl({ c1, c2 });
     }
 
-    constructor(control1: IPoint2D, control2: IPoint2D) {
-        this.c1 = new Point2D(control1);
-        this.c2 = new Point2D(control2);
+    constructor({ c1, c2 }: ICubicBezierControl) {
+        this.c1 = new Point2D(c1);
+        this.c2 = new Point2D(c2);
     }
 
     /**
@@ -31,11 +30,12 @@ export class CubicBezierControl {
      * @returns A new `CubicBezierControl` object, with control coordinates bounded to the box
      */
     public boundToRect(r: IRect): CubicBezierControl {
-        return new CubicBezierControl(this.c1.boundToRect(r), this.c2.boundToRect(r));
+        return new CubicBezierControl({ c1: this.c1.boundToRect(r), c2: this.c2.boundToRect(r) });
     }
 
     /**
-     * Shifts the control by specified delta
+     * Shifts the control by specified delta.
+     * Modifies control in place.
      * @param dx - Delta to be added to the `x`-coordinate
      * @param dy - Delta to be added to the `y`-coordinate
      */
@@ -49,7 +49,7 @@ export class CubicBezierControl {
      * @returns A new `Point2D` object with copied coordinates
      */
     public copy(): CubicBezierControl {
-        return new CubicBezierControl(this.c1, this.c2);
+        return new CubicBezierControl(this);
     }
 
     /**

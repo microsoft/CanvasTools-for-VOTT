@@ -5,10 +5,10 @@ import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { RegionComponent } from "../Component/RegionComponent";
 import { DragElement } from "../Polygon/DragElement";
-import { TagsElement } from "./TagsElement";
 import { Region } from "../Region";
 import { AnchorsElement } from "./AnchorsElement";
 import { MidpointElement } from "./MidpointElement";
+import { TagsElement } from "./TagsElement";
 
 /**
  * The Path-type region class.

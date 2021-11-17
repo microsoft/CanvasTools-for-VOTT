@@ -1,3 +1,4 @@
+import { CubicBezierIndex } from "../../Core/CubicBezierIndex";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 import { ILineSegment } from "../../Interface/ILineSegment";
@@ -13,7 +14,10 @@ export abstract class MidpointComponent extends RegionComponent {
    */
   public static DEFAULT_RADIUS: number = 6;
 
-  protected midpointElements: Snap.Element[];
+  /**
+   * Midpoint elements mapped to line segment indices.
+   */
+  protected midpointElements: Record<number, Snap.Element>;
 
   /**
    * Grouping element for midpoints.
@@ -36,7 +40,7 @@ export abstract class MidpointComponent extends RegionComponent {
     super(paper, paperRect, regionData, callbacks);
     this.node = paper.g();
     this.node.addClass("midpointLayer");
-    this.midpointElements = [];
+    this.midpointElements = {};
     this.midpointNode = this.paper.g();
     this.node.add(this.midpointNode);
     const regionLineSegments = this.regionData.getLineSegments();
@@ -67,50 +71,86 @@ export abstract class MidpointComponent extends RegionComponent {
   }
 
   protected teardownMidpoints() {
-    this.midpointElements.forEach(midpointElement => {
+    Object.values(this.midpointElements).forEach(midpointElement => {
       midpointElement.remove();
     });
-    this.midpointElements = [];
+    this.midpointElements = {};
   }
 
   protected buildMidpoints(regionLineSegments: ILineSegment[]) {
     this.teardownMidpoints();
+    const bezierControls = this.regionData.bezierControls;
     regionLineSegments.forEach((line, index) => {
-      if (this.regionData.bezierControls[index]) {
+      if (bezierControls[index]) {
         // only create midpoints for straight lines
         return;
       }
       const midpoint = this.createMidpoint(this.paper, line.pointsAlongLine.half.x, line.pointsAlongLine.half.y);
-      this.midpointElements.push(midpoint);
+      this.midpointElements[index] = midpoint;
       this.midpointNode.add(midpoint);
       this.subscribeMidpointToEvents(midpoint, index);
+    });
+  }
+
+  private updateMidpoints(bezierControls: CubicBezierIndex, regionLineSegments: ILineSegment[]) {
+    const toDelete: number[] = [];
+    const toAdd: number[] = [];
+    const toUpdate: number[] = [];
+    // first check each line segment
+    regionLineSegments.forEach((_line, idx) => {
+      // this line segment has no bezier control data and doesn't have a midpoint element
+      // need to add one
+      if (!bezierControls[idx] && !this.midpointElements[idx]) {
+        toAdd.push(idx);
+      // this line segment has no bezier control data and does have a midpoint element
+      // need to update it
+      } else if (!bezierControls[idx] && this.midpointElements[idx]) {
+        toUpdate.push(idx);
+      // this line segment does have bezier control data and does have a midpoint element
+      // need to remove it
+      } else if (bezierControls[idx] && this.midpointElements[idx]) {
+        toDelete.push(idx);
+      }
+    });
+    // next check existing midpoint elements to see if
+    // any are mapped to line segment that's been removed
+    Object.entries(this.midpointElements).forEach(([idx]) => {
+      if (!regionLineSegments[idx]) {
+        toDelete.push(Number(idx));
+      }
+    });
+    toDelete.forEach((idx) => {
+      this.midpointElements[idx].remove();
+      delete this.midpointElements[idx];
+    });
+    toAdd.forEach((idx) => {
+      if (this.midpointElements[idx]) {
+        this.midpointElements[idx].remove();
+      }
+      const midpoint = this.createMidpoint(this.paper, regionLineSegments[idx].pointsAlongLine.half.x, regionLineSegments[idx].pointsAlongLine.half.y);
+      this.midpointElements[idx] = midpoint;
+      this.midpointNode.add(midpoint);
+      this.subscribeMidpointToEvents(midpoint, idx);
+    });
+    toUpdate.forEach((idx) => {
+      const line = regionLineSegments[idx];
+      this.midpointElements[idx].attr({
+        cx: line.pointsAlongLine.half.x,
+        cy: line.pointsAlongLine.half.y,
+      });
     });
   }
 
   public redraw() {
     const bezierControls = this.regionData.bezierControls;
     const regionLineSegments = this.regionData.getLineSegments();
-    const straightLineCount = regionLineSegments.length - bezierControls.length;
-    if (this.midpointElements.length !== straightLineCount) {
-      // # of straight lines has changed, rebuild midpoints
-      window.requestAnimationFrame(() => {
-        this.buildMidpoints(regionLineSegments);
-      });
-    } else {
-      // update midpoints in place
-      window.requestAnimationFrame(() => {
-          regionLineSegments.forEach((line, index) => {
-              this.midpointElements[index].attr({
-                  cx: line.pointsAlongLine.half.x,
-                  cy: line.pointsAlongLine.half.y,
-              });
-          });
-      });
-    }
-  }
+    window.requestAnimationFrame(() => {
+      this.updateMidpoints(bezierControls, regionLineSegments);
+    });
+  };
 
   /**
    * Add event listeners to a midpoint's DOM node
    */
-   protected abstract subscribeMidpointToEvents(midpoint: Snap.Element, index: number): void;
+  protected abstract subscribeMidpointToEvents(midpoint: Snap.Element, index: number): void;
 }

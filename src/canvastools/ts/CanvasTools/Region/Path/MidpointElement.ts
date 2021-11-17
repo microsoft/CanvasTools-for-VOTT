@@ -20,12 +20,10 @@ export class MidpointElement extends MidpointComponent {
         super(paper, paperRect, regionData, callbacks);
     }
 
-    private createBezierControl(e: MouseEvent, index: number) {
+    private createBezierControl(index: number) {
         const rd = this.regionData.copy();
-        const bezierControls = rd.bezierControls;
         const line = rd.getLineSegments()[index];
-        bezierControls[index] = new CubicBezierControl(line.pointsAlongLine.oneThird, line.pointsAlongLine.twoThird);
-        rd.setBezierControls(bezierControls);
+        rd.addBezierControl(index, new CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird }))
         this.callbacks.onChange(this, rd);
     }
 
@@ -39,7 +37,7 @@ export class MidpointElement extends MidpointComponent {
                 base: midpoint.node,
                 listener: (e: MouseEvent) => {
                     e.stopPropagation();
-                    this.createBezierControl(e, index);
+                    this.createBezierControl(index);
                 },
                 bypass: false,
             },

@@ -1,4 +1,4 @@
-import { createLineSegment } from "../Core/Utils/createLineSegment";
+import { calculateLineSegments } from "../Core/Utils/calculateLineSegments";
 import { ICubicBezierControl } from "../Interface/ICubicBezierControl";
 import { ILineSegment } from "../Interface/ILineSegment";
 import { IMovable } from "../Interface/IMovable";
@@ -6,14 +6,13 @@ import { IPoint2D } from "../Interface/IPoint2D";
 import { IRect } from "../Interface/IRect";
 import { IRegionData } from "../Interface/IRegionData";
 import { IResizable } from "../Interface/IResizable";
+import { RegionDataType } from "../Interface/RegionDataType";
 import { CubicBezierControl } from "./CubicBezierControl";
+import { CubicBezierIndex } from "./CubicBezierIndex";
 import { Point2D } from "./Point2D";
 import { Rect } from "./Rect";
 
-/**
- * Defines supported region types.
- */
-export enum RegionDataType { Point = "point", Rect = "rect", Polyline = "polyline", Polygon = "polygon", Path = "Path" }
+export { RegionDataType };
 
 /**
  * Represents region meta-data, including position, size, points and type
@@ -62,9 +61,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         points: Point2D[],
     ): RegionData {
         const region = new RegionData(x, y, width, height,
-            [new Point2D(x, y), new Point2D(x + width, y),
-            new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Polygon);
-        region.points = points;
+            points.map((p) => new Point2D(p.x, p.y)), RegionDataType.Polygon);
         return region;
     }
 
@@ -79,7 +76,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * @param width - `width` of the bounding rect
      * @param height - `height` of the bounding rect
      * @param points - the points the path
-     * @param bezierControls - the bezier controls of the path
+     * @param bezierControls - Map of bezier controls to lines in the path
      * @returns A new `RegionData` object
      */
     public static BuildPathRegionData(
@@ -88,13 +85,11 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         width: number,
         height: number,
         points: Point2D[],
-        bezierControls: CubicBezierControl[]
+        bezierControls: Record<number, CubicBezierControl>
     ): RegionData {
         const region = new RegionData(x, y, width, height,
-            [new Point2D(x, y), new Point2D(x + width, y),
-            new Point2D(x + width, y + height), new Point2D(x, y + height)], RegionDataType.Path,
-            bezierControls);
-        region.points = points;
+            points.map((p) => new Point2D(p.x, p.y)), RegionDataType.Path,
+            CubicBezierIndex.buildFromJSON(bezierControls));
         return region;
     }
 
@@ -106,7 +101,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     public static BuildFromJson(data: IRegionData): RegionData {
         return new RegionData(data.x, data.y, data.width, data.height,
             data.points.map((p) => new Point2D(p.x, p.y)),
-            data.type, data.bezierControls.map((c) => new CubicBezierControl(c.c1, c.c2)));
+            data.type, CubicBezierIndex.buildFromJSON(data.bezierControls));
     }
 
     /**
@@ -202,23 +197,19 @@ export class RegionData implements IRegionData, IMovable, IResizable {
 
     /**
      * Sets the array of region points. *Region will be resized and repositioned automatically*
+     *
+     * @deprecated directly setting point arrays does not work with path regions which contain bezier control points
+     * use set/splice methods instead.
      */
     public set points(points: Point2D[]) {
         this.setPoints(points);
     }
 
     /**
-     * Gets the array of bezier control points
+     * Bezier controls mapped to line segment indexes.
      */
-    public get bezierControls(): CubicBezierControl[] {
-        return this.regionBezierControls.map((c) => c.copy());
-    }
-
-    /**
-     * Sets the array of bezier controls. *Region will be resized and repositioned automatically*
-     */
-    public set bezierControls(controls: CubicBezierControl[]) {
-        this.setBezierControls(controls);
+    public get bezierControls() {
+        return this.regionBezierControls.copy();
     }
 
     /**
@@ -231,7 +222,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     protected corner: Point2D;
     protected regionRect: Rect;
     protected regionPoints: Point2D[];
-    protected regionBezierControls: CubicBezierControl[];
+    protected regionBezierControls: CubicBezierIndex;
     protected regionType: RegionDataType;
 
     /**
@@ -243,12 +234,12 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * @param points - Collection of internal region points
      * @param type - `type` of the region from enum `RegionDataType`
      */
-    constructor(x: number, y: number, width: number, height: number, points?: Point2D[], type?: RegionDataType, bezierControls?: CubicBezierControl[]) {
+    constructor(x: number, y: number, width: number, height: number, points?: Point2D[], type?: RegionDataType, bezierControls?: Record<number, CubicBezierControl>) {
         this.corner = new Point2D(x, y);
         this.regionRect = new Rect(width, height);
 
         this.regionPoints = points ?? [];
-        this.regionBezierControls = bezierControls ?? [];
+        this.regionBezierControls = new CubicBezierIndex(bezierControls);
         this.regionType = type ?? RegionDataType.Point;
     }
 
@@ -256,6 +247,15 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         const { x: xmin, y: ymin, height, width } = Snap.path.getBBox(this.toPath());
         this.corner.move(xmin, ymin);
         this.regionRect.resize(width, height);
+    }
+
+    private getLineSegmentCount(): number {
+        const pointCount = this.regionPoints.length;
+        if ([RegionDataType.Polygon, RegionDataType.Path].includes(this.regionType)) {
+            // closing line segment from last to first point
+            return pointCount;
+        }
+        return pointCount - 1;
     }
 
     /**
@@ -280,9 +280,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         this.regionPoints.forEach((p) => {
             p.shift(dx, dy);
         });
-        this.bezierControls.forEach((c) => {
-            c.shift(dx, dy);
-        });
+        this.regionBezierControls = this.regionBezierControls.shift(dx, dy);
     }
 
     /**
@@ -295,16 +293,13 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         const sy = height / this.height;
 
         this.regionRect.resize(width, height);
-        const movePoint = (p: Point2D): void => {
+        const movePoint = (p: Point2D): Point2D => {
             const px = (p.x - this.x) * sx + this.x;
             const py = (p.y - this.y) * sy + this.y;
-            p.move(px, py);
+            return new Point2D(px, py);
         }
-        this.regionPoints.forEach(movePoint);
-        this.bezierControls.forEach(c => {
-            movePoint(c.c1);
-            movePoint(c.c2);
-        });
+        this.regionPoints = this.regionPoints.map(movePoint);
+        this.regionBezierControls = this.regionBezierControls.move(movePoint);
     }
 
     /**
@@ -320,24 +315,97 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     }
 
     /**
-     * Updates the collection of internal points
+     * Removes points from region and, if necessary, inserts new points in their place.
+     * if start is < 0 it is reset to 0.
+     * if start is > region points length it is reset to region points length.
+     * *Region will be resized and repositioned automatically*
+     * @param start The zero-based location in the array from which to start removing points.
+     * @param deleteCount The number of points to remove.
+     * @param points Points to insert into the array in place of the deleted points.
+     */
+    public splicePoints(start: number, deleteCount: number = 0, ...points: IPoint2D[]): void {
+        const pointCount = this.regionPoints.length;
+        const spliceStart = (start < 0) ? start : (start > pointCount) ? pointCount : start;
+        // delete bezier controls mapped to lines which connect to deleted points
+        const bezDeleteIndexes = [];
+        // lines are indexed by the point that they start from.
+        // get line segment of point directly preceding starting point. 
+        if (spliceStart === 0) {
+            // if it's the first point then wrap around to the ending point line segment.
+            bezDeleteIndexes.push(pointCount - 1);
+        } else {
+            bezDeleteIndexes.push(spliceStart - 1);
+        }
+        for (let i = spliceStart; i < (spliceStart + deleteCount); i++) {
+            bezDeleteIndexes.push(i);
+        }
+        this._deleteBezierControls(bezDeleteIndexes);
+        this.regionPoints.splice(spliceStart, deleteCount, ...points.map(p => new Point2D(p)));
+        this.resetBBox();
+    }
+
+    /**
+     * Add or replace bezier controls at the designated index.
+     * *Region will be resized and repositioned automatically*
+     * @param index Line segment index to add the control to.
+     * @param control Bezier control to add.
+     */
+    public addBezierControl(index: number, control: ICubicBezierControl) {
+        this.addBezierControls({ [index]: control });
+    }
+
+    /**
+     * _addBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
+     */
+    private _addBezierControls(controls: Record<number, ICubicBezierControl>) {
+        const lineCount = this.getLineSegmentCount();
+        Object.entries(controls).forEach(([index, control]) => {
+            const iIndex = Number(index);
+            if (iIndex < 0 || iIndex >= lineCount) {
+                return;
+            }
+            this.regionBezierControls[iIndex] = new CubicBezierControl(control);
+        });
+    }
+    /**
+     * Add or replace bezier controls at the designated indexes.
+     * *Region will be resized and repositioned automatically*
+     * @param controls Map of bezier controls to line segment indexes.
+     */
+    public addBezierControls(controls: Record<number, ICubicBezierControl>) {
+        this._addBezierControls(controls);
+        this.resetBBox();
+    }
+
+    /**
+     * _deleteBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
+     */
+    private _deleteBezierControls(index: number | number[]) {
+        const delIndexes = Array.isArray(index) ? index : [index];
+        delIndexes.forEach(i => delete this.regionBezierControls[i]);
+    }
+
+    /**
+     * Delete bezier controls.
+     * *Region will be resized and repositioned automatically*
+     * @param index - `number | number[]` Indexes of bezier controls to delete.
+     */
+    public deleteBezierControls(index: number | number[]) {
+        this._deleteBezierControls(index);
+        this.resetBBox();
+    }
+
+    /**
+     * Updates the collection of internal points.
      * @param points - `IPoint2D[]` collection for the region to serve as the source for the
-     * internal *copy* in the `points` collection
+     * internal *copy* in the `points` collection.
+     * *Region will be resized and repositioned automatically*
+     * 
+     * @deprecated setPoints does not work with path regions which contain bezier control points
+     * use set/splice methods instead
      */
     public setPoints(points: IPoint2D[]) {
         this.regionPoints = points.map((p) => new Point2D(p));
-        this.resetBBox();
-    }
-
-    public setBezierControl(control: ICubicBezierControl, index: number) {
-        if (index >= 0 && index < this.regionBezierControls.length) {
-            this.regionBezierControls[index] = new CubicBezierControl(control.c1, control.c2);
-        }
-        this.resetBBox();
-    }
-
-    public setBezierControls(controls: ICubicBezierControl[]): void {
-        this.regionBezierControls = controls.map((c) => new CubicBezierControl(c.c1, c.c2));
         this.resetBBox();
     }
 
@@ -349,7 +417,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         this.corner = new Point2D(regionData.x, regionData.y);
         this.regionRect = new Rect(regionData.width, regionData.height);
         this.regionPoints = regionData.points.map((p) => new Point2D(p.x, p.y));
-        this.bezierControls = regionData.bezierControls.map((c) => new CubicBezierControl(c.c1, c.c2));
+        this.regionBezierControls = CubicBezierIndex.buildFromJSON(regionData.bezierControls);
     }
 
     /**
@@ -365,7 +433,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         const height = brCorner.y - tlCorner.y;
 
         return new RegionData(tlCorner.x, tlCorner.y, width, height,
-            this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType, this.regionBezierControls.map((c) => c.boundToRect(rect)));
+            this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType, this.regionBezierControls.boundToRect(rect));
     }
 
     /**
@@ -393,7 +461,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         this.corner = scalePoint(this);
         this.regionRect = scaleRect(this);
         this.regionPoints = this.regionPoints.map(scalePoint);
-        this.bezierControls = this.regionBezierControls.map((c) => new CubicBezierControl(scalePoint(c.c1), scalePoint(c.c2)));
+        this.regionBezierControls = this.regionBezierControls.scale(scalePoint);
     }
 
     /**
@@ -402,31 +470,15 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      */
     public copy(): RegionData {
         return new RegionData(this.x, this.y, this.width, this.height,
-            this.regionPoints.map((p) => p.copy()), this.regionType, this.regionBezierControls);
+            this.regionPoints.map((p) => p.copy()), this.regionType, this.regionBezierControls.copy());
     }
 
+    /**
+     * Calculate line segments between each point in the region.
+     * @returns ILineSegment[]
+     */
     public getLineSegments(): ILineSegment[] {
-        const points = this.regionPoints;
-        if (points.length < 2) {
-            return []
-        }
-        if (points.length === 2) {
-            return [createLineSegment(points[0], points[1])]
-        }
-        const segments: ILineSegment[] = [];
-        const pointsLength = points.length;
-        const loopLength = pointsLength - 1;
-        for (let i = 0; i < loopLength; i++) {
-            const nextPointIdx = i + 1;
-            if (nextPointIdx < pointsLength) {
-                segments.push(createLineSegment(points[i], points[nextPointIdx]));
-            }
-        }
-        if ([RegionDataType.Polygon, RegionDataType.Path].includes(this.regionType)) {
-            // closing line segment from last to first point
-            segments.push(createLineSegment(points[pointsLength - 1], points[0]));
-        }
-        return segments;
+        return calculateLineSegments(this.regionPoints, { regionType: this.regionType });
     }
 
     /**
@@ -442,16 +494,12 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * Transform regionData into an SVG Path
      */
     public toPath(): string {
-        const points = this.regionPoints;
-        const pointsLength = this.regionPoints.length;
         const lineSegments = this.getLineSegments();
         const lineSegmentsLength = lineSegments.length;
-        const controlPoints = this.bezierControls;
+        const points = this.regionPoints;
+        const controlPoints = this.regionBezierControls;
 
-        if (pointsLength === 0) {
-            return ""; //
-        }
-        if (pointsLength === 1) {
+        if (points.length === 1) {
             // move to first point and draw a circle of radius 1
             return `M${points[0].x},${points[0].y} m-1,0 a1,1 0 1 0 2,0 a1,1 0 1 0 -2,0`;
         }
@@ -487,9 +535,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             points: this.regionPoints.map((point) => {
                 return { x: point.x, y: point.y };
             }),
-            bezierControls: this.regionBezierControls.map((c) => {
-                return { c1: c.c1, c2: c.c2 }
-            }),
+            bezierControls: this.regionBezierControls.toJSON(),
             type: this.regionType,
         };
     }

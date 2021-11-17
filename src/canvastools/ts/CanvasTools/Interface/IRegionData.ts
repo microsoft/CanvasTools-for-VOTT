@@ -34,9 +34,9 @@ export interface IRegionData extends IPoint2D, IRect {
     points: IPoint2D[];
 
     /**
-     * Bezier curve control points for line segments
+     * Bezier curve controls mapped to line segment indexes
      */
-    bezierControls: ICubicBezierControl[];
+    bezierControls: Record<number, ICubicBezierControl>;
 
     /**
      * The type of the region.

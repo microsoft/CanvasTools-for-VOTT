@@ -230,9 +230,7 @@ export class AnchorsElement extends AnchorsComponent {
         const rd = this.regionData.copy();
         if (this.ghostAnchorAction === GhostAnchorAction.Delete) {
             if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
-                const points = rd.points;
-                points.splice(this.activeAnchorIndex - 1, 1);
-                rd.setPoints(points);
+                rd.splicePoints(this.activeAnchorIndex - 1, 1);
             }
             this.ghostAnchorAction = GhostAnchorAction.None;
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
@@ -260,8 +258,7 @@ export class AnchorsElement extends AnchorsComponent {
                 }
             }
 
-            points.splice(index + 1, 0, point);
-            rd.setPoints(points);
+            rd.splicePoints(index + 1, 0, point);
 
             this.ghostAnchorAction = GhostAnchorAction.Delete;
             this.callbacks.onChange(this, rd, ChangeEventType.MOVEEND);
