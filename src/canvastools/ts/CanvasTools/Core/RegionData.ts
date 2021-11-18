@@ -339,7 +339,20 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         for (let i = spliceStart; i < (spliceStart + deleteCount); i++) {
             bezDeleteIndexes.push(i);
         }
-        this._deleteBezierControls(bezDeleteIndexes);
+        // adjust index of bezier controls based on # of deleted/added points
+        const idxDiff = points.length - deleteCount;
+        const newBezierRecord: Record<number, CubicBezierControl> = {}; 
+        this.regionBezierControls.forEach((control, idx) => {
+            if (bezDeleteIndexes.includes(idx)) {
+                return undefined;
+            }
+            if (idx >= spliceStart) {
+                newBezierRecord[idx + idxDiff] = control.copy();
+                return;
+            }
+            return newBezierRecord[idx] = control.copy();
+        });
+        this.regionBezierControls = new CubicBezierIndex(newBezierRecord);
         this.regionPoints.splice(spliceStart, deleteCount, ...points.map(p => new Point2D(p)));
         this.resetBBox();
     }
