@@ -1,6 +1,7 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
+import { IAnchorMixin } from "../../Interface/IAnchorMixin";
 
 import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
@@ -21,6 +22,8 @@ export abstract class AnchorsComponent extends RegionComponent {
      * Default radius for the ghost anchor, used activate dragging. Can be redefined through CSS styles.
      */
     public static DEFAULT_GHOST_ANCHOR_RADIUS = 7;
+
+    protected mixins: IAnchorMixin[] = [];
 
     /**
      * The array of anchors.
@@ -87,6 +90,7 @@ export abstract class AnchorsComponent extends RegionComponent {
                 });
             });
         }
+        this.mixins.forEach(m => m.redraw());
     }
 
     /**
@@ -119,6 +123,8 @@ export abstract class AnchorsComponent extends RegionComponent {
                 bypass: true,
             },
         ]);
+
+        this.mixins.forEach(m => m.buildAnchors());
     }
 
     /**
