@@ -139,6 +139,11 @@
     stroke-width: 2;
 }
 
+.bezierControlPointTangentStyle,
+.bezierControlPointStyle {
+    stroke-width: 2;
+}
+
 .anchorStyle {
     stroke-width: 2;
 }
@@ -181,6 +186,7 @@
     --default-color-ghost: rgba(255, 255, 255, 0.5);
     --default-color-delete: rgba(216, 24, 65, 1.0);
     --default-color-add: rgba(21, 127, 240, 1.0);
+    --default-color-control: rgb(253, 128, 45);
 }
 
 /* 2.2.1. Shared colors */
@@ -189,6 +195,12 @@
 }
 
 .midpointStyle {
+    stroke: none;
+    fill: none;
+}
+
+.bezierControlPointTangentStyle,
+.bezierControlPointStyle {
     stroke: none;
     fill: none;
 }
@@ -205,6 +217,29 @@
 .regionStyle:hover .midpointStyle {
     stroke: var(--default-color-white);
     fill: var(--default-color-white);
+}
+
+.regionStyle:hover .midpointStyle:hover {
+    stroke: var(--default-color-accent);
+}
+
+.regionStyle.selected .bezierControlPointTangentStyle,
+.regionStyle:hover .bezierControlPointTangentStyle {
+    stroke: var(--default-color-control);
+    stroke-dasharray: 4;
+}
+
+.regionStyle.selected .bezierControlPointStyle,
+.regionStyle:hover .bezierControlPointStyle {
+    stroke: var(--default-color-control);
+    fill: var(--default-color-pure);
+}
+
+.regionStyle.selected .bezierControlPointStyle:hover,
+.regionStyle:hover .bezierControlPointStyle:hover {
+    cursor: var(--cursor-resize);
+    stroke: var(--default-color-control);
+    fill: var(--default-color-control);
 }
 
 .anchorStyle.ghost,

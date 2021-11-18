@@ -350,14 +350,14 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * @param index Line segment index to add the control to.
      * @param control Bezier control to add.
      */
-    public addBezierControl(index: number, control: ICubicBezierControl) {
-        this.addBezierControls({ [index]: control });
+    public setBezierControl(index: number, control: ICubicBezierControl) {
+        this.setBezierControls({ [index]: control });
     }
 
     /**
-     * _addBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
+     * _setBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
      */
-    private _addBezierControls(controls: Record<number, ICubicBezierControl>) {
+    private _setBezierControls(controls: Record<number, ICubicBezierControl>) {
         const lineCount = this.getLineSegmentCount();
         Object.entries(controls).forEach(([index, control]) => {
             const iIndex = Number(index);
@@ -372,8 +372,8 @@ export class RegionData implements IRegionData, IMovable, IResizable {
      * *Region will be resized and repositioned automatically*
      * @param controls Map of bezier controls to line segment indexes.
      */
-    public addBezierControls(controls: Record<number, ICubicBezierControl>) {
-        this._addBezierControls(controls);
+    public setBezierControls(controls: Record<number, ICubicBezierControl>) {
+        this._setBezierControls(controls);
         this.resetBBox();
     }
 

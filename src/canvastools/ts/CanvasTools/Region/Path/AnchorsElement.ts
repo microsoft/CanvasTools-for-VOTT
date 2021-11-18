@@ -1,7 +1,10 @@
 import { ConfigurationManager } from "../../Core/ConfigurationManager";
+import { CubicBezierControl } from "../../Core/CubicBezierControl";
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
+import { EventListeners } from "../../Interface/IEventDescriptor";
+import { ILineSegment } from "../../Interface/ILineSegment";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 import { AnchorsComponent } from "../Component/AnchorsComponent";
 
@@ -11,9 +14,268 @@ enum GhostAnchorAction {
     None = "",
 }
 
+function bezierController<T extends { new(...args: any[]): AnchorsComponent }>(constructor: T) {
+    const DEFAULT_RADIUS = 6;
+    return class extends constructor {
+        /**
+         * The array of bezier control point elements.
+         */
+        private controlPoints: Snap.Element[];
+
+        /**
+         * Bezier control ghost anchor
+         */
+        private controlGhostAnchor: Snap.Element;
+
+        private activeControlPointId?: { index: number, name: "c1" | "c2" };
+
+        constructor(...args: any[]) {
+            super(...args);
+            this.controlPoints = [];
+        }
+
+        /**
+         * Helper function to create a bezier control point.
+         * @param paper - The `Snap.Paper` object to draw on.
+         * @param x - The `x`-coordinate of the anchor.
+         * @param y - The `y`-coordinate of the anchor.
+         * @param r - The radius of the anchor.
+         */
+        protected createControlPoint(paper: Snap.Paper, x: number, y: number,
+            r: number = DEFAULT_RADIUS): Snap.Element {
+            const point = paper.circle(x, y, r);
+            point.addClass("bezierControlPointStyle");
+            return point;
+        }
+
+        /**
+         * Helper function to create a bezier control point tangent line.
+         * @param paper - The `Snap.Paper` object to draw on.
+         * @param polylinePoints - Points to draw line on
+         */
+         protected createControlPointTangent(paper: Snap.Paper, polylinePoints: number[]): Snap.Element {
+            const line = paper.polyline(polylinePoints);
+            line.addClass("bezierControlPointTangentStyle");
+            return line;
+        }
+
+        /**
+         * Create Snap elements for control point and control point tangent line, in a group.
+         * @param index - Index of line segment/control data
+         * @param line - Line segment
+         * @param control - Bezier control
+         * @param pointName - `"c1" | "c2"` The point name id of the bezier control
+         * @returns Group containing the control point element and its tangent line.
+         */
+        private createControlPointGroup(index: number, line: ILineSegment, control: CubicBezierControl, pointName: "c1" | "c2"): Snap.Paper {
+            const g = this.paper.g();
+            const pointBase = pointName === "c1" ? line.start : line.end;
+            const controlPoint = control[pointName]; 
+            const controlPointElem = this.createControlPoint(this.paper, controlPoint.x, controlPoint.y);
+            const controlPointTangentElem = this.createControlPointTangent(this.paper, [pointBase.x, pointBase.y, controlPoint.x, controlPoint.y]);
+            g.add(controlPointTangentElem);
+            g.add(controlPointElem);
+            this.subscribeControlPointToEvents(controlPointElem, index, pointName);
+            return g;
+        }
+
+        /**
+         * Creates SnapSVG UI of control points of each bezier control.
+         */
+        protected buildControlPoints() {
+            const lineSegments = this.regionData.getLineSegments();
+            this.regionData.bezierControls.forEach((control, index) => {
+                const line = lineSegments[index];
+                const c1Group = this.createControlPointGroup(index, line, control, "c1");
+                this.anchorsNode.add(c1Group);
+                const c2Group = this.createControlPointGroup(index, line, control, "c2");
+                this.anchorsNode.add(c2Group);
+                this.controlPoints.push(c1Group, c2Group);
+            });
+        }
+
+        protected buildAnchors() {
+            super.buildAnchors();
+            this.buildControlPoints();
+
+            this.controlGhostAnchor = this.createAnchor(this.paper, 0, 0, "ghost", AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
+            this.controlGhostAnchor.attr({
+                display: "none",
+            });
+
+            this.node.add(this.controlGhostAnchor);
+            this.subscribeControlGhostToEvents(this.controlGhostAnchor);
+
+        }
+
+        protected updateControlPoints() {
+            this.controlPoints.forEach((cp) => {
+                cp.remove();
+            });
+            this.controlPoints = [];
+            this.buildControlPoints();
+        }
+
+        protected subscribeControlPointToEvents(controlPoint: Snap.Element, index: number, controlPointName: "c1" | "c2") {
+            this.subscribeToEvents([
+                {
+                    event: "pointerenter",
+                    base: controlPoint.node,
+                    listener: () => {
+                        // Set drag origin point to current anchor
+                        this.activeControlPointId = { index, name: controlPointName };
+                        const controlPoint = this.getActiveControlPoint();
+                        if (controlPoint) {
+                            // Move ghost anchor to current anchor position
+                            window.requestAnimationFrame(() => {
+                                this.controlGhostAnchor.attr({
+                                    cx: controlPoint.x,
+                                    cy: controlPoint.y,
+                                    display: "block",
+                                });
+                            });
+                        }
+                    },
+                    bypass: false,
+                },
+            ]);
+        }
+
+        protected subscribeControlGhostToEvents(controlGhostAnchor: Snap.Element) {
+            const listeners: EventListeners = [
+                {
+                    event: "pointerleave",
+                    base: controlGhostAnchor.node,
+                    listener: (e: PointerEvent) => {
+                        if (!this.isDragged) {
+                            window.requestAnimationFrame(() => {
+                                this.controlGhostAnchor.attr({
+                                    display: "none",
+                                });
+                            });
+                            this.activeControlPointId = undefined;
+                        }
+                    },
+                    bypass: true
+                },
+                {
+                    event: "pointermove",
+                    base: controlGhostAnchor.node,
+                    listener: (e: PointerEvent) => {
+                        if (this.isDragged) {
+                            const ghost = (e.target as HTMLElement).getBoundingClientRect();
+                            const rdx = e.clientX - ghost.left;
+                            const rdy = e.clientY - ghost.top;
+
+                            const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+                            const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+
+                            let dx = offsetX - this.dragOrigin.x;
+                            let dy = offsetY - this.dragOrigin.y;
+
+                            if ((rdx < 0 && dx > 0) || (rdx > 0 && dx < 0)) {
+                                dx = 0;
+                            }
+
+                            if ((rdy < 0 && dy > 0) || (rdy > 0 && dy < 0)) {
+                                dy = 0;
+                            }
+
+                            if (this.activeControlPointId) {
+                                const controlPoint = this.getActiveControlPoint();
+                                let p = new Point2D(controlPoint.x + dx, controlPoint.y + dy);
+
+                                if (this.paperRect !== null) {
+                                    p = p.boundToRect(this.paperRect);
+                                }
+                                window.requestAnimationFrame(() => {
+                                    this.controlGhostAnchor.attr({ cx: p.x, cy: p.y });
+                                });
+
+                                this.updateRegion(p);
+                            }
+
+                            this.dragOrigin = new Point2D(offsetX, offsetY);
+                        }
+                    },
+                    bypass: false,
+                },
+                {
+                    event: "pointerdown",
+                    base: controlGhostAnchor.node,
+                    listener: (e: PointerEvent) => {
+                        console.log("control ghost pointer down");
+                        this.controlGhostAnchor.node.setPointerCapture(e.pointerId);
+                        const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
+                        const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
+                        this.dragOrigin = new Point2D(offsetX, offsetY);
+
+                        this.isDragged = true;
+                        this.callbacks.onManipulationLockRequest(this);
+                        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEBEGIN);
+                    },
+                    bypass: false,
+                },
+                {
+                    event: "pointerup",
+                    base: controlGhostAnchor.node,
+                    listener: (e: PointerEvent) => {
+                        this.controlGhostAnchor.node.releasePointerCapture(e.pointerId);
+                        this.callbacks.onManipulationLockRelease(this);
+                        this.callbacks.onChange(this, this.regionData.copy(), ChangeEventType.MOVEEND);
+                        this.activeControlPointId = undefined;
+                        this.dragOrigin = null;
+                        this.isDragged = false;
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                display: "none",
+                            });
+                        });
+                    },
+                    bypass: false,
+                },
+            ];
+
+            this.subscribeToEvents(listeners);
+        }
+
+        protected getActiveControlPoint(): Point2D | null {
+            if (this.activeControlPointId) {
+                return this.regionData.bezierControls[this.activeControlPointId.index][this.activeControlPointId.name];
+            } else {
+                return null;
+            }
+        }
+
+        protected updateRegion(p: Point2D) {
+            if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
+                const rd = this.regionData.copy();
+                rd.setPoint(p, this.activeAnchorIndex - 1);
+                this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
+            } else if (this.activeControlPointId) {
+                const rd = this.regionData.copy();
+                if (this.activeControlPointId) {
+                    const control = rd.bezierControls[this.activeControlPointId.index];
+                    if (control) {
+                        control[this.activeControlPointId.name].move(p);
+                        rd.setBezierControl(this.activeControlPointId.index, control);
+                    }
+                }
+                this.callbacks.onChange(this, rd, ChangeEventType.MOVING);
+            }
+        }
+
+        public redraw() {
+            super.redraw();
+            this.updateControlPoints();
+        }
+    };
+}
+
 /**
  * `AnchorsComponent` for the `PolygonRegion` class.
  */
+@bezierController
 export class AnchorsElement extends AnchorsComponent {
     /**
      * Default threshold distance to define whether ctrl-pointer click is on point or line.
@@ -90,16 +352,7 @@ export class AnchorsElement extends AnchorsComponent {
                     });
                 });
             }
-
-            const pointsData = [];
-            this.regionData.points.forEach((p) => {
-                pointsData.push(p.x, p.y);
-            });
-            pointsData.push(this.regionData.points[0].x, this.regionData.points[0].y);
-
-            this.anchorsPolyline.attr({
-                points: pointsData.toString(),
-            });
+            this.updateAnchorLines();
         }
     }
 
@@ -107,25 +360,40 @@ export class AnchorsElement extends AnchorsComponent {
      * Creates a collection on anchors.
      */
     protected buildAnchors() {
-        this.buildPolygonAnchors();
+        this.buildAnchorLines();
         super.buildAnchors();
     }
 
-    /**
-     * Creates a collection of anchor points.
-     */
-    protected buildPolygonAnchors() {
-        const pointsData = [];
-        this.regionData.points.forEach((p) => {
-            pointsData.push(p.x, p.y);
+    private getAnchorPolylinePointData(): number[] {
+        const pointsData: number[] = [];
+        this.regionData.getLineSegments().forEach((line, idx) => {
+            if (this.regionData.bezierControls[idx]) {
+                return;
+            }
+            pointsData.push(line.start.x, line.start.y, line.end.x, line.end.y);
         });
-        pointsData.push(this.regionData.points[0].x, this.regionData.points[0].y);
+        return pointsData;
+    }
 
+    /**
+     * Creates polyline between anchor points.
+     */
+    protected buildAnchorLines() {
+        const pointsData = this.getAnchorPolylinePointData();
         this.anchorsPolyline = this.paper.polyline(pointsData);
         this.anchorsPolyline.addClass("anchorLineStyle");
         this.subscribeLineToEvents(this.anchorsPolyline);
-
         this.anchorsNode.add(this.anchorsPolyline);
+    }
+
+    /**
+     * Updates polyline between anchor points.
+     */
+    protected updateAnchorLines() {
+        const pointsData = this.getAnchorPolylinePointData();
+        this.anchorsPolyline.attr({
+            points: pointsData.toString(),
+        });
     }
 
     /**
@@ -160,7 +428,7 @@ export class AnchorsElement extends AnchorsComponent {
     }
 
     /**
-     * Updated the `regionData` based on the new ghost anchor location. Should be redefined in child classes.
+     * Updated the `regionData` based on the new ghost anchor location.
      * @param p - The new ghost anchor location.
      */
     protected updateRegion(p: Point2D) {
@@ -211,7 +479,7 @@ export class AnchorsElement extends AnchorsComponent {
                 this.ghostAnchorAction = GhostAnchorAction.Add;
                 this.activeAnchorIndex = -1;
             } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
-                       && swapToDelete) {
+                && swapToDelete) {
                 this.activeAnchorIndex = index + 1;
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }

@@ -93,4 +93,8 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
     public toJSON(): Record<number, ICubicBezierControl> {
         return mapIndexRecord(this, c => c.toJSON());
     }
+
+    public forEach(fn: (control: CubicBezierControl, index: number) => void): void {
+        mapIndexRecord(this, fn);
+    }
 }

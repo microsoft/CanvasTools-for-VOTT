@@ -23,7 +23,7 @@ export class MidpointElement extends MidpointComponent {
     private createBezierControl(index: number) {
         const rd = this.regionData.copy();
         const line = rd.getLineSegments()[index];
-        rd.addBezierControl(index, new CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird }))
+        rd.setBezierControl(index, new CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird }))
         this.callbacks.onChange(this, rd);
     }
 
