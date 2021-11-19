@@ -43,6 +43,12 @@ export class AnchorsElement extends AnchorsComponent {
     }
 
     /**
+     * index of line segment that ghost anchor
+     * last moved over
+     */
+    private ghostAnchorLineIdx: number;
+
+    /**
      * Current number of anchors.
      */
     private anchorsLength: number;
@@ -117,25 +123,18 @@ export class AnchorsElement extends AnchorsComponent {
         super.buildAnchors();
     }
 
-    private getAnchorPolylinePointData(): number[] {
-        const pointsData: number[] = [];
-        this.regionData.getLineSegments().forEach((line, idx) => {
-            if (this.regionData.bezierControls[idx]) {
-                return;
-            }
-            pointsData.push(line.start.x, line.start.y, line.end.x, line.end.y);
-        });
-        return pointsData;
-    }
-
     /**
      * Creates polyline between anchor points.
      */
     protected buildAnchorLines() {
-        const pointsData = this.getAnchorPolylinePointData();
-        this.anchorsPolyline = this.paper.polyline(pointsData);
-        this.anchorsPolyline.addClass("anchorLineStyle");
-        this.subscribeLineToEvents(this.anchorsPolyline);
+        const g = this.paper.g();
+        g.addClass("anchorLineStyle");
+        this.anchorsPolyline = g;
+        this.regionData.toLinePathSegments().forEach((segment, idx) => {
+            const path = this.paper.path(segment);
+            g.add(path);
+            this.subscribeLineToEvents(path, idx);
+        });
         this.anchorsNode.add(this.anchorsPolyline);
     }
 
@@ -143,17 +142,15 @@ export class AnchorsElement extends AnchorsComponent {
      * Updates polyline between anchor points.
      */
     protected updateAnchorLines() {
-        const pointsData = this.getAnchorPolylinePointData();
-        this.anchorsPolyline.attr({
-            points: pointsData.toString(),
-        });
+        this.anchorsPolyline.remove();
+        this.buildAnchorLines();
     }
 
     /**
      * Subscribe an anchor to events.
      * @param anchor - The anchor to wire up with events.
      */
-    protected subscribeLineToEvents(anchor: Snap.Element) {
+    protected subscribeLineToEvents(anchor: Snap.Element, index: number) {
         this.subscribeToEvents([
             {
                 base: anchor.node,
@@ -162,6 +159,7 @@ export class AnchorsElement extends AnchorsComponent {
                     if (this.isModifyRegionOnlyModeEnabled(e)) {
                         this.activeAnchorIndex = -1;
                         const anchorPoint = this.getActiveAnchorPoint(e);
+                        this.ghostAnchorLineIdx = index;
                         this.dragOrigin = anchorPoint;
                         this.ghostAnchorAction = GhostAnchorAction.Add;
                         window.requestAnimationFrame(() => {
@@ -259,25 +257,9 @@ export class AnchorsElement extends AnchorsComponent {
             const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
             const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
             const point = new Point2D(offsetX, offsetY);
-            const points = rd.points;
-
-            // Find the nearest segment of polyline
-            let index = 0;
-            let distance = Number.MAX_VALUE;
-
-            for (let i = 0; i < points.length; i++) {
-                let d: number;
-                if (i < points.length - 1) {
-                    d = this.dragOrigin.squareDistanceToLine(points[i], points[i + 1]);
-                } else {
-                    d = this.dragOrigin.squareDistanceToLine(points[i], points[0]);
-                }
-
-                if (d < distance) {
-                    index = i;
-                    distance = d;
-                }
-            }
+            
+            // Get index of path segment that ghost anchor was on.
+            let index = this.ghostAnchorLineIdx;
 
             rd.splicePoints(index + 1, 0, point);
 

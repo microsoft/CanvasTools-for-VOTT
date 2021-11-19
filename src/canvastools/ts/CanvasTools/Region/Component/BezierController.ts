@@ -170,7 +170,6 @@ export class BezierController implements IAnchorMixin {
                 event: "pointerleave",
                 base: controlGhostAnchor.node,
                 listener: (e: PointerEvent) => {
-                    console.log("pointerleave", this.isDragged);
                     if (!this.isDragged) {
                         window.requestAnimationFrame(() => {
                             this.controlGhostAnchor.attr({
@@ -185,7 +184,6 @@ export class BezierController implements IAnchorMixin {
                 event: "pointermove",
                 base: controlGhostAnchor.node,
                 listener: (e: PointerEvent) => {
-                    console.log("pointermove", this.isDragged);
                     if (this.isDragged) {
                         const ghost = (e.target as HTMLElement).getBoundingClientRect();
                         const rdx = e.clientX - ghost.left;
@@ -228,7 +226,6 @@ export class BezierController implements IAnchorMixin {
                 event: "pointerdown",
                 base: controlGhostAnchor.node,
                 listener: (e: PointerEvent) => {
-                    console.log("pointerdown", this.isDragged);
                     this.controlGhostAnchor.node.setPointerCapture(e.pointerId);
                     const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
                     const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
@@ -244,7 +241,6 @@ export class BezierController implements IAnchorMixin {
                 event: "pointerup",
                 base: controlGhostAnchor.node,
                 listener: (e: PointerEvent) => {
-                    console.log("pointerup", this.isDragged);
                     this.controlGhostAnchor.node.releasePointerCapture(e.pointerId);
                     this.callbacks.onManipulationLockRelease(this.anchorComponent);
                     this.callbacks.onChange(this.anchorComponent, this.regionData.copy(), ChangeEventType.MOVEEND);

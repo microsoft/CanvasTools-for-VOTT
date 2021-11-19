@@ -504,7 +504,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     }
 
     /**
-     * Transform regionData into an SVG Path
+     * Transform regionData into an SVG path.
      */
     public toPath(): string {
         const lineSegments = this.getLineSegments();
@@ -533,6 +533,27 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             }
         }
         return pathSegments.join(" ");
+    }
+
+    /**
+     * Transform regionData into set of line paths 
+     */
+    public toLinePathSegments(): string[] {
+        const lineSegments = this.getLineSegments();
+        const lineSegmentsLength = lineSegments.length;
+        const controlPoints = this.regionBezierControls;
+        const pathSegments: string[] = [];
+        for (let i = 0; i < lineSegmentsLength; i++) {
+            const line = lineSegments[i];
+            if (controlPoints[i]) {
+                // curved line
+                pathSegments.push(`M${line.start.x},${line.start.y} C${controlPoints[i].c1.x},${controlPoints[i].c1.y} ${controlPoints[i].c2.x},${controlPoints[i].c2.y} ${line.end.x},${line.end.y}`);
+            } else {
+                // straight line
+                pathSegments.push(`M${line.start.x},${line.start.y} L${line.end.x},${line.end.y}`);
+            }
+        }
+        return pathSegments;
     }
 
     /**
