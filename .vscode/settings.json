@@ -5,5 +5,8 @@
         "source.fixAll.stylelint": true
     },
     "git.enableCommitSigning": true,
-    "git.alwaysSignOff": true
+    "git.alwaysSignOff": true,
+    "cSpell.words": [
+        "Bezier"
+    ]
 }
