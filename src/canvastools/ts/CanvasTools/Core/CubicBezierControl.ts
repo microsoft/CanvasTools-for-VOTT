@@ -6,9 +6,6 @@ import { Point2D } from "./Point2D";
  * Represents a cubic bezier line control
  */
 export class CubicBezierControl {
-    public c1: Point2D;
-    public c2: Point2D;
-
     /**
      * Creates a new cubic bezier control based on extracting specific properties from any provided object
      * @param data - An `ICubicBezierControl` object with `c1` and `c2` point properties
@@ -17,6 +14,8 @@ export class CubicBezierControl {
     public static BuildFromJSON({ c1, c2 }: ICubicBezierControl): CubicBezierControl {
         return new CubicBezierControl({ c1, c2 });
     }
+    public c1: Point2D;
+    public c2: Point2D;
 
     constructor({ c1, c2 }: ICubicBezierControl) {
         this.c1 = new Point2D(c1);

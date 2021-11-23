@@ -112,7 +112,7 @@ export class AnchorsElement extends AnchorsComponent {
             this.updateAnchorLines();
         }
 
-        this.mixins.forEach(m => m.redraw());
+        this.mixins.forEach((m) => m.redraw());
     }
 
     /**
@@ -229,8 +229,10 @@ export class AnchorsElement extends AnchorsComponent {
             if (this.activeAnchorIndex <= 0 && !swapToDelete) {
                 this.ghostAnchorAction = GhostAnchorAction.Add;
                 this.activeAnchorIndex = -1;
-            } else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
-                && swapToDelete) {
+            } else if (
+                this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON &&
+                swapToDelete
+            ) {
                 this.activeAnchorIndex = index + 1;
                 this.ghostAnchorAction = GhostAnchorAction.Delete;
             }
@@ -257,9 +259,9 @@ export class AnchorsElement extends AnchorsComponent {
             const offsetX = e.clientX - (e.target as Element).closest("svg").getBoundingClientRect().left;
             const offsetY = e.clientY - (e.target as Element).closest("svg").getBoundingClientRect().top;
             const point = new Point2D(offsetX, offsetY);
-            
+
             // Get index of path segment that ghost anchor was on.
-            let index = this.ghostAnchorLineIdx;
+            const index = this.ghostAnchorLineIdx;
 
             rd.splicePoints(index + 1, 0, point);
 

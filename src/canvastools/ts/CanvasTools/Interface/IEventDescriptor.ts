@@ -3,7 +3,7 @@
  * @remarks Used as an array type to specify a collection of listeners that should
  * added to each of the elements in another array.
  */
- export interface IEventDescriptor<T extends PointerEvent | MouseEvent | KeyboardEvent | WheelEvent> {
+export interface IEventDescriptor<T extends PointerEvent | MouseEvent | KeyboardEvent | WheelEvent> {
     /**
      * Event name used in the `addEventListener` method
      */
@@ -18,7 +18,7 @@
     /**
      * Event broadcaster on which event listener should be subscribed
      */
-     base: SVGSVGElement | HTMLElement | Window;
+    base: SVGSVGElement | HTMLElement | Window;
 
     /**
      * Event capturing setting passed to the `addEventListener` method
@@ -31,4 +31,6 @@ export interface IPointerEventDescriptor extends IEventDescriptor<PointerEvent> 
 export interface IKeyboardEventDescriptor extends IEventDescriptor<KeyboardEvent> {}
 export interface IWheelEventDescriptor extends IEventDescriptor<WheelEvent> {}
 
-export type EventListeners = Array<IMouseEventDescriptor | IPointerEventDescriptor | IKeyboardEventDescriptor | IWheelEventDescriptor>;
+export type EventListeners = Array<
+    IMouseEventDescriptor | IPointerEventDescriptor | IKeyboardEventDescriptor | IWheelEventDescriptor
+>;

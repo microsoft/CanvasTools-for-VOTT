@@ -20,17 +20,10 @@ export class MidpointElement extends MidpointComponent {
         super(paper, paperRect, regionData, callbacks);
     }
 
-    private createBezierControl(index: number) {
-        const rd = this.regionData.copy();
-        const line = rd.getLineSegments()[index];
-        rd.setBezierControl(index, new CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird }))
-        this.callbacks.onChange(this, rd);
-    }
-
     /**
-   * Add event listeners to a midpoint's DOM node
-   */
-    protected subscribeMidpointToEvents(midpoint: Snap.Element, index: number) {
+     * Add event listeners to a midpoint's DOM node
+     */
+     protected subscribeMidpointToEvents(midpoint: Snap.Element, index: number) {
         const listeners: EventListeners = [
             {
                 event: "click",
@@ -43,5 +36,15 @@ export class MidpointElement extends MidpointComponent {
             },
         ];
         this.subscribeToEvents(listeners);
+    }
+
+    private createBezierControl(index: number) {
+        const rd = this.regionData.copy();
+        const line = rd.getLineSegments()[index];
+        rd.setBezierControl(
+            index,
+            new CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird })
+        );
+        this.callbacks.onChange(this, rd);
     }
 }

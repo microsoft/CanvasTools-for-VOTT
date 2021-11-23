@@ -1,9 +1,9 @@
-import { mapIndexRecord } from "./Utils/mapIndexRecord";
 import { ICubicBezierControl } from "../Interface/ICubicBezierControl";
 import { IPoint2D } from "../Interface/IPoint2D";
 import { IRect } from "../Interface/IRect";
-import { Point2D } from "./Point2D";
 import { CubicBezierControl } from "./CubicBezierControl";
+import { Point2D } from "./Point2D";
+import { mapIndexRecord } from "./Utils/mapIndexRecord";
 
 function buildCopy(controls: Record<string, ICubicBezierControl> | Record<number, ICubicBezierControl>) {
     const record = mapIndexRecord(controls, (c) => new CubicBezierControl(c));
@@ -15,8 +15,13 @@ function buildCopy(controls: Record<string, ICubicBezierControl> | Record<number
  * @param modifyPoint Function to take a point and return a new point.
  * @returns new CubicBezierIndex with modified points.
  */
-function modifyControlPoints(controls: Record<number, ICubicBezierControl>, modifyPoint: (p: IPoint2D) => Point2D): CubicBezierIndex {
-    return new CubicBezierIndex(mapIndexRecord(controls, (c) => new CubicBezierControl({ c1: modifyPoint(c.c1), c2: modifyPoint(c.c2) })));
+function modifyControlPoints(
+    controls: Record<number, ICubicBezierControl>,
+    modifyPoint: (p: IPoint2D) => Point2D
+): CubicBezierIndex {
+    return new CubicBezierIndex(
+        mapIndexRecord(controls, (c) => new CubicBezierControl({ c1: modifyPoint(c.c1), c2: modifyPoint(c.c2) }))
+    );
 }
 
 /**
@@ -26,7 +31,6 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
     [index: number]: CubicBezierControl;
 
     /**
-     * 
      * @param controls Builds a new record from JSON Record<number, ICubicBezierControl>
      * @returns CubicBezierRecord
      */
@@ -69,7 +73,7 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
      * Create a new record with moved controls.
      * @param movePoint Function which takes a point and returns the new moved point.
      */
-     public move(movePoint: (p: IPoint2D) => Point2D): CubicBezierIndex {
+    public move(movePoint: (p: IPoint2D) => Point2D): CubicBezierIndex {
         return modifyControlPoints(this, movePoint);
     }
 
@@ -79,19 +83,21 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
      * @param dy Distance in y to shift control points.
      */
     public shift(dx: number, dy: number): CubicBezierIndex {
-        return new CubicBezierIndex(mapIndexRecord(this, (c) => {
-            const control = c.copy();
-            control.shift(dx, dy);
-            return control;
-        }));
+        return new CubicBezierIndex(
+            mapIndexRecord(this, (c) => {
+                const control = c.copy();
+                control.shift(dx, dy);
+                return control;
+            })
+        );
     }
 
     public boundToRect(rect: IRect): CubicBezierIndex {
-        return new CubicBezierIndex(mapIndexRecord(this, c => c.boundToRect(rect)));
+        return new CubicBezierIndex(mapIndexRecord(this, (c) => c.boundToRect(rect)));
     }
 
     public toJSON(): Record<number, ICubicBezierControl> {
-        return mapIndexRecord(this, c => c.toJSON());
+        return mapIndexRecord(this, (c) => c.toJSON());
     }
 
     public forEach(fn: (control: CubicBezierControl, index: number) => void): void {

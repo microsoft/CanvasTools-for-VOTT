@@ -1,13 +1,11 @@
+import { ConfigurationManager } from "../../Core/ConfigurationManager";
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData, RegionDataType } from "../../Core/RegionData";
-
 import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
-
 import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
-import { ConfigurationManager } from "../../Core/ConfigurationManager";
 
 /**
  * The selector to define a polygon-region.
@@ -239,7 +237,7 @@ export class PolygonSelector extends Selector {
                 base: this.parentNode,
                 listener: (e: PointerEvent) => {
                     if (!this.isCapturing) {
-                       this.hide();
+                        this.hide();
                     } else {
                         const rect = this.parentNode.getClientRects();
                         const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
@@ -358,9 +356,17 @@ export class PolygonSelector extends Selector {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
 
-            const regionType = (ConfigurationManager.isPathRegionEnabled) ? RegionDataType.Path : RegionDataType.Polygon;
-            this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height,
-                                          this.points.map((p) => p.copy()), regionType));
+            const regionType = ConfigurationManager.isPathRegionEnabled ? RegionDataType.Path : RegionDataType.Polygon;
+            this.callbacks.onSelectionEnd(
+                new RegionData(
+                    box.x,
+                    box.y,
+                    box.width,
+                    box.height,
+                    this.points.map((p) => p.copy()),
+                    regionType
+                )
+            );
         }
         this.reset();
     }
