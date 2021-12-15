@@ -100,8 +100,8 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         y: number,
         width: number,
         height: number,
-        points: Point2D[],
-        bezierControls: Record<number, CubicBezierControl>
+        points: IPoint2D[],
+        bezierControls: Record<number, ICubicBezierControl>
     ): RegionData {
         const region = new RegionData(
             x,
