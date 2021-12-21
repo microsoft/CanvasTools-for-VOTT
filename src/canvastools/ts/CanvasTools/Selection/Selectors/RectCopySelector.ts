@@ -2,7 +2,7 @@ import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { IRect } from "../../Interface/IRect";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
@@ -130,7 +130,7 @@ export class RectCopySelector extends Selector {
         this.node.add(this.crossA.node);
         this.node.add(this.copyRectEl.node);
 
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             { event: "pointerenter", listener: this.onPointerEnter, base: this.parentNode, bypass: false },
             { event: "pointerleave", listener: this.onPointerLeave, base: this.parentNode, bypass: false },
             { event: "pointerdown", listener: this.onPointerDown, base: this.parentNode, bypass: false },

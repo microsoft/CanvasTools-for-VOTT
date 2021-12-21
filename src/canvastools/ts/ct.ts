@@ -19,9 +19,8 @@ import { RegionsManager } from "./CanvasTools/Region/RegionsManager";
 import { AreaSelector } from "./CanvasTools/Selection/AreaSelector";
 import { Toolbar as CTToolbar } from "./CanvasTools/Toolbar/Toolbar";
 
+// Snap adds itself to the window
 import "snapsvg-cjs";
-/* import * as SNAPSVG_TYPE from "snapsvg";
-declare var Snap: typeof SNAPSVG_TYPE; */
 
 export class CanvasTools {
     /**

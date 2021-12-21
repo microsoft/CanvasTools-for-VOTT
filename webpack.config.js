@@ -42,15 +42,11 @@ var webpackSettings = {
     },
 }
 
-var settings = webpackSettings[yargs.argv.set];
-if (settings == undefined) {
-    settings = webpackSettings['dev'];
-}
-
 module.exports = function (env) {
-    var settings = webpackSettings[env.mode];
+    const mode = (env && env.mode) || "prod";
+    var settings = webpackSettings[mode];
     if (settings == undefined) {
-        settings = webpackSettings['dev'];
+        settings = webpackSettings['prod'];
     }
 
     var config = {
@@ -70,7 +66,8 @@ module.exports = function (env) {
         },
         devServer: {
             contentBase: path.join(__dirname, 'samples'),
-            port: 9000
+            port: 9000,
+            publicPath: "/shared/js/"
         },
         module: {
             rules: [

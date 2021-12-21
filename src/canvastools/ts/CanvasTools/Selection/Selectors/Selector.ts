@@ -1,6 +1,6 @@
 import { Rect } from "../../Core/Rect";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { IHideable } from "../../Interface/IHideadble";
 import { IResizable } from "../../Interface/IResizable";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
@@ -80,7 +80,7 @@ export abstract class Selector extends Element {
      * Helper function to subscribe collection of elements to specified listeners.
      * @param listeners - The collection of `IEventDescriptor` objects.
      */
-    protected subscribeToEvents(listeners: IEventDescriptor[]) {
+    protected subscribeToEvents(listeners: EventListeners) {
         listeners.forEach((e) => {
             e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));
         });

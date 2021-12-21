@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -212,38 +212,56 @@ exports.Rect = Rect;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChangeEventType = void 0;
+var ChangeEventType;
+(function (ChangeEventType) {
+    ChangeEventType[ChangeEventType["MOVEEND"] = 0] = "MOVEEND";
+    ChangeEventType[ChangeEventType["MOVING"] = 1] = "MOVING";
+    ChangeEventType[ChangeEventType["MOVEBEGIN"] = 2] = "MOVEBEGIN";
+    ChangeEventType[ChangeEventType["SELECTIONTOGGLE"] = 3] = "SELECTIONTOGGLE";
+})(ChangeEventType = exports.ChangeEventType || (exports.ChangeEventType = {}));
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegionData = exports.RegionDataType = void 0;
+const calculateLineSegments_1 = __webpack_require__(36);
+const RegionDataType_1 = __webpack_require__(25);
+Object.defineProperty(exports, "RegionDataType", { enumerable: true, get: function () { return RegionDataType_1.RegionDataType; } });
+const CubicBezierControl_1 = __webpack_require__(18);
+const CubicBezierIndex_1 = __webpack_require__(37);
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-var RegionDataType;
-(function (RegionDataType) {
-    RegionDataType["Point"] = "point";
-    RegionDataType["Rect"] = "rect";
-    RegionDataType["Polyline"] = "polyline";
-    RegionDataType["Polygon"] = "polygon";
-})(RegionDataType = exports.RegionDataType || (exports.RegionDataType = {}));
 class RegionData {
-    constructor(x, y, width, height, points, type) {
+    constructor(x, y, width, height, points, type, bezierControls) {
         this.corner = new Point2D_1.Point2D(x, y);
         this.regionRect = new Rect_1.Rect(width, height);
-        this.regionPoints = (points !== undefined && points !== null) ? points : new Array();
-        this.regionType = (type !== undefined) ? type : RegionDataType.Point;
+        this.regionPoints = points !== null && points !== void 0 ? points : [];
+        this.regionBezierControls = new CubicBezierIndex_1.CubicBezierIndex(bezierControls);
+        this.regionType = type !== null && type !== void 0 ? type : RegionDataType_1.RegionDataType.Point;
     }
     static BuildPointRegionData(x, y) {
-        return new RegionData(x, y, 0, 0, [new Point2D_1.Point2D(x, y)], RegionDataType.Point);
+        return new RegionData(x, y, 0, 0, [new Point2D_1.Point2D(x, y)], RegionDataType_1.RegionDataType.Point);
     }
     static BuildRectRegionData(x, y, width, height) {
         return new RegionData(x, y, width, height, [new Point2D_1.Point2D(x, y), new Point2D_1.Point2D(x + width, y),
-            new Point2D_1.Point2D(x + width, y + height), new Point2D_1.Point2D(x, y + height)], RegionDataType.Rect);
+            new Point2D_1.Point2D(x + width, y + height), new Point2D_1.Point2D(x, y + height)], RegionDataType_1.RegionDataType.Rect);
     }
     static BuildPolygonRegionData(x, y, width, height, points) {
-        const region = new RegionData(x, y, width, height, [new Point2D_1.Point2D(x, y), new Point2D_1.Point2D(x + width, y),
-            new Point2D_1.Point2D(x + width, y + height), new Point2D_1.Point2D(x, y + height)], RegionDataType.Polygon);
-        region.points = points;
+        const region = new RegionData(x, y, width, height, points.map((p) => new Point2D_1.Point2D(p.x, p.y)), RegionDataType_1.RegionDataType.Polygon);
+        return region;
+    }
+    static BuildPathRegionData(x, y, width, height, points, bezierControls) {
+        const region = new RegionData(x, y, width, height, points.map((p) => new Point2D_1.Point2D(p.x, p.y)), RegionDataType_1.RegionDataType.Path, CubicBezierIndex_1.CubicBezierIndex.buildFromJSON(bezierControls));
         return region;
     }
     static BuildFromJson(data) {
-        return new RegionData(data.x, data.y, data.width, data.height, data.points.map((p) => new Point2D_1.Point2D(p.x, p.y)), data.type);
+        return new RegionData(data.x, data.y, data.width, data.height, data.points.map((p) => new Point2D_1.Point2D(p.x, p.y)), data.type, CubicBezierIndex_1.CubicBezierIndex.buildFromJSON(data.bezierControls));
     }
     get x() {
         return this.corner.x;
@@ -271,7 +289,7 @@ class RegionData {
     }
     get area() {
         let area;
-        if (this.regionType === RegionDataType.Point) {
+        if (this.regionType === RegionDataType_1.RegionDataType.Point) {
             area = 1.0;
         }
         else {
@@ -291,8 +309,23 @@ class RegionData {
     set points(points) {
         this.setPoints(points);
     }
+    get bezierControls() {
+        return this.regionBezierControls.copy();
+    }
     get type() {
         return this.regionType;
+    }
+    resetBBox() {
+        const { x: xmin, y: ymin, height, width } = Snap.path.getBBox(this.toPath());
+        this.corner.move(xmin, ymin);
+        this.regionRect.resize(width, height);
+    }
+    getLineSegmentCount() {
+        const pointCount = this.regionPoints.length;
+        if ([RegionDataType_1.RegionDataType.Polygon, RegionDataType_1.RegionDataType.Path].includes(this.regionType)) {
+            return pointCount;
+        }
+        return pointCount - 1;
     }
     move(arg1, arg2) {
         const oldx = this.x;
@@ -303,89 +336,158 @@ class RegionData {
         this.regionPoints.forEach((p) => {
             p.shift(dx, dy);
         });
+        this.regionBezierControls = this.regionBezierControls.shift(dx, dy);
     }
     resize(width, height) {
         const sx = width / this.width;
         const sy = height / this.height;
         this.regionRect.resize(width, height);
-        this.regionPoints.forEach((p) => {
+        const movePoint = (p) => {
             const px = (p.x - this.x) * sx + this.x;
             const py = (p.y - this.y) * sy + this.y;
-            p.move(px, py);
-        });
+            return new Point2D_1.Point2D(px, py);
+        };
+        this.regionPoints = this.regionPoints.map(movePoint);
+        this.regionBezierControls = this.regionBezierControls.move(movePoint);
     }
     setPoint(point, index) {
         if (index >= 0 && index < this.regionPoints.length) {
             this.regionPoints[index] = new Point2D_1.Point2D(point);
         }
-        let xmin = Number.MAX_VALUE;
-        let xmax = 0;
-        let ymin = Number.MAX_VALUE;
-        let ymax = 0;
-        this.regionPoints.forEach((point) => {
-            if (point.x > xmax) {
-                xmax = point.x;
+        this.resetBBox();
+    }
+    splicePoints(start, deleteCount = 0, ...points) {
+        const pointCount = this.regionPoints.length;
+        const spliceStart = (start < 0) ? start : (start > pointCount) ? pointCount : start;
+        const bezDeleteIndexes = [];
+        if (spliceStart === 0) {
+            bezDeleteIndexes.push(pointCount - 1);
+        }
+        else {
+            bezDeleteIndexes.push(spliceStart - 1);
+        }
+        for (let i = spliceStart; i < (spliceStart + deleteCount); i++) {
+            bezDeleteIndexes.push(i);
+        }
+        const idxDiff = points.length - deleteCount;
+        const newBezierRecord = {};
+        this.regionBezierControls.forEach((control, idx) => {
+            if (bezDeleteIndexes.includes(idx)) {
+                return undefined;
             }
-            if (point.x < xmin) {
-                xmin = point.x;
+            if (idx >= spliceStart) {
+                newBezierRecord[idx + idxDiff] = control.copy();
+                return;
             }
-            if (point.y > ymax) {
-                ymax = point.y;
-            }
-            if (point.y < ymin) {
-                ymin = point.y;
-            }
+            return newBezierRecord[idx] = control.copy();
         });
-        this.corner.move(xmin, ymin);
-        this.regionRect.resize(xmax - xmin, ymax - ymin);
+        this.regionBezierControls = new CubicBezierIndex_1.CubicBezierIndex(newBezierRecord);
+        this.regionPoints.splice(spliceStart, deleteCount, ...points.map(p => new Point2D_1.Point2D(p)));
+        this.resetBBox();
+    }
+    setBezierControl(index, control) {
+        this.setBezierControls({ [index]: control });
+    }
+    _setBezierControls(controls) {
+        const lineCount = this.getLineSegmentCount();
+        Object.entries(controls).forEach(([index, control]) => {
+            const iIndex = Number(index);
+            if (iIndex < 0 || iIndex >= lineCount) {
+                return;
+            }
+            this.regionBezierControls[iIndex] = new CubicBezierControl_1.CubicBezierControl(control);
+        });
+    }
+    setBezierControls(controls) {
+        this._setBezierControls(controls);
+        this.resetBBox();
+    }
+    _deleteBezierControls(index) {
+        const delIndexes = Array.isArray(index) ? index : [index];
+        delIndexes.forEach(i => delete this.regionBezierControls[i]);
+    }
+    deleteBezierControls(index) {
+        this._deleteBezierControls(index);
+        this.resetBBox();
     }
     setPoints(points) {
-        let xmin = Number.MAX_VALUE;
-        let xmax = 0;
-        let ymin = Number.MAX_VALUE;
-        let ymax = 0;
-        points.forEach((point) => {
-            if (point.x > xmax) {
-                xmax = point.x;
-            }
-            if (point.x < xmin) {
-                xmin = point.x;
-            }
-            if (point.y > ymax) {
-                ymax = point.y;
-            }
-            if (point.y < ymin) {
-                ymin = point.y;
-            }
-        });
         this.regionPoints = points.map((p) => new Point2D_1.Point2D(p));
-        this.corner.move(xmin, ymin);
-        this.regionRect.resize(xmax - xmin, ymax - ymin);
+        this.resetBBox();
     }
     initFrom(regionData) {
         this.corner = new Point2D_1.Point2D(regionData.x, regionData.y);
         this.regionRect = new Rect_1.Rect(regionData.width, regionData.height);
         this.regionPoints = regionData.points.map((p) => new Point2D_1.Point2D(p.x, p.y));
+        this.regionBezierControls = CubicBezierIndex_1.CubicBezierIndex.buildFromJSON(regionData.bezierControls);
     }
     boundToRect(rect) {
         const brCorner = (new Point2D_1.Point2D(this.x + this.width, this.y + this.height)).boundToRect(rect);
         const tlCorner = this.corner.boundToRect(rect);
         const width = brCorner.x - tlCorner.x;
         const height = brCorner.y - tlCorner.y;
-        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType);
+        return new RegionData(tlCorner.x, tlCorner.y, width, height, this.regionPoints.map((p) => p.boundToRect(rect)), this.regionType, this.regionBezierControls.boundToRect(rect));
     }
     scale(f1, f2) {
         const xf = f1;
         const yf = (f2 !== undefined) ? f2 : f1;
-        this.corner = new Point2D_1.Point2D(this.x * xf, this.y * yf);
-        this.regionRect = new Rect_1.Rect(this.width * xf, this.height * yf);
-        this.regionPoints = this.regionPoints.map((p) => new Point2D_1.Point2D(p.x * xf, p.y * yf));
+        const scalePoint = (p) => {
+            return new Point2D_1.Point2D(p.x * xf, p.y * yf);
+        };
+        const scaleRect = (r) => {
+            return new Rect_1.Rect(r.width * xf, r.height * yf);
+        };
+        this.corner = scalePoint(this);
+        this.regionRect = scaleRect(this);
+        this.regionPoints = this.regionPoints.map(scalePoint);
+        this.regionBezierControls = this.regionBezierControls.scale(scalePoint);
     }
     copy() {
-        return new RegionData(this.x, this.y, this.width, this.height, this.regionPoints.map((p) => p.copy()), this.regionType);
+        return new RegionData(this.x, this.y, this.width, this.height, this.regionPoints.map((p) => p.copy()), this.regionType, this.regionBezierControls.copy());
+    }
+    getLineSegments() {
+        return calculateLineSegments_1.calculateLineSegments(this.regionPoints, { regionType: this.regionType });
     }
     toString() {
-        return `${this.corner.toString()} x ${this.boundRect.toString()}: {${this.regionPoints.toString()}}`;
+        return `${this.corner.toString()} x ${this.boundRect.toString()}: {${this.regionPoints.toString()}}, {${this.regionBezierControls.toString()}}`;
+    }
+    toPath() {
+        const lineSegments = this.getLineSegments();
+        const lineSegmentsLength = lineSegments.length;
+        const points = this.regionPoints;
+        const controlPoints = this.regionBezierControls;
+        if (points.length === 1) {
+            return `M${points[0].x},${points[0].y} m-1,0 a1,1 0 1 0 2,0 a1,1 0 1 0 -2,0`;
+        }
+        const pathSegments = [];
+        for (let i = 0; i < lineSegmentsLength; i++) {
+            const line = lineSegments[i];
+            if (i === 0) {
+                pathSegments.push(`M${line.start.x},${line.start.y}`);
+            }
+            if (controlPoints[i]) {
+                pathSegments.push(`C${controlPoints[i].c1.x},${controlPoints[i].c1.y} ${controlPoints[i].c2.x},${controlPoints[i].c2.y} ${line.end.x},${line.end.y}`);
+            }
+            else {
+                pathSegments.push(`L${line.end.x},${line.end.y}`);
+            }
+        }
+        return pathSegments.join(" ");
+    }
+    toLinePathSegments() {
+        const lineSegments = this.getLineSegments();
+        const lineSegmentsLength = lineSegments.length;
+        const controlPoints = this.regionBezierControls;
+        const pathSegments = [];
+        for (let i = 0; i < lineSegmentsLength; i++) {
+            const line = lineSegments[i];
+            if (controlPoints[i]) {
+                pathSegments.push(`M${line.start.x},${line.start.y} C${controlPoints[i].c1.x},${controlPoints[i].c1.y} ${controlPoints[i].c2.x},${controlPoints[i].c2.y} ${line.end.x},${line.end.y}`);
+            }
+            else {
+                pathSegments.push(`M${line.start.x},${line.start.y} L${line.end.x},${line.end.y}`);
+            }
+        }
+        return pathSegments;
     }
     toJSON() {
         return {
@@ -396,6 +498,7 @@ class RegionData {
             points: this.regionPoints.map((point) => {
                 return { x: point.x, y: point.y };
             }),
+            bezierControls: this.regionBezierControls.toJSON(),
             type: this.regionType,
         };
     }
@@ -404,104 +507,7 @@ exports.RegionData = RegionData;
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChangeEventType = void 0;
-var ChangeEventType;
-(function (ChangeEventType) {
-    ChangeEventType[ChangeEventType["MOVEEND"] = 0] = "MOVEEND";
-    ChangeEventType[ChangeEventType["MOVING"] = 1] = "MOVING";
-    ChangeEventType[ChangeEventType["MOVEBEGIN"] = 2] = "MOVEBEGIN";
-    ChangeEventType[ChangeEventType["SELECTIONTOGGLE"] = 3] = "SELECTIONTOGGLE";
-})(ChangeEventType = exports.ChangeEventType || (exports.ChangeEventType = {}));
-
-
-/***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolbarIcon = exports.ToolbarItemType = void 0;
-var ToolbarItemType;
-(function (ToolbarItemType) {
-    ToolbarItemType[ToolbarItemType["SELECTOR"] = 0] = "SELECTOR";
-    ToolbarItemType[ToolbarItemType["SWITCH"] = 1] = "SWITCH";
-    ToolbarItemType[ToolbarItemType["SEPARATOR"] = 2] = "SEPARATOR";
-    ToolbarItemType[ToolbarItemType["TRIGGER"] = 3] = "TRIGGER";
-})(ToolbarItemType = exports.ToolbarItemType || (exports.ToolbarItemType = {}));
-class ToolbarIcon {
-    constructor(paper, icon) {
-        this.isSelected = false;
-        this.focused = false;
-        this.onfocusCallback = () => {
-            this.focused = true;
-        };
-        this.onfocusoutCallback = () => {
-            this.focused = false;
-        };
-        this.paper = paper;
-        if (icon !== undefined && icon !== null) {
-            this.description = icon;
-            if (icon.width !== undefined) {
-                this.width = icon.width;
-            }
-            else {
-                this.width = ToolbarIcon.IconWidth;
-            }
-            if (icon.height !== undefined) {
-                this.height = icon.height;
-            }
-            else {
-                this.height = ToolbarIcon.IconHeight;
-            }
-        }
-        else {
-            this.description = null;
-            this.width = ToolbarIcon.IconWidth;
-            this.height = ToolbarIcon.IconHeight;
-        }
-    }
-    move(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    resize(width, height) {
-        this.width = width;
-        this.height = height;
-    }
-    select() {
-        this.node.addClass("selected");
-        this.isSelected = true;
-    }
-    unselect() {
-        this.node.removeClass("selected");
-        this.isSelected = false;
-    }
-    isFocused() {
-        return this.focused;
-    }
-    toggleSelection() {
-        if (this.isSelected) {
-            this.unselect();
-        }
-        else {
-            this.select();
-        }
-    }
-}
-exports.ToolbarIcon = ToolbarIcon;
-ToolbarIcon.IconWidth = 48;
-ToolbarIcon.IconHeight = 48;
-
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -586,236 +592,94 @@ exports.RegionComponent = RegionComponent;
 
 
 /***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarIcon = exports.ToolbarItemType = void 0;
+var ToolbarItemType;
+(function (ToolbarItemType) {
+    ToolbarItemType[ToolbarItemType["SELECTOR"] = 0] = "SELECTOR";
+    ToolbarItemType[ToolbarItemType["SWITCH"] = 1] = "SWITCH";
+    ToolbarItemType[ToolbarItemType["SEPARATOR"] = 2] = "SEPARATOR";
+    ToolbarItemType[ToolbarItemType["TRIGGER"] = 3] = "TRIGGER";
+})(ToolbarItemType = exports.ToolbarItemType || (exports.ToolbarItemType = {}));
+class ToolbarIcon {
+    constructor(paper, icon) {
+        this.isSelected = false;
+        this.focused = false;
+        this.onfocusCallback = () => {
+            this.focused = true;
+        };
+        this.onfocusoutCallback = () => {
+            this.focused = false;
+        };
+        this.paper = paper;
+        if (icon !== undefined && icon !== null) {
+            this.description = icon;
+            if (icon.width !== undefined) {
+                this.width = icon.width;
+            }
+            else {
+                this.width = ToolbarIcon.IconWidth;
+            }
+            if (icon.height !== undefined) {
+                this.height = icon.height;
+            }
+            else {
+                this.height = ToolbarIcon.IconHeight;
+            }
+        }
+        else {
+            this.description = null;
+            this.width = ToolbarIcon.IconWidth;
+            this.height = ToolbarIcon.IconHeight;
+        }
+    }
+    move(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+    select() {
+        this.node.addClass("selected");
+        this.isSelected = true;
+    }
+    unselect() {
+        this.node.removeClass("selected");
+        this.isSelected = false;
+    }
+    isFocused() {
+        return this.focused;
+    }
+    toggleSelection() {
+        if (this.isSelected) {
+            this.unselect();
+        }
+        else {
+            this.select();
+        }
+    }
+}
+exports.ToolbarIcon = ToolbarIcon;
+ToolbarIcon.IconWidth = 48;
+ToolbarIcon.IconHeight = 48;
+
+
+/***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Selector = void 0;
-const Element_1 = __webpack_require__(17);
-class Selector extends Element_1.Element {
-    constructor(parent, paper, boundRect, callbacks) {
-        super(paper, boundRect);
-        this.isEnabled = true;
-        this.parentNode = parent;
-        if (callbacks !== undefined) {
-            this.callbacks = callbacks;
-        }
-        else {
-            this.callbacks = {
-                onLocked: null,
-                onSelectionBegin: null,
-                onSelectionEnd: null,
-                onUnlocked: null,
-            };
-        }
-    }
-    enable() {
-        if (!this.isEnabled) {
-            this.isEnabled = true;
-            this.show();
-        }
-    }
-    disable() {
-        if (this.isEnabled) {
-            this.isEnabled = false;
-            this.hide();
-        }
-    }
-    subscribeToEvents(listeners) {
-        listeners.forEach((e) => {
-            e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));
-        });
-    }
-    enablify(f, bypass = false) {
-        return (args) => {
-            if (this.isEnabled || bypass) {
-                f(args);
-            }
-        };
-    }
-    showAll(elements) {
-        window.requestAnimationFrame(() => {
-            elements.forEach((element) => {
-                if (element.show !== undefined) {
-                    element.show();
-                }
-                else {
-                    element.node.setAttribute("visibility", "visible");
-                }
-            });
-        });
-    }
-    hideAll(elements) {
-        window.requestAnimationFrame(() => {
-            elements.forEach((element) => {
-                if (element.hide !== undefined) {
-                    element.hide();
-                }
-                else {
-                    element.node.setAttribute("visibility", "hidden");
-                }
-            });
-        });
-    }
-    resizeAll(elements) {
-        window.requestAnimationFrame(() => {
-            elements.forEach((element) => {
-                element.resize(this.boundRect.width, this.boundRect.height);
-            });
-        });
-    }
-    moveCross(cross, pointTo, square = false, ref = null) {
-        cross.move(pointTo, this.boundRect, square, ref);
-    }
-    movePoint(point, pointTo) {
-        point.attr({
-            cx: pointTo.x,
-            cy: pointTo.y,
-        });
-    }
-    moveLine(line, pointFrom, pointTo) {
-        line.attr({
-            x1: pointFrom.x,
-            x2: pointTo.x,
-            y1: pointFrom.y,
-            y2: pointTo.y,
-        });
-    }
-}
-exports.Selector = Selector;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.LABColor = void 0;
-const XYZColor_1 = __webpack_require__(14);
-class LABColor {
-    constructor(l, a, b) {
-        this.values = [l, a, b];
-    }
-    get l() {
-        return this.values[0];
-    }
-    get a() {
-        return this.values[1];
-    }
-    get b() {
-        return this.values[2];
-    }
-    distanceTo(color) {
-        const deltaL = this.values[0] - color.values[0];
-        const deltaA = this.values[1] - color.values[1];
-        const deltaB = this.values[2] - color.values[2];
-        const c1 = Math.sqrt(this.values[1] * this.values[1] + this.values[2] * this.values[2]);
-        const c2 = Math.sqrt(color.values[1] * color.values[1] + color.values[2] * color.values[2]);
-        const deltaC = c1 - c2;
-        let deltaH = deltaA * deltaA + deltaB * deltaB - deltaC * deltaC;
-        deltaH = deltaH < 0 ? 0 : Math.sqrt(deltaH);
-        const sc = 1.0 + 0.045 * c1;
-        const sh = 1.0 + 0.015 * c1;
-        const deltaLKlsl = deltaL / (1.0);
-        const deltaCkcsc = deltaC / (sc);
-        const deltaHkhsh = deltaH / (sh);
-        const i = deltaLKlsl * deltaLKlsl + deltaCkcsc * deltaCkcsc + deltaHkhsh * deltaHkhsh;
-        return i < 0 ? 0 : Math.sqrt(i);
-    }
-    distanceTo_00(color) {
-        const [L1, a1, b1] = this.values;
-        const [L2, a2, b2] = color.values;
-        const kL = 1.0;
-        const kC = 1.0;
-        const kH = 1.0;
-        const K1 = 0.045;
-        const K2 = 0.015;
-        const deg2rad = Math.PI / 180.0;
-        const rad2deg = 180.0 / Math.PI;
-        const deltaL = L2 - L1;
-        const midL = (L1 + L2) / 2;
-        const C1 = Math.sqrt(a1 * a1 + b1 * b1);
-        const C2 = Math.sqrt(a2 * a2 + b2 * b2);
-        const midC = (C1 + C2) / 2;
-        const midC7 = midC ** 7;
-        const midC7Root = Math.sqrt(midC7 / (midC7 + 25 ** 7));
-        const a1t = a1 + 0.5 * a1 * (1 - midC7Root);
-        const a2t = a2 + 0.5 * a2 * (1 - midC7Root);
-        const C1t = Math.sqrt(a1t * a1t + b1 * b1);
-        const C2t = Math.sqrt(a2t * a2t + b2 * b2);
-        const midCt = (C1t + C2t) / 2;
-        const deltaCt = C2t - C1t;
-        const h1 = (b1 === 0 && a1t === 0) ? 0 : (Math.atan2(b1, a1t) * rad2deg) % 360;
-        const h2 = (b2 === 0 && a2t === 0) ? 0 : (Math.atan2(b2, a2t) * rad2deg) % 360;
-        let deltah = h2 - h1;
-        const absDeltah = Math.abs(deltah);
-        if (h2 <= h1 && absDeltah > 180) {
-            deltah += 360;
-        }
-        if (h2 > h1 && absDeltah > 180) {
-            deltah -= 360;
-        }
-        const deltaH = 2 * Math.sqrt(C1t * C2t) * Math.sin(0.5 * deltah * deg2rad);
-        let H = (h1 + h2) / 2;
-        if (absDeltah > 180 && h1 + h2 < 360) {
-            H += 180;
-        }
-        if (absDeltah > 180 && h1 + h2 >= 360) {
-            H -= 180;
-        }
-        const T = 1 - 0.17 * Math.cos((H - 30) * deg2rad)
-            + 0.24 * Math.cos((2 * H) * deg2rad)
-            + 0.32 * Math.cos((3 * H + 6) * deg2rad)
-            - 0.20 * Math.cos((4 * H - 63) * deg2rad);
-        const SL = 1 + (K2 * (midL - 50)) / (Math.sqrt(20 + (midL - 50) * (midL - 50)));
-        const SC = 1 + K1 * midCt;
-        const SH = 1 + K2 * midCt * T;
-        const RT = -2 * midC7Root * Math.sin((60 * Math.exp(-((H - 275) / 25) * ((H - 275) / 25))) * deg2rad);
-        const diff = Math.sqrt((deltaL / (kL * SL)) ** 2
-            + (deltaCt / (kC * SC)) ** 2
-            + (deltaH / (kH * SH)) ** 2
-            + RT * (deltaCt / (kC * SC)) * (deltaH / (kH * SH)));
-        return diff;
-    }
-    distanceToGray() {
-        return Math.sqrt(this.a * this.a + this.b * this.b);
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toXYZ() {
-        let y = (this.l * 100 + 16) / 116;
-        let x = this.a / 5 + y;
-        let z = y - this.b / 2;
-        [x, y, z] = [x, y, z].map((v) => {
-            const v3 = v * v * v;
-            return (v3 > 0.008856451) ? v3 : (v - 16 / 116) / 7.787037;
-        });
-        return new XYZColor_1.XYZColor(x * XYZColor_1.XYZColor.D65.x, y * XYZColor_1.XYZColor.D65.y, z * XYZColor_1.XYZColor.D65.z);
-    }
-    toRGB() {
-        return this.toXYZ().toRGB();
-    }
-    toSRGB() {
-        return this.toXYZ().toRGB().toSRGB();
-    }
-}
-exports.LABColor = LABColor;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.Region = void 0;
-const RegionComponent_1 = __webpack_require__(5);
+const RegionComponent_1 = __webpack_require__(4);
 class Region extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks));
@@ -882,462 +746,7 @@ exports.Region = Region;
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DragComponent = void 0;
-const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const RegionComponent_1 = __webpack_require__(5);
-class DragComponent extends RegionComponent_1.RegionComponent {
-    constructor(paper, paperRect = null, regionData, callbacks) {
-        super(paper, paperRect, regionData, callbacks);
-        this.isDragged = false;
-        this.node = paper.g();
-        this.node.addClass("dragLayer");
-    }
-    freeze() {
-        super.freeze();
-        this.isDragged = false;
-        this.dragOrigin = null;
-    }
-    subscribeToDragEvents() {
-        const listeners = [
-            {
-                event: "pointerenter",
-                base: this.dragNode.node,
-                listener: (e) => {
-                    if (this.isDragged) {
-                        e.stopPropagation();
-                    }
-                },
-                bypass: false,
-            },
-            {
-                event: "pointermove",
-                base: this.dragNode.node,
-                listener: (e) => {
-                    if (this.isDragged) {
-                        const rect = e.target.getBoundingClientRect();
-                        const rdx = e.clientX - rect.left;
-                        const rdy = e.clientY - rect.top;
-                        let dx = e.clientX - this.dragOrigin.x;
-                        let dy = e.clientY - this.dragOrigin.y;
-                        if ((rdx < 0 && dx > 0) || (rdx > this.width && dx < 0)) {
-                            dx = 0;
-                        }
-                        if ((rdy < 0 && dy > 0) || (rdy > this.height && dy < 0)) {
-                            dy = 0;
-                        }
-                        let p = new Point2D_1.Point2D(this.x + dx, this.y + dy);
-                        if (this.paperRect !== null) {
-                            p = p.boundToRect(this.paperRect);
-                        }
-                        this.dragOrigin = new Point2D_1.Point2D(e.clientX, e.clientY);
-                        const rd = this.regionData.copy();
-                        rd.move(p);
-                        this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
-                    }
-                },
-                bypass: false,
-            },
-            {
-                event: "pointerleave",
-                base: this.dragNode.node,
-                listener: (e) => {
-                },
-                bypass: false,
-            },
-            {
-                event: "pointerdown",
-                base: this.dragNode.node,
-                listener: (e) => {
-                    this.dragNode.node.setPointerCapture(e.pointerId);
-                    const multiselection = e.ctrlKey;
-                    this.isDragged = true;
-                    this.dragOrigin = new Point2D_1.Point2D(e.clientX, e.clientY);
-                    this.callbacks.onManipulationLockRequest(this);
-                    this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEBEGIN, multiselection);
-                },
-                bypass: false,
-            },
-            {
-                event: "pointerup",
-                base: this.dragNode.node,
-                listener: (e) => {
-                    this.dragNode.node.releasePointerCapture(e.pointerId);
-                    const multiselection = e.ctrlKey;
-                    if (this.isDragged) {
-                        this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEEND, multiselection);
-                        this.isDragged = false;
-                        this.dragOrigin = null;
-                    }
-                    this.callbacks.onManipulationLockRelease(this);
-                    this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.SELECTIONTOGGLE, multiselection);
-                },
-                bypass: false,
-            },
-        ];
-        this.subscribeToEvents(listeners);
-    }
-}
-exports.DragComponent = DragComponent;
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TagsComponent = void 0;
-const RegionComponent_1 = __webpack_require__(5);
-class TagsComponent extends RegionComponent_1.RegionComponent {
-    constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
-        super(paper, paperRect, regionData, null);
-        this.styleSheet = null;
-        this.styleMap = [];
-        this.styleLightMap = [];
-        this.styleId = styleId;
-        this.styleSheet = styleSheet;
-        this.tags = tags;
-        this.tagsUpdateOptions = tagsUpdateOptions;
-        this.node = paper.g();
-        this.node.addClass("tagsLayer");
-    }
-    static getCachedBBox(primaryTagNode) {
-        const tagName = primaryTagNode.node.innerHTML;
-        if (TagsComponent.bboxCache[tagName]) {
-            return TagsComponent.bboxCache[tagName];
-        }
-        TagsComponent.bboxCache[tagName] = primaryTagNode.getBBox();
-        return TagsComponent.bboxCache[tagName];
-    }
-    updateTags(tags, options) {
-        this.tags = tags;
-        this.tagsUpdateOptions = options;
-        this.rebuildTagLabels();
-        this.clearStyleMaps();
-        this.initStyleMaps(tags);
-        const showBackground = (options !== undefined) ? options.showRegionBackground : true;
-        this.applyStyleMaps(showBackground);
-        const showTagsText = (options !== undefined) ? options.showTagsText : true;
-        this.applyStyleForTagsVisibility(showTagsText);
-    }
-    clearStyleMaps() {
-        while (this.styleSheet.cssRules.length > 0) {
-            this.styleSheet.deleteRule(0);
-        }
-    }
-    applyStyleMaps(showRegionBackground = true) {
-        if (this.tags && this.tags.primary !== undefined) {
-            window.requestAnimationFrame(() => {
-                const sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
-                for (const r of sm) {
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
-                }
-            });
-        }
-    }
-    applyStyleForTagsVisibility(showTagsText = true) {
-        if (this.tags && this.tags.primary !== undefined) {
-            const visibility = showTagsText ? "block" : "none";
-            const sm = [
-                {
-                    rule: `.${this.styleId} .primaryTagTextBGStyle`,
-                    style: `display: ${visibility};`,
-                },
-                {
-                    rule: `.${this.styleId} .primaryTagTextStyle`,
-                    style: `display: ${visibility};`,
-                },
-            ];
-            window.requestAnimationFrame(() => {
-                for (const r of sm) {
-                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
-                }
-            });
-        }
-    }
-}
-exports.TagsComponent = TagsComponent;
-TagsComponent.bboxCache = {};
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CrossElement = void 0;
-const Point2D_1 = __webpack_require__(0);
-const Element_1 = __webpack_require__(17);
-class CrossElement extends Element_1.Element {
-    constructor(paper, boundRect) {
-        super(paper, boundRect);
-        this.buildUIElements();
-        this.hide();
-    }
-    get x() {
-        return this.center.x;
-    }
-    get y() {
-        return this.center.y;
-    }
-    boundToRect(rect) {
-        return new Point2D_1.Point2D(this.x, this.y).boundToRect(rect);
-    }
-    move(p, boundRect, square = false, ref = null) {
-        const np = new Point2D_1.Point2D(p).boundToRect(boundRect);
-        if (square) {
-            const dx = Math.abs(np.x - ref.x);
-            const vx = Math.sign(np.x - ref.x);
-            const dy = Math.abs(np.y - ref.y);
-            const vy = Math.sign(np.y - ref.y);
-            const d = Math.min(dx, dy);
-            np.x = ref.x + d * vx;
-            np.y = ref.y + d * vy;
-        }
-        this.center.move(np);
-        this.vl.node.setAttribute("x1", np.x.toString());
-        this.vl.node.setAttribute("x2", np.x.toString());
-        this.vl.node.setAttribute("y2", boundRect.height.toString());
-        this.hl.node.setAttribute("y1", np.y.toString());
-        this.hl.node.setAttribute("x2", boundRect.width.toString());
-        this.hl.node.setAttribute("y2", np.y.toString());
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this.vl.node.setAttribute("y2", height.toString());
-        this.hl.node.setAttribute("x2", width.toString());
-    }
-    buildUIElements() {
-        const verticalLine = this.paper.line(0, 0, 0, this.boundRect.height);
-        const horizontalLine = this.paper.line(0, 0, this.boundRect.width, 0);
-        this.node = this.paper.g();
-        this.node.addClass("crossStyle");
-        this.node.add(verticalLine);
-        this.node.add(horizontalLine);
-        this.hl = horizontalLine;
-        this.vl = verticalLine;
-        this.center = new Point2D_1.Point2D(0, 0);
-    }
-}
-exports.CrossElement = CrossElement;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.HSLColor = void 0;
-const SRGBColor_1 = __webpack_require__(19);
-class HSLColor {
-    constructor(h, s, l) {
-        this.values = [h, s, l];
-    }
-    get h() {
-        return this.values[0];
-    }
-    get s() {
-        return this.values[1];
-    }
-    get l() {
-        return this.values[2];
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toCSSValues() {
-        return [this.h * 360, this.s * 100, this.l * 100];
-    }
-    toCSSString(alpha) {
-        const [h, s, l] = this.toCSSValues();
-        if (alpha !== undefined) {
-            alpha = Math.min(1, Math.max(0, alpha));
-            return `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
-        }
-        else {
-            return `hsl(${h}, ${s}%, ${l}%)`;
-        }
-    }
-    toSRGB() {
-        let m1;
-        let m2;
-        const [h, s, l] = this.values;
-        if (l <= 0.5) {
-            m2 = l * (s + 1);
-        }
-        else {
-            m2 = l + s - l * s;
-        }
-        m1 = l * 2 - m2;
-        const r = this.hue2rgb(m1, m2, h + 1 / 3);
-        const g = this.hue2rgb(m1, m2, h);
-        const b = this.hue2rgb(m1, m2, h - 1 / 3);
-        return new SRGBColor_1.SRGBColor(r, g, b);
-    }
-    hue2rgb(m1, m2, h) {
-        if (h < 0) {
-            h = h + 1;
-        }
-        if (h > 1) {
-            h = h - 1;
-        }
-        if (h * 6 < 1) {
-            return m1 + (m2 - m1) * h * 6;
-        }
-        else if (h * 2 < 1) {
-            return m2;
-        }
-        else if (h * 3 < 2) {
-            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
-        }
-        else {
-            return m1;
-        }
-    }
-}
-exports.HSLColor = HSLColor;
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RGBColor = void 0;
-const SRGBColor_1 = __webpack_require__(19);
-const XYZColor_1 = __webpack_require__(14);
-class RGBColor {
-    constructor(r, g, b) {
-        this.values = [r, g, b];
-    }
-    get r() {
-        return this.values[0];
-    }
-    get g() {
-        return this.values[1];
-    }
-    get b() {
-        return this.values[2];
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toXYZ() {
-        const [r, g, b] = this.values;
-        const x = 0.4124 * r + 0.3576 * g + 0.1805 * b;
-        const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        const z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
-        return new XYZColor_1.XYZColor(x, y, z);
-    }
-    toSRGB() {
-        const values = this.values.map((v) => {
-            if (v < 0.0031308) {
-                return 12.92 * v;
-            }
-            else {
-                return 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
-            }
-        });
-        return new SRGBColor_1.SRGBColor(values[0], values[1], values[2]);
-    }
-    toLAB() {
-        return this.toXYZ().toLAB();
-    }
-}
-exports.RGBColor = RGBColor;
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.XYZColor = void 0;
-const LABColor_1 = __webpack_require__(7);
-const RGBColor_1 = __webpack_require__(13);
-class XYZColor {
-    constructor(x, y, z) {
-        this.values = [x, y, z];
-    }
-    get x() {
-        return this.values[0];
-    }
-    get y() {
-        return this.values[1];
-    }
-    get z() {
-        return this.values[2];
-    }
-    toArray() {
-        return this.values.map((v) => v);
-    }
-    toRGB() {
-        const [x, y, z] = this.values;
-        const r = +3.2406255 * x - 1.5372080 * y - 0.4986286 * z;
-        const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
-        const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
-        return new RGBColor_1.RGBColor(r, g, b);
-    }
-    toSRGB() {
-        return this.toRGB().toSRGB();
-    }
-    toLAB() {
-        const x = this.x / XYZColor.D65.x;
-        const y = this.y / XYZColor.D65.y;
-        const z = this.z / XYZColor.D65.z;
-        const xyz = [x, y, z].map((v) => {
-            if (v > 0.008856451) {
-                return v ** (1 / 3);
-            }
-            else {
-                return 7.787037 * v + 16 / 116;
-            }
-        });
-        return new LABColor_1.LABColor((116 * xyz[1] - 16) / 100, 5 * (xyz[0] - xyz[1]), 2 * (xyz[1] - xyz[2]));
-    }
-}
-exports.XYZColor = XYZColor;
-XYZColor.D65 = new XYZColor(0.95047, 1.000, 1.08883);
-XYZColor.D50 = new XYZColor(0.966797, 1.000, 0.825188);
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SelectionMode = void 0;
-var SelectionMode;
-(function (SelectionMode) {
-    SelectionMode[SelectionMode["NONE"] = 0] = "NONE";
-    SelectionMode[SelectionMode["POINT"] = 1] = "POINT";
-    SelectionMode[SelectionMode["RECT"] = 2] = "RECT";
-    SelectionMode[SelectionMode["COPYRECT"] = 3] = "COPYRECT";
-    SelectionMode[SelectionMode["POLYLINE"] = 4] = "POLYLINE";
-    SelectionMode[SelectionMode["POLYGON"] = 5] = "POLYGON";
-})(SelectionMode = exports.SelectionMode || (exports.SelectionMode = {}));
-
-
-/***/ }),
-/* 16 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1345,11 +754,12 @@ var SelectionMode;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorsComponent = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const RegionComponent_1 = __webpack_require__(5);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const RegionComponent_1 = __webpack_require__(4);
 class AnchorsComponent extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
+        this.mixins = [];
         this.activeAnchorIndex = 0;
         this.isDragged = false;
         this.node = this.paper.g();
@@ -1370,6 +780,7 @@ class AnchorsComponent extends RegionComponent_1.RegionComponent {
                 });
             });
         }
+        this.mixins.forEach(m => m.redraw());
     }
     freeze() {
         super.freeze();
@@ -1393,6 +804,7 @@ class AnchorsComponent extends RegionComponent_1.RegionComponent {
                 bypass: true,
             },
         ]);
+        this.mixins.forEach(m => m.buildAnchors());
     }
     buildPointAnchors() {
         this.regionData.points.forEach((point, index) => {
@@ -1551,7 +963,739 @@ AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS = 7;
 
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsComponent = void 0;
+const RegionComponent_1 = __webpack_require__(4);
+class TagsComponent extends RegionComponent_1.RegionComponent {
+    constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
+        super(paper, paperRect, regionData, null);
+        this.styleSheet = null;
+        this.styleMap = [];
+        this.styleLightMap = [];
+        this.styleId = styleId;
+        this.styleSheet = styleSheet;
+        this.tags = tags;
+        this.tagsUpdateOptions = tagsUpdateOptions;
+        this.node = paper.g();
+        this.node.addClass("tagsLayer");
+    }
+    static getCachedBBox(primaryTagNode) {
+        const tagName = primaryTagNode.node.innerHTML;
+        if (TagsComponent.bboxCache[tagName]) {
+            return TagsComponent.bboxCache[tagName];
+        }
+        TagsComponent.bboxCache[tagName] = primaryTagNode.getBBox();
+        return TagsComponent.bboxCache[tagName];
+    }
+    updateTags(tags, options) {
+        this.tags = tags;
+        this.tagsUpdateOptions = options;
+        this.rebuildTagLabels();
+        this.clearStyleMaps();
+        this.initStyleMaps(tags);
+        const showBackground = (options !== undefined) ? options.showRegionBackground : true;
+        this.applyStyleMaps(showBackground);
+        const showTagsText = (options !== undefined) ? options.showTagsText : true;
+        this.applyStyleForTagsVisibility(showTagsText);
+    }
+    clearStyleMaps() {
+        while (this.styleSheet.cssRules.length > 0) {
+            this.styleSheet.deleteRule(0);
+        }
+    }
+    applyStyleMaps(showRegionBackground = true) {
+        if (this.tags && this.tags.primary !== undefined) {
+            window.requestAnimationFrame(() => {
+                const sm = (showRegionBackground ? this.styleMap : this.styleLightMap);
+                for (const r of sm) {
+                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
+                }
+            });
+        }
+    }
+    applyStyleForTagsVisibility(showTagsText = true) {
+        if (this.tags && this.tags.primary !== undefined) {
+            const visibility = showTagsText ? "block" : "none";
+            const sm = [
+                {
+                    rule: `.${this.styleId} .primaryTagTextBGStyle`,
+                    style: `display: ${visibility};`,
+                },
+                {
+                    rule: `.${this.styleId} .primaryTagTextStyle`,
+                    style: `display: ${visibility};`,
+                },
+            ];
+            window.requestAnimationFrame(() => {
+                for (const r of sm) {
+                    this.styleSheet.insertRule(`${r.rule}{${r.style}}`, 0);
+                }
+            });
+        }
+    }
+}
+exports.TagsComponent = TagsComponent;
+TagsComponent.bboxCache = {};
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Selector = void 0;
+const Element_1 = __webpack_require__(19);
+class Selector extends Element_1.Element {
+    constructor(parent, paper, boundRect, callbacks) {
+        super(paper, boundRect);
+        this.isEnabled = true;
+        this.parentNode = parent;
+        if (callbacks !== undefined) {
+            this.callbacks = callbacks;
+        }
+        else {
+            this.callbacks = {
+                onLocked: null,
+                onSelectionBegin: null,
+                onSelectionEnd: null,
+                onUnlocked: null,
+            };
+        }
+    }
+    enable() {
+        if (!this.isEnabled) {
+            this.isEnabled = true;
+            this.show();
+        }
+    }
+    disable() {
+        if (this.isEnabled) {
+            this.isEnabled = false;
+            this.hide();
+        }
+    }
+    subscribeToEvents(listeners) {
+        listeners.forEach((e) => {
+            e.base.addEventListener(e.event, this.enablify(e.listener.bind(this), e.bypass));
+        });
+    }
+    enablify(f, bypass = false) {
+        return (args) => {
+            if (this.isEnabled || bypass) {
+                f(args);
+            }
+        };
+    }
+    showAll(elements) {
+        window.requestAnimationFrame(() => {
+            elements.forEach((element) => {
+                if (element.show !== undefined) {
+                    element.show();
+                }
+                else {
+                    element.node.setAttribute("visibility", "visible");
+                }
+            });
+        });
+    }
+    hideAll(elements) {
+        window.requestAnimationFrame(() => {
+            elements.forEach((element) => {
+                if (element.hide !== undefined) {
+                    element.hide();
+                }
+                else {
+                    element.node.setAttribute("visibility", "hidden");
+                }
+            });
+        });
+    }
+    resizeAll(elements) {
+        window.requestAnimationFrame(() => {
+            elements.forEach((element) => {
+                element.resize(this.boundRect.width, this.boundRect.height);
+            });
+        });
+    }
+    moveCross(cross, pointTo, square = false, ref = null) {
+        cross.move(pointTo, this.boundRect, square, ref);
+    }
+    movePoint(point, pointTo) {
+        point.attr({
+            cx: pointTo.x,
+            cy: pointTo.y,
+        });
+    }
+    moveLine(line, pointFrom, pointTo) {
+        line.attr({
+            x1: pointFrom.x,
+            x2: pointTo.x,
+            y1: pointFrom.y,
+            y2: pointTo.y,
+        });
+    }
+}
+exports.Selector = Selector;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LABColor = void 0;
+const XYZColor_1 = __webpack_require__(16);
+class LABColor {
+    constructor(l, a, b) {
+        this.values = [l, a, b];
+    }
+    get l() {
+        return this.values[0];
+    }
+    get a() {
+        return this.values[1];
+    }
+    get b() {
+        return this.values[2];
+    }
+    distanceTo(color) {
+        const deltaL = this.values[0] - color.values[0];
+        const deltaA = this.values[1] - color.values[1];
+        const deltaB = this.values[2] - color.values[2];
+        const c1 = Math.sqrt(this.values[1] * this.values[1] + this.values[2] * this.values[2]);
+        const c2 = Math.sqrt(color.values[1] * color.values[1] + color.values[2] * color.values[2]);
+        const deltaC = c1 - c2;
+        let deltaH = deltaA * deltaA + deltaB * deltaB - deltaC * deltaC;
+        deltaH = deltaH < 0 ? 0 : Math.sqrt(deltaH);
+        const sc = 1.0 + 0.045 * c1;
+        const sh = 1.0 + 0.015 * c1;
+        const deltaLKlsl = deltaL / (1.0);
+        const deltaCkcsc = deltaC / (sc);
+        const deltaHkhsh = deltaH / (sh);
+        const i = deltaLKlsl * deltaLKlsl + deltaCkcsc * deltaCkcsc + deltaHkhsh * deltaHkhsh;
+        return i < 0 ? 0 : Math.sqrt(i);
+    }
+    distanceTo_00(color) {
+        const [L1, a1, b1] = this.values;
+        const [L2, a2, b2] = color.values;
+        const kL = 1.0;
+        const kC = 1.0;
+        const kH = 1.0;
+        const K1 = 0.045;
+        const K2 = 0.015;
+        const deg2rad = Math.PI / 180.0;
+        const rad2deg = 180.0 / Math.PI;
+        const deltaL = L2 - L1;
+        const midL = (L1 + L2) / 2;
+        const C1 = Math.sqrt(a1 * a1 + b1 * b1);
+        const C2 = Math.sqrt(a2 * a2 + b2 * b2);
+        const midC = (C1 + C2) / 2;
+        const midC7 = midC ** 7;
+        const midC7Root = Math.sqrt(midC7 / (midC7 + 25 ** 7));
+        const a1t = a1 + 0.5 * a1 * (1 - midC7Root);
+        const a2t = a2 + 0.5 * a2 * (1 - midC7Root);
+        const C1t = Math.sqrt(a1t * a1t + b1 * b1);
+        const C2t = Math.sqrt(a2t * a2t + b2 * b2);
+        const midCt = (C1t + C2t) / 2;
+        const deltaCt = C2t - C1t;
+        const h1 = (b1 === 0 && a1t === 0) ? 0 : (Math.atan2(b1, a1t) * rad2deg) % 360;
+        const h2 = (b2 === 0 && a2t === 0) ? 0 : (Math.atan2(b2, a2t) * rad2deg) % 360;
+        let deltah = h2 - h1;
+        const absDeltah = Math.abs(deltah);
+        if (h2 <= h1 && absDeltah > 180) {
+            deltah += 360;
+        }
+        if (h2 > h1 && absDeltah > 180) {
+            deltah -= 360;
+        }
+        const deltaH = 2 * Math.sqrt(C1t * C2t) * Math.sin(0.5 * deltah * deg2rad);
+        let H = (h1 + h2) / 2;
+        if (absDeltah > 180 && h1 + h2 < 360) {
+            H += 180;
+        }
+        if (absDeltah > 180 && h1 + h2 >= 360) {
+            H -= 180;
+        }
+        const T = 1 - 0.17 * Math.cos((H - 30) * deg2rad)
+            + 0.24 * Math.cos((2 * H) * deg2rad)
+            + 0.32 * Math.cos((3 * H + 6) * deg2rad)
+            - 0.20 * Math.cos((4 * H - 63) * deg2rad);
+        const SL = 1 + (K2 * (midL - 50)) / (Math.sqrt(20 + (midL - 50) * (midL - 50)));
+        const SC = 1 + K1 * midCt;
+        const SH = 1 + K2 * midCt * T;
+        const RT = -2 * midC7Root * Math.sin((60 * Math.exp(-((H - 275) / 25) * ((H - 275) / 25))) * deg2rad);
+        const diff = Math.sqrt((deltaL / (kL * SL)) ** 2
+            + (deltaCt / (kC * SC)) ** 2
+            + (deltaH / (kH * SH)) ** 2
+            + RT * (deltaCt / (kC * SC)) * (deltaH / (kH * SH)));
+        return diff;
+    }
+    distanceToGray() {
+        return Math.sqrt(this.a * this.a + this.b * this.b);
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toXYZ() {
+        let y = (this.l * 100 + 16) / 116;
+        let x = this.a / 5 + y;
+        let z = y - this.b / 2;
+        [x, y, z] = [x, y, z].map((v) => {
+            const v3 = v * v * v;
+            return (v3 > 0.008856451) ? v3 : (v - 16 / 116) / 7.787037;
+        });
+        return new XYZColor_1.XYZColor(x * XYZColor_1.XYZColor.D65.x, y * XYZColor_1.XYZColor.D65.y, z * XYZColor_1.XYZColor.D65.z);
+    }
+    toRGB() {
+        return this.toXYZ().toRGB();
+    }
+    toSRGB() {
+        return this.toXYZ().toRGB().toSRGB();
+    }
+}
+exports.LABColor = LABColor;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConfigurationManager = void 0;
+class ConfigurationManager {
+}
+exports.ConfigurationManager = ConfigurationManager;
+ConfigurationManager.isModifyRegionOnlyMode = false;
+ConfigurationManager.isPathRegionEnabled = false;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragComponent = void 0;
+const Point2D_1 = __webpack_require__(0);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const RegionComponent_1 = __webpack_require__(4);
+class DragComponent extends RegionComponent_1.RegionComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+        this.isDragged = false;
+        this.node = paper.g();
+        this.node.addClass("dragLayer");
+    }
+    freeze() {
+        super.freeze();
+        this.isDragged = false;
+        this.dragOrigin = null;
+    }
+    subscribeToDragEvents() {
+        const listeners = [
+            {
+                event: "pointerenter",
+                base: this.dragNode.node,
+                listener: (e) => {
+                    if (this.isDragged) {
+                        e.stopPropagation();
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointermove",
+                base: this.dragNode.node,
+                listener: (e) => {
+                    if (this.isDragged) {
+                        const rect = e.target.getBoundingClientRect();
+                        const rdx = e.clientX - rect.left;
+                        const rdy = e.clientY - rect.top;
+                        let dx = e.clientX - this.dragOrigin.x;
+                        let dy = e.clientY - this.dragOrigin.y;
+                        if ((rdx < 0 && dx > 0) || (rdx > this.width && dx < 0)) {
+                            dx = 0;
+                        }
+                        if ((rdy < 0 && dy > 0) || (rdy > this.height && dy < 0)) {
+                            dy = 0;
+                        }
+                        let p = new Point2D_1.Point2D(this.x + dx, this.y + dy);
+                        if (this.paperRect !== null) {
+                            p = p.boundToRect(this.paperRect);
+                        }
+                        this.dragOrigin = new Point2D_1.Point2D(e.clientX, e.clientY);
+                        const rd = this.regionData.copy();
+                        rd.move(p);
+                        this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerleave",
+                base: this.dragNode.node,
+                listener: (e) => {
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerdown",
+                base: this.dragNode.node,
+                listener: (e) => {
+                    this.dragNode.node.setPointerCapture(e.pointerId);
+                    const multiselection = e.ctrlKey;
+                    this.isDragged = true;
+                    this.dragOrigin = new Point2D_1.Point2D(e.clientX, e.clientY);
+                    this.callbacks.onManipulationLockRequest(this);
+                    this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEBEGIN, multiselection);
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerup",
+                base: this.dragNode.node,
+                listener: (e) => {
+                    this.dragNode.node.releasePointerCapture(e.pointerId);
+                    const multiselection = e.ctrlKey;
+                    if (this.isDragged) {
+                        this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEEND, multiselection);
+                        this.isDragged = false;
+                        this.dragOrigin = null;
+                    }
+                    this.callbacks.onManipulationLockRelease(this);
+                    this.callbacks.onChange(this, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.SELECTIONTOGGLE, multiselection);
+                },
+                bypass: false,
+            },
+        ];
+        this.subscribeToEvents(listeners);
+    }
+}
+exports.DragComponent = DragComponent;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CrossElement = void 0;
+const Point2D_1 = __webpack_require__(0);
+const Element_1 = __webpack_require__(19);
+class CrossElement extends Element_1.Element {
+    constructor(paper, boundRect) {
+        super(paper, boundRect);
+        this.buildUIElements();
+        this.hide();
+    }
+    get x() {
+        return this.center.x;
+    }
+    get y() {
+        return this.center.y;
+    }
+    boundToRect(rect) {
+        return new Point2D_1.Point2D(this.x, this.y).boundToRect(rect);
+    }
+    move(p, boundRect, square = false, ref = null) {
+        const np = new Point2D_1.Point2D(p).boundToRect(boundRect);
+        if (square) {
+            const dx = Math.abs(np.x - ref.x);
+            const vx = Math.sign(np.x - ref.x);
+            const dy = Math.abs(np.y - ref.y);
+            const vy = Math.sign(np.y - ref.y);
+            const d = Math.min(dx, dy);
+            np.x = ref.x + d * vx;
+            np.y = ref.y + d * vy;
+        }
+        this.center.move(np);
+        this.vl.node.setAttribute("x1", np.x.toString());
+        this.vl.node.setAttribute("x2", np.x.toString());
+        this.vl.node.setAttribute("y2", boundRect.height.toString());
+        this.hl.node.setAttribute("y1", np.y.toString());
+        this.hl.node.setAttribute("x2", boundRect.width.toString());
+        this.hl.node.setAttribute("y2", np.y.toString());
+    }
+    resize(width, height) {
+        super.resize(width, height);
+        this.vl.node.setAttribute("y2", height.toString());
+        this.hl.node.setAttribute("x2", width.toString());
+    }
+    buildUIElements() {
+        const verticalLine = this.paper.line(0, 0, 0, this.boundRect.height);
+        const horizontalLine = this.paper.line(0, 0, this.boundRect.width, 0);
+        this.node = this.paper.g();
+        this.node.addClass("crossStyle");
+        this.node.add(verticalLine);
+        this.node.add(horizontalLine);
+        this.hl = horizontalLine;
+        this.vl = verticalLine;
+        this.center = new Point2D_1.Point2D(0, 0);
+    }
+}
+exports.CrossElement = CrossElement;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HSLColor = void 0;
+const SRGBColor_1 = __webpack_require__(21);
+class HSLColor {
+    constructor(h, s, l) {
+        this.values = [h, s, l];
+    }
+    get h() {
+        return this.values[0];
+    }
+    get s() {
+        return this.values[1];
+    }
+    get l() {
+        return this.values[2];
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toCSSValues() {
+        return [this.h * 360, this.s * 100, this.l * 100];
+    }
+    toCSSString(alpha) {
+        const [h, s, l] = this.toCSSValues();
+        if (alpha !== undefined) {
+            alpha = Math.min(1, Math.max(0, alpha));
+            return `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
+        }
+        else {
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+    }
+    toSRGB() {
+        let m1;
+        let m2;
+        const [h, s, l] = this.values;
+        if (l <= 0.5) {
+            m2 = l * (s + 1);
+        }
+        else {
+            m2 = l + s - l * s;
+        }
+        m1 = l * 2 - m2;
+        const r = this.hue2rgb(m1, m2, h + 1 / 3);
+        const g = this.hue2rgb(m1, m2, h);
+        const b = this.hue2rgb(m1, m2, h - 1 / 3);
+        return new SRGBColor_1.SRGBColor(r, g, b);
+    }
+    hue2rgb(m1, m2, h) {
+        if (h < 0) {
+            h = h + 1;
+        }
+        if (h > 1) {
+            h = h - 1;
+        }
+        if (h * 6 < 1) {
+            return m1 + (m2 - m1) * h * 6;
+        }
+        else if (h * 2 < 1) {
+            return m2;
+        }
+        else if (h * 3 < 2) {
+            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+        }
+        else {
+            return m1;
+        }
+    }
+}
+exports.HSLColor = HSLColor;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RGBColor = void 0;
+const SRGBColor_1 = __webpack_require__(21);
+const XYZColor_1 = __webpack_require__(16);
+class RGBColor {
+    constructor(r, g, b) {
+        this.values = [r, g, b];
+    }
+    get r() {
+        return this.values[0];
+    }
+    get g() {
+        return this.values[1];
+    }
+    get b() {
+        return this.values[2];
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toXYZ() {
+        const [r, g, b] = this.values;
+        const x = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+        const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+        return new XYZColor_1.XYZColor(x, y, z);
+    }
+    toSRGB() {
+        const values = this.values.map((v) => {
+            if (v < 0.0031308) {
+                return 12.92 * v;
+            }
+            else {
+                return 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+            }
+        });
+        return new SRGBColor_1.SRGBColor(values[0], values[1], values[2]);
+    }
+    toLAB() {
+        return this.toXYZ().toLAB();
+    }
+}
+exports.RGBColor = RGBColor;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.XYZColor = void 0;
+const LABColor_1 = __webpack_require__(10);
+const RGBColor_1 = __webpack_require__(15);
+class XYZColor {
+    constructor(x, y, z) {
+        this.values = [x, y, z];
+    }
+    get x() {
+        return this.values[0];
+    }
+    get y() {
+        return this.values[1];
+    }
+    get z() {
+        return this.values[2];
+    }
+    toArray() {
+        return this.values.map((v) => v);
+    }
+    toRGB() {
+        const [x, y, z] = this.values;
+        const r = +3.2406255 * x - 1.5372080 * y - 0.4986286 * z;
+        const g = -0.9689307 * x + 1.8757561 * y + 0.0415175 * z;
+        const b = +0.0557101 * x - 0.2040211 * y + 1.0569959 * z;
+        return new RGBColor_1.RGBColor(r, g, b);
+    }
+    toSRGB() {
+        return this.toRGB().toSRGB();
+    }
+    toLAB() {
+        const x = this.x / XYZColor.D65.x;
+        const y = this.y / XYZColor.D65.y;
+        const z = this.z / XYZColor.D65.z;
+        const xyz = [x, y, z].map((v) => {
+            if (v > 0.008856451) {
+                return v ** (1 / 3);
+            }
+            else {
+                return 7.787037 * v + 16 / 116;
+            }
+        });
+        return new LABColor_1.LABColor((116 * xyz[1] - 16) / 100, 5 * (xyz[0] - xyz[1]), 2 * (xyz[1] - xyz[2]));
+    }
+}
+exports.XYZColor = XYZColor;
+XYZColor.D65 = new XYZColor(0.95047, 1.000, 1.08883);
+XYZColor.D50 = new XYZColor(0.966797, 1.000, 0.825188);
+
+
+/***/ }),
 /* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SelectionMode = void 0;
+var SelectionMode;
+(function (SelectionMode) {
+    SelectionMode[SelectionMode["NONE"] = 0] = "NONE";
+    SelectionMode[SelectionMode["POINT"] = 1] = "POINT";
+    SelectionMode[SelectionMode["RECT"] = 2] = "RECT";
+    SelectionMode[SelectionMode["COPYRECT"] = 3] = "COPYRECT";
+    SelectionMode[SelectionMode["POLYLINE"] = 4] = "POLYLINE";
+    SelectionMode[SelectionMode["POLYGON"] = 5] = "POLYGON";
+})(SelectionMode = exports.SelectionMode || (exports.SelectionMode = {}));
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CubicBezierControl = void 0;
+const Point2D_1 = __webpack_require__(0);
+class CubicBezierControl {
+    constructor({ c1, c2 }) {
+        this.c1 = new Point2D_1.Point2D(c1);
+        this.c2 = new Point2D_1.Point2D(c2);
+    }
+    static BuildFromJSON({ c1, c2 }) {
+        return new CubicBezierControl({ c1, c2 });
+    }
+    boundToRect(r) {
+        return new CubicBezierControl({ c1: this.c1.boundToRect(r), c2: this.c2.boundToRect(r) });
+    }
+    shift(dx, dy) {
+        this.c1.shift(dx, dy);
+        this.c2.shift(dx, dy);
+    }
+    copy() {
+        return new CubicBezierControl(this);
+    }
+    toString() {
+        return `{${this.c1.toString()}, ${this.c2.toString()}}`;
+    }
+    toJSON() {
+        return {
+            c1: this.c1.toJSON(),
+            c2: this.c2.toJSON(),
+        };
+    }
+}
+exports.CubicBezierControl = CubicBezierControl;
+
+
+/***/ }),
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1586,18 +1730,18 @@ exports.Element = Element;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Color = void 0;
-const HSLColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(7);
-const RGBColor_1 = __webpack_require__(13);
-const SRGBColor_1 = __webpack_require__(19);
-const XYZColor_1 = __webpack_require__(14);
+const HSLColor_1 = __webpack_require__(14);
+const LABColor_1 = __webpack_require__(10);
+const RGBColor_1 = __webpack_require__(15);
+const SRGBColor_1 = __webpack_require__(21);
+const XYZColor_1 = __webpack_require__(16);
 class Color {
     constructor(...args) {
         if (args.length === 1) {
@@ -1675,15 +1819,15 @@ exports.Color = Color;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SRGBColor = void 0;
-const HSLColor_1 = __webpack_require__(12);
-const RGBColor_1 = __webpack_require__(13);
+const HSLColor_1 = __webpack_require__(14);
+const RGBColor_1 = __webpack_require__(15);
 class SRGBColor {
     constructor(r, g, b) {
         this.values = [r, g, b];
@@ -1808,7 +1952,7 @@ exports.SRGBColor = SRGBColor;
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2090,21 +2234,7 @@ exports.FilterPipeline = FilterPipeline;
 
 
 /***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConfigurationManager = void 0;
-class ConfigurationManager {
-}
-exports.ConfigurationManager = ConfigurationManager;
-ConfigurationManager.isModifyRegionOnlyMode = false;
-
-
-/***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2195,7 +2325,7 @@ exports.ZoomManager = ZoomManager;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2204,14 +2334,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegionsManager = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const RegionData_1 = __webpack_require__(2);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const ZoomManager_1 = __webpack_require__(22);
-const PointRegion_1 = __webpack_require__(24);
-const PolygonRegion_1 = __webpack_require__(35);
-const PolylineRegion_1 = __webpack_require__(39);
-const RectRegion_1 = __webpack_require__(25);
-const RegionMenu_1 = __webpack_require__(46);
+const RegionData_1 = __webpack_require__(3);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const ZoomManager_1 = __webpack_require__(23);
+const PathRegion_1 = __webpack_require__(39);
+const PointRegion_1 = __webpack_require__(27);
+const PolygonRegion_1 = __webpack_require__(47);
+const PolylineRegion_1 = __webpack_require__(50);
+const RectRegion_1 = __webpack_require__(28);
+const RegionMenu_1 = __webpack_require__(57);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
@@ -2280,6 +2411,9 @@ class RegionsManager {
         else if (regionData.type === RegionData_1.RegionDataType.Polygon) {
             this.addPolygonRegion(id, regionData, tagsDescriptor);
         }
+        else if (regionData.type === RegionData_1.RegionDataType.Path) {
+            this.addPathRegion(id, regionData, tagsDescriptor);
+        }
         this.sortRegionsByArea();
         if (this.regionAnnouncer) {
             this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
@@ -2303,6 +2437,11 @@ class RegionsManager {
     addPolygonRegion(id, regionData, tagsDescriptor) {
         this.menu.hide();
         const region = new PolygonRegion_1.PolygonRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor, this.tagsUpdateOptions);
+        this.registerRegion(region);
+    }
+    addPathRegion(id, regionData, tagsDescriptor) {
+        this.menu.hide();
+        const region = new PathRegion_1.PathRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor, this.tagsUpdateOptions);
         this.registerRegion(region);
     }
     redrawAllRegions() {
@@ -2845,16 +2984,65 @@ exports.RegionsManager = RegionsManager;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegionDataType = void 0;
+var RegionDataType;
+(function (RegionDataType) {
+    RegionDataType["Point"] = "point";
+    RegionDataType["Rect"] = "rect";
+    RegionDataType["Polyline"] = "polyline";
+    RegionDataType["Polygon"] = "polygon";
+    RegionDataType["Path"] = "Path";
+})(RegionDataType = exports.RegionDataType || (exports.RegionDataType = {}));
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragElement = void 0;
+const DragComponent_1 = __webpack_require__(12);
+class DragElement extends DragComponent_1.DragComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+        this.dragNode = paper.rect(this.x, this.y, this.width, this.height);
+        this.dragNode.addClass("dragRectStyle");
+        this.node.add(this.dragNode);
+        this.subscribeToDragEvents();
+    }
+    redraw() {
+        window.requestAnimationFrame(() => {
+            this.dragNode.attr({
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height,
+            });
+        });
+    }
+}
+exports.DragElement = DragElement;
+
+
+/***/ }),
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PointRegion = void 0;
-const Region_1 = __webpack_require__(8);
-const DragElement_1 = __webpack_require__(33);
-const TagsElement_1 = __webpack_require__(34);
+const Region_1 = __webpack_require__(6);
+const DragElement_1 = __webpack_require__(45);
+const TagsElement_1 = __webpack_require__(46);
 class PointRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
@@ -2882,7 +3070,7 @@ exports.PointRegion = PointRegion;
 
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2890,10 +3078,10 @@ exports.PointRegion = PointRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RectRegion = void 0;
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(8);
-const AnchorsElements_1 = __webpack_require__(43);
-const DragElement_1 = __webpack_require__(44);
-const TagsElement_1 = __webpack_require__(45);
+const Region_1 = __webpack_require__(6);
+const AnchorsElements_1 = __webpack_require__(54);
+const DragElement_1 = __webpack_require__(55);
+const TagsElement_1 = __webpack_require__(56);
 class RectRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -2938,7 +3126,7 @@ exports.RectRegion = RectRegion;
 
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2946,12 +3134,12 @@ exports.RectRegion = RectRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AreaSelector = void 0;
 const Rect_1 = __webpack_require__(1);
-const ISelectorSettings_1 = __webpack_require__(15);
-const PointSelector_1 = __webpack_require__(47);
-const PolygonSelector_1 = __webpack_require__(48);
-const PolylineSelector_1 = __webpack_require__(49);
-const RectCopySelector_1 = __webpack_require__(50);
-const RectSelector_1 = __webpack_require__(51);
+const ISelectorSettings_1 = __webpack_require__(17);
+const PointSelector_1 = __webpack_require__(58);
+const PolygonSelector_1 = __webpack_require__(59);
+const PolylineSelector_1 = __webpack_require__(60);
+const RectCopySelector_1 = __webpack_require__(61);
+const RectSelector_1 = __webpack_require__(62);
 class AreaSelector {
     constructor(svgHost, callbacks) {
         this.isVisible = true;
@@ -3128,14 +3316,14 @@ AreaSelector.DefaultTemplateSize = new Rect_1.Rect(20, 20);
 
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlternatingCrossElement = void 0;
-const CrossElement_1 = __webpack_require__(11);
+const CrossElement_1 = __webpack_require__(13);
 class AlternatingCrossElement extends CrossElement_1.CrossElement {
     constructor(paper, boundRect) {
         super(paper, boundRect);
@@ -3174,7 +3362,7 @@ exports.AlternatingCrossElement = AlternatingCrossElement;
 
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3183,7 +3371,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RectElement = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const Element_1 = __webpack_require__(17);
+const Element_1 = __webpack_require__(19);
 class RectElement extends Element_1.Element {
     constructor(paper, boundRect, rect) {
         super(paper, boundRect);
@@ -3216,7 +3404,7 @@ exports.RectElement = RectElement;
 
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3224,11 +3412,11 @@ exports.RectElement = RectElement;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Toolbar = void 0;
 const Rect_1 = __webpack_require__(1);
-const ToolbarIcon_1 = __webpack_require__(4);
-const ToolbarSelectIcon_1 = __webpack_require__(52);
-const ToolbarSeparator_1 = __webpack_require__(53);
-const ToolbarSwitchIcon_1 = __webpack_require__(54);
-const ToolbarTriggerIcon_1 = __webpack_require__(55);
+const ToolbarIcon_1 = __webpack_require__(5);
+const ToolbarSelectIcon_1 = __webpack_require__(63);
+const ToolbarSeparator_1 = __webpack_require__(64);
+const ToolbarSwitchIcon_1 = __webpack_require__(65);
+const ToolbarTriggerIcon_1 = __webpack_require__(66);
 class Toolbar {
     constructor(svgHost) {
         this.iconSpace = 8;
@@ -3374,16 +3562,16 @@ exports.Toolbar = Toolbar;
 
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tag = void 0;
-const Color_1 = __webpack_require__(18);
-const HSLColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(7);
+const Color_1 = __webpack_require__(20);
+const HSLColor_1 = __webpack_require__(14);
+const LABColor_1 = __webpack_require__(10);
 class Tag {
     constructor(name, color, id = "") {
         this.tagColorPure = "";
@@ -3486,33 +3674,33 @@ exports.Tag = Tag;
 
 
 /***/ }),
-/* 31 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanvasTools = void 0;
-const CanvasTools_Editor_1 = __webpack_require__(32);
-const CanvasTools_Filter_1 = __webpack_require__(20);
-const Color_1 = __webpack_require__(18);
-const HSLColor_1 = __webpack_require__(12);
-const LABColor_1 = __webpack_require__(7);
-const Palette_1 = __webpack_require__(56);
-const RGBColor_1 = __webpack_require__(13);
-const XYZColor_1 = __webpack_require__(14);
+const CanvasTools_Editor_1 = __webpack_require__(35);
+const CanvasTools_Filter_1 = __webpack_require__(22);
+const Color_1 = __webpack_require__(20);
+const HSLColor_1 = __webpack_require__(14);
+const LABColor_1 = __webpack_require__(10);
+const Palette_1 = __webpack_require__(67);
+const RGBColor_1 = __webpack_require__(15);
+const XYZColor_1 = __webpack_require__(16);
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const RegionData_1 = __webpack_require__(2);
-const Tag_1 = __webpack_require__(30);
-const TagsDescriptor_1 = __webpack_require__(57);
-const ISelectorSettings_1 = __webpack_require__(15);
-const PointRegion_1 = __webpack_require__(24);
-const RectRegion_1 = __webpack_require__(25);
-const RegionsManager_1 = __webpack_require__(23);
-const AreaSelector_1 = __webpack_require__(26);
-const Toolbar_1 = __webpack_require__(29);
-__webpack_require__(58);
+const RegionData_1 = __webpack_require__(3);
+const Tag_1 = __webpack_require__(33);
+const TagsDescriptor_1 = __webpack_require__(68);
+const ISelectorSettings_1 = __webpack_require__(17);
+const PointRegion_1 = __webpack_require__(27);
+const RectRegion_1 = __webpack_require__(28);
+const RegionsManager_1 = __webpack_require__(24);
+const AreaSelector_1 = __webpack_require__(29);
+const Toolbar_1 = __webpack_require__(32);
+__webpack_require__(69);
 class CanvasTools {
 }
 exports.CanvasTools = CanvasTools;
@@ -3550,26 +3738,26 @@ CanvasTools.Filters = {
 };
 CanvasTools.Editor = CanvasTools_Editor_1.Editor;
 CanvasTools.Toolbar = Toolbar_1.Toolbar;
-__webpack_require__(60);
+__webpack_require__(71);
 
 
 /***/ }),
-/* 32 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Editor = void 0;
-const CanvasTools_Filter_1 = __webpack_require__(20);
-const ConfigurationManager_1 = __webpack_require__(21);
+const CanvasTools_Filter_1 = __webpack_require__(22);
+const ConfigurationManager_1 = __webpack_require__(11);
 const Rect_1 = __webpack_require__(1);
-const ZoomManager_1 = __webpack_require__(22);
-const ISelectorSettings_1 = __webpack_require__(15);
-const RegionsManager_1 = __webpack_require__(23);
-const AreaSelector_1 = __webpack_require__(26);
-const Toolbar_1 = __webpack_require__(29);
-const ToolbarIcon_1 = __webpack_require__(4);
+const ZoomManager_1 = __webpack_require__(23);
+const ISelectorSettings_1 = __webpack_require__(17);
+const RegionsManager_1 = __webpack_require__(24);
+const AreaSelector_1 = __webpack_require__(29);
+const Toolbar_1 = __webpack_require__(32);
+const ToolbarIcon_1 = __webpack_require__(5);
 class Editor {
     constructor(container, areaSelector, regionsManager, filterPipeline, zoomProperties) {
         this.autoResize = true;
@@ -3803,6 +3991,9 @@ class Editor {
             this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
             this.handleZoomAfterContentUpdate();
         });
+    }
+    enablePathRegions(enable) {
+        ConfigurationManager_1.ConfigurationManager.isPathRegionEnabled = enable;
     }
     resize(containerWidth, containerHeight) {
         this.frameWidth = containerWidth;
@@ -4276,14 +4467,1039 @@ Editor.SVGDefsTemplate = `
 
 
 /***/ }),
-/* 33 */
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.calculateLineSegments = void 0;
+const RegionDataType_1 = __webpack_require__(25);
+function getPointsAlongLines(start, xLength, yLength) {
+    return {
+        oneThird: {
+            x: start.x + (xLength / 3),
+            y: start.y + (yLength / 3)
+        },
+        half: {
+            x: start.x + (xLength / 2),
+            y: start.y + (yLength / 2)
+        },
+        twoThird: {
+            x: start.x + ((2 * xLength) / 3),
+            y: start.y + ((2 * yLength) / 3)
+        },
+    };
+}
+function createLineSegment(start, end) {
+    const xLength = end.x - start.x;
+    const yLength = end.y - start.y;
+    return {
+        start,
+        end,
+        xLength,
+        yLength,
+        pointsAlongLine: getPointsAlongLines(start, xLength, yLength)
+    };
+}
+function calculateLineSegments(points, options) {
+    if (points.length < 2) {
+        return [];
+    }
+    if (points.length === 2) {
+        return [createLineSegment(points[0], points[1])];
+    }
+    const segments = [];
+    const pointsLength = points.length;
+    const loopLength = pointsLength - 1;
+    for (let i = 0; i < loopLength; i++) {
+        const nextPointIdx = i + 1;
+        if (nextPointIdx < pointsLength) {
+            segments.push(createLineSegment(points[i], points[nextPointIdx]));
+        }
+    }
+    if ([RegionDataType_1.RegionDataType.Polygon, RegionDataType_1.RegionDataType.Path].includes(options === null || options === void 0 ? void 0 : options.regionType)) {
+        segments.push(createLineSegment(points[pointsLength - 1], points[0]));
+    }
+    return segments;
+}
+exports.calculateLineSegments = calculateLineSegments;
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CubicBezierIndex = void 0;
+const mapIndexRecord_1 = __webpack_require__(38);
+const CubicBezierControl_1 = __webpack_require__(18);
+function buildCopy(controls) {
+    const record = mapIndexRecord_1.mapIndexRecord(controls, (c) => new CubicBezierControl_1.CubicBezierControl(c));
+    return new CubicBezierIndex(record);
+}
+function modifyControlPoints(controls, modifyPoint) {
+    return new CubicBezierIndex(mapIndexRecord_1.mapIndexRecord(controls, (c) => new CubicBezierControl_1.CubicBezierControl({ c1: modifyPoint(c.c1), c2: modifyPoint(c.c2) })));
+}
+class CubicBezierIndex {
+    static buildFromJSON(controls) {
+        return buildCopy(controls);
+    }
+    constructor(controls) {
+        if (controls) {
+            Object.entries(controls).forEach(([idx, control]) => {
+                const iIdx = Number(idx);
+                if (Number.isSafeInteger(iIdx)) {
+                    this[iIdx] = control;
+                }
+            });
+        }
+    }
+    copy() {
+        return buildCopy(this);
+    }
+    scale(scalePoint) {
+        return modifyControlPoints(this, scalePoint);
+    }
+    move(movePoint) {
+        return modifyControlPoints(this, movePoint);
+    }
+    shift(dx, dy) {
+        return new CubicBezierIndex(mapIndexRecord_1.mapIndexRecord(this, (c) => {
+            const control = c.copy();
+            control.shift(dx, dy);
+            return control;
+        }));
+    }
+    boundToRect(rect) {
+        return new CubicBezierIndex(mapIndexRecord_1.mapIndexRecord(this, c => c.boundToRect(rect)));
+    }
+    toJSON() {
+        return mapIndexRecord_1.mapIndexRecord(this, c => c.toJSON());
+    }
+    forEach(fn) {
+        mapIndexRecord_1.mapIndexRecord(this, fn);
+    }
+}
+exports.CubicBezierIndex = CubicBezierIndex;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mapIndexRecord = void 0;
+function mapIndexRecord(record, mapFn) {
+    const next = {};
+    Object.entries(record).forEach(([idx, c]) => {
+        const iIdx = Number(idx);
+        if (Number.isSafeInteger(iIdx)) {
+            next[iIdx] = mapFn(c, iIdx);
+        }
+    });
+    return next;
+}
+exports.mapIndexRecord = mapIndexRecord;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PathRegion = void 0;
+const Rect_1 = __webpack_require__(1);
+const DragElement_1 = __webpack_require__(26);
+const Region_1 = __webpack_require__(6);
+const AnchorsElement_1 = __webpack_require__(40);
+const MidpointElement_1 = __webpack_require__(42);
+const TagsElement_1 = __webpack_require__(44);
+class PathRegion extends Region_1.Region {
+    constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
+        super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
+        if (paperRect !== null) {
+            this.paperRects = {
+                actual: new Rect_1.Rect(paperRect.width - regionData.width, paperRect.height - regionData.height),
+                host: paperRect,
+            };
+        }
+        this.buildOn(paper);
+        const onChange = this.callbacks.onChange;
+        this.callbacks.onChange = (region, regionData, ...args) => {
+            this.paperRects.actual.resize(this.paperRects.host.width - regionData.width, this.paperRects.host.height - regionData.height);
+            onChange(this, regionData, ...args);
+        };
+    }
+    updateTags(tags, options) {
+        super.updateTags(tags, options);
+        this.tagsNode.updateTags(tags, options);
+        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
+    }
+    resize(width, height) {
+        this.paperRects.actual.resize(this.paperRects.host.width - width, this.paperRects.host.height - height);
+        super.resize(width, height);
+    }
+    buildOn(paper) {
+        this.node = paper.g();
+        this.node.addClass("regionStyle");
+        this.node.addClass(this.styleID);
+        this.dragNode = new DragElement_1.DragElement(paper, this.paperRects.actual, this.regionData, this.callbacks);
+        this.tagsNode = new TagsElement_1.TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID, this.styleSheet, this.tagsUpdateOptions);
+        this.anchorNode = new AnchorsElement_1.AnchorsElement(paper, this.paperRect, this.regionData, this.callbacks);
+        this.midpointNode = new MidpointElement_1.MidpointElement(paper, this.paperRect, this.regionData, this.callbacks);
+        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
+        this.node.append(this.toolTip);
+        this.node.add(this.dragNode.node);
+        this.node.add(this.tagsNode.node);
+        this.node.add(this.anchorNode.node);
+        this.node.add(this.midpointNode.node);
+        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode, this.midpointNode);
+    }
+}
+exports.PathRegion = PathRegion;
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnchorsElement = void 0;
+const ConfigurationManager_1 = __webpack_require__(11);
+const Point2D_1 = __webpack_require__(0);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const AnchorsComponent_1 = __webpack_require__(7);
+const BezierController_1 = __webpack_require__(41);
+var GhostAnchorAction;
+(function (GhostAnchorAction) {
+    GhostAnchorAction["Add"] = "add";
+    GhostAnchorAction["Delete"] = "delete";
+    GhostAnchorAction["None"] = "";
+})(GhostAnchorAction || (GhostAnchorAction = {}));
+class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+        this.ghostAnchorActionState = GhostAnchorAction.None;
+        this.anchorsLength = regionData.points.length;
+        const bezierController = new BezierController_1.BezierController(this, paper, paperRect, regionData, this.anchorsNode, callbacks, this.createAnchor.bind(this), this.subscribeToEvents.bind(this));
+        bezierController.buildAnchors();
+        this.mixins.push(bezierController);
+    }
+    set ghostAnchorAction(newValue) {
+        this.ghostAnchor.removeClass("add");
+        this.ghostAnchor.removeClass("delete");
+        this.ghostAnchor.addClass(newValue);
+        this.ghostAnchorActionState = newValue;
+    }
+    get ghostAnchorAction() {
+        return this.ghostAnchorActionState;
+    }
+    redraw() {
+        if (this.regionData.points !== null && this.regionData.points.length > 0) {
+            const points = this.regionData.points;
+            if (this.anchorsLength !== points.length) {
+                window.requestAnimationFrame(() => {
+                    this.anchors.forEach((anchor) => {
+                        anchor.remove();
+                    });
+                    this.anchors = [];
+                    this.buildPointAnchors();
+                });
+                this.anchorsLength = points.length;
+            }
+            else {
+                window.requestAnimationFrame(() => {
+                    this.regionData.points.forEach((p, index) => {
+                        this.anchors[index].attr({
+                            cx: p.x,
+                            cy: p.y,
+                        });
+                    });
+                });
+            }
+            this.updateAnchorLines();
+        }
+        this.mixins.forEach(m => m.redraw());
+    }
+    buildAnchors() {
+        this.buildAnchorLines();
+        super.buildAnchors();
+    }
+    buildAnchorLines() {
+        const g = this.paper.g();
+        g.addClass("anchorLineStyle");
+        this.anchorsPolyline = g;
+        this.regionData.toLinePathSegments().forEach((segment, idx) => {
+            const path = this.paper.path(segment);
+            g.add(path);
+            this.subscribeLineToEvents(path, idx);
+        });
+        this.anchorsNode.add(this.anchorsPolyline);
+    }
+    updateAnchorLines() {
+        this.anchorsPolyline.remove();
+        this.buildAnchorLines();
+    }
+    subscribeLineToEvents(anchor, index) {
+        this.subscribeToEvents([
+            {
+                base: anchor.node,
+                event: "pointermove",
+                listener: (e) => {
+                    if (this.isModifyRegionOnlyModeEnabled(e)) {
+                        this.activeAnchorIndex = -1;
+                        const anchorPoint = this.getActiveAnchorPoint(e);
+                        this.ghostAnchorLineIdx = index;
+                        this.dragOrigin = anchorPoint;
+                        this.ghostAnchorAction = GhostAnchorAction.Add;
+                        window.requestAnimationFrame(() => {
+                            this.ghostAnchor.attr({
+                                cx: anchorPoint.x,
+                                cy: anchorPoint.y,
+                                display: "block",
+                            });
+                        });
+                    }
+                    else {
+                        this.ghostAnchorAction = GhostAnchorAction.None;
+                    }
+                },
+                bypass: false,
+            },
+        ]);
+    }
+    updateRegion(p) {
+        const rd = this.regionData.copy();
+        if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
+            rd.setPoint(p, this.activeAnchorIndex - 1);
+        }
+        this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
+    }
+    onGhostPointerEnter(e) {
+        if (this.isModifyRegionOnlyModeEnabled(e)) {
+            if (this.regionData.points.length <= AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON) {
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
+            }
+        }
+        else {
+            this.ghostAnchorAction = GhostAnchorAction.None;
+        }
+        super.onGhostPointerEnter(e);
+    }
+    onGhostPointerMove(e) {
+        if (this.isModifyRegionOnlyModeEnabled(e) && this.activeAnchorIndex !== 0) {
+            const p = this.getActiveAnchorPoint(e);
+            let dist = Number.MAX_VALUE;
+            let index = -1;
+            this.regionData.points.forEach((point, i) => {
+                const d = p.squareDistanceToPoint(point);
+                if (d < dist) {
+                    dist = d;
+                    index = i;
+                }
+            });
+            const swapToDelete = dist < AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD;
+            if (this.activeAnchorIndex <= 0 && !swapToDelete) {
+                this.ghostAnchorAction = GhostAnchorAction.Add;
+                this.activeAnchorIndex = -1;
+            }
+            else if (this.regionData.points.length > AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON
+                && swapToDelete) {
+                this.activeAnchorIndex = index + 1;
+                this.ghostAnchorAction = GhostAnchorAction.Delete;
+            }
+        }
+        else {
+            this.ghostAnchorAction = GhostAnchorAction.None;
+        }
+        super.onGhostPointerMove(e);
+    }
+    onGhostPointerUp(e) {
+        const rd = this.regionData.copy();
+        if (this.ghostAnchorAction === GhostAnchorAction.Delete) {
+            if (this.activeAnchorIndex > 0 && this.activeAnchorIndex <= this.regionData.points.length) {
+                rd.splicePoints(this.activeAnchorIndex - 1, 1);
+            }
+            this.ghostAnchorAction = GhostAnchorAction.None;
+            this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
+        }
+        else if (this.ghostAnchorAction === GhostAnchorAction.Add) {
+            const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
+            const point = new Point2D_1.Point2D(offsetX, offsetY);
+            let index = this.ghostAnchorLineIdx;
+            rd.splicePoints(index + 1, 0, point);
+            this.ghostAnchorAction = GhostAnchorAction.Delete;
+            this.callbacks.onChange(this, rd, IRegionCallbacks_1.ChangeEventType.MOVEEND);
+        }
+        super.onGhostPointerUp(e);
+    }
+    getActiveAnchorPoint(e) {
+        if (this.activeAnchorIndex > 0) {
+            return this.regionData.points[this.activeAnchorIndex - 1];
+        }
+        else if (this.activeAnchorIndex < 0) {
+            const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
+            const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
+            return new Point2D_1.Point2D(offsetX, offsetY);
+        }
+        else {
+            return null;
+        }
+    }
+    isModifyRegionOnlyModeEnabled(event) {
+        return ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode || (event === null || event === void 0 ? void 0 : event.ctrlKey);
+    }
+}
+exports.AnchorsElement = AnchorsElement;
+AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
+AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BezierController = void 0;
+const Point2D_1 = __webpack_require__(0);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const AnchorsComponent_1 = __webpack_require__(7);
+const DEFAULT_RADIUS = 6;
+class BezierController {
+    constructor(anchorComponent, paper, paperRect, regionData, anchorsNode, callbacks, createAnchor, subscribeToEvents) {
+        this.anchorComponent = anchorComponent;
+        this.paper = paper;
+        this.paperRect = paperRect;
+        this.regionData = regionData;
+        this.anchorsNode = anchorsNode;
+        this.callbacks = callbacks;
+        this.createAnchor = createAnchor;
+        this.subscribeToEvents = subscribeToEvents;
+        this.isDragged = false;
+        this.controlPoints = [];
+    }
+    createControlPoint(paper, x, y, r = DEFAULT_RADIUS) {
+        const point = paper.circle(x, y, r);
+        point.addClass("bezierControlPointStyle");
+        return point;
+    }
+    createControlPointTangent(paper, polylinePoints) {
+        const line = paper.polyline(polylinePoints);
+        line.addClass("bezierControlPointTangentStyle");
+        return line;
+    }
+    createControlPointGroup(index, line, control, pointName) {
+        const g = this.paper.g();
+        const pointBase = pointName === "c1" ? line.start : line.end;
+        const controlPoint = control[pointName];
+        const controlPointElem = this.createControlPoint(this.paper, controlPoint.x, controlPoint.y);
+        const controlPointTangentElem = this.createControlPointTangent(this.paper, [pointBase.x, pointBase.y, controlPoint.x, controlPoint.y]);
+        g.add(controlPointTangentElem);
+        g.add(controlPointElem);
+        this.subscribeControlPointToEvents(controlPointElem, index, pointName);
+        return g;
+    }
+    buildControlPoints() {
+        const lineSegments = this.regionData.getLineSegments();
+        this.regionData.bezierControls.forEach((control, index) => {
+            const line = lineSegments[index];
+            const c1Group = this.createControlPointGroup(index, line, control, "c1");
+            this.anchorsNode.add(c1Group);
+            const c2Group = this.createControlPointGroup(index, line, control, "c2");
+            this.anchorsNode.add(c2Group);
+            this.controlPoints.push(c1Group, c2Group);
+        });
+    }
+    buildAnchors() {
+        this.buildControlPoints();
+        this.controlGhostAnchor = this.createAnchor(this.paper, 0, 0, "ghost", AnchorsComponent_1.AnchorsComponent.DEFAULT_GHOST_ANCHOR_RADIUS);
+        this.controlGhostAnchor.attr({
+            display: "none",
+        });
+        this.anchorComponent.node.add(this.controlGhostAnchor);
+        this.subscribeControlGhostToEvents(this.controlGhostAnchor);
+    }
+    updateControlPoints() {
+        this.controlPoints.forEach((cp) => {
+            cp.remove();
+        });
+        this.controlPoints = [];
+        this.buildControlPoints();
+    }
+    subscribeControlPointToEvents(controlPoint, index, controlPointName) {
+        this.subscribeToEvents([
+            {
+                event: "pointerenter",
+                base: controlPoint.node,
+                listener: () => {
+                    this.activeControlPointId = { index, name: controlPointName };
+                    const controlPoint = this.getActiveControlPoint();
+                    if (controlPoint) {
+                        window.requestAnimationFrame(() => {
+                            this.controlGhostAnchor.attr({
+                                cx: controlPoint.x,
+                                cy: controlPoint.y,
+                                display: "block",
+                            });
+                        });
+                    }
+                },
+                bypass: false,
+            },
+        ]);
+    }
+    subscribeControlGhostToEvents(controlGhostAnchor) {
+        const listeners = [
+            {
+                event: "pointerleave",
+                base: controlGhostAnchor.node,
+                listener: (e) => {
+                    if (!this.isDragged) {
+                        window.requestAnimationFrame(() => {
+                            this.controlGhostAnchor.attr({
+                                display: "none",
+                            });
+                        });
+                    }
+                },
+                bypass: true
+            },
+            {
+                event: "pointermove",
+                base: controlGhostAnchor.node,
+                listener: (e) => {
+                    if (this.isDragged) {
+                        const ghost = e.target.getBoundingClientRect();
+                        const rdx = e.clientX - ghost.left;
+                        const rdy = e.clientY - ghost.top;
+                        const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
+                        const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
+                        let dx = offsetX - this.dragOrigin.x;
+                        let dy = offsetY - this.dragOrigin.y;
+                        if ((rdx < 0 && dx > 0) || (rdx > 0 && dx < 0)) {
+                            dx = 0;
+                        }
+                        if ((rdy < 0 && dy > 0) || (rdy > 0 && dy < 0)) {
+                            dy = 0;
+                        }
+                        if (this.activeControlPointId) {
+                            const controlPoint = this.getActiveControlPoint();
+                            let p = new Point2D_1.Point2D(controlPoint.x + dx, controlPoint.y + dy);
+                            if (this.paperRect !== null) {
+                                p = p.boundToRect(this.paperRect);
+                            }
+                            window.requestAnimationFrame(() => {
+                                this.controlGhostAnchor.attr({ cx: p.x, cy: p.y });
+                            });
+                            this.updateRegion(p);
+                        }
+                        this.dragOrigin = new Point2D_1.Point2D(offsetX, offsetY);
+                    }
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerdown",
+                base: controlGhostAnchor.node,
+                listener: (e) => {
+                    this.controlGhostAnchor.node.setPointerCapture(e.pointerId);
+                    const offsetX = e.clientX - e.target.closest("svg").getBoundingClientRect().left;
+                    const offsetY = e.clientY - e.target.closest("svg").getBoundingClientRect().top;
+                    this.dragOrigin = new Point2D_1.Point2D(offsetX, offsetY);
+                    this.isDragged = true;
+                    this.callbacks.onManipulationLockRequest(this.anchorComponent);
+                    this.callbacks.onChange(this.anchorComponent, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEBEGIN);
+                },
+                bypass: false,
+            },
+            {
+                event: "pointerup",
+                base: controlGhostAnchor.node,
+                listener: (e) => {
+                    this.controlGhostAnchor.node.releasePointerCapture(e.pointerId);
+                    this.callbacks.onManipulationLockRelease(this.anchorComponent);
+                    this.callbacks.onChange(this.anchorComponent, this.regionData.copy(), IRegionCallbacks_1.ChangeEventType.MOVEEND);
+                    this.activeControlPointId = undefined;
+                    this.dragOrigin = null;
+                    this.isDragged = false;
+                    window.requestAnimationFrame(() => {
+                        this.controlGhostAnchor.attr({
+                            display: "none",
+                        });
+                    });
+                },
+                bypass: false,
+            },
+        ];
+        this.subscribeToEvents(listeners);
+    }
+    getActiveControlPoint() {
+        if (this.activeControlPointId) {
+            return this.regionData.bezierControls[this.activeControlPointId.index][this.activeControlPointId.name];
+        }
+        else {
+            return null;
+        }
+    }
+    updateRegion(p) {
+        if (this.activeControlPointId) {
+            const rd = this.regionData.copy();
+            if (this.activeControlPointId) {
+                const control = rd.bezierControls[this.activeControlPointId.index];
+                if (control) {
+                    control[this.activeControlPointId.name].move(p);
+                    rd.setBezierControl(this.activeControlPointId.index, control);
+                }
+            }
+            this.callbacks.onChange(this.anchorComponent, rd, IRegionCallbacks_1.ChangeEventType.MOVING);
+        }
+    }
+    redraw() {
+        this.updateControlPoints();
+    }
+}
+exports.BezierController = BezierController;
+;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MidpointElement = void 0;
+const CubicBezierControl_1 = __webpack_require__(18);
+const MidpointComponent_1 = __webpack_require__(43);
+class MidpointElement extends MidpointComponent_1.MidpointComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+    }
+    createBezierControl(index) {
+        const rd = this.regionData.copy();
+        const line = rd.getLineSegments()[index];
+        rd.setBezierControl(index, new CubicBezierControl_1.CubicBezierControl({ c1: line.pointsAlongLine.oneThird, c2: line.pointsAlongLine.twoThird }));
+        this.callbacks.onChange(this, rd);
+    }
+    subscribeMidpointToEvents(midpoint, index) {
+        const listeners = [
+            {
+                event: "click",
+                base: midpoint.node,
+                listener: (e) => {
+                    e.stopPropagation();
+                    this.createBezierControl(index);
+                },
+                bypass: false,
+            },
+        ];
+        this.subscribeToEvents(listeners);
+    }
+}
+exports.MidpointElement = MidpointElement;
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MidpointComponent = void 0;
+const RegionComponent_1 = __webpack_require__(4);
+class MidpointComponent extends RegionComponent_1.RegionComponent {
+    constructor(paper, paperRect = null, regionData, callbacks) {
+        super(paper, paperRect, regionData, callbacks);
+        this.node = paper.g();
+        this.node.addClass("midpointLayer");
+        this.midpointElements = {};
+        this.midpointNode = this.paper.g();
+        this.node.add(this.midpointNode);
+        const regionLineSegments = this.regionData.getLineSegments();
+        this.buildMidpoints(regionLineSegments);
+    }
+    createMidpoint(paper, x, y, style, r = MidpointComponent.DEFAULT_RADIUS) {
+        const midpoint = paper.circle(x, y, r);
+        midpoint.addClass("midpointStyle");
+        if (style !== undefined && style !== "") {
+            midpoint.addClass(style);
+        }
+        return midpoint;
+    }
+    teardownMidpoints() {
+        Object.values(this.midpointElements).forEach(midpointElement => {
+            midpointElement.remove();
+        });
+        this.midpointElements = {};
+    }
+    buildMidpoints(regionLineSegments) {
+        this.teardownMidpoints();
+        const bezierControls = this.regionData.bezierControls;
+        regionLineSegments.forEach((line, index) => {
+            if (bezierControls[index]) {
+                return;
+            }
+            const midpoint = this.createMidpoint(this.paper, line.pointsAlongLine.half.x, line.pointsAlongLine.half.y);
+            this.midpointElements[index] = midpoint;
+            this.midpointNode.add(midpoint);
+            this.subscribeMidpointToEvents(midpoint, index);
+        });
+    }
+    updateMidpoints(bezierControls, regionLineSegments) {
+        const toDelete = [];
+        const toAdd = [];
+        const toUpdate = [];
+        regionLineSegments.forEach((_line, idx) => {
+            if (!bezierControls[idx] && !this.midpointElements[idx]) {
+                toAdd.push(idx);
+            }
+            else if (!bezierControls[idx] && this.midpointElements[idx]) {
+                toUpdate.push(idx);
+            }
+            else if (bezierControls[idx] && this.midpointElements[idx]) {
+                toDelete.push(idx);
+            }
+        });
+        Object.entries(this.midpointElements).forEach(([idx]) => {
+            if (!regionLineSegments[idx]) {
+                toDelete.push(Number(idx));
+            }
+        });
+        toDelete.forEach((idx) => {
+            this.midpointElements[idx].remove();
+            delete this.midpointElements[idx];
+        });
+        toAdd.forEach((idx) => {
+            if (this.midpointElements[idx]) {
+                this.midpointElements[idx].remove();
+            }
+            const midpoint = this.createMidpoint(this.paper, regionLineSegments[idx].pointsAlongLine.half.x, regionLineSegments[idx].pointsAlongLine.half.y);
+            this.midpointElements[idx] = midpoint;
+            this.midpointNode.add(midpoint);
+            this.subscribeMidpointToEvents(midpoint, idx);
+        });
+        toUpdate.forEach((idx) => {
+            const line = regionLineSegments[idx];
+            this.midpointElements[idx].attr({
+                cx: line.pointsAlongLine.half.x,
+                cy: line.pointsAlongLine.half.y,
+            });
+        });
+    }
+    redraw() {
+        const bezierControls = this.regionData.bezierControls;
+        const regionLineSegments = this.regionData.getLineSegments();
+        window.requestAnimationFrame(() => {
+            this.updateMidpoints(bezierControls, regionLineSegments);
+        });
+    }
+    ;
+}
+exports.MidpointComponent = MidpointComponent;
+MidpointComponent.DEFAULT_RADIUS = 6;
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TagsElement = void 0;
+const TagsComponent_1 = __webpack_require__(8);
+class TagsElement extends TagsComponent_1.TagsComponent {
+    constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
+        super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
+        this.buildOn(paper, tags);
+    }
+    redraw(rebuildTags = false) {
+        const pointsData = [];
+        this.regionData.points.forEach((p) => {
+            pointsData.push(p.x, p.y);
+        });
+        const size = TagsElement.DEFAULT_SECONDARY_TAG_SIZE;
+        const cx = this.x + this.width / 2;
+        const cy = this.y - size - 5;
+        window.requestAnimationFrame(() => {
+            this.primaryTagBoundRect.attr({
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height,
+            });
+            this.primaryTagPolygon.attr({
+                d: this.regionData.toPath(),
+            });
+            if (rebuildTags) {
+                this.primaryTagText.node.innerHTML = (this.tags.primary !== null) ? this.tags.primary.name : "";
+                this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
+            }
+            const showTextLabel = (this.textBox.width + 10 <= this.width)
+                && (this.textBox.height <= this.height);
+            if (showTextLabel) {
+                this.primaryTagTextBG.attr({
+                    height: this.textBox.height + 5,
+                    width: this.textBox.width + 10,
+                    x: this.x + 1,
+                    y: this.y + 1,
+                });
+                this.primaryTagText.attr({
+                    visibility: "visible",
+                    x: this.x + 5,
+                    y: this.y + this.textBox.height,
+                });
+            }
+            else {
+                this.primaryTagTextBG.attr({
+                    height: Math.min(10, this.height),
+                    width: Math.min(10, this.width),
+                    x: this.x,
+                    y: this.y,
+                });
+                this.primaryTagText.attr({
+                    visibility: "hidden",
+                    x: this.x + 5,
+                    y: this.y + this.textBox.height,
+                });
+            }
+            if (this.secondaryTags && this.secondaryTags.length > 0) {
+                const length = this.secondaryTags.length;
+                for (let i = 0; i < length; i++) {
+                    const stag = this.secondaryTags[i];
+                    const x = cx + (2 * i - length + 0.5) * size;
+                    stag.attr({
+                        x,
+                        y: cy,
+                    });
+                }
+            }
+        });
+    }
+    initStyleMaps(tags) {
+        if (tags !== null) {
+            if (tags.primary !== null) {
+                this.styleMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                                stroke: ${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight}; opacity: 1;`,
+                    },
+                    {
+                        rule: `.${this.styleId}:hover .primaryTagBoundRectStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorShadow};
+                                stroke: ${tags.primary.colorPure};`,
+                    },
+                    {
+                        rule: `.${this.styleId}:hover .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke: ${tags.primary.colorPure};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke: ${tags.primary.colorPure};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure}`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                ];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;
+                                stroke: ${tags.primary.colorAccent};`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                stroke: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorHighlight};
+                                stroke: ${tags.primary.colorPure};`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: ${tags.primary.colorNoColor};
+                                stroke: ${tags.primary.colorPure};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .primaryTagTextBGStyle`,
+                        style: `fill:${tags.primary.colorNoColor};`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke:${tags.primary.colorDark};
+                                fill: ${tags.primary.colorPure};
+                                stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId}:hover .anchorStyle`,
+                        style: `stroke:#fff;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .secondaryTagStyle`,
+                        style: `opacity:0.25;`,
+                    },
+                ];
+            }
+            else {
+                this.styleMap = [];
+                this.styleLightMap = [
+                    {
+                        rule: `.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: var(--default-color-transparent);`,
+                    },
+                    {
+                        rule: `.regionStyle.selected.${this.styleId} .primaryTagPolygonStyle`,
+                        style: `fill: var(--default-color-transparent);`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagBoundRectStyle`,
+                        style: `fill: none;`,
+                    },
+                    {
+                        rule: `.${this.styleId} .primaryTagPolylineStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle`,
+                        style: `stroke-width: 1px;`,
+                    },
+                    {
+                        rule: `.regionStyle.${this.styleId} .anchorStyle.ghost`,
+                        style: `fill: var(--default-color-ghost);`,
+                    },
+                ];
+            }
+            if (tags.secondary !== null && tags.secondary !== undefined) {
+                tags.secondary.forEach((tag) => {
+                    const rule = {
+                        rule: `.secondaryTagStyle.secondaryTag-${tag.name}`,
+                        style: `fill: ${tag.colorAccent};`,
+                    };
+                    this.styleMap.push(rule);
+                    this.styleLightMap.push(rule);
+                });
+            }
+        }
+    }
+    rebuildTagLabels() {
+        for (const tag of this.secondaryTags) {
+            tag.remove();
+        }
+        this.secondaryTags = [];
+        if (this.tags) {
+            if (this.tags.primary !== undefined && this.tags.primary !== null) {
+                this.redraw(true);
+            }
+            if (this.tags.secondary && this.tags.secondary.length > 0) {
+                const length = this.tags.secondary.length;
+                for (let i = 0; i < length; i++) {
+                    const stag = this.tags.secondary[i];
+                    const s = TagsElement.DEFAULT_SECONDARY_TAG_SIZE;
+                    const x = this.x + this.boundRect.width / 2 + (2 * i - length + 1) * s - s / 2;
+                    const y = this.y - s - 5;
+                    const tagel = this.paper.rect(x, y, s, s);
+                    window.requestAnimationFrame(() => {
+                        tagel.addClass("secondaryTagStyle");
+                        tagel.addClass(`secondaryTag-${stag.name}`);
+                    });
+                    this.secondaryTagsNode.add(tagel);
+                    this.secondaryTags.push(tagel);
+                }
+            }
+        }
+    }
+    buildOn(paper, tags) {
+        this.primaryTagNode = paper.g();
+        this.primaryTagBoundRect = paper.rect(this.x, this.y, this.boundRect.width, this.boundRect.height);
+        this.primaryTagBoundRect.addClass("primaryTagBoundRectStyle");
+        this.primaryTagText = paper.text(this.x, this.y, "");
+        this.primaryTagText.addClass("primaryTagTextStyle");
+        this.textBox = TagsComponent_1.TagsComponent.getCachedBBox(this.primaryTagText);
+        const pointsData = [];
+        this.regionData.points.forEach((p) => {
+            pointsData.push(p.x, p.y);
+        });
+        this.primaryTagPolygon = paper.path(this.regionData.toPath());
+        this.primaryTagPolygon.addClass("primaryTagPolygonStyle");
+        this.primaryTagTextBG = paper.rect(this.x, this.y, 0, 0);
+        this.primaryTagTextBG.addClass("primaryTagTextBGStyle");
+        this.regionData.points.forEach((p) => {
+            pointsData.push(p.x, p.y);
+        });
+        this.primaryTagNode.add(this.primaryTagBoundRect);
+        this.primaryTagNode.add(this.primaryTagPolygon);
+        this.primaryTagNode.add(this.primaryTagTextBG);
+        this.primaryTagNode.add(this.primaryTagText);
+        this.secondaryTagsNode = paper.g();
+        this.secondaryTagsNode.addClass("secondaryTagsLayer");
+        this.secondaryTags = [];
+        this.node.add(this.primaryTagNode);
+        this.node.add(this.secondaryTagsNode);
+        this.initStyleMaps(tags);
+        this.updateTags(tags, this.tagsUpdateOptions);
+    }
+}
+exports.TagsElement = TagsElement;
+TagsElement.DEFAULT_PRIMARY_TAG_RADIUS = 3;
+TagsElement.DEFAULT_SECONDARY_TAG_SIZE = 6;
+TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
+
+
+/***/ }),
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(9);
+const DragComponent_1 = __webpack_require__(12);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -4306,14 +5522,14 @@ DragElement.DEFAULT_DRAG_RADIUS = 6;
 
 
 /***/ }),
-/* 34 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsElement = void 0;
-const TagsComponent_1 = __webpack_require__(10);
+const TagsComponent_1 = __webpack_require__(8);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -4466,7 +5682,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 35 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4474,10 +5690,10 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolygonRegion = void 0;
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(8);
-const AnchorsElement_1 = __webpack_require__(36);
-const DragElement_1 = __webpack_require__(37);
-const TagsElement_1 = __webpack_require__(38);
+const Region_1 = __webpack_require__(6);
+const AnchorsElement_1 = __webpack_require__(48);
+const DragElement_1 = __webpack_require__(26);
+const TagsElement_1 = __webpack_require__(49);
 class PolygonRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4522,17 +5738,17 @@ exports.PolygonRegion = PolygonRegion;
 
 
 /***/ }),
-/* 36 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorsElement = void 0;
-const ConfigurationManager_1 = __webpack_require__(21);
+const ConfigurationManager_1 = __webpack_require__(11);
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const AnchorsComponent_1 = __webpack_require__(16);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const AnchorsComponent_1 = __webpack_require__(7);
 var GhostAnchorAction;
 (function (GhostAnchorAction) {
     GhostAnchorAction["Add"] = "add";
@@ -4736,45 +5952,14 @@ AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
 
 
 /***/ }),
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(9);
-class DragElement extends DragComponent_1.DragComponent {
-    constructor(paper, paperRect = null, regionData, callbacks) {
-        super(paper, paperRect, regionData, callbacks);
-        this.dragNode = paper.rect(this.x, this.y, this.width, this.height);
-        this.dragNode.addClass("dragRectStyle");
-        this.node.add(this.dragNode);
-        this.subscribeToDragEvents();
-    }
-    redraw() {
-        window.requestAnimationFrame(() => {
-            this.dragNode.attr({
-                x: this.x,
-                y: this.y,
-                width: this.width,
-                height: this.height,
-            });
-        });
-    }
-}
-exports.DragElement = DragElement;
-
-
-/***/ }),
-/* 38 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsElement = void 0;
-const TagsComponent_1 = __webpack_require__(10);
+const TagsComponent_1 = __webpack_require__(8);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -5045,7 +6230,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 39 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5053,10 +6238,10 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolylineRegion = void 0;
 const Rect_1 = __webpack_require__(1);
-const Region_1 = __webpack_require__(8);
-const AnchorsElement_1 = __webpack_require__(40);
-const DragElement_1 = __webpack_require__(41);
-const TagsElement_1 = __webpack_require__(42);
+const Region_1 = __webpack_require__(6);
+const AnchorsElement_1 = __webpack_require__(51);
+const DragElement_1 = __webpack_require__(52);
+const TagsElement_1 = __webpack_require__(53);
 class PolylineRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -5101,7 +6286,7 @@ exports.PolylineRegion = PolylineRegion;
 
 
 /***/ }),
-/* 40 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5109,8 +6294,8 @@ exports.PolylineRegion = PolylineRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorsElement = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const AnchorsComponent_1 = __webpack_require__(16);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const AnchorsComponent_1 = __webpack_require__(7);
 class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5305,14 +6490,14 @@ AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
 
 
 /***/ }),
-/* 41 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(9);
+const DragComponent_1 = __webpack_require__(12);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5336,14 +6521,14 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 42 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsElement = void 0;
-const TagsComponent_1 = __webpack_require__(10);
+const TagsComponent_1 = __webpack_require__(8);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -5542,7 +6727,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 43 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5550,8 +6735,8 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorsElement = void 0;
 const Point2D_1 = __webpack_require__(0);
-const IRegionCallbacks_1 = __webpack_require__(3);
-const AnchorsComponent_1 = __webpack_require__(16);
+const IRegionCallbacks_1 = __webpack_require__(2);
+const AnchorsComponent_1 = __webpack_require__(7);
 class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5779,14 +6964,14 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 44 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(9);
+const DragComponent_1 = __webpack_require__(12);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5810,14 +6995,14 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 45 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsElement = void 0;
-const TagsComponent_1 = __webpack_require__(10);
+const TagsComponent_1 = __webpack_require__(8);
 class TagsElement extends TagsComponent_1.TagsComponent {
     constructor(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions) {
         super(paper, paperRect, regionData, tags, styleId, styleSheet, tagsUpdateOptions);
@@ -6081,14 +7266,14 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 46 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MenuElement = void 0;
-const RegionComponent_1 = __webpack_require__(5);
+const RegionComponent_1 = __webpack_require__(4);
 class MenuElement extends RegionComponent_1.RegionComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -6217,7 +7402,7 @@ MenuElement.PathCollection = {
 
 
 /***/ }),
-/* 47 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6225,9 +7410,9 @@ MenuElement.PathCollection = {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PointSelector = void 0;
 const Point2D_1 = __webpack_require__(0);
-const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(11);
-const Selector_1 = __webpack_require__(6);
+const RegionData_1 = __webpack_require__(3);
+const CrossElement_1 = __webpack_require__(13);
+const Selector_1 = __webpack_require__(9);
 class PointSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -6313,7 +7498,7 @@ PointSelector.DEFAULT_POINT_RADIUS = 6;
 
 
 /***/ }),
-/* 48 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6321,9 +7506,10 @@ PointSelector.DEFAULT_POINT_RADIUS = 6;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolygonSelector = void 0;
 const Point2D_1 = __webpack_require__(0);
-const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(11);
-const Selector_1 = __webpack_require__(6);
+const RegionData_1 = __webpack_require__(3);
+const CrossElement_1 = __webpack_require__(13);
+const Selector_1 = __webpack_require__(9);
+const ConfigurationManager_1 = __webpack_require__(11);
 class PolygonSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -6531,7 +7717,8 @@ class PolygonSelector extends Selector_1.Selector {
     submitPolygon() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
-            this.callbacks.onSelectionEnd(new RegionData_1.RegionData(box.x, box.y, box.width, box.height, this.points.map((p) => p.copy()), RegionData_1.RegionDataType.Polygon));
+            const regionType = (ConfigurationManager_1.ConfigurationManager.isPathRegionEnabled) ? RegionData_1.RegionDataType.Path : RegionData_1.RegionDataType.Polygon;
+            this.callbacks.onSelectionEnd(new RegionData_1.RegionData(box.x, box.y, box.width, box.height, this.points.map((p) => p.copy()), regionType));
         }
         this.reset();
     }
@@ -6542,7 +7729,7 @@ PolygonSelector.DEFAULT_SELECTOR_RADIUS = 6;
 
 
 /***/ }),
-/* 49 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6550,9 +7737,9 @@ PolygonSelector.DEFAULT_SELECTOR_RADIUS = 6;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolylineSelector = void 0;
 const Point2D_1 = __webpack_require__(0);
-const RegionData_1 = __webpack_require__(2);
-const CrossElement_1 = __webpack_require__(11);
-const Selector_1 = __webpack_require__(6);
+const RegionData_1 = __webpack_require__(3);
+const CrossElement_1 = __webpack_require__(13);
+const Selector_1 = __webpack_require__(9);
 class PolylineSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -6697,6 +7884,10 @@ class PolylineSelector extends Selector_1.Selector {
     }
     submitPolyline() {
         if (typeof this.callbacks.onSelectionEnd === "function") {
+            const points = this.getPolylinePoints();
+            if (points.length <= 0) {
+                return;
+            }
             const box = this.polyline.getBBox();
             this.callbacks.onSelectionEnd(new RegionData_1.RegionData(box.x, box.y, box.width, box.height, this.getPolylinePoints(), RegionData_1.RegionDataType.Polyline));
         }
@@ -6726,7 +7917,7 @@ PolylineSelector.DEFAULT_SELECTOR_RADIUS = 6;
 
 
 /***/ }),
-/* 50 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6735,10 +7926,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RectCopySelector = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const RegionData_1 = __webpack_require__(2);
-const AlternatingCrossElement_1 = __webpack_require__(27);
-const RectElement_1 = __webpack_require__(28);
-const Selector_1 = __webpack_require__(6);
+const RegionData_1 = __webpack_require__(3);
+const AlternatingCrossElement_1 = __webpack_require__(30);
+const RectElement_1 = __webpack_require__(31);
+const Selector_1 = __webpack_require__(9);
 class RectCopySelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, copyRect, callbacks) {
         super(parent, paper, boundRect, callbacks);
@@ -6929,7 +8120,7 @@ exports.RectCopySelector = RectCopySelector;
 
 
 /***/ }),
-/* 51 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6938,10 +8129,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RectSelector = exports.SelectionModificator = void 0;
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
-const RegionData_1 = __webpack_require__(2);
-const AlternatingCrossElement_1 = __webpack_require__(27);
-const RectElement_1 = __webpack_require__(28);
-const Selector_1 = __webpack_require__(6);
+const RegionData_1 = __webpack_require__(3);
+const AlternatingCrossElement_1 = __webpack_require__(30);
+const RectElement_1 = __webpack_require__(31);
+const Selector_1 = __webpack_require__(9);
 var SelectionModificator;
 (function (SelectionModificator) {
     SelectionModificator[SelectionModificator["RECT"] = 0] = "RECT";
@@ -7198,14 +8389,14 @@ exports.RectSelector = RectSelector;
 
 
 /***/ }),
-/* 52 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSelectIcon = void 0;
-const ToolbarIcon_1 = __webpack_require__(4);
+const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSelectIcon extends ToolbarIcon_1.ToolbarIcon {
     constructor(paper, icon, onAction) {
         super(paper, icon);
@@ -7273,14 +8464,14 @@ exports.ToolbarSelectIcon = ToolbarSelectIcon;
 
 
 /***/ }),
-/* 53 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSeparator = void 0;
-const ToolbarIcon_1 = __webpack_require__(4);
+const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSeparator extends ToolbarIcon_1.ToolbarIcon {
     constructor(paper, width) {
         super(paper, null);
@@ -7314,14 +8505,14 @@ exports.ToolbarSeparator = ToolbarSeparator;
 
 
 /***/ }),
-/* 54 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSwitchIcon = void 0;
-const ToolbarIcon_1 = __webpack_require__(4);
+const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSwitchIcon extends ToolbarIcon_1.ToolbarIcon {
     constructor(paper, icon, onAction) {
         super(paper, icon);
@@ -7389,14 +8580,14 @@ exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
 
 
 /***/ }),
-/* 55 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarTriggerIcon = void 0;
-const ToolbarIcon_1 = __webpack_require__(4);
+const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarTriggerIcon extends ToolbarIcon_1.ToolbarIcon {
     constructor(paper, icon, onAction) {
         super(paper, icon);
@@ -7463,7 +8654,7 @@ exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
 
 
 /***/ }),
-/* 56 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7482,8 +8673,8 @@ var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _ar
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Palette = void 0;
-const Color_1 = __webpack_require__(18);
-const LABColor_1 = __webpack_require__(7);
+const Color_1 = __webpack_require__(20);
+const LABColor_1 = __webpack_require__(10);
 class Palette {
     constructor(settings) {
         this.settings = {
@@ -7626,14 +8817,14 @@ exports.Palette = Palette;
 
 
 /***/ }),
-/* 57 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsDescriptor = void 0;
-const Tag_1 = __webpack_require__(30);
+const Tag_1 = __webpack_require__(33);
 class TagsDescriptor {
     constructor(arg1, arg2 = []) {
         if (arg1 === undefined) {
@@ -7732,10 +8923,10 @@ exports.TagsDescriptor = TagsDescriptor;
 
 
 /***/ }),
-/* 58 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
-window.eve = __webpack_require__(59)
+window.eve = __webpack_require__(70)
 
 // Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
 //
@@ -15883,7 +17074,7 @@ module.exports = Snap
 
 
 /***/ }),
-/* 59 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
@@ -16325,11 +17516,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c)
 
 
 /***/ }),
-/* 60 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(61);
+var content = __webpack_require__(72);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -16343,28 +17534,28 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(63)(content, options);
+var update = __webpack_require__(74)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
 if(false) {}
 
 /***/ }),
-/* 61 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(62)(false);
+exports = module.exports = __webpack_require__(73)(false);
 // imports
 
 
 // module
-exports.push([module.i, "/* CanvasTools.css */\n\n/* 1. Editor */\n/* 1.1. Cursors */\n.CanvasToolsEditor {\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\n}\n\n/* 1.2. Layout */\n.CanvasToolsEditor {\n    display: grid;\n    grid-template-rows: 1fr;\n    grid-template-columns: 1fr; \n    width: 100%;\n    height: 100%;\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor * {\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor canvas {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 100;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n    background-color: #111;\n}\n\n.CanvasToolsEditor svg {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 101;\n    width: 100%;\n    height: 100%;\n}\n\n.CanvasToolsEditor svg {\n    cursor: var(--cursor-pointer);\n}\n\n.CanvasToolsEditor svg title {\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.CanvasToolsContainer {\n    overflow: auto;\n    height: 100%;\n    width: 100%;\n}\n\n.CanvasToolsContainer:focus {\n    outline: none;\n}\n\n/* 2. RegionsManager\n\n.regionManager\n-->.regionStyle\n    --> .tagsLayer\n    --> .dragLayer\n    --> .anchorsLayer\n    \n--> .menuLayer\n    --> .menuRectStyle\n*/\n\n/* 2.1. General settings and layout */\n.regionManager {\n    pointer-events: none;\n}\n\n.regionStyle {\n    pointer-events: visiblePainted;\n}\n\n.dragRectStyle {\n    fill: transparent; \n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n}\n\n.dragPointStyle {\n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n    filter: url(#black-glow);\n}\n\n.tagsLayer {\n    pointer-events: none;\n}\n\n.primaryTagRectStyle {\n    stroke-width: 2;\n    stroke-dasharray: 0.5 4;\n    stroke-linecap: round;\n    filter: url(#black-glow);\n}\n\n.primaryTagPointStyle {\n    stroke-width: 1; \n}\n\n.primaryTagTextStyle {\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 9pt;\n    fill: #fff;\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.primaryTagTextStyle::selection {\n    background: none;\n    fill: #fff;\n}\n\n.secondaryTagStyle {\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.anchorStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle.ghost {\n    cursor: var(--cursor-resize);\n}\n\n.anchorStyle.ghost.delete {\n    cursor: var(--cursor-delete);\n}\n\n.anchorStyle.ghost.add {\n    cursor: var(--cursor-add);\n}\n\n.anchorStyle.ghost {\n    stroke-width: 0;\n}\n\n.primaryTagBoundRectStyle {\n    stroke-width: 2;\n}\n\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\n    stroke-width: 2;\n    stroke-linecap: round;\n    stroke-dasharray: 0.5 4;\n}\n\n/* 2.2. Default colors */\n.regionManager {\n    --default-color-pure: rgb(128, 128, 128);\n    --default-color-accent: rgba(128, 128, 128, 0.8);\n    --default-color-dark: rgba(64, 64, 64, 0.8);\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\n    --default-color-white: rgb(255, 255, 255);\n    --default-color-transparent: rgba(255, 255, 255, 0);\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\n    --default-color-delete: rgba(216, 24, 65, 1.0);\n    --default-color-add: rgba(21, 127, 240, 1.0);\n}\n\n/* 2.2.1. Shared colors */\n.secondaryTagStyle {\n    fill: var(--default-color-accent);\n}\n\n.anchorStyle {\n    stroke: var(--default-color-dark);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle:hover .anchorStyle {\n    stroke: var(--default-color-white);\n}\n\n.anchorStyle.ghost,\n.anchorStyle.ghost:hover,\n.regionStyle.selected .anchorStyle.ghost,\n.regionStyle.selected .anchorStyle.ghost:hover {\n    fill: var(--default-color-ghost);\n}\n\n.anchorStyle:hover {\n    stroke: var(--default-color-white);\n}\n\n/* 2.2.2. Rect region colors */\n.primaryTagRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n}\n\n.regionStyle:hover .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n}\n\n.regionStyle.selected .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke-dasharray: none;\n}\n\n.primaryTagTextBGStyle {\n    fill: var(--default-color-dark);\n}\n\n.anchorBoneStyle {\n    fill: var(--default-color-transparent);\n}\n\n/* 2.2.3. Point region  colors */\n.primaryTagPointStyle {\n    fill: var(--default-color-pure);\n    stroke:var(--default-color-white);\n}\n\n.dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 0.5;\n}\n\n.regionStyle:hover .dragPointStyle,\n.regionStyle.selected .dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 1.0;\n}\n\n/* 2.2.4. Polyline, polygon region colors */\n.primaryTagBoundRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n    opacity: 0.25;\n}\n\n.regionStyle.selected .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    opacity: 1;\n}\n\n.regionStyle:hover .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n    opacity: 0.75;\n}\n\n.primaryTagPolylineStyle {\n    fill: var(--default-color-transparent);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolylineStyle {\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.primaryTagPolygonStyle {\n    fill: var(--default-color-shadow);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.regionStyle:hover .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n}\n\n.regionStyle:hover .anchorStyle.ghost.delete,\n.regionStyle.selected .anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete:hover {\n    stroke: var(--default-color-delete);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.regionStyle:hover .anchorStyle.ghost.add,\n.regionStyle.selected .anchorStyle.ghost.add,\n.anchorStyle.ghost.add,\n.anchorStyle.ghost.add:hover {\n    stroke: var(--default-color-add);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.anchorLineStyle {\n    fill: none;\n    stroke-width: 5;\n    stroke: var(--default-color-transparent);  \n}\n\nsvg:not(:root) .menuLayer {\n    overflow: visible;\n}\n\n.menuRectStyle { \n    stroke-width:0;\n    fill: #000;\n    filter: url(#black-glow); \n}\n\n.menuItemBack {\n    stroke-width: 1.5;\n    stroke: rgba(198, 198, 198, 0.2);\n    fill:  #000;\n}\n\n.menuIcon {\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 10pt;\n    fill: #fff;\n}\n\n.menuItem {\n    stroke-width: 1.5;\n    stroke: #fff;\n    fill:transparent;\n}\n\n.menuItem:hover {\n    stroke: #157ff0;\n}\n\n/* Freezing regions */ \n\n.regionManager.frozen .regionStyle.old,\n.regionManager.frozen .regionStyle.old .dragRectStyle,\n.regionManager.frozen .regionStyle.old .dragPointStyle {\n    pointer-events: none;\n}\n\n.regionManager.frozen .regionStyle.old .dragRectStyle, \n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\n    cursor: default; \n}\n\n.regionManager.frozen .anchorStyle.ghost {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old, \n.regionManager.frozen .regionStyle.old:hover{\n    opacity: 0.5;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\n    stroke-width: 1;\n    stroke-dasharray: 0 0;\n}\n\n.regionManager.frozen .regionStyle.old .anchorStyle {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\n    opacity: 0.25;\n}\n\n/* AreaSelector\n\n.areaSelector\n-->.rectSelector\n    --> .maskStyle\n        [mask]\n            .maskInStyle\n            .maskOutStyle\n        .crossStyle\n            line\n            line\n-->.rectCopySelector\n    --> .crossStyle\n            line\n            line\n        .copyRectStyle\n-->.pointSelector\n    --> .crossStyle\n        .pointStyle\n-->.polylineSelector\n    --> .polylineStyle\n        .polylineGroupStyle\n        --> .polylinePointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n-->.polygonSelector\n    --> .polygonStyle\n        .polygonGroupStyle\n        --> .polygonPointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n*/\n\n#selectionOverlay {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n}\n\n.crossStyle line {\n    stroke-width:1;\n    stroke-dasharray: 3 3;\n    stroke: #666;\n    pointer-events: none; \n}\n\n.crossStyle .blackDashes {\n    stroke-width:3;\n    stroke-dasharray: 3 3;\n    stroke: #000;\n    pointer-events: none; \n}\n\n.crossStyle .whiteDashes {\n    stroke-width:3;\n    stroke-dasharray: 0 3 0;\n    stroke: #fff;\n    pointer-events: none; \n}\n\n.selectionBoxStyle {\n    fill: #fff;\n    fill-opacity: 0.25;\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.rectCopySelector .copyRectStyle {\n    stroke-width:3;\n    stroke: #000;\n    fill: transparent;\n    pointer-events: none; \n}\n\n.pointSelector .pointStyle {\n    stroke-width:2;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none; \n}\n\n.polylineSelector .polylineStyle {\n    fill: transparent;\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polylineSelector .polylinePointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polylineSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polylineSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n.polygonSelector .polygonStyle {\n    fill: rgba(255,255,255, 0.2);\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polygonSelector .polygonPointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polygonSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polygonSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n/* Toolbar \n\n.toolbarLayer\n--> .toolbarBGStyle\n--> .iconsLayerStyle\n    --> .iconStyle\n        --> .iconBGRectStyle\n            .iconImageStyle\n*/\n.toolbarBGStyle {\n    fill: #000;\n}\n\n.iconStyle {\n    pointer-events: all;\n}\n\n.iconStyle.selector .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.selector:hover .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle.selector.selected .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle .iconImageStyle * {\n    stroke: #fff;\n}\n\n\n.iconStyle.switch .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.switch:hover .iconBGRectStyle{\n    fill: #157ff0;\n}\n\n.iconStyle.switch .iconImageStyle * {\n    stroke: #fff;\n}\n\n.iconStyle.switch.selected .iconImageStyle * {\n    stroke: rgb(14, 186, 253);\n    stroke-width: 1.5;\n}\n\n.iconStyle .iconImageStyle .accent-f {\n    fill: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle .iconImageStyle .accent-s {\n    stroke: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle.separator line {\n    stroke: #fff;\n    stroke-width: 0.5px;\n}\n\n/* Announcer */\n#regionAnnouncer {\n    position: absolute !important;\n    height: 0px; \n    width: 0px;\n    overflow: hidden;\n    clip: rect(0px, 0px, 0px, 0px);\n    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    -webkit-clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    white-space: nowrap;\n}", ""]);
+exports.push([module.i, "/* CanvasTools.css */\r\n\r\n/* 1. Editor */\r\n/* 1.1. Cursors */\r\n.CanvasToolsEditor {\r\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\r\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\r\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\r\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\r\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\r\n}\r\n\r\n/* 1.2. Layout */\r\n.CanvasToolsEditor {\r\n    display: grid;\r\n    grid-template-rows: 1fr;\r\n    grid-template-columns: 1fr; \r\n    width: 100%;\r\n    height: 100%;\r\n    box-sizing: content-box;\r\n}\r\n\r\n.CanvasToolsEditor * {\r\n    box-sizing: content-box;\r\n}\r\n\r\n.CanvasToolsEditor canvas {\r\n    position: relative;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    z-index: 100;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n    background-color: #111;\r\n}\r\n\r\n.CanvasToolsEditor svg {\r\n    position: relative;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    z-index: 101;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\n.CanvasToolsEditor svg {\r\n    cursor: var(--cursor-pointer);\r\n}\r\n\r\n.CanvasToolsEditor svg title {\r\n    -moz-user-select: none; /* Firefox */\r\n    -ms-user-select: none; /* Internet Explorer/Edge */\r\n    user-select: none;\r\n    pointer-events: none;\r\n}\r\n\r\n.CanvasToolsContainer {\r\n    overflow: auto;\r\n    height: 100%;\r\n    width: 100%;\r\n}\r\n\r\n.CanvasToolsContainer:focus {\r\n    outline: none;\r\n}\r\n\r\n/* 2. RegionsManager\r\n\r\n.regionManager\r\n-->.regionStyle\r\n    --> .tagsLayer\r\n    --> .dragLayer\r\n    --> .anchorsLayer\r\n    \r\n--> .menuLayer\r\n    --> .menuRectStyle\r\n*/\r\n\r\n/* 2.1. General settings and layout */\r\n.regionManager {\r\n    pointer-events: none;\r\n}\r\n\r\n.regionStyle {\r\n    pointer-events: visiblePainted;\r\n}\r\n\r\n.dragRectStyle {\r\n    fill: transparent; \r\n    stroke-width: 0;\r\n    pointer-events: all;\r\n    cursor: var(--cursor-move);\r\n}\r\n\r\n.dragPointStyle {\r\n    stroke-width: 0;\r\n    pointer-events: all;\r\n    cursor: var(--cursor-move);\r\n    filter: url(#black-glow);\r\n}\r\n\r\n.tagsLayer {\r\n    pointer-events: none;\r\n}\r\n\r\n.primaryTagRectStyle {\r\n    stroke-width: 2;\r\n    stroke-dasharray: 0.5 4;\r\n    stroke-linecap: round;\r\n    filter: url(#black-glow);\r\n}\r\n\r\n.primaryTagPointStyle {\r\n    stroke-width: 1; \r\n}\r\n\r\n.primaryTagTextStyle {\r\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\r\n    font-size: 9pt;\r\n    fill: #fff;\r\n    -moz-user-select: none; /* Firefox */\r\n    -ms-user-select: none; /* Internet Explorer/Edge */\r\n    user-select: none;\r\n    pointer-events: none;\r\n}\r\n\r\n.primaryTagTextStyle::selection {\r\n    background: none;\r\n    fill: #fff;\r\n}\r\n\r\n.secondaryTagStyle {\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.midpointStyle {\r\n    stroke-width: 2;\r\n}\r\n\r\n.bezierControlPointTangentStyle,\r\n.bezierControlPointStyle {\r\n    stroke-width: 2;\r\n}\r\n\r\n.anchorStyle {\r\n    stroke-width: 2;\r\n}\r\n\r\n.anchorStyle.ghost {\r\n    cursor: var(--cursor-resize);\r\n}\r\n\r\n.anchorStyle.ghost.delete {\r\n    cursor: var(--cursor-delete);\r\n}\r\n\r\n.anchorStyle.ghost.add {\r\n    cursor: var(--cursor-add);\r\n}\r\n\r\n.anchorStyle.ghost {\r\n    stroke-width: 0;\r\n}\r\n\r\n.primaryTagBoundRectStyle {\r\n    stroke-width: 2;\r\n}\r\n\r\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\r\n    stroke-width: 2;\r\n    stroke-linecap: round;\r\n    stroke-dasharray: 0.5 4;\r\n}\r\n\r\n/* 2.2. Default colors */\r\n.regionManager {\r\n    --default-color-pure: rgb(128, 128, 128);\r\n    --default-color-accent: rgba(128, 128, 128, 0.8);\r\n    --default-color-dark: rgba(64, 64, 64, 0.8);\r\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\r\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\r\n    --default-color-white: rgb(255, 255, 255);\r\n    --default-color-transparent: rgba(255, 255, 255, 0);\r\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\r\n    --default-color-delete: rgba(216, 24, 65, 1.0);\r\n    --default-color-add: rgba(21, 127, 240, 1.0);\r\n    --default-color-control: rgb(253, 128, 45);\r\n}\r\n\r\n/* 2.2.1. Shared colors */\r\n.secondaryTagStyle {\r\n    fill: var(--default-color-accent);\r\n}\r\n\r\n.midpointStyle {\r\n    stroke: none;\r\n    fill: none;\r\n}\r\n\r\n.bezierControlPointTangentStyle,\r\n.bezierControlPointStyle {\r\n    stroke: none;\r\n    fill: none;\r\n}\r\n\r\n.anchorStyle {\r\n    stroke: var(--default-color-dark);\r\n    fill: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle {\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n.regionStyle:hover .midpointStyle {\r\n    stroke: var(--default-color-white);\r\n    fill: var(--default-color-white);\r\n}\r\n\r\n.regionStyle:hover .midpointStyle:hover {\r\n    stroke: var(--default-color-accent);\r\n}\r\n\r\n.regionStyle.selected .bezierControlPointTangentStyle,\r\n.regionStyle:hover .bezierControlPointTangentStyle {\r\n    stroke: var(--default-color-control);\r\n    stroke-dasharray: 4;\r\n}\r\n\r\n.regionStyle.selected .bezierControlPointStyle,\r\n.regionStyle:hover .bezierControlPointStyle {\r\n    stroke: var(--default-color-control);\r\n    fill: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle.selected .bezierControlPointStyle:hover,\r\n.regionStyle:hover .bezierControlPointStyle:hover {\r\n    cursor: var(--cursor-resize);\r\n    stroke: var(--default-color-control);\r\n    fill: var(--default-color-control);\r\n}\r\n\r\n.anchorStyle.ghost,\r\n.anchorStyle.ghost:hover,\r\n.regionStyle.selected .anchorStyle.ghost,\r\n.regionStyle.selected .anchorStyle.ghost:hover {\r\n    fill: var(--default-color-ghost);\r\n}\r\n\r\n.anchorStyle:hover {\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n/* 2.2.2. Rect region colors */\r\n.primaryTagRectStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke:var(--default-color-accent);\r\n}\r\n\r\n.regionStyle:hover .primaryTagRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke: var(--default-color-white);\r\n}\r\n\r\n.regionStyle.selected .primaryTagRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.primaryTagTextBGStyle {\r\n    fill: var(--default-color-dark);\r\n}\r\n\r\n.anchorBoneStyle {\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n/* 2.2.3. Point region  colors */\r\n.primaryTagPointStyle {\r\n    fill: var(--default-color-pure);\r\n    stroke:var(--default-color-white);\r\n}\r\n\r\n.dragPointStyle {\r\n    fill: var(--default-color-ghost);\r\n    opacity: 0.5;\r\n}\r\n\r\n.regionStyle:hover .dragPointStyle,\r\n.regionStyle.selected .dragPointStyle {\r\n    fill: var(--default-color-ghost);\r\n    opacity: 1.0;\r\n}\r\n\r\n/* 2.2.4. Polyline, polygon region colors */\r\n.primaryTagBoundRectStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke:var(--default-color-accent);\r\n    opacity: 0.25;\r\n}\r\n\r\n.regionStyle.selected .primaryTagBoundRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    opacity: 1;\r\n}\r\n\r\n.regionStyle:hover .primaryTagBoundRectStyle {\r\n    fill: var(--default-color-highlight);\r\n    stroke: var(--default-color-white);\r\n    opacity: 0.75;\r\n}\r\n\r\n.primaryTagPolylineStyle {\r\n    fill: var(--default-color-transparent);\r\n    stroke: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle.selected .primaryTagPolylineStyle {\r\n    filter: url(#black-glow);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.primaryTagPolygonStyle {\r\n    fill: var(--default-color-shadow);\r\n    stroke: var(--default-color-pure);\r\n}\r\n\r\n.regionStyle.selected .primaryTagPolygonStyle {\r\n    fill: var(--default-color-highlight);\r\n    filter: url(#black-glow);\r\n    stroke-dasharray: none;\r\n}\r\n\r\n.regionStyle:hover .primaryTagPolygonStyle {\r\n    fill: var(--default-color-highlight);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle.ghost.delete,\r\n.regionStyle.selected .anchorStyle.ghost.delete,\r\n.anchorStyle.ghost.delete,\r\n.anchorStyle.ghost.delete:hover {\r\n    stroke: var(--default-color-delete);\r\n    stroke-width: 2px;\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n.regionStyle:hover .anchorStyle.ghost.add,\r\n.regionStyle.selected .anchorStyle.ghost.add,\r\n.anchorStyle.ghost.add,\r\n.anchorStyle.ghost.add:hover {\r\n    stroke: var(--default-color-add);\r\n    stroke-width: 2px;\r\n    fill: var(--default-color-transparent);\r\n}\r\n\r\n.anchorLineStyle {\r\n    fill: none;\r\n    stroke-width: 5;\r\n    stroke: var(--default-color-transparent);  \r\n}\r\n\r\nsvg:not(:root) .menuLayer {\r\n    overflow: visible;\r\n}\r\n\r\n.menuRectStyle { \r\n    stroke-width:0;\r\n    fill: #000;\r\n    filter: url(#black-glow); \r\n}\r\n\r\n.menuItemBack {\r\n    stroke-width: 1.5;\r\n    stroke: rgba(198, 198, 198, 0.2);\r\n    fill:  #000;\r\n}\r\n\r\n.menuIcon {\r\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\r\n    font-size: 10pt;\r\n    fill: #fff;\r\n}\r\n\r\n.menuItem {\r\n    stroke-width: 1.5;\r\n    stroke: #fff;\r\n    fill:transparent;\r\n}\r\n\r\n.menuItem:hover {\r\n    stroke: #157ff0;\r\n}\r\n\r\n/* Freezing regions */ \r\n\r\n.regionManager.frozen .regionStyle.old,\r\n.regionManager.frozen .regionStyle.old .dragRectStyle,\r\n.regionManager.frozen .regionStyle.old .dragPointStyle {\r\n    pointer-events: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .dragRectStyle, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \r\n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\r\n    cursor: default; \r\n}\r\n\r\n.regionManager.frozen .anchorStyle.ghost {\r\n    display: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old, \r\n.regionManager.frozen .regionStyle.old:hover{\r\n    opacity: 0.5;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\r\n    stroke-width: 1;\r\n    stroke-dasharray: 0 0;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .anchorStyle {\r\n    display: none;\r\n}\r\n\r\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\r\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\r\n    opacity: 0.25;\r\n}\r\n\r\n/* AreaSelector\r\n\r\n.areaSelector\r\n-->.rectSelector\r\n    --> .maskStyle\r\n        [mask]\r\n            .maskInStyle\r\n            .maskOutStyle\r\n        .crossStyle\r\n            line\r\n            line\r\n-->.rectCopySelector\r\n    --> .crossStyle\r\n            line\r\n            line\r\n        .copyRectStyle\r\n-->.pointSelector\r\n    --> .crossStyle\r\n        .pointStyle\r\n-->.polylineSelector\r\n    --> .polylineStyle\r\n        .polylineGroupStyle\r\n        --> .polylinePointStyle\r\n        .nextSegmentStyle\r\n        .nextPointStyle\r\n-->.polygonSelector\r\n    --> .polygonStyle\r\n        .polygonGroupStyle\r\n        --> .polygonPointStyle\r\n        .nextSegmentStyle\r\n        .nextPointStyle\r\n*/\r\n\r\n#selectionOverlay {\r\n    position: relative;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n}\r\n\r\n.crossStyle line {\r\n    stroke-width:1;\r\n    stroke-dasharray: 3 3;\r\n    stroke: #666;\r\n    pointer-events: none; \r\n}\r\n\r\n.crossStyle .blackDashes {\r\n    stroke-width:3;\r\n    stroke-dasharray: 3 3;\r\n    stroke: #000;\r\n    pointer-events: none; \r\n}\r\n\r\n.crossStyle .whiteDashes {\r\n    stroke-width:3;\r\n    stroke-dasharray: 0 3 0;\r\n    stroke: #fff;\r\n    pointer-events: none; \r\n}\r\n\r\n.selectionBoxStyle {\r\n    fill: #fff;\r\n    fill-opacity: 0.25;\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.rectCopySelector .copyRectStyle {\r\n    stroke-width:3;\r\n    stroke: #000;\r\n    fill: transparent;\r\n    pointer-events: none; \r\n}\r\n\r\n.pointSelector .pointStyle {\r\n    stroke-width:2;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none; \r\n}\r\n\r\n.polylineSelector .polylineStyle {\r\n    fill: transparent;\r\n    stroke-width: 2px;\r\n    stroke:  rgba(21, 127, 240, 0.5);\r\n    pointer-events: none;\r\n}\r\n\r\n.polylineSelector .polylinePointStyle {\r\n    fill:  rgba(21, 127, 240, 1.0);\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.polylineSelector .nextSegmentStyle {\r\n    stroke-width:2;\r\n    stroke-dasharray: 3 3;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    pointer-events: none;\r\n}\r\n.polylineSelector .nextPointStyle {\r\n    stroke-width:2;\r\n    r: 6px;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .polygonStyle {\r\n    fill: rgba(255,255,255, 0.2);\r\n    stroke-width: 2px;\r\n    stroke:  rgba(21, 127, 240, 0.5);\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .polygonPointStyle {\r\n    fill:  rgba(21, 127, 240, 1.0);\r\n    stroke-width: 0;\r\n    pointer-events: none;\r\n}\r\n\r\n.polygonSelector .nextSegmentStyle {\r\n    stroke-width:2;\r\n    stroke-dasharray: 3 3;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    pointer-events: none;\r\n}\r\n.polygonSelector .nextPointStyle {\r\n    stroke-width:2;\r\n    r: 6px;\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n    fill: transparent;\r\n    pointer-events: none;\r\n}\r\n\r\n/* Toolbar \r\n\r\n.toolbarLayer\r\n--> .toolbarBGStyle\r\n--> .iconsLayerStyle\r\n    --> .iconStyle\r\n        --> .iconBGRectStyle\r\n            .iconImageStyle\r\n*/\r\n.toolbarBGStyle {\r\n    fill: #000;\r\n}\r\n\r\n.iconStyle {\r\n    pointer-events: all;\r\n}\r\n\r\n.iconStyle.selector .iconBGRectStyle{\r\n    fill: transparent;\r\n}\r\n\r\n.iconStyle.selector:hover .iconBGRectStyle {\r\n    fill: #157ff0;\r\n}\r\n\r\n.iconStyle.selector.selected .iconBGRectStyle {\r\n    fill: #157ff0;\r\n}\r\n\r\n.iconStyle .iconImageStyle * {\r\n    stroke: #fff;\r\n}\r\n\r\n\r\n.iconStyle.switch .iconBGRectStyle{\r\n    fill: transparent;\r\n}\r\n\r\n.iconStyle.switch:hover .iconBGRectStyle{\r\n    fill: #157ff0;\r\n}\r\n\r\n.iconStyle.switch .iconImageStyle * {\r\n    stroke: #fff;\r\n}\r\n\r\n.iconStyle.switch.selected .iconImageStyle * {\r\n    stroke: rgb(14, 186, 253);\r\n    stroke-width: 1.5;\r\n}\r\n\r\n.iconStyle .iconImageStyle .accent-f {\r\n    fill: rgba(21, 127, 240, 1.0);\r\n}\r\n\r\n.iconStyle .iconImageStyle .accent-s {\r\n    stroke: rgba(21, 127, 240, 1.0);\r\n}\r\n\r\n.iconStyle.separator line {\r\n    stroke: #fff;\r\n    stroke-width: 0.5px;\r\n}\r\n\r\n/* Announcer */\r\n#regionAnnouncer {\r\n    position: absolute !important;\r\n    height: 0px; \r\n    width: 0px;\r\n    overflow: hidden;\r\n    clip: rect(0px, 0px, 0px, 0px);\r\n    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\r\n    -webkit-clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\r\n    white-space: nowrap;\r\n}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 62 */
+/* 73 */
 /***/ (function(module, exports) {
 
 /*
@@ -16446,7 +17637,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 63 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -16515,7 +17706,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(64);
+var	fixUrls = __webpack_require__(75);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -16850,7 +18041,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 64 */
+/* 75 */
 /***/ (function(module, exports) {
 
 

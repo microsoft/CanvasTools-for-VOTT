@@ -1,8 +1,9 @@
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
+import { IAnchorMixin } from "../../Interface/IAnchorMixin";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
 import { RegionComponent } from "./RegionComponent";
@@ -13,14 +14,16 @@ import { RegionComponent } from "./RegionComponent";
  */
 export abstract class AnchorsComponent extends RegionComponent {
     /**
-     * Default radius for anchor poitns. Can be redefined through CSS styles.
+     * Default radius for anchor points. Can be redefined through CSS styles.
      */
     public static DEFAULT_ANCHOR_RADIUS = 3;
 
     /**
-     * Defailt radius for the ghost anchor, used activate dragging. Can be redefined through CSS styles.
+     * Default radius for the ghost anchor, used activate dragging. Can be redefined through CSS styles.
      */
     public static DEFAULT_GHOST_ANCHOR_RADIUS = 7;
+
+    protected mixins: IAnchorMixin[] = [];
 
     /**
      * The array of anchors.
@@ -87,6 +90,7 @@ export abstract class AnchorsComponent extends RegionComponent {
                 });
             });
         }
+        this.mixins.forEach(m => m.redraw());
     }
 
     /**
@@ -119,6 +123,8 @@ export abstract class AnchorsComponent extends RegionComponent {
                 bypass: true,
             },
         ]);
+
+        this.mixins.forEach(m => m.buildAnchors());
     }
 
     /**
@@ -302,7 +308,7 @@ export abstract class AnchorsComponent extends RegionComponent {
      * Subscribe event listeners on the ghost anchor
      */
     protected subscribeGhostToEvents() {
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             {
                 event: "pointerenter",
                 base: this.ghostAnchor.node,

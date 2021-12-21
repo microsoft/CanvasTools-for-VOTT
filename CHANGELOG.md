@@ -1,5 +1,18 @@
 ## Changelog
 
+### 2.3.0
+* Add an `enablePathRegions` editor configuration to enable/disable path region types (Bezier curve support).
+```js
+const editor = new CanvasTools.Editor(...);
+editor.enablePathRegions(true);
+```
+* Add a new "PathRegion" type which will be created in place of polygon region types when `enablePathRegions` is enabled.
+* Replace bounding box calculation in region metadata with Snap.SVG path getBBox utility to accommodate BBox of complex paths.
+* Add Bezier control information to region metadata.
+* Add midpoint line markers, when clicked will assign bezier control data to that line.
+* Add Bezier control anchors to lines with bezier control data to allow manipulation of line shape.
+* Deprecate "setPoints" region data method in favor of "splicePoints". Use of setPoints is not compatible with "PathRegion" region types.
+
 ### 2.2.26
 * Add `.toggleTagsTextVisibility()` to `RegionManager` for toggling visibility of tags text on region.
 

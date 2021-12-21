@@ -23,6 +23,11 @@
         /* "outFile": "./lib/ct.js" */
     },
     "include": [     
-        "./src/canvastools/ts/**/*.ts"
+        "./src/canvastools/ts/**/*.ts",
+        "./types/**/*.d.ts"
+    ],
+    "exclude": [     
+        "./src/canvastools/ts/**/*.spec.ts",
+        "./src/canvastools/ts/**/*.spec.js"
     ]
 }

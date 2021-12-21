@@ -3,14 +3,6 @@
 // Definitions by: Lars Klein <https://github.com/lhk>, Mattanja Kern <https://github.com/mattanja>, Andrey Kurdyumov <https://github.com/kant2002>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-
-/* export = Snap; */
-/* export as namespace Snap; */
-
-declare module "snapsvg-cjs" {
-    export = Snap;
- }
-
 declare function Snap(width:number|string,height:number|string):Snap.Paper;
 declare function Snap(query:string):Snap.Paper;
 declare function Snap(DOM:SVGElement):Snap.Paper;
@@ -71,6 +63,8 @@ declare namespace Snap {
     export function parseTransformString(TString:Array<string>):Array<any>;
 
     export function closest(x: number, y: number, X: number, Y: number): boolean;
+
+    export const path: Path;
 
     export interface RGB {
         r:number;

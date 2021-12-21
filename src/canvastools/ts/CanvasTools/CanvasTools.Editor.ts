@@ -4,7 +4,7 @@ import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
 import { ZoomData, ZoomDirection, ZoomManager, ZoomProperties, ZoomType } from "./Core/ZoomManager";
-import { RegionChangeFunction, RegionManipulationFunction } from "./Interface/IRegionCallbacks";
+import { RegionManipulationFunction } from "./Interface/IRegionCallbacks";
 import { RegionSelectionFunction, RegionUpdateFunction } from "./Interface/IRegionsManagerCallbacks";
 import {
     PointSelectionNotifyFunction,
@@ -18,24 +18,26 @@ import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 import { AreaSelector } from "./Selection/AreaSelector";
 import { Toolbar } from "./Toolbar/Toolbar";
-import { ToolbarItemType} from "./Toolbar/ToolbarIcon";
+import { ToolbarItemType } from "./Toolbar/ToolbarIcon";
 
 /**
  * Internal type to describe toolbar presets
  */
-type ToolbarIconDescription = {
-    type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH | ToolbarItemType.TRIGGER,
-    action: string,
-    iconFile: string,
-    tooltip: string,
-    actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void,
-    key: string[],
-    width?: number,
-    height?: number,
-    activate: boolean,
-} | {
-    type: ToolbarItemType.SEPARATOR,
-};
+type ToolbarIconDescription =
+    | {
+          type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH | ToolbarItemType.TRIGGER;
+          action: string;
+          iconFile: string;
+          tooltip: string;
+          actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void;
+          key: string[];
+          width?: number;
+          height?: number;
+          activate: boolean;
+      }
+    | {
+          type: ToolbarItemType.SEPARATOR;
+      };
 
 /**
  * Wraps internal CanvasTools components into one Editor experience.
@@ -504,8 +506,12 @@ export class Editor {
      * @param regionsManager - The `RegionsManager` component to use.
      * @param filterPipeline - The `FilterPipeline` component to use.
      */
-    constructor(container: HTMLDivElement, areaSelector: AreaSelector, regionsManager: RegionsManager,
-                filterPipeline: FilterPipeline);
+    constructor(
+        container: HTMLDivElement,
+        areaSelector: AreaSelector,
+        regionsManager: RegionsManager,
+        filterPipeline: FilterPipeline
+    );
 
     /**
      * Creates a new `Editor` in specified div-container and with custom building components.
@@ -516,11 +522,21 @@ export class Editor {
      * @param filterPipeline [Optional]- The `FilterPipeline` component to use.
      * @param zoomProperties [Optional]- The properties of Zoom Manager to set
      */
-    constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-                filterPipeline?: FilterPipeline, zoomProperties?: ZoomProperties);
+    constructor(
+        container: HTMLDivElement,
+        areaSelector?: AreaSelector,
+        regionsManager?: RegionsManager,
+        filterPipeline?: FilterPipeline,
+        zoomProperties?: ZoomProperties
+    );
 
-    constructor(container: HTMLDivElement, areaSelector?: AreaSelector, regionsManager?: RegionsManager,
-                filterPipeline?: FilterPipeline, zoomProperties?: ZoomProperties) {
+    constructor(
+        container: HTMLDivElement,
+        areaSelector?: AreaSelector,
+        regionsManager?: RegionsManager,
+        filterPipeline?: FilterPipeline,
+        zoomProperties?: ZoomProperties
+    ) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
@@ -777,18 +793,31 @@ export class Editor {
 
         context.drawImage(source, 0, 0, buffCnvs.width, buffCnvs.height);
 
-        return this.filterPipeline.applyToCanvas(buffCnvs).then((bcnvs) => {
-            // Copy buffer to the canvas on screen
-            this.contentCanvas.width = bcnvs.width;
-            this.contentCanvas.height = bcnvs.height;
-            const imgContext = this.contentCanvas.getContext("2d");
-            imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
-        }).then(() => {
-            // resize the container of editor size to adjust to the new content size
-            this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+        return this.filterPipeline
+            .applyToCanvas(buffCnvs)
+            .then((bcnvs) => {
+                // Copy buffer to the canvas on screen
+                this.contentCanvas.width = bcnvs.width;
+                this.contentCanvas.height = bcnvs.height;
+                const imgContext = this.contentCanvas.getContext("2d");
+                imgContext.drawImage(bcnvs, 0, 0, bcnvs.width, bcnvs.height);
+            })
+            .then(() => {
+                // resize the container of editor size to adjust to the new content size
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
-            this.handleZoomAfterContentUpdate();
-        });
+                this.handleZoomAfterContentUpdate();
+            });
+    }
+
+    /**
+     * Enable path regions.
+     * @remarks - Any polygon region created by the editor will become a path region
+     * (allowing curved shapes) while this setting is enabled.
+     * @param enable - The new enabled state
+     */
+    public enablePathRegions(enable: boolean) {
+        ConfigurationManager.isPathRegionEnabled = enable;
     }
 
     /**
@@ -873,8 +902,8 @@ export class Editor {
      * @returns Resized `RegionData` object.
      */
     public scaleRegionToSourceSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
-        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const sw = sourceWidth !== undefined ? sourceWidth : this.sourceWidth;
+        const sh = sourceHeight !== undefined ? sourceHeight : this.sourceHeight;
 
         const xf = sw / this.frameWidth;
         const yf = sh / this.frameHeight;
@@ -892,8 +921,8 @@ export class Editor {
      * @returns Resized `RegionData` object.
      */
     public scaleRegionToFrameSize(regionData: RegionData, sourceWidth?: number, sourceHeight?: number): RegionData {
-        const sw = (sourceWidth !== undefined) ? sourceWidth : this.sourceWidth;
-        const sh = (sourceHeight !== undefined) ? sourceHeight : this.sourceHeight;
+        const sw = sourceWidth !== undefined ? sourceWidth : this.sourceWidth;
+        const sh = sourceHeight !== undefined ? sourceHeight : this.sourceHeight;
 
         const xf = this.frameWidth / sw;
         const yf = this.frameHeight / sh;
@@ -1034,12 +1063,12 @@ export class Editor {
             if (this.zoomManager.zoomType === ZoomType.ImageCenter) {
                 if (this.editorContainerDiv.scrollHeight > this.editorContainerDiv.clientHeight) {
                     this.editorContainerDiv.scrollTop =
-                    (this.editorDiv.clientHeight - this.editorContainerDiv.clientHeight) / 2;
+                        (this.editorDiv.clientHeight - this.editorContainerDiv.clientHeight) / 2;
                 }
 
                 if (this.editorContainerDiv.scrollWidth > this.editorContainerDiv.clientWidth) {
                     this.editorContainerDiv.scrollLeft =
-                    (this.editorDiv.clientWidth - this.editorContainerDiv.clientWidth) / 2;
+                        (this.editorDiv.clientWidth - this.editorContainerDiv.clientWidth) / 2;
                 }
             }
 
@@ -1053,8 +1082,8 @@ export class Editor {
 
                 // get the current center of the viewport
                 const currentCenterInView = {
-                    x: (this.editorContainerDiv.clientWidth / 2) + currentScrollPos.left,
-                    y: (this.editorContainerDiv.clientHeight / 2) + currentScrollPos.top,
+                    x: this.editorContainerDiv.clientWidth / 2 + currentScrollPos.left,
+                    y: this.editorContainerDiv.clientHeight / 2 + currentScrollPos.top,
                 };
 
                 // get the current center of the viewport once its is scaled based on zoom data

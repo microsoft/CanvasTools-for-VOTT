@@ -1,4 +1,5 @@
 import { RegionDataType } from "../Core/RegionData";
+import { ICubicBezierControl } from "./ICubicBezierControl";
 import { IPoint2D } from "./IPoint2D";
 import { IRect } from "./IRect";
 
@@ -31,6 +32,11 @@ export interface IRegionData extends IPoint2D, IRect {
      * The array of region points.
      */
     points: IPoint2D[];
+
+    /**
+     * Bezier curve controls mapped to line segment indexes
+     */
+    bezierControls: Record<number, ICubicBezierControl>;
 
     /**
      * The type of the region.

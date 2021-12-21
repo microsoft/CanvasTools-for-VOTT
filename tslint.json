@@ -1,14 +1,19 @@
 {
     "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
+    "extends": ["tslint:recommended", "tslint-config-prettier"],
     "linterOptions": {
         "include": ["src/**/*.ts"],
         "exclude": ["**/*.d.ts"]
     },
     "jsRules": {},
     "rules": {
+        "variable-name": {
+            "options": [
+                "ban-keywords",
+                "allow-leading-underscore",
+                "allow-pascal-case"
+            ]
+        },
         "max-line-length": {
             "options": [120]
         },

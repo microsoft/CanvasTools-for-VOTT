@@ -1,12 +1,9 @@
+import { ConfigurationManager } from "../../Core/ConfigurationManager";
 import { Point2D } from "../../Core/Point2D";
 import { Rect } from "../../Core/Rect";
 import { RegionData, RegionDataType } from "../../Core/RegionData";
-
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
-import { IMovable } from "../../Interface/IMovable";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
-
-import { IPoint2D } from "../../Interface/IPoint2D";
 import { CrossElement } from "../Component/CrossElement";
 import { Selector } from "./Selector";
 
@@ -228,7 +225,7 @@ export class PolygonSelector extends Selector {
         this.node.add(this.nextSegment);
         this.node.add(this.nextPoint);
 
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             {
                 event: "pointerenter",
                 base: this.parentNode,
@@ -240,7 +237,7 @@ export class PolygonSelector extends Selector {
                 base: this.parentNode,
                 listener: (e: PointerEvent) => {
                     if (!this.isCapturing) {
-                       this.hide();
+                        this.hide();
                     } else {
                         const rect = this.parentNode.getClientRects();
                         const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
@@ -359,8 +356,17 @@ export class PolygonSelector extends Selector {
         if (typeof this.callbacks.onSelectionEnd === "function") {
             const box = this.polygon.getBBox();
 
-            this.callbacks.onSelectionEnd(new RegionData(box.x, box.y, box.width, box.height,
-                                          this.points.map((p) => p.copy()), RegionDataType.Polygon));
+            const regionType = ConfigurationManager.isPathRegionEnabled ? RegionDataType.Path : RegionDataType.Polygon;
+            this.callbacks.onSelectionEnd(
+                new RegionData(
+                    box.x,
+                    box.y,
+                    box.width,
+                    box.height,
+                    this.points.map((p) => p.copy()),
+                    regionType
+                )
+            );
         }
         this.reset();
     }

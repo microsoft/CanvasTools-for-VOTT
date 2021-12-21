@@ -4,7 +4,7 @@ import { RegionData } from "../../Core/RegionData";
 
 import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { RegionComponent } from "./RegionComponent";
 
 /**
@@ -49,10 +49,10 @@ export abstract class DragComponent extends RegionComponent {
     }
 
     /**
-     * Helper function to subscibe the draggable element to events.
+     * Helper function to subscribe the draggable element to events.
      */
     protected subscribeToDragEvents() {
-        const listeners: IEventDescriptor[] = [
+        const listeners: EventListeners = [
             {
                 event: "pointerenter",
                 base: this.dragNode.node,

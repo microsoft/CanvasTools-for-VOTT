@@ -4,15 +4,16 @@ import { TagsDescriptor } from "../../Core/TagsDescriptor";
 import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 import { ITagsUpdateOptions } from "../../Interface/ITagsUpdateOptions";
 import { RegionComponent } from "../Component/RegionComponent";
+import { DragElement } from "../Polygon/DragElement";
 import { Region } from "../Region";
 import { AnchorsElement } from "./AnchorsElement";
-import { DragElement } from "./DragElement";
+import { MidpointElement } from "./MidpointElement";
 import { TagsElement } from "./TagsElement";
 
 /**
- * The polygon-type region class.
+ * The Path-type region class.
  */
-export class PolygonRegion extends Region {
+export class PathRegion extends Region {
     /**
      * Reference to the internal AnchorsElement.
      */
@@ -29,6 +30,11 @@ export class PolygonRegion extends Region {
     private tagsNode: TagsElement;
 
     /**
+     * Reference to midpoint node
+     */
+    private midpointNode: MidpointElement;
+
+    /**
      * Reference to the tooltip element.
      */
     private toolTip: Snap.Fragment;
@@ -39,7 +45,7 @@ export class PolygonRegion extends Region {
     private paperRects: { host: Rect, actual: Rect };
 
     /**
-     * Creates new `PolygonRegion` object.
+     * Creates new `PathRegion` object.
      * @param paper - The `Snap.Paper` object to draw on.
      * @param paperRect - The parent bounding box for created component.
      * @param regionData - The `RegionData` object shared across components. Used also for initial setup.
@@ -103,6 +109,7 @@ export class PolygonRegion extends Region {
         this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID,
             this.styleSheet, this.tagsUpdateOptions);
         this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, this.callbacks);
+        this.midpointNode = new MidpointElement(paper, this.paperRect, this.regionData, this.callbacks);
 
         this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
         this.node.append(this.toolTip as any);
@@ -110,7 +117,8 @@ export class PolygonRegion extends Region {
         this.node.add(this.dragNode.node);
         this.node.add(this.tagsNode.node);
         this.node.add(this.anchorNode.node);
+        this.node.add(this.midpointNode.node);
 
-        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode);
+        this.UI.push(this.tagsNode, this.dragNode, this.anchorNode, this.midpointNode);
     }
 }

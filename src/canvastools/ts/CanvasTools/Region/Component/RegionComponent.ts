@@ -1,13 +1,12 @@
 import { Rect } from "../../Core/Rect";
 import { RegionData } from "../../Core/RegionData";
 
-import { type } from "os";
-import { IEventDescriptor } from "../../Interface/IEventDescriptor";
+import { EventListeners } from "../../Interface/IEventDescriptor";
 import { IFreezable } from "../../Interface/IFreezable";
 import { IHideable } from "../../Interface/IHideadble";
 import { IMovable } from "../../Interface/IMovable";
 import { IPoint2D } from "../../Interface/IPoint2D";
-import { ChangeEventType, IRegionCallbacks } from "../../Interface/IRegionCallbacks";
+import { IRegionCallbacks } from "../../Interface/IRegionCallbacks";
 import { IResizable } from "../../Interface/IResizable";
 
 /**
@@ -203,14 +202,14 @@ export abstract class RegionComponent implements IHideable, IResizable, IMovable
      * Subscribes the component elements according to provided event descriptors. Binds to the `this` object.
      * @param listeners - The collection of event descriptors.
      */
-    protected subscribeToEvents(listeners: IEventDescriptor[]) {
+    protected subscribeToEvents(listeners: EventListeners) {
         listeners.forEach((e) => {
             e.base.addEventListener(e.event, this.makeFreezable(e.listener.bind(this), e.bypass));
         });
     }
 
     /**
-     * A helper function to make event listeners froozen if the component state is frozen.
+     * A helper function to make event listeners frozen if the component state is frozen.
      * @param f - Function to wrap.
      * @param bypass - A flag whether event should bypass.
      */
