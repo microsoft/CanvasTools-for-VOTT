@@ -11,20 +11,6 @@ function buildCopy(controls: Record<string, ICubicBezierControl> | Record<number
 }
 
 /**
- * @param controls Controls to modify.
- * @param modifyPoint Function to take a point and return a new point.
- * @returns new CubicBezierIndex with modified points.
- */
-function modifyControlPoints(
-    controls: Record<number, ICubicBezierControl>,
-    modifyPoint: (p: IPoint2D) => Point2D
-): CubicBezierIndex {
-    return new CubicBezierIndex(
-        mapIndexRecord(controls, (c) => new CubicBezierControl({ c1: modifyPoint(c.c1), c2: modifyPoint(c.c2) }))
-    );
-}
-
-/**
  * Map of cubic bezier controls to numbered indexes.
  */
 export class CubicBezierIndex implements Record<number, CubicBezierControl> {
@@ -64,17 +50,19 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
     /**
      * Create a new record with scaled controls.
      * @param scalePoint Function which takes a point and returns the new scaled point.
+     * @deprecated Use mapPoints instead
      */
     public scale(scalePoint: (p: IPoint2D) => Point2D): CubicBezierIndex {
-        return modifyControlPoints(this, scalePoint);
+        return this.mapPoints(scalePoint);
     }
 
     /**
      * Create a new record with moved controls.
      * @param movePoint Function which takes a point and returns the new moved point.
+     * @deprecated Use mapPoints instead
      */
     public move(movePoint: (p: IPoint2D) => Point2D): CubicBezierIndex {
-        return modifyControlPoints(this, movePoint);
+        return this.mapPoints(movePoint);
     }
 
     /**
@@ -83,21 +71,31 @@ export class CubicBezierIndex implements Record<number, CubicBezierControl> {
      * @param dy Distance in y to shift control points.
      */
     public shift(dx: number, dy: number): CubicBezierIndex {
-        return new CubicBezierIndex(
-            mapIndexRecord(this, (c) => {
-                const control = c.copy();
-                control.shift(dx, dy);
-                return control;
-            })
-        );
+        return this.map((c) => {
+            const control = c.copy();
+            control.shift(dx, dy);
+            return control;
+        });
+    }
+
+    public map(fn: (control: CubicBezierControl, index: number) => ICubicBezierControl): CubicBezierIndex {
+        return new CubicBezierIndex(mapIndexRecord(this, (control, idx) => new CubicBezierControl(fn(control, idx))));
     }
 
     public boundToRect(rect: IRect): CubicBezierIndex {
-        return new CubicBezierIndex(mapIndexRecord(this, (c) => c.boundToRect(rect)));
+        return this.map((c) => c.boundToRect(rect));
     }
 
     public toJSON(): Record<number, ICubicBezierControl> {
         return mapIndexRecord(this, (c) => c.toJSON());
+    }
+
+    /**
+     * Map over each point for each control in the index and return a new index.
+     * @param fn Function which takes a point and returns the new point.
+     */
+    public mapPoints(fn: (p: IPoint2D) => IPoint2D): CubicBezierIndex {
+        return this.map((control) => control.map(fn));
     }
 
     public forEach(fn: (control: CubicBezierControl, index: number) => void): void {

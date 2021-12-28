@@ -1,4 +1,5 @@
 import { ICubicBezierControl } from "../Interface/ICubicBezierControl";
+import { IPoint2D } from "../Interface/IPoint2D";
 import { IRect } from "../Interface/IRect";
 import { Point2D } from "./Point2D";
 
@@ -41,6 +42,17 @@ export class CubicBezierControl {
     public shift(dx: number, dy: number): void {
         this.c1.shift(dx, dy);
         this.c2.shift(dx, dy);
+    }
+
+    /**
+     * Map each point in the control to a new point.
+     * @param fn map function
+     * @returns new bezier control with mapped points
+     */
+    public map(fn: (p: Point2D, idx: number) => IPoint2D): CubicBezierControl {
+        const points = [this.c1, this.c2];
+        const mappedPoints = points.map((p, idx) => fn(p, idx));
+        return new CubicBezierControl({ c1: mappedPoints[0], c2: mappedPoints[1] });
     }
 
     /**

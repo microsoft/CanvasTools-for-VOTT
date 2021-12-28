@@ -320,7 +320,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             return new Point2D(px, py);
         };
         this.regionPoints = this.regionPoints.map(movePoint);
-        this.regionBezierControls = this.regionBezierControls.move(movePoint);
+        this.regionBezierControls = this.regionBezierControls.mapPoints(movePoint);
     }
 
     /**
@@ -481,7 +481,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         this.corner = scalePoint(this);
         this.regionRect = scaleRect(this);
         this.regionPoints = this.regionPoints.map(scalePoint);
-        this.regionBezierControls = this.regionBezierControls.scale(scalePoint);
+        this.regionBezierControls = this.regionBezierControls.mapPoints(scalePoint);
     }
 
     /**

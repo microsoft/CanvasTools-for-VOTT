@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.3.1
+* Add map and mapPoints functions to CubicBezierIndex class.
+  * deprecate scale/move functions, replaced with mapPoints function
+* Add map function to CubicBezierControl class.
+
 ### 2.3.0
 * Add an `enablePathRegions` editor configuration to enable/disable path region types (Bezier curve support).
 ```js
