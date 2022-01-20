@@ -70,15 +70,14 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         height: number,
         points: Point2D[]
     ): RegionData {
-        const region = new RegionData(
+        return new RegionData(
             x,
             y,
             width,
             height,
             points.map((p) => new Point2D(p.x, p.y)),
             RegionDataType.Polygon
-        );
-        return region;
+        )
     }
 
     /**
@@ -103,7 +102,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         points: IPoint2D[],
         bezierControls: Record<number, ICubicBezierControl>
     ): RegionData {
-        const region = new RegionData(
+        return new RegionData(
             x,
             y,
             width,
@@ -111,8 +110,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
             points.map((p) => new Point2D(p.x, p.y)),
             RegionDataType.Path,
             CubicBezierIndex.buildFromJSON(bezierControls)
-        );
-        return region;
+        )
     }
 
     /**
@@ -162,12 +160,15 @@ export class RegionData implements IRegionData, IMovable, IResizable {
         this.regionPoints = points ?? [];
         this.regionBezierControls = new CubicBezierIndex(bezierControls);
         this.regionType = type ?? RegionDataType.Point;
+        if (this.regionPoints.length) {
+            this.resetBBox();
+        }
     }
 
     /**
      * Gets the `x`-coordinate of the region
      */
-     public get x(): number {
+    public get x(): number {
         return this.corner.x;
     }
 
@@ -595,7 +596,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     /**
      * _deleteBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
      */
-     private _deleteBezierControls(index: number | number[]) {
+    private _deleteBezierControls(index: number | number[]) {
         const delIndexes = Array.isArray(index) ? index : [index];
         delIndexes.forEach((i) => delete this.regionBezierControls[i]);
     }
@@ -603,7 +604,7 @@ export class RegionData implements IRegionData, IMovable, IResizable {
     /**
      * _setBezierControls does not update the BBox, to allow code re-use with minimum necessary BBox recalculations.
      */
-     private _setBezierControls(controls: Record<number, ICubicBezierControl>) {
+    private _setBezierControls(controls: Record<number, ICubicBezierControl>) {
         const lineCount = this.getLineSegmentCount();
         Object.entries(controls).forEach(([index, control]) => {
             const iIndex = Number(index);
