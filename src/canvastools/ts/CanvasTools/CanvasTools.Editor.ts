@@ -3,7 +3,7 @@ import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
-import { ZoomData, ZoomDirection, ZoomManager, ZoomProperties, ZoomType } from "./Core/ZoomManager";
+import { CursorPosition, ZoomData, ZoomDirection, ZoomManager, ZoomProperties, ZoomType } from "./Core/ZoomManager";
 import { RegionManipulationFunction } from "./Interface/IRegionCallbacks";
 import { RegionSelectionFunction, RegionUpdateFunction } from "./Interface/IRegionsManagerCallbacks";
 import {
@@ -43,6 +43,54 @@ type ToolbarIconDescription =
  * Wraps internal CanvasTools components into one Editor experience.
  */
 export class Editor {
+
+    /**
+     * A proxy wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
+     * `FilterPipeline` (`FP`).
+     * @remarks As of now those apis do not overlap, so all methods/properties might be mapped from unified API.
+     */
+    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager {
+        return this.mergedAPI;
+    }
+
+    /**
+     * Short reference to the `RegionsManager` component.
+     */
+    public get RM(): RegionsManager {
+        return this.regionsManager;
+    }
+
+    /**
+     * Short reference to the `AreaSelector` component.
+     */
+    public get AS(): AreaSelector {
+        return this.areaSelector;
+    }
+
+    /**
+     * Short reference to the `FilterPipeline` component.
+     */
+    public get FP(): FilterPipeline {
+        return this.filterPipeline;
+    }
+
+    /**
+     * Short reference to the `RegionsManager` component.
+     */
+    public get ZM(): ZoomManager {
+        return this.zoomManager;
+    }
+
+    /**
+     * Set polygon selection to be in add/remove points mode on anchors
+     */
+    public set isModifyRegionOnlyMode(value: boolean) {
+        ConfigurationManager.isModifyRegionOnlyMode = value;
+    }
+
+    public get isModifyRegionOnlyMode() {
+        return ConfigurationManager.isModifyRegionOnlyMode;
+    }
     /**
      * The toolbar icons preset with all available features.
      */
@@ -345,15 +393,6 @@ export class Editor {
     public autoResize: boolean = true;
 
     /**
-     * A proxy wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
-     * `FilterPipeline` (`FP`).
-     * @remarks As of now those apis do not overlap, so all methods/properties might be mapped from unified API.
-     */
-    public get api(): Editor & RegionsManager & AreaSelector & FilterPipeline & ZoomManager {
-        return this.mergedAPI;
-    }
-
-    /**
      * Callback for `RegionsManager` called when some region is selected or unselected.
      */
     public onRegionSelected: RegionSelectionFunction;
@@ -640,13 +679,13 @@ export class Editor {
             this.filterPipeline = new FilterPipeline();
         }
 
-        // Init zoom manager
+        // Init zoom manager 
         const initZoomCallbacks: IZoomCallbacks = {
-            onZoomingOut: () => {
-                this.onZoom(ZoomDirection.Out);
+            onZoomingOut: (cursorPos?: CursorPosition) => {
+                this.onZoom(ZoomDirection.Out, undefined, cursorPos);
             },
-            onZoomingIn: () => {
-                this.onZoom(ZoomDirection.In);
+            onZoomingIn: (cursorPos?: CursorPosition) => {
+                this.onZoom(ZoomDirection.In, undefined, cursorPos);
             },
             getZoomLevel: () => {
                 return this.zoomManager.getZoomData().currentZoomScale;
@@ -856,45 +895,6 @@ export class Editor {
     }
 
     /**
-     * Short reference to the `RegionsManager` component.
-     */
-    public get RM(): RegionsManager {
-        return this.regionsManager;
-    }
-
-    /**
-     * Short reference to the `AreaSelector` component.
-     */
-    public get AS(): AreaSelector {
-        return this.areaSelector;
-    }
-
-    /**
-     * Short reference to the `FilterPipeline` component.
-     */
-    public get FP(): FilterPipeline {
-        return this.filterPipeline;
-    }
-
-    /**
-     * Short reference to the `RegionsManager` component.
-     */
-    public get ZM(): ZoomManager {
-        return this.zoomManager;
-    }
-
-    /**
-     * Set polygon selection to be in add/remove points mode on anchors
-     */
-    public set isModifyRegionOnlyMode(value: boolean) {
-        ConfigurationManager.isModifyRegionOnlyMode = value;
-    }
-
-    public get isModifyRegionOnlyMode() {
-        return ConfigurationManager.isModifyRegionOnlyMode;
-    }
-
-    /**
      * Scales the `RegionData` object from frame to source size.
      * @param regionData - The `RegionData` object.
      * @param sourceWidth - [Optional] The source width.
@@ -969,7 +969,11 @@ export class Editor {
      * and a scroll bar needs to appear.
      * @param zoomType - A type that indicates whether we are zooming in or out.
      */
-    private onZoom(zoomType: ZoomDirection, newScale?: number): void {
+    private onZoom(
+        zoomType: ZoomDirection,
+        newScale?: number,
+        cursorPos?: CursorPosition
+    ): void {
         if (!this.zoomManager.isZoomEnabled) {
             throw new Error("Zoom feature is not enabled");
         }
@@ -980,7 +984,7 @@ export class Editor {
             const scaledFrameHeight = (this.frameHeight / zoomData.previousZoomScale) * zoomData.currentZoomScale;
             this.frameWidth = scaledFrameWidth;
             this.frameHeight = scaledFrameHeight;
-            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight, zoomData);
+            this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight, zoomData, cursorPos);
 
             // area selector updates after zoom
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
@@ -1015,7 +1019,12 @@ export class Editor {
     /**
      * Helper function to zoom the editor to given scale.
      */
-    private zoomEditorToScale(scaledFrameWidth: number, scaledFrameHeight: number, zoomData: ZoomData): void {
+    private zoomEditorToScale(
+        scaledFrameWidth: number,
+        scaledFrameHeight: number,
+        zoomData: ZoomData,
+        cursorPos?: CursorPosition
+    ): void {
         if (!this.editorContainerDiv && !this.editorContainerDiv.offsetWidth) {
             this.editorContainerDiv = document.getElementsByClassName("CanvasToolsContainer")[0] as HTMLDivElement;
             this.editorDiv = document.getElementsByClassName("CanvasToolsEditor")[0] as HTMLDivElement;
@@ -1089,13 +1098,49 @@ export class Editor {
                 // get the current center of the viewport once its is scaled based on zoom data
                 const zoomedCenterInView = {
                     x: (currentCenterInView.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
-                    y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                    y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale
                 };
 
                 // get the difference between the expected scaled viewport center and current viewport center
                 const expectedScrollPosDifference = {
                     left: zoomedCenterInView.x - currentCenterInView.x,
                     top: zoomedCenterInView.y - currentCenterInView.y,
+                };
+
+                // get the expected scaled scroll position
+                const expectedScrollPos = {
+                    left: currentScrollPos.left + expectedScrollPosDifference.left,
+                    top: currentScrollPos.top + expectedScrollPosDifference.top,
+                };
+
+                this.editorContainerDiv.scrollLeft = expectedScrollPos.left;
+                this.editorContainerDiv.scrollTop = expectedScrollPos.top;
+            }
+
+            // when zooming is based on cursor position
+            if (this.zoomManager.zoomType === ZoomType.CursorCenter && cursorPos) {
+                // get the current scroll position
+                const currentScrollPos = {
+                    left: this.editorContainerDiv.scrollLeft,
+                    top: this.editorContainerDiv.scrollTop,
+                };
+
+                // get current mouse pos
+                const mousePos = {
+                    x: cursorPos.x,
+                    y: cursorPos.y
+                }
+
+                // get scaled mouse pos after zoom
+                const scaledMousePos = {
+                    x: (mousePos.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                    y: (mousePos.y / zoomData.previousZoomScale) * zoomData.currentZoomScale
+                }
+
+                 // get the difference between the expected scaled viewport center and current viewport center
+                 const expectedScrollPosDifference = {
+                    left: scaledMousePos.x - mousePos.x,
+                    top: scaledMousePos.y - mousePos.y,
                 };
 
                 // get the expected scaled scroll position

@@ -1,6 +1,6 @@
-import { ZoomData } from "../Core/ZoomManager";
+import { CursorPosition, ZoomData } from "../Core/ZoomManager";
 
-export type ZoomFunction = () => void;
+export type ZoomFunction = (cursorPos?: CursorPosition) => void;
 export type ZoomUpdateFunction = (zoomData: ZoomData) => void;
 /**
  * Defines a collection of callbacks passed to the `ZoomManager` constructor.
