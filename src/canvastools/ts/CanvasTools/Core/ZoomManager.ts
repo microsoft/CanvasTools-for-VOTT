@@ -16,6 +16,14 @@ export interface ZoomProperties {
 }
 
 /**
+ * x and y are coordinates of cursor position on the image relative to zoomed/scaled image
+ */
+export interface CursorPosition {
+    x: number;
+    y: number;
+}
+
+/**
  * Enum indicating zoom behavior
  */
 export enum ZoomDirection {
@@ -36,6 +44,9 @@ export enum ZoomType {
     // This will zoom in/out based on the center of the portion of image currently visible
     // or view port of editor container
     ViewportCenter,
+
+    // This will zoom in/out based on the position of the cursor on the image
+    CursorCenter
 }
 
 /**
@@ -112,7 +123,7 @@ export class ZoomManager {
     /**
      * The factor or scale at which the zoom in / zoom out works incrementally.
      */
-    private zoomScale: number = 0.5;
+    private zoomScale: number = 0.1;
 
     /**
      * This holds the current scale at which the image is zoomed at.

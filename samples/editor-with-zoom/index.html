@@ -11,7 +11,7 @@
     <div id="canvasToolsDiv">
         <div id="toolbarDiv">
         </div>
-        <div id="selectionDiv">
+        <div id="selectionDiv" onmousewheel="onWheelCapture(event)">
             <div id="editorDiv"></div>
         </div>
     </div>
@@ -69,16 +69,16 @@
                 title: "Snow"
             }, 
         ];
-
+    var editor;
     document.addEventListener("DOMContentLoaded", (e) => {
         // Get references for editor and toolbar containers
         const editorContainer = document.getElementById("editorDiv");
         const toolbarContainer = document.getElementById("toolbarDiv");
 
         // Init the editor with toolbar.
-        const editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
+        editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
             isZoomEnabled: true,
-            zoomType: 2
+            zoomType: 3
         }).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.RectToolbarSet, "./../shared/media/icons/");
 
@@ -177,6 +177,8 @@
             return tags;
         };
         
+
+        
         let imageIndex = 0;
         // Init images selector
         initImageSelect(images, (index, path) => {
@@ -260,6 +262,44 @@
             onReady(e.target);                
         });
         image.src = path;
+    }
+
+    function onWheelCapture(e) {
+        if (!e.ctrlKey && !e.shiftKey && e.altKey && editor) {
+            const cursorPos = getCursorPos(e);
+            if (e.deltaY < 0) {
+                editor.ZM.callbacks.onZoomingIn(cursorPos);
+            } else if (e.deltaY > 0) {
+                editor.ZM.callbacks.onZoomingOut(cursorPos);
+            }
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }
+
+    function getCursorPos(e) {
+        const editorContainer = document.getElementsByClassName("CanvasToolsEditor")[0];
+        var containerPos, x = 0, y = 0;
+        e = e || window.event;
+        /*get the x and y positions of the container:*/
+        containerPos = editorContainer.getBoundingClientRect();
+
+        /*get the x and y positions of the image:*/
+        var editorStyles = window.getComputedStyle(editorContainer);
+        var imagePos = {
+            left: containerPos.left + parseFloat(editorStyles.paddingLeft),
+            top: containerPos.top + parseFloat(editorStyles.paddingTop)
+        };
+
+
+        /*calculate the cursor's x and y coordinates, relative to the image:*/
+        x = e.pageX - imagePos.left;
+        y = e.pageY - imagePos.top;
+        /*consider any page scrolling:*/
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        return {x : x, y : y};
     }
 </script>
 

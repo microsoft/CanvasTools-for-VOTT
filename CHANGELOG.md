@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.3.1
+* Added a new ZoomType `CursorCenter` which allows users to set the zoom around cursor position.
+
 ### 2.3.0
 * Add an `enablePathRegions` editor configuration to enable/disable path region types (Bezier curve support).
 ```js
