@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.3.2
+* Expose getters to frameWidth and frameHeight on `Editor`
+
 ### 2.3.1
 * Added a new ZoomType `CursorCenter` which allows users to set the zoom around cursor position.
 
