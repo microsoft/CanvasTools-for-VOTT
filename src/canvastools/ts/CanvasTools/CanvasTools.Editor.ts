@@ -91,6 +91,14 @@ export class Editor {
     public get isModifyRegionOnlyMode() {
         return ConfigurationManager.isModifyRegionOnlyMode;
     }
+
+    /**
+     * Get the frame width and frame height
+     */
+    public get getFrameSize(): [number, number] {
+        return [this.frameWidth, this.frameHeight];
+    }
+
     /**
      * The toolbar icons preset with all available features.
      */
@@ -515,12 +523,12 @@ export class Editor {
     /**
      * The current frame width.
      */
-    private frameWidth: number;
+     private frameWidth: number;
 
-    /**
-     * The current frame height.
-     */
-    private frameHeight: number;
+     /**
+      * The current frame height.
+      */
+     private frameHeight: number;
 
     /**
      * Creates a new `Editor` in specified div-container.
