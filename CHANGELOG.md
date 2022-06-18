@@ -1,5 +1,8 @@
 ## Changelog
 
+### 2.3.3
+* Allow the user to run a callback for each region in the canvas
+
 ### 2.3.2
 * Expose getters to frameWidth and frameHeight on `Editor`
 

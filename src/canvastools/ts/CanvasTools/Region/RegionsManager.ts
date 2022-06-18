@@ -325,6 +325,16 @@ export class RegionsManager {
     }
 
     /**
+     * Allows user to run a function for all the regions in the canvas
+     * @param callBack a function that accepts a region Object
+     */
+    public forEachRegion(
+        callBack: (region: Region) => void
+    ): void {
+        this.regions.forEach(callBack);
+    }
+
+    /**
      * Returns a collection of selected regions.
      */
     public getSelectedRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
