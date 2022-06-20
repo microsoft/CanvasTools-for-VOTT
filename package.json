@@ -5,7 +5,7 @@
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
   "scripts": {
-    "bundle-lib": "cpx ./src/canvastools/{icons,css}/* ./lib/ && cpx ./types/**/*.d.ts ./lib/js/ && tsc --project ./tsconfig.bundle.json",
+    "bundle-lib": "cpx \"./src/canvastools/{icons,css}/*\" \"./lib/\" && cpx ./types/**/*.d.ts ./lib/js/ && tsc --project ./tsconfig.bundle.json",
     "prepare": "npm run clean-dist && npm run clean-lib && npm run bundle-lib && npm run webpack-dist",
     "webpack-dist-prod": "webpack --config webpack.config.js --env.mode=prod",
     "webpack-dist-prod-min": "webpack --config webpack.config.js --env.mode=prod-min",
