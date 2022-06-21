@@ -73,6 +73,5 @@ export class RectElement extends Element implements IPoint2D {
      */
     private buildUIElements() {
         this.node = this.paper.rect(0, 0, this.rect.width, this.rect.height);
-
     }
 }

@@ -22,6 +22,31 @@
             <select id="imageSelect">
             </select>
         </div>
+        <div class="btn swapZIndex">Press For brush</div>
+        <div>
+            <label for="brushModeSelect" >Choose brush type: </label>
+            <select id="brushModeSelect">
+                <option value="brush">Brush</option>
+                <option value="eraser">Eraser</option>
+            </select>
+        </div>
+        <div>
+            <label for="brushSizeSelect" >Choose brush/eraser size: </label>
+            <select id="brushSizeSelect">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <div>
+            <label for="tagColorSelect" >Choose color: </label>
+            <select id="tagColorSelect">
+                <option value="#ff0000">red</option>
+                <option value="#00ff00">green</option>
+                <option value="#0000ff">blue</option>
+            </select>
+        </div>
     </div>
 </body>
 <script src="./../shared/js/ct.js"></script>
@@ -63,12 +88,19 @@
         ];
 
     document.addEventListener("DOMContentLoaded", (e) => {
+
+        let brushProps = {
+            brushSize: 20,
+            color: '#ff0000',
+            mode: 'brush'
+        };
+
         // Get references for editor and toolbar containers
         const editorContainer = document.getElementById("editorDiv");
         const toolbarContainer = document.getElementById("toolbarDiv");
 
         // Init the editor with toolbar.
-        const editor = new CanvasTools.Editor(editorContainer).api;
+        const editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, undefined, brushProps).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
 
         let incrementalRegionID = 100;
@@ -180,7 +212,50 @@
         loadImage(images[imageIndex].path, (image) => {
             editor.addContentSource(image);
         });
+
+        swapIndex();
+
+        initBrushModeSelect((value) => {
+            brushProps = {
+                brushSize: brushProps.brushSize,
+                color: brushProps.color,
+                mode: value
+            };
+            editor.setBrushProperties(brushProps);
+        });
+
+        initBrushSizeSelect((value) => {
+            brushProps = {
+                brushSize: value,
+                color: brushProps.color,
+                mode: brushProps.mode
+            }
+            editor.setBrushProperties(brushProps);
+        });
+
+        initTagColorSelect((value) => {
+            brushProps = {
+                brushSize: brushProps.brushSize,
+                color: value,
+                mode: brushProps.mode
+            }
+            editor.setBrushProperties(brushProps);
+        });
     });
+
+    function swapIndex() {
+        let flip = true;
+        const swap = document.getElementsByClassName("swapZIndex")[0];
+        const svgElement = document.querySelector(".CanvasToolsEditor svg");
+        const konvaElement = document.querySelector(".CanvasToolsEditor #konvaContainer");
+        swap.addEventListener("click", (e) => {
+            const svgIndex = flip ? 99 : 101;
+            const konvaIndex = flip ? 101 : 99;
+            svgElement.style["z-index"] = svgIndex;
+            konvaElement.style["z-index"] = konvaIndex;
+            flip = !flip;
+        });
+    }
 
     // Builds select element using provided list of images 
     function initImageSelect(images, onSelect) {
@@ -199,6 +274,31 @@
             if (index >= 0 && index < images.length) {
                 onSelect(index, images[index].path);
             }
+        });
+    }
+
+    function initBrushModeSelect(onSelect) {
+        var brushModeSelect = document.getElementById("brushModeSelect");
+        brushModeSelect.selectedIndex = 0;
+
+        brushModeSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
+        });
+    }
+
+    function initBrushSizeSelect(onSelect) {
+        var brushSizeSelect = document.getElementById("brushSizeSelect");
+        brushSizeSelect.selectedIndex = 3;
+        brushSizeSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
+        });
+    }
+
+    function initTagColorSelect(onSelect) {
+        var tagColorSelect = document.getElementById("tagColorSelect");
+        tagColorSelect.selectedIndex = 0;
+        tagColorSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
         });
     }
 

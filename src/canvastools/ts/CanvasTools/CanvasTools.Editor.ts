@@ -1,3 +1,6 @@
+import Konva from "konva";
+import { Stage } from "konva/lib/Stage";
+
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
@@ -19,6 +22,12 @@ import { RegionsManager } from "./Region/RegionsManager";
 import { AreaSelector } from "./Selection/AreaSelector";
 import { Toolbar } from "./Toolbar/Toolbar";
 import { ToolbarItemType } from "./Toolbar/ToolbarIcon";
+
+interface BrushSegmentation {
+    brushSize: number;
+    color: string;
+    mode: "brush" | "eraser"
+}
 
 /**
  * Internal type to describe toolbar presets
@@ -496,6 +505,21 @@ export class Editor {
     private contentCanvas: HTMLCanvasElement;
 
     /**
+     * Reference to the host konva stage element.
+     */
+     private konvaStage: Stage;
+
+    /**
+     * Reference to the host konva stage element.
+     */
+    private selectedRegionId: string;
+
+    /**
+     * brush properties
+     */
+    private brushProperties: BrushSegmentation;
+
+    /**
      * Reference to the host div element (contains SVG and Canvas elements).
      */
     private editorDiv: HTMLDivElement;
@@ -582,11 +606,20 @@ export class Editor {
         areaSelector?: AreaSelector,
         regionsManager?: RegionsManager,
         filterPipeline?: FilterPipeline,
-        zoomProperties?: ZoomProperties
+        zoomProperties?: ZoomProperties,
+        brushProperties?: BrushSegmentation
     ) {
-        // Create SVG Element
+        // create canvas that contains image
         this.contentCanvas = this.createCanvasElement();
+        // Create SVG Element
         this.editorSVG = this.createSVGElement();
+        // const svgContainerDiv = this.createDivElement();
+        // svgContainerDiv.append(this.editorSVG);
+
+        // for brush/konva
+        this.brushProperties = brushProperties;
+        const brushContainerDiv = this.createDivElement();
+        brushContainerDiv.setAttribute("id", "konvaContainer");
 
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
@@ -596,7 +629,11 @@ export class Editor {
         this.editorDiv.classList.add("CanvasToolsEditor");
 
         this.editorDiv.append(this.contentCanvas);
+
         this.editorDiv.append(this.editorSVG);
+
+        this.editorDiv.append(brushContainerDiv);
+
         this.editorContainerDiv.append(this.editorDiv);
 
         // Init regionsManager
@@ -818,6 +855,14 @@ export class Editor {
         this.toolbar.select(activeSelector);
     }
 
+    public setBrushProperties(brushProperties: BrushSegmentation) {
+        this.brushProperties = {
+            color: brushProperties.color,
+            mode: brushProperties.mode,
+            brushSize: brushProperties.brushSize
+        };
+    }
+
     /**
      * Updates the content source for the editor.
      * @param source - Content source.
@@ -854,6 +899,8 @@ export class Editor {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
                 this.handleZoomAfterContentUpdate();
+
+                this.handleKonvaAfterContentUpdate();
             });
     }
 
@@ -972,6 +1019,214 @@ export class Editor {
     }
 
     /**
+     * Internal helper to initialize brush segmentation layout
+     */
+    private initializeBrushSegmentation(): void {
+        const style = getComputedStyle(this.editorDiv);
+        const currentDimensions = {
+            width: parseInt(style.width, undefined),
+            height: parseInt(style.height, undefined)
+        };
+        const stage = new Konva.Stage({
+            container: "konvaContainer",
+            width: currentDimensions.width,
+            height: currentDimensions.height
+        });
+
+        this.konvaStage = stage;
+        
+        // const imagelayer = new Konva.Layer();
+        const canvaslayer = new Konva.Layer();
+        // stage.add(imagelayer);
+        stage.add(canvaslayer);
+
+        // then we are going to draw into special canvas element
+        // const canvas = document.createElement('canvas');
+        // canvas.width = stage.width();
+        // canvas.height = stage.height();
+
+        // created canvas we can add to layer as "Konva.Image" element
+        // const image = new Konva.Image({
+        //     image: canvas,
+        //     x: 0,
+        //     y: 0,
+        //     width: stage.width(),
+        //     height: stage.height()
+        // });
+        // canvaslayer.add(image);
+
+        // Good. Now we need to get access to context element
+        // const context = canvas.getContext('2d');
+        // context.strokeStyle = '#df4b26';
+        // context.lineJoin = 'round';
+        // context.lineWidth = 5;
+
+        let isPaint = false;
+        let lastPointerPosition;
+        const mode = this.brushProperties.mode;
+        let currentLine;
+        let previousLine;
+
+        // now we need to bind some events
+        // we need to start drawing on mousedown
+        // and stop drawing on mouseup
+        /*stage.on('mousedown touchstart', (evt) => {
+            console.log("from mousedown konva");
+            isPaint = true;
+            lastPointerPosition = stage.getPointerPosition();
+            evt.cancelBubble = true;
+            evt.currentTarget.preventDefault();
+        });
+
+        // will it be better to listen move/end events on the window?
+
+        stage.on('mouseup touchend', (evt) => {
+            isPaint = false;
+            evt.cancelBubble = true;
+            evt.currentTarget.preventDefault();
+        });
+
+        // and core function - drawing
+        stage.on('mousemove touchmove', (evt) => {
+            if (!isPaint) {
+                return;
+            }
+
+            if (mode === 'brush') {
+                context.globalCompositeOperation = 'source-over';
+            }
+            // if (mode === 'eraser') {
+            //     context.globalCompositeOperation = 'destination-out';
+            // }
+            context.beginPath();
+
+            let localPos = {
+                x: lastPointerPosition.x - image.x(),
+                y: lastPointerPosition.y - image.y(),
+            };
+            context.moveTo(localPos.x, localPos.y);
+            const pos = stage.getPointerPosition();
+            localPos = {
+                x: pos.x - image.x(),
+                y: pos.y - image.y(),
+            };
+            context.lineTo(localPos.x, localPos.y);
+            context.closePath();
+            context.stroke();
+
+            lastPointerPosition = pos;
+            // redraw manually
+            canvaslayer.batchDraw();
+            evt.cancelBubble = true;
+            evt.currentTarget.preventDefault();
+        });*/
+
+        
+        // saving data POC
+        // const targetStage = e.target.getStage();
+        // const targetlayer: Konva.Layer = e.target.getLayer();
+        // const regions = targetlayer?.children;
+        // console.log(targetStage);
+        // console.log(targetlayer);
+        // console.log(regions);
+        // { pixelRatio: nw / image.stageWidth }
+        // take care of any transformations applied
+        // resize to original size
+        // if (targetlayer) {
+        //     const canvas = targetlayer?.toCanvas();
+        //     const ctx = canvas?.getContext("2d");
+
+        //     // get the resulting raw data and encode into RLE format
+        //     const data = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
+
+        //     for (let i = data.data.length / 4; i--; ) {
+        //         data.data[i * 4] = data.data[i * 4 + 1] = data.data[i * 4 + 2] = data.data[i * 4 + 3];
+        //     }
+
+        //     console.log(data.data);
+        // }
+
+        // canvaslayer.on('click', (e) => {
+        //     e.target.opacity(1);
+        //     // set others to 0.7 ?
+        // });
+
+        this.selectedRegionId = "";
+
+        stage.on('mousedown touchstart', (e) => {
+            isPaint = true;
+            const pos = stage.getPointerPosition();
+            // delete any exisitng line?
+            previousLine =  new Konva.Line({
+              globalCompositeOperation: "destination-out",
+              points: [pos.x, pos.y, pos.x, pos.y],
+              stroke: "black",
+              strokeWidth: this.brushProperties.brushSize,
+              listening: false,
+              lineCap: 'round',
+              lineJoin: 'round',
+              tension: 1,
+            });
+            canvaslayer.add(previousLine);
+
+            // form new line !?
+            currentLine = new Konva.Line({
+              opacity: 0.5,
+              stroke: this.brushProperties.color,
+              strokeWidth: this.brushProperties.brushSize,
+              globalCompositeOperation:
+                mode === this.brushProperties.mode ? 'source-over' : 'destination-out',
+              // round cap for smoother lines
+              lineCap: 'round',
+              lineJoin: 'round',
+              tension: 1,
+              // add point twice, so we have some drawings even on a simple click
+              points: [pos.x, pos.y, pos.x, pos.y],
+            });
+
+            currentLine.on("click", (evt) => {
+                console.log(evt);
+                console.log(evt.target);
+                this.selectedRegionId = evt.target.id;
+                evt.target.opacity(1);
+                evt.cancelBubble = true;
+                evt.target.preventDefault();
+            });
+            
+            canvaslayer.add(currentLine);
+            e.cancelBubble = true;
+            e.evt.preventDefault();
+          });
+    
+          stage.on('mouseup touchend', (e) => {
+            isPaint = false;
+            e.cancelBubble = true;
+            e.evt.preventDefault();
+          });
+    
+          // and core function - drawing
+          stage.on('mousemove touchmove', (e) => {
+            if (!isPaint) {
+              return;
+            }
+    
+            // prevent scrolling on touch devices
+            e.evt.preventDefault();
+    
+            const pos = stage.getPointerPosition();
+            // delete
+            const newPointsToRemove = previousLine.points().concat([pos.x, pos.y]);
+            previousLine.points(newPointsToRemove);
+
+            // add
+            const newPoints = currentLine.points().concat([pos.x, pos.y]);
+            currentLine.points(newPoints);
+            e.cancelBubble = true;
+            e.evt.preventDefault();
+          });
+    }   
+
+    /**
      * Internal helper to set the editor container size properties.
      * Necessary for zoom feature, where the internal editor may container bigger content,
      * and a scroll bar needs to appear.
@@ -1022,6 +1277,10 @@ export class Editor {
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
         }
+    }
+    
+    private handleKonvaAfterContentUpdate() {
+        this.initializeBrushSegmentation();
     }
 
     /**
@@ -1175,5 +1434,105 @@ export class Editor {
                 this.handleZoomAfterContentUpdate();
             }
         });
+
+        // test segmentation brush
+        // const strokeWidth = 16;
+        // let bufferSize;
+
+        // const svgElement = this.editorSVG;
+        // const rect = svgElement.getBoundingClientRect();
+        // console.log(rect);
+        // let path = null;
+        // let strPath;
+        // let buffer = []; // Contains the last positions of the mouse cursor
+
+        // svgElement.addEventListener("mousedown", (e) => {
+        //     bufferSize = 8;
+        //     path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        //     path.setAttribute("fill", "none");
+        //     path.setAttribute("stroke", "#000");
+        //     path.setAttribute("stroke-width", strokeWidth);
+        //     buffer = [];
+        //     const pt = getMousePosition(e);
+        //     console.log(pt);
+        //     appendToBuffer(pt);
+        //     strPath = "M" + pt.x + " " + pt.y;
+        //     path.setAttribute("d", strPath);
+        //     svgElement.appendChild(path);
+        // });
+
+        // svgElement.addEventListener("mousemove", (e) => {
+        //     if (path) {
+        //         appendToBuffer(getMousePosition(e));
+        //         updateSvgPath();
+        //     }
+        // });
+
+        // svgElement.addEventListener("mouseup", () => {
+        //     if (path) {
+        //         path = null;
+        //     }
+        // });
+
+        // const getMousePosition = (e) => {
+        //     return {
+        //         x: e.pageX - rect.left,
+        //         y: e.pageY - rect.top/2 // fake re-test
+        //     }
+        //     // return {
+        //     //     x: e.pageX,
+        //     //     y: e.pageY
+        //     // }
+        // };
+
+        // const appendToBuffer = (pt) => {
+        //     buffer.push(pt);
+        //     while (buffer.length > bufferSize) {
+        //         buffer.shift();
+        //     }
+        // };
+
+        // // Calculate the average point, starting at offset in the buffer
+        // const getAveragePoint = (offset) => {
+        //     const len = buffer.length;
+        //     if (len % 2 === 1 || len >= bufferSize) {
+        //         let totalX = 0;
+        //         let totalY = 0;
+        //         let pt;
+        //         let i;
+        //         let count = 0;
+        //         for (i = offset; i < len; i++) {
+        //             count++;
+        //             pt = buffer[i];
+        //             totalX += pt.x;
+        //             totalY += pt.y;
+        //         }
+        //         return {
+        //             x: totalX / count,
+        //             y: totalY / count
+        //         }
+        //     }
+        //     return null;
+        // };
+
+        // const updateSvgPath = () => {
+        //     let pt = getAveragePoint(0);
+
+        //     if (pt) {
+        //         // Get the smoothed part of the path that will not change
+        //         strPath += " L" + pt.x + " " + pt.y;
+
+        //         // Get the last part of the path (close to the current mouse position)
+        //         // This part will change if the mouse moves again
+        //         let tmpPath = "";
+        //         for (let offset = 2; offset < buffer.length; offset += 2) {
+        //             pt = getAveragePoint(offset);
+        //             tmpPath += " L" + pt.x + " " + pt.y;
+        //         }
+
+        //         // Set the complete current path coordinates
+        //         path.setAttribute("d", strPath + tmpPath);
+        //     }
+        // };
     }
 }
