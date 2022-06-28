@@ -311,10 +311,10 @@ export class RegionsManager {
      * @param shouldShow whether or not the regions found should be marked as visible or invisible
      */
     public updateRegionVisibility(
-        shouldHideThisRegion: (tagsDescriptor: TagsDescriptor) => boolean,
+        shouldHideThisRegion: (tagsDescriptor: TagsDescriptor, region?: Region) => boolean,
         shouldShow: boolean): void {
         this.regions.forEach((region) => {
-            if (shouldHideThisRegion(region.tags)) {
+            if (shouldHideThisRegion(region.tags, region)) {
                 if (shouldShow) {
                     region.show();
                 } else {
@@ -322,16 +322,6 @@ export class RegionsManager {
                 }
             }
         });
-    }
-
-    /**
-     * Allows user to run a function for all the regions in the canvas
-     * @param callBack a function that accepts a region Object
-     */
-    public forEachRegion(
-        callBack: (region: Region) => void
-    ): void {
-        this.regions.forEach(callBack);
     }
 
     /**

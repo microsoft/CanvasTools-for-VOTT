@@ -1,7 +1,15 @@
 ## Changelog
 
 ### 2.3.3
-* Allow the user to run a callback for each region in the canvas
+* `RegionManager.updateRegionVisibility()` now accepts callbacks that can optionally accept region object in addition to tagsDescriptor.
+```js
+updateRegionVisibility((tag, region) => {
+      if (region === undefined) {
+        return false;
+      }
+      return true;
+    }, true);
+```
 
 ### 2.3.2
 * Expose getters to frameWidth and frameHeight on `Editor`
