@@ -306,15 +306,17 @@ export class RegionsManager {
 
     /**
      * Allows for easy toggling of visibility of regions matching a predicate
-     * @param shouldHideThisRegion the predicate for determining if a given `TagsDescriptor` and
-     * its corresponding region should have its visibility changed
+     * @param shouldHideThisRegion accepts a `TagsDescriptor` and a `Region` to determine
+     * if that region should have its visibility changed. 
+     * @deprecated the `tagsDescriptor` parameter will be removed from the callback signature in the
+     * upcoming release. Instead, we recommend using `tags` property from the new region parameter.
      * @param shouldShow whether or not the regions found should be marked as visible or invisible
      */
     public updateRegionVisibility(
-        shouldHideThisRegion: (tagsDescriptor: TagsDescriptor) => boolean,
+        shouldHideThisRegion: (tagsDescriptor: TagsDescriptor, region: Region) => boolean,
         shouldShow: boolean): void {
         this.regions.forEach((region) => {
-            if (shouldHideThisRegion(region.tags)) {
+            if (shouldHideThisRegion(region.tags, region)) {
                 if (shouldShow) {
                     region.show();
                 } else {
