@@ -1,11 +1,11 @@
 {
-  "name": "vott-ct",
-  "version": "2.3.3",
-  "description": "CanvasTools editor for the VoTT project",
+  "name": "vott-dot-ct",
+  "version": "0.1.0",
+  "description": "CanvasTools editor for the VoTT-dot project",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
   "scripts": {
-    "bundle-lib": "cpx \"./src/canvastools/{icons,css}/*\" \"./lib/\" && cpx ./types/**/*.d.ts ./lib/js/ && tsc --project ./tsconfig.bundle.json",
+    "bundle-lib": "cpx \"./src/canvastools/{icons,css}/*\" \"./lib/\" && cpx \"./types/**/*.d.ts\" \"./lib/js/\" && tsc --project ./tsconfig.bundle.json",
     "prepare": "npm run clean-dist && npm run clean-lib && npm run bundle-lib && npm run webpack-dist",
     "webpack-dist-prod": "webpack --config webpack.config.js --env.mode=prod",
     "webpack-dist-prod-min": "webpack --config webpack.config.js --env.mode=prod-min",
@@ -23,16 +23,16 @@
     "lint": "tslint src/**/*.ts --exclude **/*.d.ts",
     "lintfix": "tslint src/**/*.ts --exclude **/*.d.ts --fix"
   },
-  "author": "Konstantin Kichinsky",
+  "author": "Jinki Jung",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/microsoft/CanvasTools-for-VOTT.git"
+    "url": "git+https://github.com/Digital-Maritime-Consultancy/CanvasTools-for-VOTT-dot.git"
   },
   "bugs": {
-    "url": "https://github.com/microsoft/CanvasTools-for-VOTT/issues"
+    "url": "https://github.com/Digital-Maritime-Consultancy/CanvasTools-for-VOTT-dot/issues"
   },
-  "homepage": "https://github.com/microsoft/CanvasTools-for-VOTT#readme",
+  "homepage": "https://github.com/Digital-Maritime-Consultancy/CanvasTools-for-VOTT-dot#readme",
   "files": [
     "/lib",
     "/dist"
