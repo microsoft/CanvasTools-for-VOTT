@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.3.3
+* Users of `RegionManager.updateRegionVisibility()` can now supply callbacks that can optionally accept region object in addition to tagsDescriptor for the `shouldHideThisRegion` parameter.
+* NOTE: The `tagsDescriptor` parameter will be removed in upcoming release and users are recommended to use `region.tag` in the callback body instead.
+
 ### 2.3.2
 * Expose getters to frameWidth and frameHeight on `Editor`
 
