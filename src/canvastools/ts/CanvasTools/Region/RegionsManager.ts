@@ -308,7 +308,7 @@ export class RegionsManager {
      * Allows for easy toggling of visibility of regions matching a predicate
      * @param shouldHideThisRegion the predicate for determining if a given `TagsDescriptor` and
      * its corresponding region should have its visibility changed
-     * @deprecated `tagsDescriptor` parameter will be removed from the callback signature in the upcoming release.
+     * @deprecated the `tagsDescriptor` parameter will be removed from the callback signature in the upcoming release.
      * Instead, we recommend using `tags` property from the new region parameter.
      * @param shouldShow whether or not the regions found should be marked as visible or invisible
      */
