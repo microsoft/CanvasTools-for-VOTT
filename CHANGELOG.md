@@ -1,15 +1,7 @@
 ## Changelog
 
 ### 2.3.3
-* `RegionManager.updateRegionVisibility()` now accepts callbacks that can optionally accept region object in addition to tagsDescriptor.
-```js
-updateRegionVisibility((tag, region) => {
-      if (region === undefined) {
-        return false;
-      }
-      return true;
-    }, true);
-```
+* In `RegionManager.updateRegionVisibility()` users can now supply callbacks that can optionally accept region object in addition to tagsDescriptor for the `shouldHideThisRegion` parameter.
 
 ### 2.3.2
 * Expose getters to frameWidth and frameHeight on `Editor`
