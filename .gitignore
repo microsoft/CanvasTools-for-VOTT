@@ -94,3 +94,4 @@ typings/
 lib/
 dist/
 plato-report/
+.DS_Store

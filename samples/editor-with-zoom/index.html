@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/index-horizontal.css" />
     <title>CanvasTools Samples - Images Editor</title>
 </head>
 
@@ -79,8 +79,8 @@
         editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
             isZoomEnabled: true,
             zoomType: 3
-        }).api;
-        editor.addToolbar(toolbarContainer, CanvasTools.Editor.RectToolbarSet, "./../shared/media/icons/");
+        });
+        editor.addToolbar(toolbarContainer, CanvasTools.Editor.RectToolbarSet, "./../shared/media/icons/", false);
 
         let incrementalRegionID = 100;
 
@@ -88,12 +88,16 @@
         editor.onSelectionEnd = (regionData) => {
             let id = (incrementalRegionID++).toString();
 
+            const scaledRegionData = editor.scaleRegionToSourceSize(
+            regionData, 100, 100,
+            );
+            console.log(scaledRegionData);
+
             // Generate random tag
             let tags = generateRandomTagsDescriptor();            
-            editor.addRegion(id, regionData, tags);
-
+            editor.RM.addRegion(id, regionData, tags);
             console.log(`Created ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
-        };     
+        };
         
         // Log region manipulations
         editor.onRegionMoveBegin = (id, regionData) => {
@@ -106,6 +110,7 @@
             console.log(`Ended moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
         };
         editor.onRegionSelected = (id, multiSelection) => {
+            
             console.log(`Selected ${id}: multiSelection = ${multiSelection}`);
         }
         editor.onRegionDelete = (id, regionData) => {
@@ -176,8 +181,6 @@
             }
             return tags;
         };
-        
-
         
         let imageIndex = 0;
         // Init images selector

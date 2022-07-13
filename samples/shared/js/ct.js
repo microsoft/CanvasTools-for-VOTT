@@ -3423,11 +3423,13 @@ const ToolbarSeparator_1 = __webpack_require__(64);
 const ToolbarSwitchIcon_1 = __webpack_require__(65);
 const ToolbarTriggerIcon_1 = __webpack_require__(66);
 class Toolbar {
-    constructor(svgHost) {
+    constructor(svgHost, isVertical = true) {
         this.iconSpace = 8;
         this.areHotKeysEnabled = true;
+        this.isVertical = true;
         this.icons = new Array();
-        this.buildUIElements(svgHost);
+        this.isVertical = isVertical;
+        this.buildUIElements(svgHost, isVertical);
     }
     addSelector(icon, actor) {
         const newIcon = new ToolbarSelectIcon_1.ToolbarSelectIcon(this.paper, icon, (action) => {
@@ -3443,7 +3445,7 @@ class Toolbar {
         this.addIcon(newIcon);
     }
     addSeparator() {
-        const newIcon = new ToolbarSeparator_1.ToolbarSeparator(this.paper, ToolbarIcon_1.ToolbarIcon.IconWidth);
+        const newIcon = new ToolbarSeparator_1.ToolbarSeparator(this.paper, ToolbarIcon_1.ToolbarIcon.IconWidth, this.isVertical);
         this.addIcon(newIcon);
     }
     addTrigger(icon, actor) {
@@ -3476,13 +3478,13 @@ class Toolbar {
     disableHotkeys() {
         this.areHotKeysEnabled = false;
     }
-    buildUIElements(svgHost) {
+    buildUIElements(svgHost, isVertical) {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect_1.Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
         const toolbarGroup = this.paper.g();
         toolbarGroup.addClass("toolbarLayer");
-        this.recalculateToolbarSize();
+        this.recalculateToolbarSize(isVertical);
         this.backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.toolbarHeight);
         this.backgroundRect.addClass("toolbarBGStyle");
         toolbarGroup.add(this.backgroundRect);
@@ -3491,17 +3493,32 @@ class Toolbar {
         toolbarGroup.add(this.iconsLayer);
         this.subscribeToKeyboardEvents();
     }
-    recalculateToolbarSize(newIcon) {
-        if (newIcon === undefined) {
-            this.toolbarWidth = ToolbarIcon_1.ToolbarIcon.IconWidth + 2 * this.iconSpace;
-            this.toolbarHeight = this.icons.length * (ToolbarIcon_1.ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+    recalculateToolbarSize(isVertical, newIcon) {
+        if (isVertical) {
+            if (newIcon === undefined) {
+                this.toolbarWidth = ToolbarIcon_1.ToolbarIcon.IconWidth + 2 * this.iconSpace;
+                this.toolbarHeight = this.icons.length * (ToolbarIcon_1.ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+            }
+            else {
+                const width = newIcon.width + 2 * this.iconSpace;
+                if (width > this.toolbarWidth) {
+                    this.toolbarWidth = width;
+                }
+                this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
+            }
         }
         else {
-            const width = newIcon.width + 2 * this.iconSpace;
-            if (width > this.toolbarWidth) {
-                this.toolbarWidth = width;
+            if (newIcon === undefined) {
+                this.toolbarHeight = ToolbarIcon_1.ToolbarIcon.IconHeight + 2 * this.iconSpace;
+                this.toolbarWidth = this.icons.length * (ToolbarIcon_1.ToolbarIcon.IconWidth + this.iconSpace) + this.iconSpace;
             }
-            this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
+            else {
+                const height = newIcon.height + 2 * this.iconSpace;
+                if (height > this.toolbarHeight) {
+                    this.toolbarHeight = height;
+                }
+                this.toolbarWidth = this.toolbarWidth + newIcon.width + this.iconSpace;
+            }
         }
     }
     updateToolbarSize() {
@@ -3513,8 +3530,13 @@ class Toolbar {
     addIcon(newIcon) {
         this.icons.push(newIcon);
         this.iconsLayer.add(newIcon.node);
-        newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
-        this.recalculateToolbarSize(newIcon);
+        if (this.isVertical) {
+            newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
+        }
+        else {
+            newIcon.move(this.toolbarWidth + this.iconSpace, this.iconSpace);
+        }
+        this.recalculateToolbarSize(this.isVertical, newIcon);
         this.updateToolbarSize();
     }
     findIconByKey(key) {
@@ -3950,10 +3972,10 @@ class Editor {
     get getFrameSize() {
         return [this.frameWidth, this.frameHeight];
     }
-    addToolbar(container, toolbarSet, iconsPath) {
+    addToolbar(container, toolbarSet, iconsPath, isVertical = true) {
         const svg = this.createSVGElement();
         container.append(svg);
-        this.toolbar = new Toolbar_1.Toolbar(svg);
+        this.toolbar = new Toolbar_1.Toolbar(svg, isVertical);
         if (toolbarSet === null || toolbarSet === undefined) {
             toolbarSet = Editor.FullToolbarSet;
         }
@@ -8511,31 +8533,54 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSeparator = void 0;
 const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSeparator extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, width) {
+    constructor(paper, width, isVertical = true) {
         super(paper, null);
         this.buildIconUI();
-        this.resize(width, 1);
+        if (isVertical) {
+            this.resize(width, 1);
+        }
+        else {
+            this.resize(1, width);
+        }
+        this.isVertical = isVertical;
     }
     move(x, y) {
         super.move(x, y);
-        this.iconSeparator.attr({
-            x1: x,
-            x2: x + this.width,
-            y1: y,
-            y2: y,
-        });
+        if (this.isVertical) {
+            this.iconSeparator.attr({
+                x1: x,
+                x2: x + this.width,
+                y1: y,
+                y2: y,
+            });
+        }
+        else {
+            this.iconSeparator.attr({
+                x1: x,
+                x2: x,
+                y1: y,
+                y2: y + this.width,
+            });
+        }
     }
     resize(width, height) {
-        super.resize(width, 1);
-        this.iconSeparator.attr({
-            width: this.width,
-        });
+        if (this.isVertical) {
+            super.resize(width, 1);
+            this.iconSeparator.attr({
+                width: this.width,
+            });
+        }
+        else {
+            super.resize(1, height);
+            this.iconSeparator.attr({
+                height: this.height,
+            });
+        }
     }
     buildIconUI() {
         this.node = this.paper.g();
-        this.node.addClass("iconStyle");
         this.node.addClass("separator");
-        this.iconSeparator = this.paper.line(0, 0, this.width, 0);
+        this.iconSeparator = this.isVertical ? this.paper.line(0, 0, this.width, 0) : this.paper.line(0, 0, 0, this.width);
         this.node.add(this.iconSeparator);
     }
 }

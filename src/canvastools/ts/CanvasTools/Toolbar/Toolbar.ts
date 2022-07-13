@@ -23,10 +23,14 @@ export class Toolbar {
 
     private areHotKeysEnabled: boolean = true;
 
-    constructor(svgHost: SVGSVGElement) {
+    private isVertical = true;
+
+    constructor(svgHost: SVGSVGElement, isVertical: boolean = true) {
         this.icons = new Array<ToolbarIcon>();
 
-        this.buildUIElements(svgHost);
+        this.isVertical = isVertical;
+
+        this.buildUIElements(svgHost, isVertical);
     }
 
     public addSelector(icon: IToolbarIcon, actor: IconCallback) {
@@ -47,7 +51,7 @@ export class Toolbar {
     }
 
     public addSeparator() {
-        const newIcon = new ToolbarSeparator(this.paper, ToolbarIcon.IconWidth);
+        const newIcon = new ToolbarSeparator(this.paper, ToolbarIcon.IconWidth, this.isVertical);
         this.addIcon(newIcon);
     }
 
@@ -87,7 +91,7 @@ export class Toolbar {
         this.areHotKeysEnabled = false;
     }
 
-    private buildUIElements(svgHost: SVGSVGElement) {
+    private buildUIElements(svgHost: SVGSVGElement, isVertical: boolean) {
         this.baseParent = svgHost;
         this.paper = Snap(svgHost);
         this.paperRect = new Rect(svgHost.width.baseVal.value, svgHost.height.baseVal.value);
@@ -95,7 +99,7 @@ export class Toolbar {
         const toolbarGroup = this.paper.g();
         toolbarGroup.addClass("toolbarLayer");
 
-        this.recalculateToolbarSize();
+        this.recalculateToolbarSize(isVertical);
 
         this.backgroundRect = this.paper.rect(0, 0, this.toolbarWidth, this.toolbarHeight);
         this.backgroundRect.addClass("toolbarBGStyle");
@@ -108,18 +112,33 @@ export class Toolbar {
         this.subscribeToKeyboardEvents();
     }
 
-    private recalculateToolbarSize(newIcon?: ToolbarIcon) {
-        if (newIcon === undefined) {
-            this.toolbarWidth = ToolbarIcon.IconWidth + 2 * this.iconSpace;
-            this.toolbarHeight = this.icons.length * (ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
-        } else {
-            const width = newIcon.width + 2 * this.iconSpace;
-            if (width > this.toolbarWidth) {
-                this.toolbarWidth = width;
+    private recalculateToolbarSize(isVertical: boolean, newIcon?: ToolbarIcon) {
+        if (isVertical) {
+            if (newIcon === undefined) {
+                this.toolbarWidth = ToolbarIcon.IconWidth + 2 * this.iconSpace;
+                this.toolbarHeight = this.icons.length * (ToolbarIcon.IconHeight + this.iconSpace) + this.iconSpace;
+            } else {
+                const width = newIcon.width + 2 * this.iconSpace;
+                if (width > this.toolbarWidth) {
+                    this.toolbarWidth = width;
+                }
+    
+                this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
             }
-
-            this.toolbarHeight = this.toolbarHeight + newIcon.height + this.iconSpace;
+        } else {
+            if (newIcon === undefined) {
+                this.toolbarHeight = ToolbarIcon.IconHeight + 2 * this.iconSpace;
+                this.toolbarWidth = this.icons.length * (ToolbarIcon.IconWidth + this.iconSpace) + this.iconSpace;
+            } else {
+                const height = newIcon.height + 2 * this.iconSpace;
+                if (height > this.toolbarHeight) {
+                    this.toolbarHeight = height;
+                }
+    
+                this.toolbarWidth = this.toolbarWidth + newIcon.width + this.iconSpace;
+            }
         }
+        
     }
 
     private updateToolbarSize() {
@@ -133,8 +152,13 @@ export class Toolbar {
         this.icons.push(newIcon);
         this.iconsLayer.add(newIcon.node);
 
-        newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
-        this.recalculateToolbarSize(newIcon);
+        if(this.isVertical) {
+            newIcon.move(this.iconSpace, this.toolbarHeight + this.iconSpace);
+        } else {
+            newIcon.move(this.toolbarWidth + this.iconSpace, this.iconSpace);
+        }
+        
+        this.recalculateToolbarSize(this.isVertical, newIcon);
         this.updateToolbarSize();
     }
 

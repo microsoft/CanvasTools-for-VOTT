@@ -767,11 +767,11 @@ export class Editor {
      * @param toolbarSet - Icons set for the toolbar.
      * @param iconsPath - Path to the toolbar icons.
      */
-    public addToolbar(container: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string) {
+    public addToolbar(container: HTMLDivElement, toolbarSet: ToolbarIconDescription[], iconsPath: string, isVertical: boolean = true) {
         const svg = this.createSVGElement();
         container.append(svg);
 
-        this.toolbar = new Toolbar(svg);
+        this.toolbar = new Toolbar(svg, isVertical);
 
         if (toolbarSet === null || toolbarSet === undefined) {
             toolbarSet = Editor.FullToolbarSet;

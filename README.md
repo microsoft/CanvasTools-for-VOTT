@@ -18,7 +18,7 @@
 Install package from npm:
 
 ```node
-npm i vott-ct
+npm i @jinkijung/vott-dot-ct
 ```
 
 The package structure:
