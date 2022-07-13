@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ 	return __webpack_require__(__webpack_require__.s = 35);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -230,11 +230,11 @@ var ChangeEventType;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegionData = exports.RegionDataType = void 0;
-const calculateLineSegments_1 = __webpack_require__(36);
+const calculateLineSegments_1 = __webpack_require__(37);
 const RegionDataType_1 = __webpack_require__(25);
 Object.defineProperty(exports, "RegionDataType", { enumerable: true, get: function () { return RegionDataType_1.RegionDataType; } });
 const CubicBezierControl_1 = __webpack_require__(18);
-const CubicBezierIndex_1 = __webpack_require__(37);
+const CubicBezierIndex_1 = __webpack_require__(38);
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 class RegionData {
@@ -603,6 +603,7 @@ exports.RegionComponent = RegionComponent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarIcon = exports.ToolbarItemType = void 0;
+const ToolbarSelect_1 = __webpack_require__(33);
 var ToolbarItemType;
 (function (ToolbarItemType) {
     ToolbarItemType[ToolbarItemType["SELECTOR"] = 0] = "SELECTOR";
@@ -610,16 +611,9 @@ var ToolbarItemType;
     ToolbarItemType[ToolbarItemType["SEPARATOR"] = 2] = "SEPARATOR";
     ToolbarItemType[ToolbarItemType["TRIGGER"] = 3] = "TRIGGER";
 })(ToolbarItemType = exports.ToolbarItemType || (exports.ToolbarItemType = {}));
-class ToolbarIcon {
-    constructor(paper, icon) {
-        this.isSelected = false;
-        this.focused = false;
-        this.onfocusCallback = () => {
-            this.focused = true;
-        };
-        this.onfocusoutCallback = () => {
-            this.focused = false;
-        };
+class ToolbarIcon extends ToolbarSelect_1.ToolbarSelect {
+    constructor(paper, icon, onAction, action, key) {
+        super(onAction, action, key);
         this.paper = paper;
         if (icon !== undefined && icon !== null) {
             this.description = icon;
@@ -651,15 +645,12 @@ class ToolbarIcon {
         this.height = height;
     }
     select() {
+        super.select();
         this.node.addClass("selected");
-        this.isSelected = true;
     }
     unselect() {
+        super.unselect();
         this.node.removeClass("selected");
-        this.isSelected = false;
-    }
-    isFocused() {
-        return this.focused;
     }
     toggleSelection() {
         if (this.isSelected) {
@@ -2342,12 +2333,12 @@ const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(3);
 const IRegionCallbacks_1 = __webpack_require__(2);
 const ZoomManager_1 = __webpack_require__(23);
-const PathRegion_1 = __webpack_require__(39);
+const PathRegion_1 = __webpack_require__(40);
 const PointRegion_1 = __webpack_require__(27);
-const PolygonRegion_1 = __webpack_require__(47);
-const PolylineRegion_1 = __webpack_require__(50);
+const PolygonRegion_1 = __webpack_require__(48);
+const PolylineRegion_1 = __webpack_require__(51);
 const RectRegion_1 = __webpack_require__(28);
-const RegionMenu_1 = __webpack_require__(57);
+const RegionMenu_1 = __webpack_require__(58);
 class RegionsManager {
     constructor(svgHost, callbacks) {
         this.isFrozenState = false;
@@ -3046,8 +3037,8 @@ exports.DragElement = DragElement;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PointRegion = void 0;
 const Region_1 = __webpack_require__(6);
-const DragElement_1 = __webpack_require__(45);
-const TagsElement_1 = __webpack_require__(46);
+const DragElement_1 = __webpack_require__(46);
+const TagsElement_1 = __webpack_require__(47);
 class PointRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions);
@@ -3084,9 +3075,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RectRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(6);
-const AnchorsElements_1 = __webpack_require__(54);
-const DragElement_1 = __webpack_require__(55);
-const TagsElement_1 = __webpack_require__(56);
+const AnchorsElements_1 = __webpack_require__(55);
+const DragElement_1 = __webpack_require__(56);
+const TagsElement_1 = __webpack_require__(57);
 class RectRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -3140,11 +3131,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AreaSelector = void 0;
 const Rect_1 = __webpack_require__(1);
 const ISelectorSettings_1 = __webpack_require__(17);
-const PointSelector_1 = __webpack_require__(58);
-const PolygonSelector_1 = __webpack_require__(59);
-const PolylineSelector_1 = __webpack_require__(60);
-const RectCopySelector_1 = __webpack_require__(61);
-const RectSelector_1 = __webpack_require__(62);
+const PointSelector_1 = __webpack_require__(59);
+const PolygonSelector_1 = __webpack_require__(60);
+const PolylineSelector_1 = __webpack_require__(61);
+const RectCopySelector_1 = __webpack_require__(62);
+const RectSelector_1 = __webpack_require__(63);
 class AreaSelector {
     constructor(svgHost, callbacks) {
         this.isVisible = true;
@@ -3418,10 +3409,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Toolbar = void 0;
 const Rect_1 = __webpack_require__(1);
 const ToolbarIcon_1 = __webpack_require__(5);
-const ToolbarSelectIcon_1 = __webpack_require__(63);
-const ToolbarSeparator_1 = __webpack_require__(64);
-const ToolbarSwitchIcon_1 = __webpack_require__(65);
-const ToolbarTriggerIcon_1 = __webpack_require__(66);
+const ToolbarSelect_1 = __webpack_require__(33);
+const ToolbarSelectIcon_1 = __webpack_require__(64);
+const ToolbarSeparator_1 = __webpack_require__(65);
+const ToolbarSwitchIcon_1 = __webpack_require__(66);
+const ToolbarTriggerIcon_1 = __webpack_require__(67);
 class Toolbar {
     constructor(svgHost, isVertical = true) {
         this.iconSpace = 8;
@@ -3435,13 +3427,13 @@ class Toolbar {
         const newIcon = new ToolbarSelectIcon_1.ToolbarSelectIcon(this.paper, icon, (action) => {
             this.select(action);
             actor(action);
-        });
+        }, icon.action ? icon.action : undefined, icon.key ? icon.key : undefined);
         this.addIcon(newIcon);
     }
     addSwitch(icon, actor) {
         const newIcon = new ToolbarSwitchIcon_1.ToolbarSwitchIcon(this.paper, icon, (action) => {
             actor(action);
-        });
+        }, icon.action ? icon.action : undefined, icon.key ? icon.key : undefined);
         this.addIcon(newIcon);
     }
     addSeparator() {
@@ -3451,13 +3443,13 @@ class Toolbar {
     addTrigger(icon, actor) {
         const newIcon = new ToolbarTriggerIcon_1.ToolbarTriggerIcon(this.paper, icon, (action) => {
             actor(action);
-        });
+        }, icon.action ? icon.action : undefined, icon.key ? icon.key : undefined);
         this.addIcon(newIcon);
     }
     select(action) {
         this.icons.forEach((icon) => {
-            if (icon instanceof ToolbarSelectIcon_1.ToolbarSelectIcon) {
-                if (icon.description.action !== action) {
+            if (icon instanceof ToolbarSelect_1.ToolbarSelect) {
+                if (icon.action !== action) {
                     icon.unselect();
                 }
                 else {
@@ -3540,16 +3532,13 @@ class Toolbar {
         this.updateToolbarSize();
     }
     findIconByKey(key) {
-        return this.icons.find((icon) => {
-            if (icon.description !== null) {
-                return icon.description.key.includes(key);
-            }
-            return false;
-        });
+        return this.icons.find((icon) => { if (icon.key) {
+            return icon.key.includes(key);
+        } });
     }
     findIconByAction(action) {
         return this.icons.find((icon) => {
-            return icon.description !== null && icon.description.action === action;
+            return icon.action !== null && icon.action === action;
         });
     }
     findFocusedIcon() {
@@ -3590,6 +3579,47 @@ exports.Toolbar = Toolbar;
 
 /***/ }),
 /* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarSelect = void 0;
+class ToolbarSelect {
+    constructor(onAction, action, key) {
+        this.focused = false;
+        this.isSelected = false;
+        this.onfocusCallback = () => {
+            this.focused = true;
+        };
+        this.onfocusoutCallback = () => {
+            this.focused = false;
+        };
+        this.onAction = onAction;
+        this.action = action;
+        this.key = key;
+    }
+    select() {
+        this.isSelected = true;
+    }
+    unselect() {
+        this.isSelected = false;
+    }
+    activate() {
+        if (this.action) {
+            this.onAction(this.action);
+            this.select();
+        }
+    }
+    isFocused() {
+        return this.focused;
+    }
+}
+exports.ToolbarSelect = ToolbarSelect;
+
+
+/***/ }),
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3701,33 +3731,33 @@ exports.Tag = Tag;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanvasTools = void 0;
-const CanvasTools_Editor_1 = __webpack_require__(35);
+const CanvasTools_Editor_1 = __webpack_require__(36);
 const CanvasTools_Filter_1 = __webpack_require__(22);
 const Color_1 = __webpack_require__(20);
 const HSLColor_1 = __webpack_require__(14);
 const LABColor_1 = __webpack_require__(10);
-const Palette_1 = __webpack_require__(67);
+const Palette_1 = __webpack_require__(69);
 const RGBColor_1 = __webpack_require__(15);
 const XYZColor_1 = __webpack_require__(16);
 const Point2D_1 = __webpack_require__(0);
 const Rect_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(3);
-const Tag_1 = __webpack_require__(33);
-const TagsDescriptor_1 = __webpack_require__(68);
+const Tag_1 = __webpack_require__(34);
+const TagsDescriptor_1 = __webpack_require__(70);
 const ISelectorSettings_1 = __webpack_require__(17);
 const PointRegion_1 = __webpack_require__(27);
 const RectRegion_1 = __webpack_require__(28);
 const RegionsManager_1 = __webpack_require__(24);
 const AreaSelector_1 = __webpack_require__(29);
 const Toolbar_1 = __webpack_require__(32);
-__webpack_require__(69);
+__webpack_require__(71);
 class CanvasTools {
 }
 exports.CanvasTools = CanvasTools;
@@ -3765,11 +3795,11 @@ CanvasTools.Filters = {
 };
 CanvasTools.Editor = CanvasTools_Editor_1.Editor;
 CanvasTools.Toolbar = Toolbar_1.Toolbar;
-__webpack_require__(71);
+__webpack_require__(73);
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3784,6 +3814,7 @@ const ISelectorSettings_1 = __webpack_require__(17);
 const RegionsManager_1 = __webpack_require__(24);
 const AreaSelector_1 = __webpack_require__(29);
 const Toolbar_1 = __webpack_require__(32);
+const ToolbarAction_1 = __webpack_require__(68);
 const ToolbarIcon_1 = __webpack_require__(5);
 class Editor {
     constructor(container, areaSelector, regionsManager, filterPipeline, zoomProperties) {
@@ -4246,7 +4277,7 @@ exports.Editor = Editor;
 Editor.FullToolbarSet = [
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "none-select",
+        action: ToolbarAction_1.ToolbarAction.NONE,
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
         key: ["M", "m"],
@@ -4260,7 +4291,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "point-select",
+        action: ToolbarAction_1.ToolbarAction.POINT,
         iconFile: "point-selection.svg",
         tooltip: "Point-selection (P)",
         key: ["P", "p"],
@@ -4272,7 +4303,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "rect-select",
+        action: ToolbarAction_1.ToolbarAction.RECT,
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
         key: ["R", "r"],
@@ -4284,7 +4315,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "copy-select",
+        action: ToolbarAction_1.ToolbarAction.COPY,
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
         key: ["T", "t"],
@@ -4309,7 +4340,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "polyline-select",
+        action: ToolbarAction_1.ToolbarAction.POLYLINE,
         iconFile: "polyline-selection.svg",
         tooltip: "Polyline-selection (Y)",
         key: ["Y", "y"],
@@ -4321,7 +4352,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "polygon-select",
+        action: ToolbarAction_1.ToolbarAction.POLYGON,
         iconFile: "polygon-selection.svg",
         tooltip: "Polygon-selection (O)",
         key: ["O", "o"],
@@ -4334,7 +4365,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "pointer-add-remove-points-on-polygons",
+        action: ToolbarAction_1.ToolbarAction.ADD_REMOVE_POINTS,
         iconFile: "pointer-add-polygon-point.svg",
         tooltip: "Polygon add/remove points (U)",
         key: ["U", "u"],
@@ -4352,7 +4383,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "delete-all-select",
+        action: ToolbarAction_1.ToolbarAction.DELETE_ALL,
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions",
         key: ["D", "d"],
@@ -4366,7 +4397,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "selection-lock",
+        action: ToolbarAction_1.ToolbarAction.SELECTION_LOCK,
         iconFile: "selection-lock.svg",
         tooltip: "Lock/unlock regions (L)",
         key: ["L", "l"],
@@ -4377,7 +4408,7 @@ Editor.FullToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "background-toggle",
+        action: ToolbarAction_1.ToolbarAction.BACKGROUND_TOGGLE,
         iconFile: "background-toggle.svg",
         tooltip: "Toggle Region Background (B)",
         key: ["B", "b"],
@@ -4390,7 +4421,7 @@ Editor.FullToolbarSet = [
 Editor.RectToolbarSet = [
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "none-select",
+        action: ToolbarAction_1.ToolbarAction.NONE,
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
         key: ["M", "m"],
@@ -4404,7 +4435,7 @@ Editor.RectToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "rect-select",
+        action: ToolbarAction_1.ToolbarAction.RECT,
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
         key: ["R", "r"],
@@ -4416,7 +4447,7 @@ Editor.RectToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
-        action: "copy-select",
+        action: ToolbarAction_1.ToolbarAction.COPY,
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
         key: ["T", "t"],
@@ -4443,7 +4474,7 @@ Editor.RectToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "delete-all-select",
+        action: ToolbarAction_1.ToolbarAction.DELETE_ALL,
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions (D)",
         key: ["D", "d"],
@@ -4457,7 +4488,7 @@ Editor.RectToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "selection-lock",
+        action: ToolbarAction_1.ToolbarAction.SELECTION_LOCK,
         iconFile: "selection-lock.svg",
         tooltip: "Lock/unlock regions (L)",
         key: ["L", "l"],
@@ -4468,7 +4499,7 @@ Editor.RectToolbarSet = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.SWITCH,
-        action: "background-toggle",
+        action: ToolbarAction_1.ToolbarAction.BACKGROUND_TOGGLE,
         iconFile: "background-toggle.svg",
         tooltip: "Toggle Region Background (B)",
         key: ["B", "b"],
@@ -4481,7 +4512,7 @@ Editor.RectToolbarSet = [
 Editor.ZoomIconGroupToolbar = [
     {
         type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "zoom-in",
+        action: ToolbarAction_1.ToolbarAction.ZOOM_IN,
         iconFile: "zoom-in.svg",
         tooltip: "Zoom in (+)",
         key: ["+"],
@@ -4492,7 +4523,7 @@ Editor.ZoomIconGroupToolbar = [
     },
     {
         type: ToolbarIcon_1.ToolbarItemType.TRIGGER,
-        action: "zoom-out",
+        action: ToolbarAction_1.ToolbarAction.ZOOM_OUT,
         iconFile: "zoom-out.svg",
         tooltip: "Zoom out (-)",
         key: ["-"],
@@ -4524,7 +4555,7 @@ Editor.SVGDefsTemplate = `
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4584,7 +4615,7 @@ exports.calculateLineSegments = calculateLineSegments;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4592,7 +4623,7 @@ exports.calculateLineSegments = calculateLineSegments;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CubicBezierIndex = void 0;
 const CubicBezierControl_1 = __webpack_require__(18);
-const mapIndexRecord_1 = __webpack_require__(38);
+const mapIndexRecord_1 = __webpack_require__(39);
 function buildCopy(controls) {
     const record = mapIndexRecord_1.mapIndexRecord(controls, (c) => new CubicBezierControl_1.CubicBezierControl(c));
     return new CubicBezierIndex(record);
@@ -4644,7 +4675,7 @@ exports.CubicBezierIndex = CubicBezierIndex;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4665,7 +4696,7 @@ exports.mapIndexRecord = mapIndexRecord;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4675,9 +4706,9 @@ exports.PathRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const DragElement_1 = __webpack_require__(26);
 const Region_1 = __webpack_require__(6);
-const AnchorsElement_1 = __webpack_require__(40);
-const MidpointElement_1 = __webpack_require__(42);
-const TagsElement_1 = __webpack_require__(44);
+const AnchorsElement_1 = __webpack_require__(41);
+const MidpointElement_1 = __webpack_require__(43);
+const TagsElement_1 = __webpack_require__(45);
 class PathRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -4724,7 +4755,7 @@ exports.PathRegion = PathRegion;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4735,7 +4766,7 @@ const ConfigurationManager_1 = __webpack_require__(11);
 const Point2D_1 = __webpack_require__(0);
 const IRegionCallbacks_1 = __webpack_require__(2);
 const AnchorsComponent_1 = __webpack_require__(7);
-const BezierController_1 = __webpack_require__(41);
+const BezierController_1 = __webpack_require__(42);
 var GhostAnchorAction;
 (function (GhostAnchorAction) {
     GhostAnchorAction["Add"] = "add";
@@ -4923,7 +4954,7 @@ AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5136,7 +5167,7 @@ exports.BezierController = BezierController;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5144,7 +5175,7 @@ exports.BezierController = BezierController;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MidpointElement = void 0;
 const CubicBezierControl_1 = __webpack_require__(18);
-const MidpointComponent_1 = __webpack_require__(43);
+const MidpointComponent_1 = __webpack_require__(44);
 class MidpointElement extends MidpointComponent_1.MidpointComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -5174,7 +5205,7 @@ exports.MidpointElement = MidpointElement;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5274,7 +5305,7 @@ MidpointComponent.DEFAULT_RADIUS = 6;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5552,7 +5583,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5582,7 +5613,7 @@ DragElement.DEFAULT_DRAG_RADIUS = 6;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5742,7 +5773,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5751,9 +5782,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolygonRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(6);
-const AnchorsElement_1 = __webpack_require__(48);
+const AnchorsElement_1 = __webpack_require__(49);
 const DragElement_1 = __webpack_require__(26);
-const TagsElement_1 = __webpack_require__(49);
+const TagsElement_1 = __webpack_require__(50);
 class PolygonRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -5798,7 +5829,7 @@ exports.PolygonRegion = PolygonRegion;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6012,7 +6043,7 @@ AnchorsElement.MIN_NUMBERS_OF_POINTS_PER_POLYGON = 3;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6290,7 +6321,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6299,9 +6330,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolylineRegion = void 0;
 const Rect_1 = __webpack_require__(1);
 const Region_1 = __webpack_require__(6);
-const AnchorsElement_1 = __webpack_require__(51);
-const DragElement_1 = __webpack_require__(52);
-const TagsElement_1 = __webpack_require__(53);
+const AnchorsElement_1 = __webpack_require__(52);
+const DragElement_1 = __webpack_require__(53);
+const TagsElement_1 = __webpack_require__(54);
 class PolylineRegion extends Region_1.Region {
     constructor(paper, paperRect = null, regionData, callbacks, id, tagsDescriptor, tagsUpdateOptions) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
@@ -6346,7 +6377,7 @@ exports.PolylineRegion = PolylineRegion;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6550,7 +6581,7 @@ AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6581,7 +6612,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6787,7 +6818,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7024,7 +7055,7 @@ exports.AnchorsElement = AnchorsElement;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7055,7 +7086,7 @@ exports.DragElement = DragElement;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7326,7 +7357,7 @@ exports.TagsElement = TagsElement;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7462,7 +7493,7 @@ MenuElement.PathCollection = {
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7558,7 +7589,7 @@ PointSelector.DEFAULT_POINT_RADIUS = 6;
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7789,7 +7820,7 @@ PolygonSelector.DEFAULT_SELECTOR_RADIUS = 6;
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7977,7 +8008,7 @@ PolylineSelector.DEFAULT_SELECTOR_RADIUS = 6;
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8180,7 +8211,7 @@ exports.RectCopySelector = RectCopySelector;
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8449,7 +8480,7 @@ exports.RectSelector = RectSelector;
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8458,9 +8489,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSelectIcon = void 0;
 const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSelectIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
+    constructor(paper, icon, onAction, action, key) {
+        super(paper, icon, onAction, action, key);
         this.buildIconUI();
     }
     activate() {
@@ -8524,7 +8554,7 @@ exports.ToolbarSelectIcon = ToolbarSelectIcon;
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8588,7 +8618,7 @@ exports.ToolbarSeparator = ToolbarSeparator;
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8597,9 +8627,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarSwitchIcon = void 0;
 const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarSwitchIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
+    constructor(paper, icon, onAction, action, key) {
+        super(paper, icon, onAction, action, key);
         this.buildIconUI();
     }
     activate() {
@@ -8663,7 +8692,7 @@ exports.ToolbarSwitchIcon = ToolbarSwitchIcon;
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8672,9 +8701,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ToolbarTriggerIcon = void 0;
 const ToolbarIcon_1 = __webpack_require__(5);
 class ToolbarTriggerIcon extends ToolbarIcon_1.ToolbarIcon {
-    constructor(paper, icon, onAction) {
-        super(paper, icon);
-        this.onAction = onAction;
+    constructor(paper, icon, onAction, action, key) {
+        super(paper, icon, onAction, action, key);
         this.buildIconUI();
     }
     activate() {
@@ -8737,7 +8765,32 @@ exports.ToolbarTriggerIcon = ToolbarTriggerIcon;
 
 
 /***/ }),
-/* 67 */
+/* 68 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarAction = void 0;
+var ToolbarAction;
+(function (ToolbarAction) {
+    ToolbarAction["NONE"] = "none-select";
+    ToolbarAction["POINT"] = "point-select";
+    ToolbarAction["RECT"] = "rect-select";
+    ToolbarAction["COPY"] = "copy-select";
+    ToolbarAction["POLYLINE"] = "polyline-select";
+    ToolbarAction["POLYGON"] = "polygon-select";
+    ToolbarAction["ADD_REMOVE_POINTS"] = "pointer-add-remove-points-on-polygons";
+    ToolbarAction["DELETE_ALL"] = "delete-all-select";
+    ToolbarAction["SELECTION_LOCK"] = "selection-lock";
+    ToolbarAction["BACKGROUND_TOGGLE"] = "background-toggle";
+    ToolbarAction["ZOOM_IN"] = "zoom-in";
+    ToolbarAction["ZOOM_OUT"] = "zoom-out";
+})(ToolbarAction = exports.ToolbarAction || (exports.ToolbarAction = {}));
+
+
+/***/ }),
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8900,14 +8953,14 @@ exports.Palette = Palette;
 
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagsDescriptor = void 0;
-const Tag_1 = __webpack_require__(33);
+const Tag_1 = __webpack_require__(34);
 class TagsDescriptor {
     constructor(arg1, arg2 = []) {
         if (arg1 === undefined) {
@@ -9006,10 +9059,10 @@ exports.TagsDescriptor = TagsDescriptor;
 
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
-window.eve = __webpack_require__(70)
+window.eve = __webpack_require__(72)
 
 // Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
 //
@@ -17157,7 +17210,7 @@ module.exports = Snap
 
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
@@ -17599,11 +17652,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c)
 
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(72);
+var content = __webpack_require__(74);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -17617,17 +17670,17 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(74)(content, options);
+var update = __webpack_require__(76)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
 if(false) {}
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(73)(false);
+exports = module.exports = __webpack_require__(75)(false);
 // imports
 
 
@@ -17638,7 +17691,7 @@ exports.push([module.i, "/* CanvasTools.css */\n\n/* 1. Editor */\n/* 1.1. Curso
 
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports) {
 
 /*
@@ -17720,7 +17773,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -17789,7 +17842,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(75);
+var	fixUrls = __webpack_require__(77);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -18124,7 +18177,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports) {
 
 

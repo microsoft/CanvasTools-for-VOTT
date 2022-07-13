@@ -1,10 +1,10 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
-
-export type IconCallback = (action: string) => void;
+import { ToolbarAction } from './ToolbarAction';
+import { IconCallback, ToolbarSelect } from './ToolbarSelect';
 
 export enum ToolbarItemType { SELECTOR, SWITCH, SEPARATOR, TRIGGER }
 
-export abstract class ToolbarIcon {
+export abstract class ToolbarIcon extends ToolbarSelect{
     public static IconWidth: number = 48;
     public static IconHeight: number = 48;
 
@@ -17,10 +17,10 @@ export abstract class ToolbarIcon {
     protected paper: Snap.Paper;
     protected x: number;
     protected y: number;
-    protected isSelected: boolean = false;
-    protected focused: boolean = false;
 
-    constructor(paper: Snap.Paper, icon?: IToolbarIcon) {
+    constructor(paper: Snap.Paper, icon?: IToolbarIcon, onAction?: IconCallback,
+        action?: ToolbarAction, key?: string[]) {
+        super(onAction, action, key);
         this.paper = paper;
 
         if (icon !== undefined && icon !== null) {
@@ -54,17 +54,13 @@ export abstract class ToolbarIcon {
     }
 
     public select() {
+        super.select();
         this.node.addClass("selected");
-        this.isSelected = true;
     }
 
     public unselect() {
+        super.unselect();
         this.node.removeClass("selected");
-        this.isSelected = false;
-    }
-
-    public isFocused() {
-        return this.focused;
     }
 
     protected toggleSelection() {
@@ -73,13 +69,5 @@ export abstract class ToolbarIcon {
         } else {
             this.select();
         }
-    }
-
-    protected onfocusCallback = () => {
-        this.focused = true;
-    }
-
-    protected onfocusoutCallback = () => {
-        this.focused = false;
     }
 }

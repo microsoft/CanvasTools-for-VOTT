@@ -1,20 +1,20 @@
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
-import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 import * as SNAPSVG_TYPE from "snapsvg";
+import { ToolbarAction } from "./ToolbarAction";
+import { IconCallback } from "./ToolbarSelect";
 declare var Snap: typeof SNAPSVG_TYPE;
 
 export class ToolbarTriggerIcon extends ToolbarIcon {
-    public onAction: IconCallback;
 
     private iconBackgrounRect: Snap.Element;
     private iconImage: Snap.Element;
     private iconImageSVG: Snap.Element;
 
-    constructor(paper: Snap.Paper, icon: IToolbarIcon, onAction: IconCallback) {
-        super(paper, icon);
+    constructor(paper: Snap.Paper, icon: IToolbarIcon, onAction: IconCallback, action?: ToolbarAction, key?: string[]) {
+        super(paper, icon, onAction, action, key);
 
-        this.onAction = onAction;
         this.buildIconUI();
     }
 

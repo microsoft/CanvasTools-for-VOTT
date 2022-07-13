@@ -1,6 +1,8 @@
 import { Rect } from "../Core/Rect";
 import { IToolbarIcon } from "../Interface/IToolbarIcon";
-import { IconCallback, ToolbarIcon } from "./ToolbarIcon";
+import { ToolbarAction } from './ToolbarAction';
+import { ToolbarIcon } from "./ToolbarIcon";
+import { IconCallback, ToolbarSelect } from "./ToolbarSelect";
 import { ToolbarSelectIcon } from "./ToolbarSelectIcon";
 import { ToolbarSeparator } from "./ToolbarSeparator";
 import { ToolbarSwitchIcon } from "./ToolbarSwitchIcon";
@@ -19,14 +21,14 @@ export class Toolbar {
     private toolbarWidth: number;
     private toolbarHeight: number;
 
-    private icons: ToolbarIcon[];
+    private icons: ToolbarSelect[];
 
     private areHotKeysEnabled: boolean = true;
 
     private isVertical = true;
 
     constructor(svgHost: SVGSVGElement, isVertical: boolean = true) {
-        this.icons = new Array<ToolbarIcon>();
+        this.icons = new Array<ToolbarSelect>();
 
         this.isVertical = isVertical;
 
@@ -37,7 +39,8 @@ export class Toolbar {
         const newIcon = new ToolbarSelectIcon(this.paper, icon, (action) => {
             this.select(action);
             actor(action);
-        });
+        }, icon.action ? icon.action as ToolbarAction : undefined,
+        icon.key? icon.key: undefined);
 
         this.addIcon(newIcon);
     }
@@ -45,7 +48,8 @@ export class Toolbar {
     public addSwitch(icon: IToolbarIcon, actor: IconCallback) {
         const newIcon = new ToolbarSwitchIcon(this.paper, icon, (action) => {
             actor(action);
-        });
+        }, icon.action ? icon.action as ToolbarAction : undefined,
+        icon.key? icon.key: undefined);
 
         this.addIcon(newIcon);
     }
@@ -58,15 +62,16 @@ export class Toolbar {
     public addTrigger(icon: IToolbarIcon, actor: IconCallback) {
         const newIcon = new ToolbarTriggerIcon(this.paper, icon, (action) => {
             actor(action);
-        });
+        }, icon.action ? icon.action as ToolbarAction : undefined,
+        icon.key? icon.key: undefined);
 
         this.addIcon(newIcon);
     }
 
     public select(action: string) {
         this.icons.forEach((icon) => {
-            if (icon instanceof ToolbarSelectIcon) {
-                if (icon.description.action !== action) {
+            if (icon instanceof ToolbarSelect) {
+                if (icon.action !== action) {
                     icon.unselect();
                 } else {
                     icon.select();
@@ -76,7 +81,7 @@ export class Toolbar {
     }
 
     public setSwitch(action: string, on: boolean) {
-        const switchIcon: ToolbarIcon = this.findIconByAction(action);
+        const switchIcon: ToolbarSelect = this.findIconByAction(action);
 
         if (switchIcon !== undefined && switchIcon instanceof ToolbarSwitchIcon) {
             (on) ? switchIcon.select() : switchIcon.unselect();
@@ -162,23 +167,17 @@ export class Toolbar {
         this.updateToolbarSize();
     }
 
-    private findIconByKey(key: string): ToolbarIcon {
-        return this.icons.find((icon) => {
-            if (icon.description !== null) {
-                return icon.description.key.includes(key);
-            }
+    private findIconByKey(key: string): ToolbarSelect {
+        return this.icons.find((icon: ToolbarSelect) => {if (icon.key) { return icon.key.includes(key); }});
+    }
 
-            return false;
+    private findIconByAction(action: string): ToolbarSelect {
+        return this.icons.find((icon) => {
+            return icon.action !== null && icon.action === action;
         });
     }
 
-    private findIconByAction(action: string): ToolbarIcon {
-        return this.icons.find((icon) => {
-            return icon.description !== null && icon.description.action === action;
-        });
-    }
-
-    private findFocusedIcon(): ToolbarIcon {
+    private findFocusedIcon(): ToolbarSelect {
         return this.icons.find((icon) => {
             return icon.isFocused();
         });

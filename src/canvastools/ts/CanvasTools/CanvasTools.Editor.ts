@@ -18,6 +18,7 @@ import { RegionComponent } from "./Region/Component/RegionComponent";
 import { RegionsManager } from "./Region/RegionsManager";
 import { AreaSelector } from "./Selection/AreaSelector";
 import { Toolbar } from "./Toolbar/Toolbar";
+import { ToolbarAction } from "./Toolbar/ToolbarAction";
 import { ToolbarItemType } from "./Toolbar/ToolbarIcon";
 
 /**
@@ -105,7 +106,7 @@ export class Editor {
     public static FullToolbarSet: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.SELECTOR,
-            action: "none-select",
+            action: ToolbarAction.NONE,
             iconFile: "none-selection.svg",
             tooltip: "Regions Manipulation (M)",
             key: ["M", "m"],
@@ -119,7 +120,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "point-select",
+            action: ToolbarAction.POINT,
             iconFile: "point-selection.svg",
             tooltip: "Point-selection (P)",
             key: ["P", "p"],
@@ -131,7 +132,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "rect-select",
+            action: ToolbarAction.RECT,
             iconFile: "rect-selection.svg",
             tooltip: "Rectangular box (R)",
             key: ["R", "r"],
@@ -143,7 +144,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "copy-select",
+            action: ToolbarAction.COPY,
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
             key: ["T", "t"],
@@ -167,7 +168,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "polyline-select",
+            action: ToolbarAction.POLYLINE,
             iconFile: "polyline-selection.svg",
             tooltip: "Polyline-selection (Y)",
             key: ["Y", "y"],
@@ -179,7 +180,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "polygon-select",
+            action: ToolbarAction.POLYGON,
             iconFile: "polygon-selection.svg",
             tooltip: "Polygon-selection (O)",
             key: ["O", "o"],
@@ -192,7 +193,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "pointer-add-remove-points-on-polygons",
+            action: ToolbarAction.ADD_REMOVE_POINTS,
             iconFile: "pointer-add-polygon-point.svg",
             tooltip: "Polygon add/remove points (U)",
             key: ["U", "u"],
@@ -210,7 +211,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.TRIGGER,
-            action: "delete-all-select",
+            action: ToolbarAction.DELETE_ALL,
             iconFile: "delete-all-selection.svg",
             tooltip: "Delete all regions",
             key: ["D", "d"],
@@ -224,7 +225,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SWITCH,
-            action: "selection-lock",
+            action: ToolbarAction.SELECTION_LOCK,
             iconFile: "selection-lock.svg",
             tooltip: "Lock/unlock regions (L)",
             key: ["L", "l"],
@@ -235,7 +236,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SWITCH,
-            action: "background-toggle",
+            action: ToolbarAction.BACKGROUND_TOGGLE,
             iconFile: "background-toggle.svg",
             tooltip: "Toggle Region Background (B)",
             key: ["B", "b"],
@@ -252,7 +253,7 @@ export class Editor {
     public static RectToolbarSet: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.SELECTOR,
-            action: "none-select",
+            action: ToolbarAction.NONE,
             iconFile: "none-selection.svg",
             tooltip: "Regions Manipulation (M)",
             key: ["M", "m"],
@@ -266,7 +267,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "rect-select",
+            action: ToolbarAction.RECT,
             iconFile: "rect-selection.svg",
             tooltip: "Rectangular box (R)",
             key: ["R", "r"],
@@ -278,7 +279,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SELECTOR,
-            action: "copy-select",
+            action: ToolbarAction.COPY,
             iconFile: "copy-t-selection.svg",
             tooltip: "Template-based box (T)",
             key: ["T", "t"],
@@ -304,7 +305,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.TRIGGER,
-            action: "delete-all-select",
+            action: ToolbarAction.DELETE_ALL,
             iconFile: "delete-all-selection.svg",
             tooltip: "Delete all regions (D)",
             key: ["D", "d"],
@@ -318,7 +319,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SWITCH,
-            action: "selection-lock",
+            action: ToolbarAction.SELECTION_LOCK,
             iconFile: "selection-lock.svg",
             tooltip: "Lock/unlock regions (L)",
             key: ["L", "l"],
@@ -329,7 +330,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.SWITCH,
-            action: "background-toggle",
+            action: ToolbarAction.BACKGROUND_TOGGLE,
             iconFile: "background-toggle.svg",
             tooltip: "Toggle Region Background (B)",
             key: ["B", "b"],
@@ -346,7 +347,7 @@ export class Editor {
     private static ZoomIconGroupToolbar: ToolbarIconDescription[] = [
         {
             type: ToolbarItemType.TRIGGER,
-            action: "zoom-in",
+            action: ToolbarAction.ZOOM_IN,
             iconFile: "zoom-in.svg",
             tooltip: "Zoom in (+)",
             key: ["+"],
@@ -357,7 +358,7 @@ export class Editor {
         },
         {
             type: ToolbarItemType.TRIGGER,
-            action: "zoom-out",
+            action: ToolbarAction.ZOOM_OUT,
             iconFile: "zoom-out.svg",
             tooltip: "Zoom out (-)",
             key: ["-"],
