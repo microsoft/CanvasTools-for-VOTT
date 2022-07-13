@@ -1,6 +1,6 @@
 {
   "name": "@jinkijung/vott-dot-ct",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CanvasTools editor for the VoTT-dot project (forked from VoTT-CT)",
   "main": "./lib/js/ct.js",
   "types": "./lib/js/ct.d.ts",
