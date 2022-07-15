@@ -24,21 +24,17 @@ import { ToolbarItemType } from "./Toolbar/ToolbarIcon";
 /**
  * Internal type to describe toolbar presets
  */
-type ToolbarIconDescription =
-    | {
-          type: ToolbarItemType.SELECTOR | ToolbarItemType.SWITCH | ToolbarItemType.TRIGGER;
-          action: string;
-          iconFile: string;
-          tooltip: string;
-          actionCallback: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void;
-          key: string[];
-          width?: number;
-          height?: number;
-          activate: boolean;
-      }
-    | {
-          type: ToolbarItemType.SEPARATOR;
-      };
+export interface ToolbarIconDescription {
+    type: ToolbarItemType;
+    action?: ToolbarAction;
+    iconFile?: string;
+    tooltip?: string;
+    actionCallback?: (action: string, rm: RegionsManager, sl: AreaSelector, zm: ZoomManager) => void;
+    key?: string[];
+    width?: number;
+    height?: number;
+    activate?: boolean;
+};
 
 /**
  * Wraps internal CanvasTools components into one Editor experience.
