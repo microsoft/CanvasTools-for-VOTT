@@ -2249,11 +2249,38 @@ var ZoomType;
     ZoomType[ZoomType["CursorCenter"] = 3] = "CursorCenter";
 })(ZoomType = exports.ZoomType || (exports.ZoomType = {}));
 class ZoomManager {
-    constructor(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+    constructor(isZoomEnabled = false, zoomCanvas, zoomCallbacks, maxZoom, zoomScale) {
         this.minZoomScale = 1;
         this.maxZoomScale = 4;
         this.zoomScale = 0.1;
+        this.pos = { top: 0, left: 0, x: 0, y: 0 };
+        this.mouseDownHandler = (e) => {
+            if (this.zoomCanvas) {
+                this.zoomCanvas.style.cursor = 'grabbing';
+                this.zoomCanvas.style.userSelect = 'none';
+                this.pos = {
+                    left: this.zoomCanvas.scrollLeft,
+                    top: this.zoomCanvas.scrollTop,
+                    x: e.clientX,
+                    y: e.clientY,
+                };
+            }
+        };
+        this.mouseUpHandler = () => {
+            if (this.zoomCanvas) {
+                this.zoomCanvas.style.removeProperty('user-select');
+            }
+        };
+        this.mouseMoveHandler = (e) => {
+            if (this.zoomCanvas && this.zoomCanvas.style.getPropertyValue('user-select')) {
+                const dx = e.clientX - this.pos.x;
+                const dy = e.clientY - this.pos.y;
+                this.zoomCanvas.scrollTop = this.pos.top - dy;
+                this.zoomCanvas.scrollLeft = this.pos.left - dx;
+            }
+        };
         this.isZoomEnabled = isZoomEnabled;
+        this.zoomCanvas = zoomCanvas;
         this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
@@ -2270,9 +2297,10 @@ class ZoomManager {
             this.previousZoomScale = this.currentZoomScale = 1;
         }
     }
-    static getInstance(isZoomEnabled = false, zoomCallbacks, maxZoom, zoomScale) {
+    ;
+    static getInstance(isZoomEnabled = false, editorContainerDiv, zoomCallbacks, maxZoom, zoomScale) {
         if (!ZoomManager.instance) {
-            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, editorContainerDiv, zoomCallbacks, maxZoom, zoomScale);
         }
         return ZoomManager.instance;
     }
@@ -2314,6 +2342,19 @@ class ZoomManager {
     deleteInstance() {
         if (ZoomManager.instance) {
             delete ZoomManager.instance;
+        }
+    }
+    setDragging(activate) {
+        if (activate) {
+            this.zoomCanvas.addEventListener('mousemove', this.mouseMoveHandler);
+            window.addEventListener('mousedown', this.mouseDownHandler);
+            window.addEventListener('mouseup', this.mouseUpHandler);
+        }
+        else {
+            this.zoomCanvas.style.removeProperty('user-select');
+            this.zoomCanvas.removeEventListener('mousemove', this.mouseMoveHandler);
+            window.removeEventListener('mousedown', this.mouseDownHandler);
+            window.removeEventListener('mouseup', this.mouseUpHandler);
         }
     }
 }
@@ -3816,6 +3857,7 @@ const AreaSelector_1 = __webpack_require__(29);
 const Toolbar_1 = __webpack_require__(32);
 const ToolbarAction_1 = __webpack_require__(68);
 const ToolbarIcon_1 = __webpack_require__(5);
+;
 class Editor {
     constructor(container, areaSelector, regionsManager, filterPipeline, zoomProperties) {
         this.autoResize = true;
@@ -3926,10 +3968,17 @@ class Editor {
                 this.onZoom(ZoomManager_1.ZoomDirection.In, newZoomScale);
                 return this.zoomManager.getZoomData();
             },
+            onDraggingCanvas: () => {
+                this.zoomManager.setDragging(true);
+            },
+            onEndDragging: () => {
+                this.regionsManager.unfreeze();
+                this.zoomManager.setDragging(false);
+            }
         };
-        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, this.editorContainerDiv, initZoomCallbacks);
         this.zoomManager.deleteInstance();
-        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, initZoomCallbacks);
+        this.zoomManager = ZoomManager_1.ZoomManager.getInstance(false, this.editorContainerDiv, initZoomCallbacks);
         if (zoomProperties && zoomProperties.isZoomEnabled) {
             this.zoomManager.isZoomEnabled = true;
             this.zoomManager.zoomType = zoomProperties.zoomType || ZoomManager_1.ZoomType.Default;
@@ -4281,7 +4330,8 @@ Editor.FullToolbarSet = [
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
         key: ["M", "m"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
         },
         activate: false,
@@ -4295,7 +4345,8 @@ Editor.FullToolbarSet = [
         iconFile: "point-selection.svg",
         tooltip: "Point-selection (P)",
         key: ["P", "p"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POINT });
             sl.show();
         },
@@ -4307,7 +4358,8 @@ Editor.FullToolbarSet = [
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
         key: ["R", "r"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
             sl.show();
         },
@@ -4319,7 +4371,8 @@ Editor.FullToolbarSet = [
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
         key: ["T", "t"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             const regions = rm.getSelectedRegions();
             if (regions !== undefined && regions.length > 0) {
                 const r = regions[0];
@@ -4344,7 +4397,8 @@ Editor.FullToolbarSet = [
         iconFile: "polyline-selection.svg",
         tooltip: "Polyline-selection (Y)",
         key: ["Y", "y"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYLINE });
             sl.show();
         },
@@ -4356,7 +4410,8 @@ Editor.FullToolbarSet = [
         iconFile: "polygon-selection.svg",
         tooltip: "Polygon-selection (O)",
         key: ["O", "o"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = false;
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
             sl.show();
@@ -4369,7 +4424,8 @@ Editor.FullToolbarSet = [
         iconFile: "pointer-add-polygon-point.svg",
         tooltip: "Polygon add/remove points (U)",
         key: ["U", "u"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             if (!ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode) {
                 ConfigurationManager_1.ConfigurationManager.isModifyRegionOnlyMode = true;
                 sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.POLYGON });
@@ -4387,7 +4443,7 @@ Editor.FullToolbarSet = [
         iconFile: "delete-all-selection.svg",
         tooltip: "Delete all regions",
         key: ["D", "d"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
             rm.deleteAllRegions();
         },
         activate: false,
@@ -4425,7 +4481,8 @@ Editor.RectToolbarSet = [
         iconFile: "none-selection.svg",
         tooltip: "Regions Manipulation (M)",
         key: ["M", "m"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.NONE });
         },
         activate: false,
@@ -4439,7 +4496,8 @@ Editor.RectToolbarSet = [
         iconFile: "rect-selection.svg",
         tooltip: "Rectangular box (R)",
         key: ["R", "r"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             sl.setSelectionMode({ mode: ISelectorSettings_1.SelectionMode.RECT });
             sl.show();
         },
@@ -4451,7 +4509,8 @@ Editor.RectToolbarSet = [
         iconFile: "copy-t-selection.svg",
         tooltip: "Template-based box (T)",
         key: ["T", "t"],
-        actionCallback: (action, rm, sl) => {
+        actionCallback: (action, rm, sl, zm) => {
+            zm.callbacks.onEndDragging();
             const regions = rm.getSelectedRegionsWithZoomScale();
             if (regions !== undefined && regions.length > 0) {
                 const r = regions[0];
@@ -4529,6 +4588,19 @@ Editor.ZoomIconGroupToolbar = [
         key: ["-"],
         actionCallback: (action, rm, sl, zm) => {
             zm.callbacks.onZoomingOut();
+        },
+        activate: false,
+    },
+    {
+        type: ToolbarIcon_1.ToolbarItemType.SELECTOR,
+        action: ToolbarAction_1.ToolbarAction.ZOOM_DRAG,
+        iconFile: "zoom-out.svg",
+        tooltip: "Dragging for zoom-in (U)",
+        key: ["Z", "z"],
+        actionCallback: (action, rm, sl, zm) => {
+            sl.setSelectionMode(ISelectorSettings_1.SelectionMode.NONE);
+            rm.freeze();
+            zm.callbacks.onDraggingCanvas();
         },
         activate: false,
     },
@@ -8786,6 +8858,7 @@ var ToolbarAction;
     ToolbarAction["BACKGROUND_TOGGLE"] = "background-toggle";
     ToolbarAction["ZOOM_IN"] = "zoom-in";
     ToolbarAction["ZOOM_OUT"] = "zoom-out";
+    ToolbarAction["ZOOM_DRAG"] = "zoom-drag";
 })(ToolbarAction = exports.ToolbarAction || (exports.ToolbarAction = {}));
 
 
@@ -17685,7 +17758,7 @@ exports = module.exports = __webpack_require__(75)(false);
 
 
 // module
-exports.push([module.i, "/* CanvasTools.css */\n\n/* 1. Editor */\n/* 1.1. Cursors */\n.CanvasToolsEditor {\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\n}\n\n/* 1.2. Layout */\n.CanvasToolsEditor {\n    display: grid;\n    grid-template-rows: 1fr;\n    grid-template-columns: 1fr; \n    width: 100%;\n    height: 100%;\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor * {\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor canvas {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 100;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n    background-color: #111;\n}\n\n.CanvasToolsEditor svg {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 101;\n    width: 100%;\n    height: 100%;\n}\n\n.CanvasToolsEditor svg {\n    cursor: var(--cursor-pointer);\n}\n\n.CanvasToolsEditor svg title {\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.CanvasToolsContainer {\n    overflow: auto;\n    height: 100%;\n    width: 100%;\n}\n\n.CanvasToolsContainer:focus {\n    outline: none;\n}\n\n/* 2. RegionsManager\n\n.regionManager\n-->.regionStyle\n    --> .tagsLayer\n    --> .dragLayer\n    --> .anchorsLayer\n    \n--> .menuLayer\n    --> .menuRectStyle\n*/\n\n/* 2.1. General settings and layout */\n.regionManager {\n    pointer-events: none;\n}\n\n.regionStyle {\n    pointer-events: visiblePainted;\n}\n\n.dragRectStyle {\n    fill: transparent; \n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n}\n\n.dragPointStyle {\n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n    filter: url(#black-glow);\n}\n\n.tagsLayer {\n    pointer-events: none;\n}\n\n.primaryTagRectStyle {\n    stroke-width: 2;\n    stroke-dasharray: 0.5 4;\n    stroke-linecap: round;\n    filter: url(#black-glow);\n}\n\n.primaryTagPointStyle {\n    stroke-width: 1; \n}\n\n.primaryTagTextStyle {\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 9pt;\n    fill: #fff;\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.primaryTagTextStyle::selection {\n    background: none;\n    fill: #fff;\n}\n\n.secondaryTagStyle {\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.midpointStyle {\n    stroke-width: 2;\n}\n\n.bezierControlPointTangentStyle,\n.bezierControlPointStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle.ghost {\n    cursor: var(--cursor-resize);\n}\n\n.anchorStyle.ghost.delete {\n    cursor: var(--cursor-delete);\n}\n\n.anchorStyle.ghost.add {\n    cursor: var(--cursor-add);\n}\n\n.anchorStyle.ghost {\n    stroke-width: 0;\n}\n\n.primaryTagBoundRectStyle {\n    stroke-width: 2;\n}\n\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\n    stroke-width: 2;\n    stroke-linecap: round;\n    stroke-dasharray: 0.5 4;\n}\n\n/* 2.2. Default colors */\n.regionManager {\n    --default-color-pure: rgb(128, 128, 128);\n    --default-color-accent: rgba(128, 128, 128, 0.8);\n    --default-color-dark: rgba(64, 64, 64, 0.8);\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\n    --default-color-white: rgb(255, 255, 255);\n    --default-color-transparent: rgba(255, 255, 255, 0);\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\n    --default-color-delete: rgba(216, 24, 65, 1.0);\n    --default-color-add: rgba(21, 127, 240, 1.0);\n    --default-color-control: rgb(253, 128, 45);\n}\n\n/* 2.2.1. Shared colors */\n.secondaryTagStyle {\n    fill: var(--default-color-accent);\n}\n\n.midpointStyle {\n    stroke: none;\n    fill: none;\n}\n\n.bezierControlPointTangentStyle,\n.bezierControlPointStyle {\n    stroke: none;\n    fill: none;\n}\n\n.anchorStyle {\n    stroke: var(--default-color-dark);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle:hover .anchorStyle {\n    stroke: var(--default-color-white);\n}\n\n.regionStyle:hover .midpointStyle {\n    stroke: var(--default-color-white);\n    fill: var(--default-color-white);\n}\n\n.regionStyle:hover .midpointStyle:hover {\n    stroke: var(--default-color-accent);\n}\n\n.regionStyle.selected .bezierControlPointTangentStyle,\n.regionStyle:hover .bezierControlPointTangentStyle {\n    stroke: var(--default-color-control);\n    stroke-dasharray: 4;\n}\n\n.regionStyle.selected .bezierControlPointStyle,\n.regionStyle:hover .bezierControlPointStyle {\n    stroke: var(--default-color-control);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle.selected .bezierControlPointStyle:hover,\n.regionStyle:hover .bezierControlPointStyle:hover {\n    cursor: var(--cursor-resize);\n    stroke: var(--default-color-control);\n    fill: var(--default-color-control);\n}\n\n.anchorStyle.ghost,\n.anchorStyle.ghost:hover,\n.regionStyle.selected .anchorStyle.ghost,\n.regionStyle.selected .anchorStyle.ghost:hover {\n    fill: var(--default-color-ghost);\n}\n\n.anchorStyle:hover {\n    stroke: var(--default-color-white);\n}\n\n/* 2.2.2. Rect region colors */\n.primaryTagRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n}\n\n.regionStyle:hover .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n}\n\n.regionStyle.selected .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke-dasharray: none;\n}\n\n.primaryTagTextBGStyle {\n    fill: var(--default-color-dark);\n}\n\n.anchorBoneStyle {\n    fill: var(--default-color-transparent);\n}\n\n/* 2.2.3. Point region  colors */\n.primaryTagPointStyle {\n    fill: var(--default-color-pure);\n    stroke:var(--default-color-white);\n}\n\n.dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 0.5;\n}\n\n.regionStyle:hover .dragPointStyle,\n.regionStyle.selected .dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 1.0;\n}\n\n/* 2.2.4. Polyline, polygon region colors */\n.primaryTagBoundRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n    opacity: 0.25;\n}\n\n.regionStyle.selected .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    opacity: 1;\n}\n\n.regionStyle:hover .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n    opacity: 0.75;\n}\n\n.primaryTagPolylineStyle {\n    fill: var(--default-color-transparent);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolylineStyle {\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.primaryTagPolygonStyle {\n    fill: var(--default-color-shadow);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.regionStyle:hover .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n}\n\n.regionStyle:hover .anchorStyle.ghost.delete,\n.regionStyle.selected .anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete:hover {\n    stroke: var(--default-color-delete);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.regionStyle:hover .anchorStyle.ghost.add,\n.regionStyle.selected .anchorStyle.ghost.add,\n.anchorStyle.ghost.add,\n.anchorStyle.ghost.add:hover {\n    stroke: var(--default-color-add);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.anchorLineStyle {\n    fill: none;\n    stroke-width: 5;\n    stroke: var(--default-color-transparent);  \n}\n\nsvg:not(:root) .menuLayer {\n    overflow: visible;\n}\n\n.menuRectStyle { \n    stroke-width:0;\n    fill: #000;\n    filter: url(#black-glow); \n}\n\n.menuItemBack {\n    stroke-width: 1.5;\n    stroke: rgba(198, 198, 198, 0.2);\n    fill:  #000;\n}\n\n.menuIcon {\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 10pt;\n    fill: #fff;\n}\n\n.menuItem {\n    stroke-width: 1.5;\n    stroke: #fff;\n    fill:transparent;\n}\n\n.menuItem:hover {\n    stroke: #157ff0;\n}\n\n/* Freezing regions */ \n\n.regionManager.frozen .regionStyle.old,\n.regionManager.frozen .regionStyle.old .dragRectStyle,\n.regionManager.frozen .regionStyle.old .dragPointStyle {\n    pointer-events: none;\n}\n\n.regionManager.frozen .regionStyle.old .dragRectStyle, \n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\n    cursor: default; \n}\n\n.regionManager.frozen .anchorStyle.ghost {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old, \n.regionManager.frozen .regionStyle.old:hover{\n    opacity: 0.5;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\n    stroke-width: 1;\n    stroke-dasharray: 0 0;\n}\n\n.regionManager.frozen .regionStyle.old .anchorStyle {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\n    opacity: 0.25;\n}\n\n/* AreaSelector\n\n.areaSelector\n-->.rectSelector\n    --> .maskStyle\n        [mask]\n            .maskInStyle\n            .maskOutStyle\n        .crossStyle\n            line\n            line\n-->.rectCopySelector\n    --> .crossStyle\n            line\n            line\n        .copyRectStyle\n-->.pointSelector\n    --> .crossStyle\n        .pointStyle\n-->.polylineSelector\n    --> .polylineStyle\n        .polylineGroupStyle\n        --> .polylinePointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n-->.polygonSelector\n    --> .polygonStyle\n        .polygonGroupStyle\n        --> .polygonPointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n*/\n\n#selectionOverlay {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n}\n\n.crossStyle line {\n    stroke-width:1;\n    stroke-dasharray: 3 3;\n    stroke: #666;\n    pointer-events: none; \n}\n\n.crossStyle .blackDashes {\n    stroke-width:3;\n    stroke-dasharray: 3 3;\n    stroke: #000;\n    pointer-events: none; \n}\n\n.crossStyle .whiteDashes {\n    stroke-width:3;\n    stroke-dasharray: 0 3 0;\n    stroke: #fff;\n    pointer-events: none; \n}\n\n.selectionBoxStyle {\n    fill: #fff;\n    fill-opacity: 0.25;\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.rectCopySelector .copyRectStyle {\n    stroke-width:3;\n    stroke: #000;\n    fill: transparent;\n    pointer-events: none; \n}\n\n.pointSelector .pointStyle {\n    stroke-width:2;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none; \n}\n\n.polylineSelector .polylineStyle {\n    fill: transparent;\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polylineSelector .polylinePointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polylineSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polylineSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n.polygonSelector .polygonStyle {\n    fill: rgba(255,255,255, 0.2);\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polygonSelector .polygonPointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polygonSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polygonSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n/* Toolbar \n\n.toolbarLayer\n--> .toolbarBGStyle\n--> .iconsLayerStyle\n    --> .iconStyle\n        --> .iconBGRectStyle\n            .iconImageStyle\n*/\n.toolbarBGStyle {\n    fill: #000;\n}\n\n.iconStyle {\n    pointer-events: all;\n}\n\n.iconStyle.selector .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.selector:hover .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle.selector.selected .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle .iconImageStyle * {\n    stroke: #fff;\n}\n\n\n.iconStyle.switch .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.switch:hover .iconBGRectStyle{\n    fill: #157ff0;\n}\n\n.iconStyle.switch .iconImageStyle * {\n    stroke: #fff;\n}\n\n.iconStyle.switch.selected .iconImageStyle * {\n    stroke: rgb(14, 186, 253);\n    stroke-width: 1.5;\n}\n\n.iconStyle .iconImageStyle .accent-f {\n    fill: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle .iconImageStyle .accent-s {\n    stroke: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle.separator line {\n    stroke: #fff;\n    stroke-width: 0.5px;\n}\n\n/* Announcer */\n#regionAnnouncer {\n    position: absolute !important;\n    height: 0px; \n    width: 0px;\n    overflow: hidden;\n    clip: rect(0px, 0px, 0px, 0px);\n    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    -webkit-clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    white-space: nowrap;\n}", ""]);
+exports.push([module.i, "/* CanvasTools.css */\n\n/* 1. Editor */\n/* 1.1. Cursors */\n.CanvasToolsEditor {\n    --cursor-pointer: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABUklEQVRoQ+3YMW6EMBAF0NkTmNOkTkVtCjdUcIFcAY4CNQ1HSNqkSx8JpBwATpDIllhptezCekg8XzIVErI1bz62JZ+MMa9d1z0T6HMioh9jzBsqwgFs81ERDqCUonmeIREOUFUVDcNAbdvCIc6Auq6pKAo4xAXArgU0xBUADbEKQELcBKAg7gIQEJsA6YhdAMmI3QCpiIcAEhEPA6QhvACSEN4AKQgWQAKCDQiNOAQQEnEYIBTiUEAIxOGA/0bsApRlSU3TeN0c/fVtxyZgKT5N0y+l1LePIsuylzzPP33Gbo25C1iK11p/9H3/tDVZiO83AQjF24atAlCKXwUgFX8FQCv+AjCOo9sqJS/YtU3CrYEkSWiaJrjizwnYF7TOL2m4BFCLdwlord+lHlJ7DkabAPQTAaHjiwnEBJgdiL8Qs4Hs4TEBdguZE8QEmA1kD/8FUOpiQO9zcnQAAAAASUVORK5CYII=') 2x), pointer;\n    --cursor-move: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgElEQVRoQ+2ZS27CMBCGyQFygnZJb1Ep6SY3yJpHeweWQNVjVAHWvkE2hXtQVlwAcQCqiQhygsceP8bqAkuoqpqM/88ez/wuySDwmE6n38fjMavr+iVwaGW4JOQkIL6qqneIWRTFPgZEMIBW/Gg0atZks9lEgQgCIItfr9cNwHg8jgLhDaAS36ZlDAgvAJ34WBDOABTxMSCcAGzEc0NYA7iI54SwApDrvKp/zOfzwWKxaP4EP5fLJdpmQvUJMsBsNns9HA5fmCIhRKYCKMtyh72Tpum+qqoPn2ZKAoCVP5/PQyFErpnsguwAOkdZltvT6fTk07GNAG3awEpyAMDO+aSTFkDOeU4AH++EAsjVBnwNJwD4J1fvpATol8okSVgBLpeLs3e6A1DV+RgArgawA4A1qVgALhA3AF2HBQDKsGlkcjxIIXnYuNhGmcketN3VBJHn+QA+MLbbbfOhDFV8KkRiEk8RwPUMBeIGAA+vVisuLU5xJ5PJAG54RVH81nU9VAXppBAGoTNlctAsyzoptNuhNqijBc5Of1DEwzt3h1gFEfsQU8V3AOTD3IeIWUZtxN8BYBCxAGzFKwFUEDEAXMSjAH0IqAScZg5S1lRtsDL2n+w0Wip1NdjoESJdaJzEa1NIpma+Uj5jTYrS/Yw70Aa5Xuo/saBCiDfkUv+DvZOm6SHKpb4VEPjfKs5pIy8IeQf6EC7eybVUeh1i1cvtTthAcIgnH2JfCC7xXgA67yQDc4r3BjBBcIsPAoBBxBAfDKAPAb+7ehtK8/Iqo7oJel+zBqnzJiDrPmAKeP2iO/exB6Y52HbAZuJQzwbfgVDCqHEeANSV4nrusQNcK0uN+wdgZhRePQu00wAAAABJRU5ErkJggg==') 2x) 8 8, move;\n    --cursor-resize: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADKElEQVRoQ+2ZK6waQRSGB8W25iJBgWiTrQKNKWo1ZF1LwuM2teARgMCDbxdIqCSgUSgsoLqiTWhCAhLUBbXN2bBkgN15MWy5KVjm8X9zHvMPBJDkT7FY/LZcLj+ORqP3kpd2XS4gcxMQbxjGM6ypadovPyCkATjic7mcfSbdbtcXCCkAuPhOp2MD5PN5XyCuBnAT76SlHxBXAZDE+wUhDMAi3g8IIQBHfCgUQuVymamRNZtNtNlspBc2NwDeKpmUuwyS2WK5AURF32reA+BWJ8u6LjUCh5z/wrqgyLhDTbwTmUsEwAqWCiqyOTbHEi1sT2Fn3ebmAKIG0FWYI/7p6Qltt1tYmwoAcyaTySfTNN/ABFVVX5LJZM8wjK8M0bGcvXgjcSEMv2FjsRiq1+tEgEqlEu33+z9BeDweR6lUytY7Ho/RfD63QXRd/9BoNP4QQKxqtYoWiwW3ATwBOLcHtVqNCgACV6uVAi40nU6faBwOh7YrjUQiL6ZpvqUBwH68BvAI4OZtaADZbHbQ6/XSg8HgQrwjFiAymQwqFovfDcPw6mZ2BGA/XituA3gZMxoAnH4wGFRmsxkxzROJBNrv96QonADwQARIrpIGgBCySqUSAqNG+oDha7VapFq6AGCFOAJA7rXb7RMddwTwezQauV50Jyl0DkEDgBRSFEWZTqcsKbRzWqzLYFIKeYo/CamTSjgEDcCHIiaKv8jJcwgagHNhrddrBdLPrY0WCgUUDodJpw/LHCOAtVGqeNeiwiGi0Sj1HjhcZKZpmgp0G/wig+6kqupO13WV8yJjEu/ZFfAnIzwDOazEZwA5RGaXTCZ/EHo/XgoWPE8PT05m8URh/8jMcYmnnqzPdppbPBUAu6Vf54OG2Nzv5Euqz78TnZ4y/j8AST9sCRWsWxiEIoDfE+BGWT7gWOF5qmmaNPFMXchLnJt38hrLaw9YDsQZIxQBZzILxC3FXxUBFohbi5cCgF12z7gV90O8NIBzCMuynJ9HpBastC5EK2z4Xna38drzqiJ2W/TwR3fK6w3L02FYxkoHYNlU5pgHgMzTFFnrEQGRU5M559VH4C9ocYlPRB5IuQAAAABJRU5ErkJggg==') 2x) 8 8, nesw-resize;\n    --cursor-delete: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABn0lEQVRoQ+3YMW6EMBAAwL0XmNekhYraFG6o4AP5AvATqGl4ArRJlz4SSHkAvIDIljjlBHesAQevhKuTzpidXa8R3IQQdVmWHhAdNwAYhRANVYQCyORTRSgAYwyGYSCJUIAkSaBtWyiKghziDkjTFKIoIod4AMhe0ESo/tk45L13jxlAEzG6rguehz+F67qGpmnkbcwBNBCqf+T2ww45N8sy8wAkwm4AAjHK7aO7heQ2Mr6F/m6JF41tZxMv7WfN0wnbErvnLZ5Cz1a1EaEFQPTE7ozqLqANsA2xCWATYjPAFsQugA2I3YCzEYcAzkQcBjgLcSjgDMThgP9GoABxHEOe57oPSTXf9NeOVcAUvO/734yxny2KIAjewzD82nLt2jUvAVPwnPPPqqre1hY74/+nAArBT29Fs9dCKsEvAigFPwNQC/4B0HWdOiptbtilQ0I1seM40Pc9ueDvFZA/qGV+qoaqANXgVQU45x+2PqQwD8ZDPrBibmRqzgUwlVnsulcFsJkyNe+qgKnMYte9KoDNlKl5VwVMZRa7LvkK/AIya4BAvmH9YQAAAABJRU5ErkJggg==') 2x), pointer;\n    --cursor-add: -webkit-image-set(url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2YsW7CMBCGnZEs4Wm6hol2DEOkKkMEL9BXAN4EmCqxMLZbsrZb90og9QFggTHVWZgGY+JLbNexlJOQIsU+33f/ne3gxXGcrdfrAXHUPEJIEcdxrgNitVo9H4/HRz4Xvu+/p2n6aiJHFAAc64A4qxnygerwfQ+eAgRBQA6HgzIEAygKmhNqnucp+61SjgJMp1Oy3W7JcrlUWswqwGw2I+PxWAnCOgBIVRPir1ZKOvMldKcEQH1lu5QQKMCsBkQRhiEZDK534bKv8jP4z7KM5HlO20M5+rMT2gP8QkgI4dyqwGCd+XxuHgBZTu0GQEAUUD58CYGizCDjsJUygxKCn/ESKpdBRTm1s4lFNYzpiVZso1UNKINoPYCsJ5wAqIKwdpkTnQOyQ0ZUTnCdPp1OT/zcXq/3ZvQ63QRAVk6yBOh6L7xK1HEua+w6vpqMVQawrYQWAJsQ2gBsQWgFsAGhHeC/IVAAk8mELBaLJpuE0jc2ZkEpAAt+OBx+B0Hwg3HKjxmNRi9Jknw1mSubUwnAgo+i6HOz2TzInNl4fxfAheDZV9HNZ6ErwQsBXAr+BsC14K8Adrsd3Srb3LCiTYI2cb/fJ/v93rngLwrAg2uZZ2pQBVwNnioQRdFHWw8pzMGo5Q9WzEKmxnQApjKL9dspgM2UqXGdAqYyi/XbKYDNlKlxnQKmMov167wCv7Mu7kBLP7biAAAAAElFTkSuQmCC') 2x), pointer;\n}\n\n/* 1.2. Layout */\n.CanvasToolsEditor {\n    display: grid;\n    grid-template-rows: 1fr;\n    grid-template-columns: 1fr; \n    width: 100%;\n    height: 100%;\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor * {\n    box-sizing: content-box;\n}\n\n.CanvasToolsEditor canvas {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 100;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n    background-color: #111;\n}\n\n.CanvasToolsEditor svg {\n    position: relative;\n    grid-row: 1;\n    grid-column: 1;\n    z-index: 101;\n    width: 100%;\n    height: 100%;\n}\n\n.CanvasToolsEditor svg {\n    cursor: var(--cursor-pointer);\n}\n\n.CanvasToolsEditor svg title {\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.CanvasToolsContainer {\n    overflow: auto;\n    height: 100%;\n    width: 100%;\n}\n\n.CanvasToolsContainer:focus {\n    outline: none;\n}\n\n/* 2. RegionsManager\n\n.regionManager\n-->.regionStyle\n    --> .tagsLayer\n    --> .dragLayer\n    --> .anchorsLayer\n    \n--> .menuLayer\n    --> .menuRectStyle\n*/\n\n/* 2.1. General settings and layout */\n.regionManager {\n    pointer-events: none;\n}\n\n.regionStyle {\n    pointer-events: visiblePainted;\n}\n\n.dragRectStyle {\n    fill: transparent; \n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n}\n\n.dragPointStyle {\n    stroke-width: 0;\n    pointer-events: all;\n    cursor: var(--cursor-move);\n    filter: url(#black-glow);\n}\n\n.tagsLayer {\n    pointer-events: none;\n}\n\n.primaryTagRectStyle {\n    stroke-width: 2;\n    stroke-dasharray: 0.5 4;\n    stroke-linecap: round;\n    filter: url(#black-glow);\n}\n\n.primaryTagPointStyle {\n    stroke-width: 1; \n}\n\n.primaryTagTextStyle {\n    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 9pt;\n    fill: #fff;\n    -moz-user-select: none; /* Firefox */\n    -ms-user-select: none; /* Internet Explorer/Edge */\n    user-select: none;\n    pointer-events: none;\n}\n\n.primaryTagTextStyle::selection {\n    background: none;\n    fill: #fff;\n}\n\n.secondaryTagStyle {\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.midpointStyle {\n    stroke-width: 2;\n}\n\n.bezierControlPointTangentStyle,\n.bezierControlPointStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle {\n    stroke-width: 2;\n}\n\n.anchorStyle.ghost {\n    cursor: var(--cursor-resize);\n}\n\n.anchorStyle.ghost.delete {\n    cursor: var(--cursor-delete);\n}\n\n.anchorStyle.ghost.add {\n    cursor: var(--cursor-add);\n}\n\n.anchorStyle.ghost {\n    stroke-width: 0;\n}\n\n.primaryTagBoundRectStyle {\n    stroke-width: 2;\n}\n\n.primaryTagPolylineStyle, .primaryTagPolygonStyle {\n    stroke-width: 2;\n    stroke-linecap: round;\n    stroke-dasharray: 0.5 4;\n}\n\n/* 2.2. Default colors */\n.regionManager {\n    --default-color-pure: rgb(128, 128, 128);\n    --default-color-accent: rgba(128, 128, 128, 0.8);\n    --default-color-dark: rgba(64, 64, 64, 0.8);\n    --default-color-shadow: rgba(128, 128, 128, 0.4);\n    --default-color-highlight: rgba(128, 128, 128, 0.2);\n    --default-color-white: rgb(255, 255, 255);\n    --default-color-transparent: rgba(255, 255, 255, 0);\n    --default-color-ghost: rgba(255, 255, 255, 0.5);\n    --default-color-delete: rgba(216, 24, 65, 1.0);\n    --default-color-add: rgba(21, 127, 240, 1.0);\n    --default-color-control: rgb(253, 128, 45);\n}\n\n/* 2.2.1. Shared colors */\n.secondaryTagStyle {\n    fill: var(--default-color-accent);\n}\n\n.midpointStyle {\n    stroke: none;\n    fill: none;\n}\n\n.bezierControlPointTangentStyle,\n.bezierControlPointStyle {\n    stroke: none;\n    fill: none;\n}\n\n.anchorStyle {\n    stroke: var(--default-color-dark);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle:hover .anchorStyle {\n    stroke: var(--default-color-white);\n}\n\n.regionStyle:hover .midpointStyle {\n    stroke: var(--default-color-white);\n    fill: var(--default-color-white);\n}\n\n.regionStyle:hover .midpointStyle:hover {\n    stroke: var(--default-color-accent);\n}\n\n.regionStyle.selected .bezierControlPointTangentStyle,\n.regionStyle:hover .bezierControlPointTangentStyle {\n    stroke: var(--default-color-control);\n    stroke-dasharray: 4;\n}\n\n.regionStyle.selected .bezierControlPointStyle,\n.regionStyle:hover .bezierControlPointStyle {\n    stroke: var(--default-color-control);\n    fill: var(--default-color-pure);\n}\n\n.regionStyle.selected .bezierControlPointStyle:hover,\n.regionStyle:hover .bezierControlPointStyle:hover {\n    cursor: var(--cursor-resize);\n    stroke: var(--default-color-control);\n    fill: var(--default-color-control);\n}\n\n.anchorStyle.ghost,\n.anchorStyle.ghost:hover,\n.regionStyle.selected .anchorStyle.ghost,\n.regionStyle.selected .anchorStyle.ghost:hover {\n    fill: var(--default-color-ghost);\n}\n\n.anchorStyle:hover {\n    stroke: var(--default-color-white);\n}\n\n/* 2.2.2. Rect region colors */\n.primaryTagRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n}\n\n.regionStyle:hover .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n}\n\n.regionStyle.selected .primaryTagRectStyle {\n    fill: var(--default-color-highlight);\n    stroke-dasharray: none;\n}\n\n.primaryTagTextBGStyle {\n    fill: var(--default-color-dark);\n}\n\n.anchorBoneStyle {\n    fill: var(--default-color-transparent);\n}\n\n/* 2.2.3. Point region  colors */\n.primaryTagPointStyle {\n    fill: var(--default-color-pure);\n    stroke:var(--default-color-white);\n}\n\n.dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 0.5;\n}\n\n.regionStyle:hover .dragPointStyle,\n.regionStyle.selected .dragPointStyle {\n    fill: var(--default-color-ghost);\n    opacity: 1.0;\n}\n\n/* 2.2.4. Polyline, polygon region colors */\n.primaryTagBoundRectStyle {\n    fill: var(--default-color-shadow);\n    stroke:var(--default-color-accent);\n    opacity: 0.25;\n}\n\n.regionStyle.selected .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    opacity: 1;\n}\n\n.regionStyle:hover .primaryTagBoundRectStyle {\n    fill: var(--default-color-highlight);\n    stroke: var(--default-color-white);\n    opacity: 0.75;\n}\n\n.primaryTagPolylineStyle {\n    fill: var(--default-color-transparent);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolylineStyle {\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.primaryTagPolygonStyle {\n    fill: var(--default-color-shadow);\n    stroke: var(--default-color-pure);\n}\n\n.regionStyle.selected .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n    filter: url(#black-glow);\n    stroke-dasharray: none;\n}\n\n.regionStyle:hover .primaryTagPolygonStyle {\n    fill: var(--default-color-highlight);\n}\n\n.regionStyle:hover .anchorStyle.ghost.delete,\n.regionStyle.selected .anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete,\n.anchorStyle.ghost.delete:hover {\n    stroke: var(--default-color-delete);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.regionStyle:hover .anchorStyle.ghost.add,\n.regionStyle.selected .anchorStyle.ghost.add,\n.anchorStyle.ghost.add,\n.anchorStyle.ghost.add:hover {\n    stroke: var(--default-color-add);\n    stroke-width: 2px;\n    fill: var(--default-color-transparent);\n}\n\n.anchorLineStyle {\n    fill: none;\n    stroke-width: 5;\n    stroke: var(--default-color-transparent);  \n}\n\nsvg:not(:root) .menuLayer {\n    overflow: visible;\n}\n\n.menuRectStyle { \n    stroke-width:0;\n    fill: #000;\n    filter: url(#black-glow); \n}\n\n.menuItemBack {\n    stroke-width: 1.5;\n    stroke: rgba(198, 198, 198, 0.2);\n    fill:  #000;\n}\n\n.menuIcon {\n    font-family: 'Segoe UI Emoji', Tahoma, Geneva, Verdana, sans-serif;\n    font-size: 10pt;\n    fill: #fff;\n}\n\n.menuItem {\n    stroke-width: 1.5;\n    stroke: #fff;\n    fill:transparent;\n}\n\n.menuItem:hover {\n    stroke: #157ff0;\n}\n\n/* Freezing regions */ \n\n.regionManager.frozen .regionStyle.old,\n.regionManager.frozen .regionStyle.old .dragRectStyle,\n.regionManager.frozen .regionStyle.old .dragPointStyle {\n    pointer-events: none;\n}\n\n.regionManager.frozen .regionStyle.old .dragRectStyle, \n.regionManager.frozen .regionStyle.old .anchorStyle.TL, \n.regionManager.frozen .regionStyle.old .anchorStyle.BR, \n.regionManager.frozen .regionStyle.old .anchorStyle.TR, \n.regionManager.frozen .regionStyle.old .anchorStyle.BL {\n    cursor: default; \n}\n\n.regionManager.frozen .anchorStyle.ghost {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old, \n.regionManager.frozen .regionStyle.old:hover{\n    opacity: 0.5;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagRectStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPointStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolylineStyle,\n.regionManager.frozen .regionStyle.old .primaryTagPolygonStyle {\n    stroke-width: 1;\n    stroke-dasharray: 0 0;\n}\n\n.regionManager.frozen .regionStyle.old .anchorStyle {\n    display: none;\n}\n\n.regionManager.frozen .regionStyle.old .primaryTagTextStyle,\n.regionManager.frozen .regionStyle.old .primaryTagTextBGStyle {\n    opacity: 0.25;\n}\n\n/* AreaSelector\n\n.areaSelector\n-->.rectSelector\n    --> .maskStyle\n        [mask]\n            .maskInStyle\n            .maskOutStyle\n        .crossStyle\n            line\n            line\n-->.rectCopySelector\n    --> .crossStyle\n            line\n            line\n        .copyRectStyle\n-->.pointSelector\n    --> .crossStyle\n        .pointStyle\n-->.polylineSelector\n    --> .polylineStyle\n        .polylineGroupStyle\n        --> .polylinePointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n-->.polygonSelector\n    --> .polygonStyle\n        .polygonGroupStyle\n        --> .polygonPointStyle\n        .nextSegmentStyle\n        .nextPointStyle\n*/\n\n#selectionOverlay {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    pointer-events: none;\n}\n\n.crossStyle line {\n    stroke-width:1;\n    stroke-dasharray: 3 3;\n    stroke: #666;\n    pointer-events: none; \n}\n\n.crossStyle .blackDashes {\n    stroke-width:3;\n    stroke-dasharray: 3 3;\n    stroke: #000;\n    pointer-events: none; \n}\n\n.crossStyle .whiteDashes {\n    stroke-width:3;\n    stroke-dasharray: 0 3 0;\n    stroke: #fff;\n    pointer-events: none; \n}\n\n.selectionBoxStyle {\n    fill: #fff;\n    fill-opacity: 0.25;\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.rectCopySelector .copyRectStyle {\n    stroke-width:3;\n    stroke: #000;\n    fill: transparent;\n    pointer-events: none; \n}\n\n.pointSelector .pointStyle {\n    stroke-width:2;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none; \n}\n\n.polylineSelector .polylineStyle {\n    fill: transparent;\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polylineSelector .polylinePointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polylineSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polylineSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n.polygonSelector .polygonStyle {\n    fill: rgba(255,255,255, 0.2);\n    stroke-width: 2px;\n    stroke:  rgba(21, 127, 240, 0.5);\n    pointer-events: none;\n}\n\n.polygonSelector .polygonPointStyle {\n    fill:  rgba(21, 127, 240, 1.0);\n    stroke-width: 0;\n    pointer-events: none;\n}\n\n.polygonSelector .nextSegmentStyle {\n    stroke-width:2;\n    stroke-dasharray: 3 3;\n    stroke: rgba(21, 127, 240, 1.0);\n    pointer-events: none;\n}\n.polygonSelector .nextPointStyle {\n    stroke-width:2;\n    r: 6px;\n    stroke: rgba(21, 127, 240, 1.0);\n    fill: transparent;\n    pointer-events: none;\n}\n\n/* Toolbar \n\n.toolbarLayer\n--> .toolbarBGStyle\n--> .iconsLayerStyle\n    --> .iconStyle\n        --> .iconBGRectStyle\n            .iconImageStyle\n*/\n.toolbarBGStyle {\n    fill: #000;\n}\n\n.iconStyle {\n    pointer-events: all;\n}\n\n.iconStyle.selector .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.selector:hover .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle.selector.selected .iconBGRectStyle {\n    fill: #157ff0;\n}\n\n.iconStyle .iconImageStyle * {\n    stroke: #fff;\n}\n\n\n.iconStyle.switch .iconBGRectStyle{\n    fill: transparent;\n}\n\n.iconStyle.switch:hover .iconBGRectStyle{\n    fill: #157ff0;\n}\n\n.iconStyle.switch .iconImageStyle * {\n    stroke: #fff;\n}\n\n.iconStyle.switch.selected .iconImageStyle * {\n    stroke: rgb(14, 186, 253);\n    stroke-width: 1.5;\n}\n\n.iconStyle .iconImageStyle .accent-f {\n    fill: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle .iconImageStyle .accent-s {\n    stroke: rgba(21, 127, 240, 1.0);\n}\n\n.iconStyle.separator line {\n    stroke: #fff;\n    stroke-width: 0.5px;\n}\n\n/* Announcer */\n#regionAnnouncer {\n    position: absolute !important;\n    height: 0px; \n    width: 0px;\n    overflow: hidden;\n    clip: rect(0px, 0px, 0px, 0px);\n    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    -webkit-clip-path: polygon(0px 0px, 0px 0px, 0px 0px);\n    white-space: nowrap;\n}\n\n.grabbable {\n    cursor: move; /* fallback if grab cursor is unsupported */\n    cursor: grab;\n    cursor: -moz-grab;\n    cursor: -webkit-grab;\n}\n\n /* (Optional) Apply a \"closed-hand\" cursor during drag operation. */\n.grabbable:active {\n    cursor: grabbing;\n    cursor: -moz-grabbing;\n    cursor: -webkit-grabbing;\n}", ""]);
 
 // exports
 

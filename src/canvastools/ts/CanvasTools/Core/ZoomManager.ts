@@ -69,6 +69,7 @@ export class ZoomManager {
             this.previousZoomScale = this.currentZoomScale = 1;
         }
     }
+;
 
     /**
      * Gets the singleton instance of Zoom Manager.
@@ -79,12 +80,14 @@ export class ZoomManager {
      */
     public static getInstance(
         isZoomEnabled = false,
+        editorContainerDiv?: HTMLDivElement,
         zoomCallbacks?: IZoomCallbacks,
         maxZoom?: number,
         zoomScale?: number,
     ) {
         if (!ZoomManager.instance) {
-            ZoomManager.instance = new ZoomManager(isZoomEnabled, zoomCallbacks, maxZoom, zoomScale);
+            ZoomManager.instance = new ZoomManager(isZoomEnabled, editorContainerDiv,
+                zoomCallbacks, maxZoom, zoomScale);
         }
         return ZoomManager.instance;
     }
@@ -140,8 +143,14 @@ export class ZoomManager {
       */
     private shouldResetZoomOnContentLoad: boolean;
 
-    private constructor(isZoomEnabled = false, zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
+    private zoomCanvas: HTMLDivElement;
+
+    private pos = { top: 0, left: 0, x: 0, y: 0 };
+
+    private constructor(isZoomEnabled = false, zoomCanvas: HTMLDivElement,
+            zoomCallbacks?: IZoomCallbacks, maxZoom?: number, zoomScale?: number) {
         this.isZoomEnabled = isZoomEnabled;
+        this.zoomCanvas = zoomCanvas;
         this.maxZoomScale = maxZoom ? maxZoom : this.maxZoomScale;
         this.zoomScale = zoomScale ? zoomScale : this.zoomScale;
         this.currentZoomScale = this.minZoomScale;
@@ -215,4 +224,56 @@ export class ZoomManager {
             delete ZoomManager.instance;
         }
     }
+
+    /**
+     * Helper function to subscribe manager to drag events
+     */
+    public setDragging(activate: boolean) {
+        if (activate) {
+            // mouse down should be handled in the zoom canvas
+            this.zoomCanvas.addEventListener('mousemove', this.mouseMoveHandler);
+            // the scope of mouse move and up will be the window
+            window.addEventListener('mousedown', this.mouseDownHandler);
+            window.addEventListener('mouseup', this.mouseUpHandler);
+        } else {
+            // remove the mouse-down notion
+            this.zoomCanvas.style.removeProperty('user-select');
+            this.zoomCanvas.removeEventListener('mousemove', this.mouseMoveHandler);
+            window.removeEventListener('mousedown', this.mouseDownHandler);
+            window.removeEventListener('mouseup', this.mouseUpHandler);
+        }
+    }
+
+    private mouseDownHandler = (e: MouseEvent) => {
+        if (this.zoomCanvas) {
+            this.zoomCanvas.style.cursor = 'grabbing';
+            this.zoomCanvas.style.userSelect = 'none';
+
+            this.pos = {
+                left: this.zoomCanvas.scrollLeft,
+                top: this.zoomCanvas.scrollTop,
+                // Get the current mouse position
+                x: e.clientX,
+                y: e.clientY,
+            };
+        }
+    };
+
+    private mouseUpHandler = () => {
+        if (this.zoomCanvas) {
+            this.zoomCanvas.style.removeProperty('user-select');
+        }
+    }
+
+    private mouseMoveHandler = (e: MouseEvent) => {
+        if (this.zoomCanvas && this.zoomCanvas.style.getPropertyValue('user-select')){
+            // How far the mouse has been moved
+            const dx = e.clientX - this.pos.x;
+            const dy = e.clientY - this.pos.y;
+
+            // Scroll the element
+            this.zoomCanvas.scrollTop = this.pos.top - dy;
+            this.zoomCanvas.scrollLeft = this.pos.left - dx;
+        }
+    };
 }

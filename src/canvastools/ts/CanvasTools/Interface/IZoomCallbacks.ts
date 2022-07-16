@@ -25,4 +25,14 @@ export interface IZoomCallbacks {
      * Set the current zoom level
      */
     setZoomLevel: (zoomScale: number) => ZoomData;
+    
+    /**
+     * Set the canvas draggable when it is zooming in
+     */
+    onDraggingCanvas: () => void;
+
+    /**
+     * Remove event listener for dragging
+     */
+    onEndDragging: () => void;
 }

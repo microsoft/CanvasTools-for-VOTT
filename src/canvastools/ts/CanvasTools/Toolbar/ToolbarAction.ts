@@ -11,4 +11,5 @@ export enum ToolbarAction {
     BACKGROUND_TOGGLE = "background-toggle",
     ZOOM_IN = "zoom-in",
     ZOOM_OUT = "zoom-out",
+    ZOOM_DRAG = "zoom-drag",
 }
