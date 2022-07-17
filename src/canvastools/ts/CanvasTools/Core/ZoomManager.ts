@@ -111,6 +111,8 @@ export class ZoomManager {
      */
     public callbacks: IZoomCallbacks;
 
+    public isDraggingEnabled: boolean;
+
     /**
      * The minimum zoom factor.
      * Defaults to 1 or 100%.
@@ -229,6 +231,7 @@ export class ZoomManager {
      * Helper function to subscribe manager to drag events
      */
     public setDragging(activate: boolean) {
+        this.isDraggingEnabled = activate;
         if (activate) {
             document.getElementById('svgCanvas').style.cursor = 'grab';
             // mouse down should be handled in the zoom canvas

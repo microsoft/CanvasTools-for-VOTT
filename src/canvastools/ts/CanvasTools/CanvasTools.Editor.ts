@@ -374,15 +374,13 @@ export class Editor {
             activate: false,
         },
         {
-            type: ToolbarItemType.SELECTOR,
+            type: ToolbarItemType.SWITCH,
             action: ToolbarAction.ZOOM_DRAG,
-            iconFile: "zoom-out.svg",
+            iconFile: "zoom-drag.svg",
             tooltip: "Dragging for zoom-in (U)",
             key: ["Z", "z"],
             actionCallback: (action, rm, sl, zm) => {
-                sl.setSelectionMode(SelectionMode.NONE);
-                rm.freeze();
-                zm.callbacks.onDraggingCanvas();
+                zm.callbacks.toggleDragging();
             },
             activate: false,
         },
@@ -723,8 +721,15 @@ export class Editor {
                 this.onZoom(ZoomDirection.In, newZoomScale);
                 return this.zoomManager.getZoomData();
             },
-            onDraggingCanvas: () => {
-                this.zoomManager.setDragging(true);
+            toggleDragging: () => {
+                if (!this.zoomManager.isDraggingEnabled) {
+                    this.AS.setSelectionMode(SelectionMode.NONE);
+                    this.RM.freeze();
+                    this.zoomManager.setDragging(true);
+                } else {
+                    this.regionsManager.unfreeze();
+                    this.zoomManager.setDragging(false);
+                }
             },
             onEndDragging: () => {
                 this.regionsManager.unfreeze();
