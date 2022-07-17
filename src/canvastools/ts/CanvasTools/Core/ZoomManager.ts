@@ -230,12 +230,14 @@ export class ZoomManager {
      */
     public setDragging(activate: boolean) {
         if (activate) {
+            document.getElementById('svgCanvas').style.cursor = 'grab';
             // mouse down should be handled in the zoom canvas
             this.zoomCanvas.addEventListener('mousemove', this.mouseMoveHandler);
             // the scope of mouse move and up will be the window
             window.addEventListener('mousedown', this.mouseDownHandler);
             window.addEventListener('mouseup', this.mouseUpHandler);
         } else {
+            document.getElementById('svgCanvas').style.cursor = 'var(--cursor-pointer)';
             // remove the mouse-down notion
             this.zoomCanvas.style.removeProperty('user-select');
             this.zoomCanvas.removeEventListener('mousemove', this.mouseMoveHandler);
@@ -246,7 +248,7 @@ export class ZoomManager {
 
     private mouseDownHandler = (e: MouseEvent) => {
         if (this.zoomCanvas) {
-            this.zoomCanvas.style.cursor = 'grabbing';
+            document.getElementById('svgCanvas').style.cursor = 'grabbing';
             this.zoomCanvas.style.userSelect = 'none';
 
             this.pos = {
@@ -261,6 +263,7 @@ export class ZoomManager {
 
     private mouseUpHandler = () => {
         if (this.zoomCanvas) {
+            document.getElementById('svgCanvas').style.cursor = 'grab';
             this.zoomCanvas.style.removeProperty('user-select');
         }
     }

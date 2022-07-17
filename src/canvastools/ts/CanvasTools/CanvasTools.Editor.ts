@@ -607,6 +607,7 @@ export class Editor {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
         this.editorSVG = this.createSVGElement();
+        this.editorSVG.setAttribute('id', 'svgCanvas');
 
         this.editorContainerDiv = container;
         this.editorContainerDiv.classList.add("CanvasToolsContainer");
