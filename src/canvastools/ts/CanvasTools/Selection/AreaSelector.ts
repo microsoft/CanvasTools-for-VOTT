@@ -1,9 +1,11 @@
+import { ConfigurationManager } from "../Core/ConfigurationManager";
 import { Rect } from "../Core/Rect";
 import { RegionData } from "../Core/RegionData";
 import { TagsDescriptor } from "../Core/TagsDescriptor";
 import { IRect } from "../Interface/IRect";
 import { ISelectorCallbacks } from "../Interface/ISelectorCallbacks";
 import { ISelectorSettings, SelectionMode } from "../Interface/ISelectorSettings";
+import { MaskSelector } from "./Selectors/MaskSelector";
 import { PointSelector } from "./Selectors/PointSelector";
 import { PolygonSelector } from "./Selectors/PolygonSelector";
 import { PolylineSelector } from "./Selectors/PolylineSelector";
@@ -85,6 +87,11 @@ export class AreaSelector {
     private polygonSelector: PolygonSelector;
 
     /**
+     * Reference to a `MaskSelector` object.
+     */
+    private maskSelector?: MaskSelector;
+
+    /**
      * Internal flag to track selector visibility.
      */
     private isVisible: boolean = true;
@@ -105,6 +112,7 @@ export class AreaSelector {
                 onSelectionEnd: null,
                 onNextSelectionPoint: null,
                 onUnlocked: null,
+                onMaskSelection: null
             };
         }
 
@@ -229,6 +237,14 @@ export class AreaSelector {
             this.disable();
             this.selectorSettings = selectionSettings;
 
+            // disable if its a non mask mode selection
+            if (
+                this.selectorSettings.mode !== SelectionMode.BRUSH &&
+                this.selectorSettings.mode !== SelectionMode.ERASER
+            ) {
+                this.maskSelector.disable();
+            }
+
             if (this.selectorSettings.mode === SelectionMode.NONE) {
                 this.selector = null;
                 return;
@@ -248,6 +264,10 @@ export class AreaSelector {
                 this.selector = this.polylineSelector;
             } else if (this.selectorSettings.mode === SelectionMode.POLYGON) {
                 this.selector = this.polygonSelector;
+            } else if (this.selectorSettings.mode === SelectionMode.BRUSH) {
+                this.maskSelector.enableMode(SelectionMode.BRUSH);
+            } else if (this.selectorSettings.mode === SelectionMode.ERASER) {
+                this.maskSelector?.enableMode(SelectionMode.ERASER);
             }
             // restore enabled status
             this.enable();
@@ -314,6 +334,9 @@ export class AreaSelector {
         this.pointSelector = new PointSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.polylineSelector = new PolylineSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.polygonSelector = new PolygonSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
+        
+        this.maskSelector = new MaskSelector(SelectionMode.BRUSH, this.callbacks);
+        this.maskSelector?.disable();
 
         this.selector = this.rectSelector;
 

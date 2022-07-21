@@ -28,7 +28,6 @@
     position: relative;
     grid-row: 1;
     grid-column: 1;
-    z-index: 100;
     width: 100%;
     height: 100%;
     pointer-events: none;
@@ -39,7 +38,6 @@
     position: relative;
     grid-row: 1;
     grid-column: 1;
-    z-index: 101;
     width: 100%;
     height: 100%;
 }
@@ -53,6 +51,18 @@
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none;
     pointer-events: none;
+}
+
+.CanvasToolsEditor #konvaContainer {
+    position: relative;
+    grid-row: 1;
+    grid-column: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.konvajs-content canvas {
+    opacity: 0.5;
 }
 
 .CanvasToolsContainer {
