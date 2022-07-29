@@ -237,14 +237,6 @@ export class AreaSelector {
             this.disable();
             this.selectorSettings = selectionSettings;
 
-            // disable if its a non mask mode selection
-            if (
-                this.selectorSettings.mode !== SelectionMode.BRUSH &&
-                this.selectorSettings.mode !== SelectionMode.ERASER
-            ) {
-                this.maskSelector.disable();
-            }
-
             if (this.selectorSettings.mode === SelectionMode.NONE) {
                 this.selector = null;
                 return;
@@ -275,6 +267,14 @@ export class AreaSelector {
                 this.show();
             } else {
                 this.hide();
+            }
+
+            // disable if its a non mask mode selection
+            if (
+                this.selectorSettings.mode !== SelectionMode.BRUSH &&
+                this.selectorSettings.mode !== SelectionMode.ERASER
+            ) {
+                this.maskSelector.disable();
             }
         }
     }

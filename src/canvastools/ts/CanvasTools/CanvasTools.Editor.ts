@@ -700,6 +700,13 @@ export class Editor {
                 }
             },
             onMaskSelection: (enabled: boolean, mode?: MaskSelectorMode) => {
+                if (enabled) {
+                    this.regionsManager?.freeze();
+                    this.areaSelector?.hide();
+                } else {
+                    this.regionsManager?.unfreeze();
+                    this.areaSelector?.show();
+                }
                 this.masksManager?.setSelection(enabled, mode);
             }
         };
@@ -887,6 +894,8 @@ export class Editor {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
                 this.handleZoomAfterContentUpdate();
+
+                this.handleMaskManagerAfterContentUpdate();
             });
     }
 
@@ -919,8 +928,18 @@ export class Editor {
                     return this.onMaskDrawingBegin();
                 }
             },
+            onToggleMaskPreview: (enableMaskPreview: boolean) => {
+                if (enableMaskPreview) {
+                    this.regionsManager.updateRegionVisibility(() => true, false);
+                } else {
+                    this.regionsManager.updateRegionVisibility(() => true, true);
+                }
+            },
+            getAllRegions: () => {
+                return this.regionsManager.getAllRegions();
+            }
         };
-        this.masksManager = new MasksManager(this.konvaContainerDivElement, mmCallbacks);
+        this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
     }
 
     /**
@@ -1083,6 +1102,10 @@ export class Editor {
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
             this.masksManager?.resize(scaledFrameWidth, scaledFrameHeight);
         }
+    }
+
+    private handleMaskManagerAfterContentUpdate(): void {
+        this.masksManager?.eraseAllMasks();
     }
 
     /**

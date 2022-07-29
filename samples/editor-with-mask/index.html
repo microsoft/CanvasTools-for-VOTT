@@ -51,6 +51,9 @@
             <button id="getRegion">Get Region !</button>
             <button id="disableAS">Disable AS</button>
             <button id="enableAS">Enable AS</button>
+            <button id="getAllMasks">Get all masks</button>
+            <button id="loadAllMasks">Load all masks</button>
+            <button id="preview">Preview</button>
         </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
@@ -117,7 +120,8 @@
             isZoomEnabled: true,
             zoomType: 3
         }).api;
-        editor.addToolbar(toolbarContainer, CanvasTools.Editor.RectToolbarSet, "./../shared/media/icons/");
+        editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
+        editor.enablePathRegions(true);
         editor.enableMaskRegions();
 
         let incrementalRegionID = 100;
@@ -181,6 +185,7 @@
             imageIndex = index;
             loadImage(path, (image) => {
                 editor.addContentSource(image);
+                editor.AS.setSelectionMode(2);
 
                 var showZoomDiv = document.getElementById("showZoomFactor");
                 showZoomDiv.innerText = "Image zoomed at " + editor.ZM.getZoomData().currentZoomScale*100 + " %";
@@ -200,7 +205,7 @@
         });
 
         initBrushSizeSelect((value) => {
-            editor.MM.setBrushSize({brush: value, erase: value});
+            editor.MM.setBrushSize({brush: parseInt(value), erase: parseInt(value)});
         });
 
         initTagColorSelect((value) => {
@@ -221,6 +226,22 @@
         var getRegionButton = document.getElementById("enableAS");
         getRegionButton.addEventListener("click", (e) => {
             editor.AS.show();
+        });
+
+        var getAllMasksButton = document.getElementById("getAllMasks");
+        getAllMasksButton.addEventListener("click", (e) => {
+            window["brushData"] = editor.MM.getAllMasks();
+        });
+
+        var loadAllMasksButton = document.getElementById("loadAllMasks");
+        loadAllMasksButton.addEventListener("click", (e) => {
+            editor.MM.eraseAllMasks();
+            editor.MM.loadAllMasks(window["brushData"]);
+        });
+
+        var previewButton = document.getElementById("preview");
+        previewButton.addEventListener("click", (e) => {
+            editor.MM.togglePreview();
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");
