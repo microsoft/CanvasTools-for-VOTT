@@ -9,7 +9,17 @@ export type MaskSelectorMode = SelectionMode.BRUSH | SelectionMode.ERASER;
 export interface IMaskManagerCallbacks {
     onMaskDrawingBegin: () => TagsDescriptor;
     onToggleMaskPreview: (enableMaskPreview: boolean) => void;
-    getAllRegions: () => Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }>;
+    getAllRegionsWithLayer: () => Array<{
+        id: string;
+        tags: TagsDescriptor;
+        regionData: RegionData;
+        layerNumber: number;
+    }>;
+}
+
+export interface IDimension {
+    width: number;
+    height: number;
 }
 
 export interface IBrushSize {

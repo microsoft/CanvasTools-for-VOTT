@@ -47,10 +47,20 @@ export class PolygonRegion extends Region {
      * @param id - The region `id` used to identify regions in `RegionsManager`.
      * @param tagsDescriptor - The descriptor of region tags.
      * @param tagsUpdateOptions - The drawing options for tags.
+     * @param layerNumber - The layer number for this region.
      */
     constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
-        id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
+        id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions, layerNumber?: number) {
+        super(
+            paper,
+            paperRect,
+            regionData,
+            Object.assign({}, callbacks),
+            id,
+            tagsDescriptor,
+            tagsUpdateOptions,
+            layerNumber
+        );
 
         if (paperRect !== null) {
             this.paperRects = {

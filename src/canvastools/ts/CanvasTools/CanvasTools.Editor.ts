@@ -1,5 +1,6 @@
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { ConfigurationManager } from "./Core/ConfigurationManager";
+import { LayerManager } from "./Core/LayerManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
@@ -508,6 +509,11 @@ export class Editor {
     private zoomManager: ZoomManager;
 
     /**
+     * Internal reference to the `LayerManager` component.
+     */
+     private layerManager: LayerManager;
+
+    /**
      * Reference to the host SVG element.
      */
     private editorSVG: SVGSVGElement;
@@ -750,6 +756,8 @@ export class Editor {
             this.zoomManager.zoomType = zoomProperties.zoomType || ZoomType.Default;
         }
 
+        this.layerManager = LayerManager.getInstance();
+
         // Adjust editor size
         this.resize(container.offsetWidth, container.offsetHeight);
 
@@ -896,6 +904,8 @@ export class Editor {
                 this.handleZoomAfterContentUpdate();
 
                 this.handleMaskManagerAfterContentUpdate();
+
+                this.handleLayerManagerAfterContentUpdate();
             });
     }
 
@@ -935,8 +945,8 @@ export class Editor {
                     this.regionsManager.updateRegionVisibility(() => true, true);
                 }
             },
-            getAllRegions: () => {
-                return this.regionsManager.getAllRegions();
+            getAllRegionsWithLayer: () => {
+                return this.regionsManager.getAllRegionsWithLayer();
             }
         };
         this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
@@ -1106,6 +1116,12 @@ export class Editor {
 
     private handleMaskManagerAfterContentUpdate(): void {
         this.masksManager?.eraseAllMasks();
+    }
+
+    private handleLayerManagerAfterContentUpdate(): void {
+        const layermanagerInstance = LayerManager.getInstance();
+        layermanagerInstance.deleteInstance();
+        this.layerManager = LayerManager.getInstance();
     }
 
     /**

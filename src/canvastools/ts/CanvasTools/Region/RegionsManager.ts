@@ -1,3 +1,4 @@
+import { LayerManager } from "../Core/LayerManager";
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { RegionData, RegionDataType } from "../Core/RegionData";
@@ -124,8 +125,12 @@ export class RegionsManager {
 
         this.regions = new Array<Region>();
         this.callbacks = {
-            onChange: (region: Region, regionData: RegionData, state: ChangeEventType,
-                       multiSelection: boolean = false) => {
+            onChange: (
+                region: Region,
+                regionData: RegionData,
+                state: ChangeEventType,
+                multiSelection: boolean = false
+            ) => {
                 this.onRegionChange(region, regionData, state, multiSelection);
                 if (typeof callbacks.onChange === "function") {
                     callbacks.onChange(region, regionData, state, multiSelection);
@@ -194,9 +199,18 @@ export class RegionsManager {
      */
     public addRectRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
-
-        const region = new RectRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
-                                      this.tagsUpdateOptions);
+        // Experimental. Currently used for rect and polygon region.
+        const layerNumber = LayerManager.getInstance().getCurrentLayerNumber();
+        const region = new RectRegion(
+            this.paper,
+            this.paperRect,
+            regionData,
+            this.callbacks,
+            id,
+            tagsDescriptor,
+            this.tagsUpdateOptions,
+            layerNumber
+        );
 
         this.registerRegion(region);
     }
@@ -210,8 +224,15 @@ export class RegionsManager {
     public addPointRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PointRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
-                                       this.tagsUpdateOptions);
+        const region = new PointRegion(
+            this.paper,
+            this.paperRect,
+            regionData,
+            this.callbacks,
+            id,
+            tagsDescriptor,
+            this.tagsUpdateOptions
+        );
 
         this.registerRegion(region);
     }
@@ -225,8 +246,15 @@ export class RegionsManager {
     public addPolylineRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PolylineRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
-                                          this.tagsUpdateOptions);
+        const region = new PolylineRegion(
+            this.paper,
+            this.paperRect,
+            regionData,
+            this.callbacks,
+            id,
+            tagsDescriptor,
+            this.tagsUpdateOptions
+        );
 
         this.registerRegion(region);
     }
@@ -239,9 +267,18 @@ export class RegionsManager {
      */
     public addPolygonRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
-
-        const region = new PolygonRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
-                                         this.tagsUpdateOptions);
+        // Experimental. Currently used for rect and polygon region.
+        const layerNumber = LayerManager.getInstance().getCurrentLayerNumber();
+        const region = new PolygonRegion(
+            this.paper,
+            this.paperRect,
+            regionData,
+            this.callbacks,
+            id,
+            tagsDescriptor,
+            this.tagsUpdateOptions,
+            layerNumber
+        );
 
         this.registerRegion(region);
     }
@@ -252,11 +289,18 @@ export class RegionsManager {
      * @param regionData - The `RegionData` object defining region.
      * @param tagsDescriptor - The tags descriptor object.
      */
-     public addPathRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
+    public addPathRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
 
-        const region = new PathRegion(this.paper, this.paperRect, regionData, this.callbacks, id, tagsDescriptor,
-                                         this.tagsUpdateOptions);
+        const region = new PathRegion(
+            this.paper,
+            this.paperRect,
+            regionData,
+            this.callbacks,
+            id,
+            tagsDescriptor,
+            this.tagsUpdateOptions
+        );
 
         this.registerRegion(region);
     }
@@ -294,7 +338,7 @@ export class RegionsManager {
     /**
      * Returns a collection of all the regions currently drawn on the canvas
      */
-    public getAllRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+    public getAllRegions(): Array<{ id: string; tags: TagsDescriptor; regionData: RegionData }> {
         return this.regions.map((region) => {
             return {
                 id: region.ID,
@@ -305,16 +349,36 @@ export class RegionsManager {
     }
 
     /**
+     * @experimentalFn Returns a collection of all the regions currently drawn on the canvas with layerNumber
+     */
+    public getAllRegionsWithLayer(): Array<{
+        id: string;
+        tags: TagsDescriptor;
+        regionData: RegionData;
+        layerNumber: number;
+    }> {
+        return this.regions.map((region) => {
+            return {
+                id: region.ID,
+                tags: region.tags,
+                regionData: this.scaleRegionToOriginalSize(region.regionData),
+                layerNumber: region.layerNumber,
+            };
+        });
+    }
+
+    /**
      * Allows for easy toggling of visibility of regions matching a predicate
      * @param shouldHideThisRegion accepts a `TagsDescriptor` and a `Region` to determine
-     * if that region should have its visibility changed. 
+     * if that region should have its visibility changed.
      * @deprecated the `tagsDescriptor` parameter will be removed from the callback signature in the
      * upcoming release. Instead, we recommend using `tags` property from the new region parameter.
      * @param shouldShow whether or not the regions found should be marked as visible or invisible
      */
     public updateRegionVisibility(
         shouldHideThisRegion: (tagsDescriptor: TagsDescriptor, region: Region) => boolean,
-        shouldShow: boolean): void {
+        shouldShow: boolean
+    ): void {
         this.regions.forEach((region) => {
             if (shouldHideThisRegion(region.tags, region)) {
                 if (shouldShow) {
@@ -329,7 +393,7 @@ export class RegionsManager {
     /**
      * Returns a collection of selected regions.
      */
-    public getSelectedRegions(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+    public getSelectedRegions(): Array<{ id: string; tags: TagsDescriptor; regionData: RegionData }> {
         return this.lookupSelectedRegions().map((region) => {
             return {
                 id: region.ID,
@@ -342,7 +406,7 @@ export class RegionsManager {
     /**
      * Returns a collection of selected regions with the zoom scale intact
      */
-    public getSelectedRegionsWithZoomScale(): Array<{ id: string, tags: TagsDescriptor, regionData: RegionData }> {
+    public getSelectedRegionsWithZoomScale(): Array<{ id: string; tags: TagsDescriptor; regionData: RegionData }> {
         return this.lookupSelectedRegions().map((region) => {
             return {
                 id: region.ID,
@@ -518,7 +582,7 @@ export class RegionsManager {
     /**
      * Changes the tags drawing setting to draw tags text or hide it.
      */
-     public toggleTagsTextVisibility() {
+    public toggleTagsTextVisibility() {
         this.tagsUpdateOptions.showTagsText = !this.tagsUpdateOptions.showTagsText;
         this.regions.forEach((r) => {
             r.updateTags(r.tags, this.tagsUpdateOptions);
@@ -787,8 +851,12 @@ export class RegionsManager {
      * @param state - New state of the region.
      * @param multiSelection - Flag for multi-selection.
      */
-    private onRegionChange(region: Region, regionData: RegionData, state: ChangeEventType,
-                           multiSelection: boolean = false) {
+    private onRegionChange(
+        region: Region,
+        regionData: RegionData,
+        state: ChangeEventType,
+        multiSelection: boolean = false
+    ) {
         // resize or drag begin
         if (state === ChangeEventType.MOVEBEGIN) {
             if (!multiSelection) {
@@ -874,9 +942,11 @@ export class RegionsManager {
         });
 
         window.addEventListener("keyup", (e) => {
-            if (!(e.target instanceof HTMLInputElement) &&
+            if (
+                !(e.target instanceof HTMLInputElement) &&
                 !(e.target instanceof HTMLTextAreaElement) &&
-                !(e.target instanceof HTMLSelectElement)) {
+                !(e.target instanceof HTMLSelectElement)
+            ) {
                 if (!this.isFrozen) {
                     switch (e.keyCode) {
                         // tab
@@ -944,16 +1014,19 @@ export class RegionsManager {
                             }
                             break;
                         // default
-                        default: return;
+                        default:
+                            return;
                     }
                     e.preventDefault();
                 }
             }
         });
         window.addEventListener("keydown", (e) => {
-            if (!(e.target instanceof HTMLInputElement) &&
+            if (
+                !(e.target instanceof HTMLInputElement) &&
                 !(e.target instanceof HTMLTextAreaElement) &&
-                !(e.target instanceof HTMLSelectElement)) {
+                !(e.target instanceof HTMLSelectElement)
+            ) {
                 if (!this.isFrozen) {
                     switch (e.key) {
                         case "a":
@@ -1005,7 +1078,7 @@ export class RegionsManager {
      */
     private regionSelectedAndValidNextRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        return (0 <= firstIndex) && (firstIndex < this.regions.length - 1);
+        return 0 <= firstIndex && firstIndex < this.regions.length - 1;
     }
 
     /**
@@ -1021,7 +1094,7 @@ export class RegionsManager {
      */
     private regionSelectedAndValidPrevRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        return (1 <= firstIndex);
+        return 1 <= firstIndex;
     }
 
     /**
@@ -1029,7 +1102,7 @@ export class RegionsManager {
      */
     private noRegionSelectedAndValidFirstRegion() {
         const firstIndex = this.getIndexOfFirstSelectedRegion();
-        return (firstIndex < 0) && (this.regions.length > 0);
+        return firstIndex < 0 && this.regions.length > 0;
     }
 
     /**
