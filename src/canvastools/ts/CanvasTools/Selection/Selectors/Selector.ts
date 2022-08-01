@@ -47,6 +47,7 @@ export abstract class Selector extends Element {
                 onSelectionBegin: null,
                 onSelectionEnd: null,
                 onUnlocked: null,
+                onMaskSelection: null
             };
         }
     }

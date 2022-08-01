@@ -3,10 +3,14 @@ import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
+import { TagsDescriptor } from "./Core/TagsDescriptor";
+import { ImageCanvasZIndex, KonvaContainerId, SvgHostZIndex } from "./Core/Utils/constants";
 import { CursorPosition, ZoomData, ZoomDirection, ZoomManager, ZoomProperties, ZoomType } from "./Core/ZoomManager";
+import { IMaskManagerCallbacks, MaskSelectorMode } from "./Interface/IMask";
 import { RegionManipulationFunction } from "./Interface/IRegionCallbacks";
 import { RegionSelectionFunction, RegionUpdateFunction } from "./Interface/IRegionsManagerCallbacks";
 import {
+    ISelectorCallbacks,
     PointSelectionNotifyFunction,
     SelectionConfirmFunction,
     SelectionNotifyFunction,
@@ -15,6 +19,7 @@ import { SelectionMode } from "./Interface/ISelectorSettings";
 import { IToolbarIcon } from "./Interface/IToolbarIcon";
 import { IZoomCallbacks, ZoomUpdateFunction } from "./Interface/IZoomCallbacks";
 import { RegionComponent } from "./Region/Component/RegionComponent";
+import { MasksManager } from "./Region/Mask/MaskManager";
 import { RegionsManager } from "./Region/RegionsManager";
 import { AreaSelector } from "./Selection/AreaSelector";
 import { Toolbar } from "./Toolbar/Toolbar";
@@ -79,6 +84,13 @@ export class Editor {
      */
     public get ZM(): ZoomManager {
         return this.zoomManager;
+    }
+
+    /**
+     * Short reference to the `MasksManager` component.
+     */
+      public get MM(): MasksManager {
+        return this.masksManager;
     }
 
     /**
@@ -451,6 +463,11 @@ export class Editor {
     public onNextSelectionPoint: PointSelectionNotifyFunction;
 
     /**
+     * Callback for `MasksManager` called when the mask is drawn.
+     */
+     public onMaskDrawingBegin: () => TagsDescriptor;
+
+    /**
      * Callback when user ended zoom function.
      */
     public onZoomEnd: ZoomUpdateFunction;
@@ -484,6 +501,11 @@ export class Editor {
      * Internal reference to the `ZoomManager` component.
      */
     private zoomManager: ZoomManager;
+
+    /**
+     * Internal reference to the `MasksManager` component.
+     */
+     private masksManager?: MasksManager;
 
     /**
      * Reference to the host SVG element.
@@ -529,6 +551,11 @@ export class Editor {
       * The current frame height.
       */
      private frameHeight: number;
+
+    /**
+     * Reference to the div element that contains the konvaJS element for mask region.
+     */
+    private konvaContainerDivElement?: HTMLDivElement;
 
     /**
      * Creates a new `Editor` in specified div-container.
@@ -649,7 +676,7 @@ export class Editor {
         }
 
         // Init areaSelector
-        const asCallbacks = {
+        const asCallbacks: ISelectorCallbacks = {
             onSelectionBegin: () => {
                 this.isRMFrozen = this.regionsManager.isFrozen;
                 this.regionsManager.freeze();
@@ -672,6 +699,16 @@ export class Editor {
                     this.onNextSelectionPoint(point);
                 }
             },
+            onMaskSelection: (enabled: boolean, mode?: MaskSelectorMode) => {
+                if (enabled) {
+                    this.regionsManager?.freeze();
+                    this.areaSelector?.hide();
+                } else {
+                    this.regionsManager?.unfreeze();
+                    this.areaSelector?.show();
+                }
+                this.masksManager?.setSelection(enabled, mode);
+            }
         };
         if (areaSelector !== null && areaSelector !== undefined) {
             this.areaSelector = areaSelector;
@@ -759,6 +796,9 @@ export class Editor {
         regionAnnouncer.setAttribute("tabindex", "-1");
         regionAnnouncer.id = "regionAnnouncer";
         container.appendChild(regionAnnouncer);
+
+        this.editorSVG.style["z-index"] = SvgHostZIndex;
+        this.contentCanvas.style["z-index"] = ImageCanvasZIndex;
     }
 
     /**
@@ -854,6 +894,8 @@ export class Editor {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
                 this.handleZoomAfterContentUpdate();
+
+                this.handleMaskManagerAfterContentUpdate();
             });
     }
 
@@ -865,6 +907,29 @@ export class Editor {
      */
     public enablePathRegions(enable: boolean) {
         ConfigurationManager.isPathRegionEnabled = enable;
+    }
+
+    /**
+     * Enable mask regions.
+     * @remarks - Configuration setting to enable support of mask regions on canvas
+     */
+    public enableMaskRegions() {
+        ConfigurationManager.isMaskEnabled = true;
+
+        // initialize KonvaJS
+        this.konvaContainerDivElement = this.createDivElement();
+        this.konvaContainerDivElement.setAttribute("id", KonvaContainerId);
+        this.editorDiv.append(this.konvaContainerDivElement);
+
+        // initialize MasksManager
+        const mmCallbacks: IMaskManagerCallbacks = {
+            onMaskDrawingBegin: () => {
+                if (typeof this.onMaskDrawingBegin === "function") {
+                    return this.onMaskDrawingBegin();
+                }
+            }
+        };
+        this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
     }
 
     /**
@@ -900,6 +965,7 @@ export class Editor {
 
         this.areaSelector.resize(this.frameWidth, this.frameHeight);
         this.regionsManager.resize(this.frameWidth, this.frameHeight);
+        this.masksManager?.resize(this.frameWidth, this.frameHeight);
     }
 
     /**
@@ -1000,6 +1066,9 @@ export class Editor {
             // regions on the canvas updates after zoom
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
 
+            // mask regions on the konvaJS canvas updates after zoom
+            this.masksManager?.resize(scaledFrameWidth, scaledFrameHeight);
+
             // template box or rect copy selector updates after zoom.
             const regions = this.regionsManager.getSelectedRegionsWithZoomScale();
             this.areaSelector.updateRectCopyTemplateSelector(this.areaSelector.getRectCopyTemplate(regions));
@@ -1022,6 +1091,10 @@ export class Editor {
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
         }
+    }
+
+    private handleMaskManagerAfterContentUpdate(): void {
+        this.masksManager?.eraseAllMasks();
     }
 
     /**

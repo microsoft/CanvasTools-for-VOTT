@@ -43,6 +43,7 @@
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^17.0.22",
+    "@thi.ng/rle-pack": "^3.1.7",
     "copyfiles": "^2.3.0",
     "cpx": "^1.5.0",
     "css-loader": "^1.0.1",
@@ -53,6 +54,7 @@
     "handlebars": ">=4.5.3",
     "imports-loader": "^0.8.0",
     "jest": "^25.1.0",
+    "konva": "^8.3.9",
     "serialize-javascript": ">=3.1.0",
     "style-loader": "^0.23.1",
     "ts-jest": "^25.2.0",

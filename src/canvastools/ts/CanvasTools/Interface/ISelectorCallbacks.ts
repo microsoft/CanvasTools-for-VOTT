@@ -1,5 +1,6 @@
 import { Point2D } from "../Core/Point2D";
 import { RegionData } from "../Core/RegionData";
+import { MaskSelectorMode } from "./IMask";
 
 export type SelectionNotifyFunction = () => void;
 export type PointSelectionNotifyFunction = (point: Point2D) => void;
@@ -34,4 +35,11 @@ export interface ISelectorCallbacks {
      * The callback to be called when the current selector is unlocked.
      */
     onUnlocked?: () => void;
+
+    /**
+     * The callback to be called when the current selector is unlocked.
+     * @param enabled - indicates if mask selection is enabled
+     * @param mode - optional. sets the mode of mask selection to either brush or eraser
+     */
+         onMaskSelection?: (enabled: boolean, mode?: MaskSelectorMode) => void
 }

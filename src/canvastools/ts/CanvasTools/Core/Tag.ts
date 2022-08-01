@@ -2,6 +2,7 @@ import { Color } from "../Core/Colors/Color";
 import { ITag } from "../Interface/ITag";
 import { HSLColor } from "./Colors/HSLColor";
 import { LABColor } from "./Colors/LABColor";
+import { SRGBColor } from "./Colors/SRGBColor";
 
 /**
  * Represents meta-data for a tag
@@ -51,6 +52,13 @@ export class Tag implements ITag {
      */
     public get color(): string {
         return this.colorObj.sRGB.toHex();
+    }
+
+    /**
+     * The tag's color in hex format. *Readonly*
+     */
+       public get srgbColor(): SRGBColor {
+        return this.colorObj.sRGB;
     }
 
     /**

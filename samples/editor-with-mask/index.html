@@ -1,0 +1,341 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" />
+    <title>CanvasTools Samples - Images Editor</title>
+</head>
+
+<body>
+    <h1>CanvasTools Samples - Images Editor</h1>
+    <div id="canvasToolsDiv">
+        <div id="toolbarDiv">
+        </div>
+        <div id="selectionDiv" onmousewheel="onWheelCapture(event)">
+            <div id="editorDiv"></div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div>
+            <label for="imageSelect" >Choose image: </label>
+            <select id="imageSelect">
+            </select>
+        </div>
+        <div>
+            <label for="tagColorSelect" >Choose label: </label>
+            <select id="tagColorSelect">
+                <option value="#c48de7">Awesome</option>
+                <option value="#3b1fff">Amazing</option>
+                <option value="#f94c48">Brilliant</option>
+            </select>
+        </div>
+        <div>
+            <label for="brushModeSelect" >Choose brush type: </label>
+            <select id="brushModeSelect">
+                <option value="NONE">None</option>
+                <option value="brush">Brush</option>
+                <option value="eraser">Eraser</option>
+            </select>
+        </div>
+        <div>
+            <label for="brushSizeSelect" >Choose brush/eraser size: </label>
+            <select id="brushSizeSelect">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <div>
+            <button id="getRegion">Get Region !</button>
+            <button id="disableAS">Disable AS</button>
+            <button id="enableAS">Enable AS</button>
+        </div>
+        <div id="showZoomFactor"></div>
+        <input id="resetZoomOnLoad" type="checkbox"></input>
+        <label id="resetZoomOnLoadLabel">Reset Zoom On Content Load</label>
+    </div>
+</body>
+<script src="./../shared/js/ct.js"></script>
+<script>
+    // The list of images
+    const images = [
+            {
+                path: "./../shared/media/background-shapesTest1.jpg",
+                title: "Shapes (1)"
+            },
+            {
+                path: "./../shared/media/background-shapesTest2.jpg",
+                title: "Shapes (2)"
+            },
+            {
+                path: "./../shared/media/background-cat-hd.jpg",
+                title: "Cat (HD)"
+            },
+            {
+                path: "./../shared/media/background-cat2.jpg",
+                title: "Cat - Grumpy"
+            },
+            {
+                path: "./../shared/media/background-cat3.jpg",
+                title: "Cat - Inspiring"
+            },                                   
+            {
+                path: "./../shared/media/background-city.jpg",
+                title: "City"
+            },
+            {
+                path: "./../shared/media/background-forest-hd.jpg",
+                title: "Forest (HD)"
+            },
+            {
+                path: "./../shared/media/background-glass.jpg",
+                title: "Cafe"
+            },
+            {
+                path: "./../shared/media/background-sea-hd.jpg",
+                title: "Sea (HD)"
+            },
+            {
+                path: "./../shared/media/background-snow.jpg",
+                title: "Snow"
+            }, 
+        ];
+    var editor;
+    // store
+    var tagColor = "#c48de7";
+    var maskSize = 20;
+
+    document.addEventListener("DOMContentLoaded", (e) => {
+        // Get references for editor and toolbar containers
+        const editorContainer = document.getElementById("editorDiv");
+        const toolbarContainer = document.getElementById("toolbarDiv");
+
+        // Init the editor with toolbar.
+        editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
+            isZoomEnabled: true,
+            zoomType: 3
+        }).api;
+        editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
+        editor.enablePathRegions(true);
+        editor.enableMaskRegions();
+
+        let incrementalRegionID = 100;
+
+        // Add new region to the editor when new region is created
+        editor.onSelectionEnd = (regionData) => {
+            let id = (incrementalRegionID++).toString();
+
+            // Generate random tag
+            let tags = getTagsDescriptor();            
+            editor.addRegion(id, regionData, tags);
+
+            console.log(`Created ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };     
+
+        // Log region manipulations
+        editor.onRegionMoveBegin = (id, regionData) => {
+            console.log(`Began moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+        editor.onRegionMove = (id, regionData) => {
+            // console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+        editor.onRegionMoveEnd = (id, regionData) => {
+            console.log(`Ended moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+        editor.onRegionSelected = (id, multiSelection) => {
+            console.log(`Selected ${id}: multiSelection = ${multiSelection}`);
+        }
+        editor.onRegionDelete = (id, regionData) => {
+            console.log(`Deleted ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+        };
+
+        editor.onMaskDrawingBegin = () => {
+            return getTagsDescriptor();
+        };
+
+        editor.ZM.setMaxZoomScale(10);
+
+        // Collection of primary tags. Use Color class to define color.
+        const Color = CanvasTools.Core.Colors.Color;
+        const primaryTags = [
+            new CanvasTools.Core.Tag("Awesome", new Color("#c48de7")),
+            new CanvasTools.Core.Tag("Amazing", new Color("#3b1fff")),
+            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48")),
+        ];
+
+
+        // Randomly generate tags descriptor object
+        function getTagsDescriptor() {
+            const currentTag = primaryTags.find(function (tag) {
+                return tag.color == tagColor;
+            });
+            return new CanvasTools.Core.TagsDescriptor([currentTag]);
+        };
+
+
+
+        let imageIndex = 0;
+        // Init images selector
+        initImageSelect(images, (index, path) => {
+            imageIndex = index;
+            loadImage(path, (image) => {
+                editor.addContentSource(image);
+                editor.AS.setSelectionMode(2);
+
+                var showZoomDiv = document.getElementById("showZoomFactor");
+                showZoomDiv.innerText = "Image zoomed at " + editor.ZM.getZoomData().currentZoomScale*100 + " %";
+            });
+
+            // Delete current regions on image change
+            editor.deleteAllRegions();
+        });
+
+        // Load first image
+        loadImage(images[imageIndex].path, (image) => {
+            editor.addContentSource(image);
+        });
+
+        initBrushModeSelect((value) => {
+            editor.AS.setSelectionMode(value);
+        });
+
+        initBrushSizeSelect((value) => {
+            editor.MM.setBrushSize({brush: parseInt(value), erase: parseInt(value)});
+        });
+
+        initTagColorSelect((value) => {
+            tagColor = value;
+        });
+
+        var getRegionButton = document.getElementById("getRegion");
+        getRegionButton.addEventListener("click", (e) => {
+            var x = editor.RM.getAllRegions()[0].regionData;
+            console.log(x);
+        });
+
+        var getRegionButton = document.getElementById("disableAS");
+        getRegionButton.addEventListener("click", (e) => {
+            editor.AS.hide();
+        });
+
+        var getRegionButton = document.getElementById("enableAS");
+        getRegionButton.addEventListener("click", (e) => {
+            editor.AS.show();
+        });
+
+        var showZoomDiv = document.getElementById("showZoomFactor");
+        editor.onZoomEnd = function (zoom) {
+            showZoomDiv.innerText = "Image zoomed at " + zoom.currentZoomScale*100 + " %";
+            console.log(zoom.maxZoomScale);
+        }
+
+        // check if reset zoom is On.
+        var resetZoomInput = document.getElementById("resetZoomOnLoad");
+        if (resetZoomOnLoad.checked) {
+            editor.ZM.resetZoomOnContentLoad = true;
+        }
+        resetZoomInput.addEventListener("click", (e) => {
+            if (resetZoomOnLoad.checked) {
+                editor.ZM.resetZoomOnContentLoad = true;
+            } else {
+                editor.ZM.resetZoomOnContentLoad = false;
+            }
+        });
+    });
+
+    // Builds select element using provided list of images 
+    function initImageSelect(images, onSelect) {
+        var imageSelect = document.getElementById("imageSelect");
+
+        images.forEach((image) => {
+            let o = document.createElement("option");
+            o.text = image.title;
+            imageSelect.add(o);
+        })
+        imageSelect.selectedIndex = 0;
+
+        // Register listener for image change
+        imageSelect.addEventListener("change", (e) => {
+            let index = imageSelect.selectedIndex;
+            if (index >= 0 && index < images.length) {
+                onSelect(index, images[index].path);
+            }
+        });
+    }
+
+    function initBrushModeSelect(onSelect) {
+        var brushModeSelect = document.getElementById("brushModeSelect");
+        brushModeSelect.selectedIndex = 0;
+
+        brushModeSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
+        });
+    }
+
+    function initBrushSizeSelect(onSelect) {
+        var brushSizeSelect = document.getElementById("brushSizeSelect");
+        brushSizeSelect.selectedIndex = 3;
+        brushSizeSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
+        });
+    }
+
+    function initTagColorSelect(onSelect) {
+        var tagColorSelect = document.getElementById("tagColorSelect");
+        tagColorSelect.selectedIndex = 0;
+        tagColorSelect.addEventListener("change", (e) => {
+            onSelect(e.target.value);
+        });
+    }
+
+    // Load an image from specified path and notify when it is loaded.
+    function loadImage(path, onReady) {
+        const image = new Image();
+        image.addEventListener("load", (e) => {
+            onReady(e.target);                
+        });
+        image.src = path;
+    }
+
+    function onWheelCapture(e) {
+        if (!e.ctrlKey && !e.shiftKey && e.altKey && editor) {
+            const cursorPos = getCursorPos(e);
+            if (e.deltaY < 0) {
+                editor.ZM.callbacks.onZoomingIn(cursorPos);
+            } else if (e.deltaY > 0) {
+                editor.ZM.callbacks.onZoomingOut(cursorPos);
+            }
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }
+
+    function getCursorPos(e) {
+        const editorContainer = document.getElementsByClassName("CanvasToolsEditor")[0];
+        var containerPos, x = 0, y = 0;
+        e = e || window.event;
+        /*get the x and y positions of the container:*/
+        containerPos = editorContainer.getBoundingClientRect();
+
+        /*get the x and y positions of the image:*/
+        var editorStyles = window.getComputedStyle(editorContainer);
+        var imagePos = {
+            left: containerPos.left + parseFloat(editorStyles.paddingLeft),
+            top: containerPos.top + parseFloat(editorStyles.paddingTop)
+        };
+
+
+        /*calculate the cursor's x and y coordinates, relative to the image:*/
+        x = e.pageX - imagePos.left;
+        y = e.pageY - imagePos.top;
+        /*consider any page scrolling:*/
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        return {x : x, y : y};
+    }
+</script>
+
+</html>
