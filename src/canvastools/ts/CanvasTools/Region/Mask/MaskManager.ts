@@ -1,3 +1,4 @@
+import { decode, encode } from "@thi.ng/rle-pack";
 import Konva from "konva";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 import { DisabledMaskHostZIndex, EnabledMaskHostZIndex, KonvaContainerId } from "../../Core/Utils/constants";
@@ -5,6 +6,7 @@ import { ZoomManager } from "../../Core/ZoomManager";
 import {
     IBrushSize,
     IDimension,
+    IMask,
     IMaskManagerCallbacks,
     MaskSelectorMode,
 } from "../../Interface/IMask";
@@ -113,6 +115,200 @@ export class MasksManager {
                 y: zoom,
             });
         }
+    }
+
+    /**
+     * gets all the masks drawn on the canvas. returns a binary mask with tags
+     */
+     public getAllMasks(): IMask[] {
+        const allMasks: IMask[] = [];
+        const currentDimensions = this.getCurrentDimension();
+
+        const width = this.konvaStage.width();
+        const height = this.konvaStage.height();
+        const scaleX = this.konvaStage.scaleX();
+        const scaleY = this.konvaStage.scaleY();
+
+        const targetlayer = this.konvaStage.getChildren()[0];
+        if (targetlayer) {
+            // The konva stage is scaled back to zoom = 1 before extracting image data out of canvas
+            // post that, the konvaStage is scaled back to its original dimensions
+            this.konvaStage.width(currentDimensions.width).height(currentDimensions.height).scaleX(1).scaleY(1);
+            let canvas: HTMLCanvasElement;
+            canvas = this.canvasLayer?.toCanvas();
+            
+            const ctx = canvas?.getContext("2d");
+            const data: ImageData = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
+
+            this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY);
+
+            // create an edge pixel matrix
+            const edgeArray = this.getEdgePixelArray(data.data);
+
+            // remove antialiasing/smoothening ?
+            const imgData = this.unSmoothenImageData(edgeArray, currentDimensions, data.data);
+
+            // create a list of binary masks with tag object
+            this.tagsList.forEach((tags: TagsDescriptor) => {
+                const [r, g, b] = tags.primary.srgbColor.to255();
+                const newData: ImageData = ctx.createImageData(currentDimensions.width, currentDimensions.height);
+
+                // converting the unit8clamped array to a binary matrix
+                for (let i = 0; i <= data.data.length - 1; i = i + 4) {
+                    if (imgData[i] === r && imgData[i + 1] === g && imgData[i + 2] === b && imgData[i + 3] === 255) {
+                        newData.data[i] = 1;
+                        newData.data[i + 1] = 1;
+                        newData.data[i + 2] = 1;
+                        newData.data[i + 3] = 1;
+                    }
+                }
+
+                // run length encoding is done here
+                allMasks.push({
+                    tags,
+                    imageData: encode(newData.data, newData.data.length),
+                });
+
+                ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
+            });
+        }
+        return allMasks;
+    }
+
+    /**
+     * Draws all the masks on the canvas
+     * @param allMasks - all masks data to be drawn on canvas
+     */
+    public loadAllMasks(allMasks: IMask[]): void {
+        this.loadMasksInternal(allMasks, this.canvasLayer);
+    }
+
+    /**
+     * Removes antialiasing or smoothening from image data.
+     * When drawing a shape on the canvas with smoothening on, the shape's edge has mixed pixel value
+     * hence it looks curved. But when extracting image data out of canvas, we need each pixel to belong
+     * to either of our tag colors. Hence if a pixel is on edge (its color value does not match any of the tag colors),
+     * we look for the pixel value of its neighbouring 8 pixels to determine if we can assign the neighbours pixel value
+     * to this pixel starting from topLeft pixel and going clockwise.
+     */
+     private unSmoothenImageData(
+        edgeArray: number[],
+        currentDimensions: IDimension,
+        imgData: Uint8ClampedArray
+    ): Uint8ClampedArray {
+        for (let i = 0; i <= edgeArray.length - 1; i++) {
+            if (edgeArray[i] === 1) {
+                const topLeft = i - currentDimensions.width - 1 < 0 ? 0 : i - currentDimensions.width - 1;
+                const top = i - currentDimensions.width < 0 ? 0 : i - currentDimensions.width;
+                const topRight = i - currentDimensions.width + 1 < 0 ? 0 : i - currentDimensions.width + 1;
+                const current = i;
+                const previous = i - 1 < 0 ? 0 : i - 1;
+                const next = i + 1 > edgeArray.length - 1 ? edgeArray.length - 1 : i + 1;
+                const bottomLeft =
+                    i + currentDimensions.width - 1 > edgeArray.length - 1
+                        ? edgeArray.length - 1
+                        : i + currentDimensions.width - 1;
+                const bottom =
+                    i + currentDimensions.width > edgeArray.length - 1
+                        ? edgeArray.length - 1
+                        : i + currentDimensions.width;
+                const bottomRight =
+                    i + currentDimensions.width + 1 > edgeArray.length - 1
+                        ? edgeArray.length - 1
+                        : i + currentDimensions.width + 1;
+
+                const neighboringPixels = [];
+                neighboringPixels.push(topLeft, top, topRight, previous, next, bottomLeft, bottom, bottomRight);
+                const index = neighboringPixels.findIndex((j) => edgeArray[j] === 0);
+                if (index >= 0) {
+                    const pixel = neighboringPixels[index] * 4;
+                    imgData[current * 4] = imgData[pixel];
+                    imgData[current * 4 + 1] = imgData[pixel + 1];
+                    imgData[current * 4 + 2] = imgData[pixel + 2];
+                    imgData[current * 4 + 3] = imgData[pixel + 3];
+                }
+            }
+        }
+
+        return imgData;
+    }
+
+    /**
+     * gets the pixels from the imageData that do not match any tag color. Hence they are edge pixels
+     */
+     private getEdgePixelArray(imageData: Uint8ClampedArray): number[] {
+        const edgeArray: number[] = [];
+        for (let i = 0; i <= imageData.length - 1; i = i + 4) {
+            let edgePixel = true;
+            edgeArray[i / 4] = 0;
+            const r = imageData[i];
+            const g = imageData[i + 1];
+            const b = imageData[i + 2];
+            if (r !== 0 && g !== 0 && b !== 0) {
+                this.tagsList.forEach((tags: TagsDescriptor) => {
+                    const [r1, g1, b1] = tags.primary.srgbColor.to255();
+                    if (r === r1 && g === g1 && b === b1) {
+                        edgePixel = false;
+                    }
+                });
+                if (edgePixel) {
+                    edgeArray[i / 4] = 1;
+                }
+            }
+        }
+        return edgeArray;
+    }
+
+    private loadMasksInternal(allMasks: IMask[], layer: Konva.Layer) {
+        const currentDimensions = this.getCurrentDimension();
+
+        const width = this.konvaStage.width();
+        const height = this.konvaStage.height();
+        const scaleX = this.konvaStage.scaleX();
+        const scaleY = this.konvaStage.scaleY();
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = currentDimensions.width;
+        canvas.height = currentDimensions.height;
+
+        const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
+        const imageDataAll = newdata.data;
+        let imgData;
+        // look through all the colored mask. each tag has its own binary mask
+        // decode from rle to binary matrix and then convert it to a unit8clamped array of imageData
+        allMasks.forEach((mask: IMask) => {
+            imgData = decode(mask.imageData);
+            const [r, g, b] = mask.tags.primary.srgbColor.to255();
+            for (let i = 0; i <= imgData.length - 1; i = i + 4) {
+                if (imgData[i] === 1) {
+                    imageDataAll[i] = r;
+                    imageDataAll[i + 1] = g;
+                    imageDataAll[i + 2] = b;
+                    imageDataAll[i + 3] = 255;
+                }
+            }
+        });
+
+        newdata.data.set(imageDataAll);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.putImageData(newdata, 0, 0);
+        const new_image = new Image();
+        new_image.src = canvas.toDataURL();
+
+        // draw the masks at scale = 1 and then scale the konvaStage to desired dimensions
+        this.konvaStage.width(currentDimensions.width).height(currentDimensions.height).scaleX(1).scaleY(1);
+        layer.imageSmoothingEnabled(true);
+        const newKonvaImg = new Konva.Image({
+            image: new_image,
+            lineCap: "round",
+            lineJoin: "round",
+        });
+        layer.add(newKonvaImg);
+
+        this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY);
     }
 
     private setKonvaCursor(): void {

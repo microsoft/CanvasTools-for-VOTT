@@ -1,4 +1,3 @@
-
 import Konva from "konva";
 import { Color } from "../../Core/Colors/Color";
 import { Tag } from "../../Core/Tag";
@@ -8,6 +7,13 @@ import { ZoomDirection, ZoomManager } from "../../Core/ZoomManager";
 import { IMaskManagerCallbacks } from "../../Interface/IMask";
 import { SelectionMode } from "../../Interface/ISelectorSettings";
 import { MasksManager } from "./MaskManager";  
+
+jest.mock("@thi.ng/rle-pack", () => {
+    return {
+        encode: jest.fn(),
+        decode: jest.fn()
+    }
+});
 
 describe("Mask manager tests", () => {
     let maskManager: MasksManager;
