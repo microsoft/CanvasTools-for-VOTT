@@ -57,7 +57,7 @@ export class Tag implements ITag {
     /**
      * The tag's color in hex format. *Readonly*
      */
-       public get srgbColor(): SRGBColor {
+    public get srgbColor(): SRGBColor {
         return this.colorObj.sRGB;
     }
 

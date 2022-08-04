@@ -1,7 +1,4 @@
-import { decode, encode } from "@thi.ng/rle-pack";
 import Konva from "konva";
-import { Point2D } from "../../Core/Point2D";
-import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 import { DisabledMaskHostZIndex, EnabledMaskHostZIndex, KonvaContainerId } from "../../Core/Utils/constants";
 import { ZoomManager } from "../../Core/ZoomManager";
@@ -20,29 +17,41 @@ export class MasksManager {
     /**
      * Reference to the host konva stage element.
      */
-    private konvaStage: Konva.Stage;
+    public konvaStage: Konva.Stage;
+
+    /**
+     * The current selected mode for mask. Brush or Eraser
+     */
+    public maskSelectionMode: MaskSelectorMode;
+
+    /**
+     * The brush and eraser size
+     */
+    public brushSize: IBrushSize;
 
     /**
      * Reference to the host konva div element.
      */
-    private konvaContainerHostElement: HTMLDivElement;
+    public konvaContainerHostElement: HTMLDivElement;
 
     /**
      * Reference to the host div element.
      */
     private editorDiv: HTMLDivElement;
 
-    private maskSelectionMode: MaskSelectorMode;
-
-    private brushSize: IBrushSize;
-
     /**
      * Reference to the konva layer element that contains only the masks drawn
      */
     private canvasLayer: Konva.Layer;
 
+    /**
+     * The list of callbacks needed for mask manager
+     */
     private callbacks: IMaskManagerCallbacks;
 
+    /**
+     * The list of tags used to draw masks
+     */
     private tagsList: TagsDescriptor[];
 
     constructor(editorDiv: HTMLDivElement, konvaDivHostElement: HTMLDivElement, callbacks: IMaskManagerCallbacks) {
@@ -65,7 +74,6 @@ export class MasksManager {
      * @param mode - optional. sets the mode of mask selection to either brush or eraser
      */
     public setSelection(enabled: boolean, mode?: MaskSelectorMode) {
-        // explain these zIndex numbers
         if (enabled) {
             this.konvaContainerHostElement.style["z-index"] = EnabledMaskHostZIndex;
             this.maskSelectionMode = mode;
@@ -109,7 +117,6 @@ export class MasksManager {
 
     private setKonvaCursor(): void {
         const size = this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase;
-        // cursor stuff
         const base64 = this.base64EncodedMaskCursor(size);
         const cursor = ["url('", base64, "')", " ", Math.floor(size / 2) + 4, " ", Math.floor(size / 2) + 4, ",auto"];
 
@@ -164,7 +171,7 @@ export class MasksManager {
                 stroke: tag.primary.color,
                 strokeWidth:
                     this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase,
-                globalCompositeOperation: this.maskSelectionMode === "brush" ? "source-over" : "destination-out",
+                globalCompositeOperation: this.maskSelectionMode === SelectionMode.BRUSH ? "source-over" : "destination-out",
                 points: [scaledPosition.x, scaledPosition.y],
                 name: tag.primary.name,
                 ...this.getLineShapeAttributes()
@@ -197,9 +204,6 @@ export class MasksManager {
         });
     }
 
-    /**
-     * gets current dimensions of editorDiv
-     */
     private getCurrentDimension(): IDimension {
         const zoom = ZoomManager.getInstance().getZoomData().currentZoomScale;
         const style = getComputedStyle(this.editorDiv);
@@ -247,10 +251,7 @@ export class MasksManager {
 
         this.canvasLayer = new Konva.Layer({});
         stage.add(this.canvasLayer);
-
-
         this.konvaStage = stage;
-
         this.setKonvaCursor();
         this.addListeners();
     }

@@ -256,7 +256,7 @@ export class AreaSelector {
             } else if (this.selectorSettings.mode === SelectionMode.POLYGON) {
                 this.selector = this.polygonSelector;
             } else if (this.selectorSettings.mode === SelectionMode.BRUSH) {
-                this.maskSelector.enableMode(SelectionMode.BRUSH);
+                this.maskSelector?.enableMode(SelectionMode.BRUSH);
             } else if (this.selectorSettings.mode === SelectionMode.ERASER) {
                 this.maskSelector?.enableMode(SelectionMode.ERASER);
             }
@@ -273,7 +273,7 @@ export class AreaSelector {
                 this.selectorSettings.mode !== SelectionMode.BRUSH &&
                 this.selectorSettings.mode !== SelectionMode.ERASER
             ) {
-                this.maskSelector.disable();
+                this.maskSelector?.disable();
             }
         }
     }
@@ -335,7 +335,7 @@ export class AreaSelector {
         this.polygonSelector = new PolygonSelector(this.parentNode, this.paper, this.boundRect, this.callbacks);
         this.maskSelector = new MaskSelector(this.callbacks);
 
-        this.maskSelector?.disable();
+        this.maskSelector.disable();
 
         this.selector = this.rectSelector;
 

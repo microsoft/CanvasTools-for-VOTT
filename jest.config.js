@@ -4,5 +4,5 @@ module.exports = {
     },
     testRegex: "(test|spec)\\.(js|ts)$",
     moduleFileExtensions: ["ts", "js"],
-    collectCoverage: true,
+    collectCoverage: true
 };

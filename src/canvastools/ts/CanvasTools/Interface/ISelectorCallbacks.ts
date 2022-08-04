@@ -41,5 +41,5 @@ export interface ISelectorCallbacks {
      * @param enabled - indicates if mask selection is enabled
      * @param mode - optional. sets the mode of mask selection to either brush or eraser
      */
-         onMaskSelection?: (enabled: boolean, mode?: MaskSelectorMode) => void
+    onMaskSelection?: (enabled: boolean, mode?: MaskSelectorMode) => void
 }
