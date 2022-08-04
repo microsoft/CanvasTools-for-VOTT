@@ -19,3 +19,14 @@ export interface IBrushSize {
     brush: number;
     erase: number;
 }
+
+export interface IMask {
+    imageData: Uint8Array;
+    tags: TagsDescriptor;
+}
+
+export interface IRegionEdge {
+    start: IPoint2D;
+    controlPoint?: ICubicBezierControl;
+    end: IPoint2D;
+}
