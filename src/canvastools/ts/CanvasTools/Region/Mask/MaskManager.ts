@@ -131,6 +131,8 @@ export class MasksManager {
 
         const targetlayer = this.konvaStage.getChildren()[0];
         if (targetlayer) {
+            // The konva stage is scaled back to zoom = 1 before extracting image data out of canvas
+            // post that, the konvaStage is scaled back to its original dimensions
             this.konvaStage.width(currentDimensions.width).height(currentDimensions.height).scaleX(1).scaleY(1);
             let canvas: HTMLCanvasElement;
             canvas = this.canvasLayer?.toCanvas();
@@ -146,10 +148,12 @@ export class MasksManager {
             // remove antialiasing/smoothening ?
             const imgData = this.unSmoothenImageData(edgeArray, currentDimensions, data.data);
 
+            // create a list of binary masks with tag object
             this.tagsList.forEach((tags: TagsDescriptor) => {
                 const [r, g, b] = tags.primary.srgbColor.to255();
                 const newData: ImageData = ctx.createImageData(currentDimensions.width, currentDimensions.height);
 
+                // converting the unit8clamped array to a binary matrix
                 for (let i = 0; i <= data.data.length - 1; i = i + 4) {
                     if (imgData[i] === r && imgData[i + 1] === g && imgData[i + 2] === b && imgData[i + 3] === 255) {
                         newData.data[i] = 1;
@@ -159,6 +163,7 @@ export class MasksManager {
                     }
                 }
 
+                // run length encoding is done here
                 allMasks.push({
                     tags,
                     imageData: encode(newData.data, newData.data.length),
@@ -171,7 +176,7 @@ export class MasksManager {
     }
 
     /**
-     * draws all the masks on the canvas
+     * Draws all the masks on the canvas
      * @param allMasks - all masks data to be drawn on canvas
      */
     public loadAllMasks(allMasks: IMask[]): void {
@@ -179,7 +184,12 @@ export class MasksManager {
     }
 
     /**
-     * removes antialiasing or smoothening from image data
+     * Removes antialiasing or smoothening from image data.
+     * When drawing a shape on the canvas with smoothening on, the shape's edge has mixed pixel value
+     * hence it looks curved. But when extracting image data out of canvas, we need each pixel to belong
+     * to either of our tag colors. Hence if a pixel is on edge (its color value does not match any of the tag colors),
+     * we look for the pixel value of its neighbouring 8 pixels to determine if we can assign the neighbours pixel value
+     * to this pixel starting from topLeft pixel and going clockwise.
      */
      private unSmoothenImageData(
         edgeArray: number[],
@@ -266,6 +276,8 @@ export class MasksManager {
         const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
         const imageDataAll = newdata.data;
         let imgData;
+        // look through all the colored mask. each tag has its own binary mask
+        // decode from rle to binary matrix and then convert it to a unit8clamped array of imageData
         allMasks.forEach((mask: IMask) => {
             imgData = decode(mask.imageData);
             const [r, g, b] = mask.tags.primary.srgbColor.to255();
@@ -286,6 +298,7 @@ export class MasksManager {
         const new_image = new Image();
         new_image.src = canvas.toDataURL();
 
+        // draw the masks at scale = 1 and then scale the konvaStage to desired dimensions
         this.konvaStage.width(currentDimensions.width).height(currentDimensions.height).scaleX(1).scaleY(1);
         layer.imageSmoothingEnabled(true);
         const newKonvaImg = new Konva.Image({
