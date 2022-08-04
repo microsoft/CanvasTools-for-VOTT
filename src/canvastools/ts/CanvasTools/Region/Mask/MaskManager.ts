@@ -156,7 +156,7 @@ export class MasksManager {
 
     /**
      * gets all the masks drawn on the canvas. returns a binary mask with tags
-     * @param layerNumber gets masks from shapes in this layer
+     * @param layerNumber optionally specify the layer number to fetch masks from only that layer
      */
     public getAllMasks(layerNumber?: number): IMask[] {
         const allMasks: IMask[] = [];
@@ -324,18 +324,11 @@ export class MasksManager {
         const maxLayerCount = this.getCurrentLayerNumber();
 
         for (let i = 1; i <= maxLayerCount; i++) {
-            if (isRegionsFirst) {
-                if (i % 2 === 0) {
-                    this.getAndLoadMasks(this.previewCanvasLayer, i);
-                } else {
-                    this.convertRegionsToMask(this.previewCanvasLayer, i);
-                }
+            const isEvenLayer = i % 2 === 0;
+            if (isRegionsFirst ? !isEvenLayer : isEvenLayer) {
+                this.convertRegionsToMask(this.previewCanvasLayer, i);
             } else {
-                if (i % 2 !== 0) {
-                    this.getAndLoadMasks(this.previewCanvasLayer, i);
-                } else {
-                    this.convertRegionsToMask(this.previewCanvasLayer, i);
-                }
+                this.getAndLoadMasks(this.previewCanvasLayer, i);
             }
         }
     }
