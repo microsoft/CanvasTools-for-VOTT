@@ -183,9 +183,9 @@ export class SRGBColor {
     }
 
     /**
-     * Internal helper function to map color values into [0, 255] range.
+     * Maps color values into [0, 255] range.
      */
-    private to255(): number[] {
+    public to255(): number[] {
         const rgb = this.truncate();
         return rgb.values.map((v) => Math.round(255 * v));
     }
