@@ -927,6 +927,16 @@ export class Editor {
                 if (typeof this.onMaskDrawingBegin === "function") {
                     return this.onMaskDrawingBegin();
                 }
+            },
+            onToggleMaskPreview: (enableMaskPreview: boolean) => {
+                if (enableMaskPreview) {
+                    this.regionsManager.updateRegionVisibility(() => true, false);
+                } else {
+                    this.regionsManager.updateRegionVisibility(() => true, true);
+                }
+            },
+            getAllRegionsWithLayer: () => {
+                return this.regionsManager.getAllRegionsWithLayer();
             }
         };
         this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
