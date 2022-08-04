@@ -197,6 +197,10 @@ export class MasksManager {
 
             this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY);
 
+            if (tempCanvasLayer) {
+                tempCanvasLayer.destroy();
+            }
+
             // create an edge pixel matrix
             const edgeArray = this.getEdgePixelArray(data.data);
 
