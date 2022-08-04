@@ -3,7 +3,7 @@
     "extends": ["tslint:recommended", "tslint-config-prettier"],
     "linterOptions": {
         "include": ["src/**/*.ts"],
-        "exclude": ["**/*.d.ts"]
+        "exclude": ["**/*.d.ts", "**/*.spec.ts"]
     },
     "jsRules": {},
     "rules": {

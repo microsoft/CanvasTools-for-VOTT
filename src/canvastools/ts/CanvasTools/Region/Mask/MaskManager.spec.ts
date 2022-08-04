@@ -9,10 +9,12 @@ import { SelectionMode } from "../../Interface/ISelectorSettings";
 import { MasksManager } from "./MaskManager";  
 
 jest.mock("@thi.ng/rle-pack", () => {
-    encode: jest.fn();
-    decode: jest.fn()
+    return {
+        encode: jest.fn(),
+        decode: jest.fn()
+    }
 });
-import { decode, encode } from "@thi.ng/rle-pack";
+
 describe("Mask manager tests", () => {
     let maskManager: MasksManager;
     let editorDiv;
