@@ -53,6 +53,7 @@
             <button id="enableAS">Enable AS</button>
             <button id="getAllMasks">Get all masks</button>
             <button id="loadAllMasks">Load all masks</button>
+            <button id="preview">Preview</button>
         </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
@@ -236,6 +237,11 @@
         loadAllMasksButton.addEventListener("click", (e) => {
             editor.MM.eraseAllMasks();
             editor.MM.loadAllMasks(window["brushData"]);
+        });
+
+        var previewButton = document.getElementById("preview");
+        previewButton.addEventListener("click", (e) => {
+            editor.MM.togglePreview();
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");

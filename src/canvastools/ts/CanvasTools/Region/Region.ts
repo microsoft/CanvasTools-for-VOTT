@@ -28,6 +28,11 @@ export abstract class Region extends RegionComponent {
     public regionID: string;
 
     /**
+     * Internal region layer number. Used to simplify debugging layers
+     */
+    public layerNumber: number;
+
+    /**
      * Building blocks of the region component.
      */
     protected UI: RegionComponent[];
@@ -57,13 +62,21 @@ export abstract class Region extends RegionComponent {
      * @param tagsDescriptor - The descriptor of region tags.
      * @param tagsUpdateOptions - The drawing options for tags.
      */
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
-                id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
+    constructor(
+        paper: Snap.Paper,
+        paperRect: Rect = null,
+        regionData: RegionData,
+        callbacks: IRegionCallbacks,
+        id: string,
+        tagsDescriptor: TagsDescriptor,
+        tagsUpdateOptions?: ITagsUpdateOptions,
+        layerNumber?: number
+    ) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks));
 
         this.ID = id;
         this.tags = tagsDescriptor;
-
+        this.layerNumber = layerNumber;
         this.regionID = this.s8();
         this.styleID = `region_${this.regionID}_style`;
         this.styleSheet = this.insertStyleSheet();
@@ -158,7 +171,9 @@ export abstract class Region extends RegionComponent {
      * Internal helper function to generate random id.
      */
     protected s8() {
-        return Math.floor((1 + Math.random()) * 0x100000000).toString(16).substring(1);
+        return Math.floor((1 + Math.random()) * 0x100000000)
+            .toString(16)
+            .substring(1);
     }
 
     /**

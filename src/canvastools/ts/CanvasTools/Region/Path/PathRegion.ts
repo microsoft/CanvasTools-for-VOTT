@@ -42,7 +42,7 @@ export class PathRegion extends Region {
     /**
      * Bounding rects for the region.
      */
-    private paperRects: { host: Rect, actual: Rect };
+    private paperRects: { host: Rect; actual: Rect };
 
     /**
      * Creates new `PathRegion` object.
@@ -54,9 +54,26 @@ export class PathRegion extends Region {
      * @param tagsDescriptor - The descriptor of region tags.
      * @param tagsUpdateOptions - The drawing options for tags.
      */
-    constructor(paper: Snap.Paper, paperRect: Rect = null, regionData: RegionData, callbacks: IRegionCallbacks,
-        id: string, tagsDescriptor: TagsDescriptor, tagsUpdateOptions?: ITagsUpdateOptions) {
-        super(paper, paperRect, regionData, Object.assign({}, callbacks), id, tagsDescriptor, tagsUpdateOptions);
+    constructor(
+        paper: Snap.Paper,
+        paperRect: Rect = null,
+        regionData: RegionData,
+        callbacks: IRegionCallbacks,
+        id: string,
+        tagsDescriptor: TagsDescriptor,
+        tagsUpdateOptions?: ITagsUpdateOptions,
+        layerNumber?: number
+    ) {
+        super(
+            paper,
+            paperRect,
+            regionData,
+            Object.assign({}, callbacks),
+            id,
+            tagsDescriptor,
+            tagsUpdateOptions,
+            layerNumber
+        );
 
         if (paperRect !== null) {
             this.paperRects = {
@@ -69,8 +86,10 @@ export class PathRegion extends Region {
 
         const onChange = this.callbacks.onChange;
         this.callbacks.onChange = (region: RegionComponent, regionData: RegionData, ...args) => {
-            this.paperRects.actual.resize(this.paperRects.host.width - regionData.width,
-                this.paperRects.host.height - regionData.height);
+            this.paperRects.actual.resize(
+                this.paperRects.host.width - regionData.width,
+                this.paperRects.host.height - regionData.height
+            );
             onChange(this, regionData, ...args);
         };
     }
@@ -83,7 +102,7 @@ export class PathRegion extends Region {
     public updateTags(tags: TagsDescriptor, options?: ITagsUpdateOptions) {
         super.updateTags(tags, options);
         this.tagsNode.updateTags(tags, options);
-        this.node.select("title").node.innerHTML = (tags !== null) ? tags.toString() : "";
+        this.node.select("title").node.innerHTML = tags !== null ? tags.toString() : "";
     }
 
     /**
@@ -106,12 +125,19 @@ export class PathRegion extends Region {
         this.node.addClass(this.styleID);
 
         this.dragNode = new DragElement(paper, this.paperRects.actual, this.regionData, this.callbacks);
-        this.tagsNode = new TagsElement(paper, this.paperRect, this.regionData, this.tags, this.styleID,
-            this.styleSheet, this.tagsUpdateOptions);
+        this.tagsNode = new TagsElement(
+            paper,
+            this.paperRect,
+            this.regionData,
+            this.tags,
+            this.styleID,
+            this.styleSheet,
+            this.tagsUpdateOptions
+        );
         this.anchorNode = new AnchorsElement(paper, this.paperRect, this.regionData, this.callbacks);
         this.midpointNode = new MidpointElement(paper, this.paperRect, this.regionData, this.callbacks);
 
-        this.toolTip = Snap.parse(`<title>${(this.tags !== null) ? this.tags.toString() : ""}</title>`);
+        this.toolTip = Snap.parse(`<title>${this.tags !== null ? this.tags.toString() : ""}</title>`);
         this.node.append(this.toolTip as any);
 
         this.node.add(this.dragNode.node);
