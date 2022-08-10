@@ -158,6 +158,10 @@
             return getTagsDescriptor();
         };
 
+        editor.onMaskDrawingEnd = (drawnMask) => {
+            console.log(drawnMask);
+        };
+
         editor.ZM.setMaxZoomScale(10);
 
         // Collection of primary tags. Use Color class to define color.
@@ -238,10 +242,14 @@
             editor.MM.eraseAllMasks();
             editor.MM.loadAllMasks(window["brushData"]);
         });
-
+        let previewEnabled = false;
         var previewButton = document.getElementById("preview");
         previewButton.addEventListener("click", (e) => {
-            editor.MM.togglePreview();
+            // editor.MM.enablePreview(!previewEnabled);
+            // previewEnabled = !previewEnabled;
+            editor.MM.getAllMergedMasks().then((a) => {
+                console.log(a);
+            });
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");

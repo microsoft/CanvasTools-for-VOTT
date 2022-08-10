@@ -463,9 +463,15 @@ export class Editor {
     public onNextSelectionPoint: PointSelectionNotifyFunction;
 
     /**
-     * Callback for `MasksManager` called when the mask is drawn.
+     * Callback for `MasksManager` called when the drawing mask begins. Returns a tagDescriptor
      */
-     public onMaskDrawingBegin: () => TagsDescriptor;
+    public onMaskDrawingBegin: () => TagsDescriptor;
+
+    /**
+     * Callback for `MasksManager` called when the mask is drawn.
+     * @param mask RLE encoded mask drawn
+     */
+    public onMaskDrawingEnd: (mask: Uint8Array) => void;
 
     /**
      * Callback when user ended zoom function.
@@ -893,7 +899,7 @@ export class Editor {
                 // resize the container of editor size to adjust to the new content size
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
 
-                this.handleZoomAfterContentUpdate();
+                this.handleZoomAfterContentUpdate(true);
 
                 this.handleMaskManagerAfterContentUpdate();
             });
@@ -917,9 +923,12 @@ export class Editor {
         ConfigurationManager.isMaskEnabled = true;
 
         // initialize KonvaJS
+        const konvaWrapper = this.createDivElement();
+        konvaWrapper.setAttribute("id", "konvaWrapper");
         this.konvaContainerDivElement = this.createDivElement();
         this.konvaContainerDivElement.setAttribute("id", KonvaContainerId);
-        this.editorDiv.append(this.konvaContainerDivElement);
+        konvaWrapper.append(this.konvaContainerDivElement);
+        this.editorDiv.append(konvaWrapper);
 
         // initialize MasksManager
         const mmCallbacks: IMaskManagerCallbacks = {
@@ -928,12 +937,18 @@ export class Editor {
                     return this.onMaskDrawingBegin();
                 }
             },
+            onMaskDrawingEnd: (mask: Uint8Array) => {
+                if (typeof this.onMaskDrawingEnd === "function") {
+                    this.onMaskDrawingEnd(mask);
+                }
+            },
             onToggleMaskPreview: (enableMaskPreview: boolean) => {
                 if (enableMaskPreview) {
                     this.regionsManager.updateRegionVisibility(() => true, false);
                 } else {
                     this.regionsManager.updateRegionVisibility(() => true, true);
                 }
+                this.regionsManager.toggleFreezeMode();
             },
             getAllRegionsWithLayer: () => {
                 return this.regionsManager.getAllRegionsWithLayer();
@@ -1089,7 +1104,7 @@ export class Editor {
         }
     }
 
-    private handleZoomAfterContentUpdate(): void {
+    private handleZoomAfterContentUpdate(initialRender?: boolean): void {
         // check if the editor needs to be zoomed based on previous content source.
         if (this.zoomManager.isZoomEnabled) {
             const zoomData = this.zoomManager.getZoomData();
@@ -1100,6 +1115,7 @@ export class Editor {
             this.zoomEditorToScale(scaledFrameWidth, scaledFrameHeight, zoomData);
             this.areaSelector.resize(scaledFrameWidth, scaledFrameHeight);
             this.regionsManager.resize(scaledFrameWidth, scaledFrameHeight);
+            this.masksManager?.resize(scaledFrameWidth, scaledFrameHeight, initialRender);
         }
     }
 
