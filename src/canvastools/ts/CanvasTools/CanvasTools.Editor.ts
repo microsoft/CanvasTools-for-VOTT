@@ -1,5 +1,6 @@
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { ConfigurationManager } from "./Core/ConfigurationManager";
+import { LayerManager } from "./Core/LayerManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
@@ -48,7 +49,6 @@ type ToolbarIconDescription =
  * Wraps internal CanvasTools components into one Editor experience.
  */
 export class Editor {
-
     /**
      * A proxy wrapper around internal API for the `Editor` itself, `RegionsManager` (`RM`), `AreaSelector` (`AS`) and
      * `FilterPipeline` (`FP`).
@@ -89,7 +89,7 @@ export class Editor {
     /**
      * Short reference to the `MasksManager` component.
      */
-      public get MM(): MasksManager {
+    public get MM(): MasksManager {
         return this.masksManager;
     }
 
@@ -471,7 +471,17 @@ export class Editor {
      * Callback for `MasksManager` called when the mask is drawn.
      * @param mask RLE encoded mask drawn
      */
-    public onMaskDrawingEnd: (mask: Uint8Array) => void;
+    public onMaskDrawingEnd: (mask: Uint8ClampedArray) => void;
+
+    /**
+     * Callback for `MasksManager` called when the merged mask generation begins.
+     */
+    public onMaskGenerationBegin: () => void;
+
+    /**
+     * Callback for `MasksManager` called when the merged mask generation ends.
+     */
+    public onMaskGenerationEnd: () => void;
 
     /**
      * Callback when user ended zoom function.
@@ -511,7 +521,12 @@ export class Editor {
     /**
      * Internal reference to the `MasksManager` component.
      */
-     private masksManager?: MasksManager;
+    private masksManager?: MasksManager;
+
+    /**
+     * Internal reference to the `LayerManager` component.
+     */
+    private layerManager?: LayerManager;
 
     /**
      * Reference to the host SVG element.
@@ -551,12 +566,12 @@ export class Editor {
     /**
      * The current frame width.
      */
-     private frameWidth: number;
+    private frameWidth: number;
 
-     /**
-      * The current frame height.
-      */
-     private frameHeight: number;
+    /**
+     * The current frame height.
+     */
+    private frameHeight: number;
 
     /**
      * Reference to the div element that contains the konvaJS element for mask region.
@@ -607,7 +622,8 @@ export class Editor {
         areaSelector?: AreaSelector,
         regionsManager?: RegionsManager,
         filterPipeline?: FilterPipeline,
-        zoomProperties?: ZoomProperties
+        zoomProperties?: ZoomProperties,
+        enableMask?: boolean
     );
 
     constructor(
@@ -615,7 +631,8 @@ export class Editor {
         areaSelector?: AreaSelector,
         regionsManager?: RegionsManager,
         filterPipeline?: FilterPipeline,
-        zoomProperties?: ZoomProperties
+        zoomProperties?: ZoomProperties,
+        enableMask?: boolean
     ) {
         // Create SVG Element
         this.contentCanvas = this.createCanvasElement();
@@ -714,7 +731,7 @@ export class Editor {
                     this.areaSelector?.show();
                 }
                 this.masksManager?.setSelection(enabled, mode);
-            }
+            },
         };
         if (areaSelector !== null && areaSelector !== undefined) {
             this.areaSelector = areaSelector;
@@ -730,7 +747,7 @@ export class Editor {
             this.filterPipeline = new FilterPipeline();
         }
 
-        // Init zoom manager 
+        // Init zoom manager
         const initZoomCallbacks: IZoomCallbacks = {
             onZoomingOut: (cursorPos?: CursorPosition) => {
                 this.onZoom(ZoomDirection.Out, undefined, cursorPos);
@@ -746,6 +763,54 @@ export class Editor {
                 return this.zoomManager.getZoomData();
             },
         };
+
+        if (enableMask) {
+            // initialize KonvaJS
+            const konvaWrapper = this.createDivElement();
+            konvaWrapper.setAttribute("id", "konvaWrapper");
+            this.konvaContainerDivElement = this.createDivElement();
+            this.konvaContainerDivElement.setAttribute("id", KonvaContainerId);
+            konvaWrapper.append(this.konvaContainerDivElement);
+            this.editorDiv.append(konvaWrapper);
+
+            // initialize MasksManager
+            const mmCallbacks: IMaskManagerCallbacks = {
+                onMaskDrawingBegin: () => {
+                    if (typeof this.onMaskDrawingBegin === "function") {
+                        return this.onMaskDrawingBegin();
+                    }
+                },
+                onMaskDrawingEnd: (mask: Uint8ClampedArray) => {
+                    if (typeof this.onMaskDrawingEnd === "function") {
+                        this.onMaskDrawingEnd(mask);
+                    }
+                },
+                onMaskGenerationBegin: () => {
+                    if (typeof this.onMaskDrawingEnd === "function") {
+                        this.onMaskGenerationBegin();
+                    }
+                },
+                onMaskGenerationEnd: () => {
+                    if (typeof this.onMaskDrawingEnd === "function") {
+                        this.onMaskGenerationEnd();
+                    }
+                },
+                onToggleMaskPreview: (enableMaskPreview: boolean) => {
+                    if (enableMaskPreview) {
+                        this.regionsManager.updateRegionVisibility(() => true, false);
+                    } else {
+                        this.regionsManager.updateRegionVisibility(() => true, true);
+                    }
+                    this.regionsManager.toggleFreezeMode();
+                },
+                getAllRegionsWithLayer: () => {
+                    return this.regionsManager.getAllRegionsWithLayer();
+                },
+            };
+            this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
+        }
+
+        this.initializeLayerManager();
 
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
         this.zoomManager.deleteInstance();
@@ -869,7 +934,10 @@ export class Editor {
      * @param source - Content source.
      * @returns A new `Promise` resolved when content is drawn and Editor is resized.
      */
-    public async addContentSource(source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement): Promise<void> {
+    public async addContentSource(
+        source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement,
+        onContentLoadCb?: () => void
+    ): Promise<void> {
         const buffCnvs = document.createElement("canvas");
         const context = buffCnvs.getContext("2d");
 
@@ -898,10 +966,12 @@ export class Editor {
             .then(() => {
                 // resize the container of editor size to adjust to the new content size
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
-
                 this.handleZoomAfterContentUpdate(true);
-
                 this.handleMaskManagerAfterContentUpdate();
+                this.initializeLayerManager();
+                if (typeof onContentLoadCb === "function") {
+                    onContentLoadCb();
+                }
             });
     }
 
@@ -913,48 +983,6 @@ export class Editor {
      */
     public enablePathRegions(enable: boolean) {
         ConfigurationManager.isPathRegionEnabled = enable;
-    }
-
-    /**
-     * Enable mask regions.
-     * @remarks - Configuration setting to enable support of mask regions on canvas
-     */
-    public enableMaskRegions() {
-        ConfigurationManager.isMaskEnabled = true;
-
-        // initialize KonvaJS
-        const konvaWrapper = this.createDivElement();
-        konvaWrapper.setAttribute("id", "konvaWrapper");
-        this.konvaContainerDivElement = this.createDivElement();
-        this.konvaContainerDivElement.setAttribute("id", KonvaContainerId);
-        konvaWrapper.append(this.konvaContainerDivElement);
-        this.editorDiv.append(konvaWrapper);
-
-        // initialize MasksManager
-        const mmCallbacks: IMaskManagerCallbacks = {
-            onMaskDrawingBegin: () => {
-                if (typeof this.onMaskDrawingBegin === "function") {
-                    return this.onMaskDrawingBegin();
-                }
-            },
-            onMaskDrawingEnd: (mask: Uint8Array) => {
-                if (typeof this.onMaskDrawingEnd === "function") {
-                    this.onMaskDrawingEnd(mask);
-                }
-            },
-            onToggleMaskPreview: (enableMaskPreview: boolean) => {
-                if (enableMaskPreview) {
-                    this.regionsManager.updateRegionVisibility(() => true, false);
-                } else {
-                    this.regionsManager.updateRegionVisibility(() => true, true);
-                }
-                this.regionsManager.toggleFreezeMode();
-            },
-            getAllRegionsWithLayer: () => {
-                return this.regionsManager.getAllRegionsWithLayer();
-            }
-        };
-        this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
     }
 
     /**
@@ -1068,11 +1096,7 @@ export class Editor {
      * and a scroll bar needs to appear.
      * @param zoomType - A type that indicates whether we are zooming in or out.
      */
-    private onZoom(
-        zoomType: ZoomDirection,
-        newScale?: number,
-        cursorPos?: CursorPosition
-    ): void {
+    private onZoom(zoomType: ZoomDirection, newScale?: number, cursorPos?: CursorPosition): void {
         if (!this.zoomManager.isZoomEnabled) {
             throw new Error("Zoom feature is not enabled");
         }
@@ -1120,7 +1144,14 @@ export class Editor {
     }
 
     private handleMaskManagerAfterContentUpdate(): void {
+        this.masksManager?.setSourceDimensions(this.sourceWidth, this.sourceHeight);
         this.masksManager?.eraseAllMasks();
+    }
+
+    private initializeLayerManager(): void {
+        this.layerManager = LayerManager.getInstance();
+        this.layerManager.deleteInstance();
+        this.layerManager = LayerManager.getInstance();
     }
 
     /**
@@ -1188,8 +1219,8 @@ export class Editor {
                 }
             }
 
-             // Case: 2: ZoomType.CursorCenter when zooming is based on cursor position
-             if (this.zoomManager.zoomType === ZoomType.CursorCenter && cursorPos) {
+            // Case: 2: ZoomType.CursorCenter when zooming is based on cursor position
+            if (this.zoomManager.zoomType === ZoomType.CursorCenter && cursorPos) {
                 // get the current scroll position
                 const currentScrollPos = {
                     left: this.editorContainerDiv.scrollLeft,
@@ -1199,17 +1230,17 @@ export class Editor {
                 // get current mouse pos
                 const mousePos = {
                     x: cursorPos.x,
-                    y: cursorPos.y
-                }
+                    y: cursorPos.y,
+                };
 
                 // get scaled mouse pos after zoom
                 const scaledMousePos = {
                     x: (mousePos.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
-                    y: (mousePos.y / zoomData.previousZoomScale) * zoomData.currentZoomScale
-                }
+                    y: (mousePos.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
+                };
 
-                 // get the difference between the expected scaled viewport center and current viewport center
-                 const expectedScrollPosDifference = {
+                // get the difference between the expected scaled viewport center and current viewport center
+                const expectedScrollPosDifference = {
                     left: scaledMousePos.x - mousePos.x,
                     top: scaledMousePos.y - mousePos.y,
                 };
@@ -1242,7 +1273,7 @@ export class Editor {
                 // get the current center of the viewport once its is scaled based on zoom data
                 const zoomedCenterInView = {
                     x: (currentCenterInView.x / zoomData.previousZoomScale) * zoomData.currentZoomScale,
-                    y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale
+                    y: (currentCenterInView.y / zoomData.previousZoomScale) * zoomData.currentZoomScale,
                 };
 
                 // get the difference between the expected scaled viewport center and current viewport center

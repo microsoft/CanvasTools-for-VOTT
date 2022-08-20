@@ -119,10 +119,10 @@
         editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
             isZoomEnabled: true,
             zoomType: 3
-        }).api;
+        }, true).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
         editor.enablePathRegions(true);
-        editor.enableMaskRegions();
+        // editor.enableMaskRegions();
 
         let incrementalRegionID = 100;
 
@@ -162,7 +162,16 @@
             console.log(drawnMask);
         };
 
+        editor.onMaskGenerationBegin = () => {
+            console.log((new Date()).getMilliseconds());
+        };
+
+        editor.onMaskGenerationEnd = () => {
+            console.log((new Date()).getMilliseconds());
+        };
+
         editor.ZM.setMaxZoomScale(10);
+        editor.ZM.resetZoomOnContentLoad = true;
 
         // Collection of primary tags. Use Color class to define color.
         const Color = CanvasTools.Core.Colors.Color;
@@ -186,6 +195,11 @@
         let imageIndex = 0;
         // Init images selector
         initImageSelect(images, (index, path) => {
+            if (index == 1) {
+                editorContainer.classList.add("changeSize");
+            } else {
+                editorContainer.classList.remove("changeSize");
+            }
             imageIndex = index;
             loadImage(path, (image) => {
                 editor.addContentSource(image);
@@ -234,7 +248,7 @@
 
         var getAllMasksButton = document.getElementById("getAllMasks");
         getAllMasksButton.addEventListener("click", (e) => {
-            window["brushData"] = editor.MM.getAllMasks();
+            window["brushData"] = editor.MM.getOnlyMasks();
         });
 
         var loadAllMasksButton = document.getElementById("loadAllMasks");
@@ -249,6 +263,7 @@
             // previewEnabled = !previewEnabled;
             editor.MM.getAllMergedMasks().then((a) => {
                 console.log(a);
+                window["brushData"] = a.mergedMasks
             });
         });
 

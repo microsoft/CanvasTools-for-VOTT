@@ -18,6 +18,11 @@ body {
     background: rgb(64,64,64);
 }
 
+.CanvasToolsContainer.changeSize {
+    height: 500px;
+    width: 500px;
+}
+
 #toolbarDiv {
     grid-row: 1;
     grid-column: 1/2;
