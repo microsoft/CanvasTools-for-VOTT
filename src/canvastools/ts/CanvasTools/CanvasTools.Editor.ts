@@ -804,7 +804,9 @@ export class Editor {
                     this.regionsManager.toggleFreezeMode();
                 },
                 getAllRegionsWithLayer: () => {
-                    return this.regionsManager.getAllRegionsWithLayer();
+                    const regionsWithLayer = this.regionsManager.getAllRegionsWithLayer();
+                    this.regionsManager.deleteAllRegions();
+                    return regionsWithLayer;
                 },
             };
             this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);

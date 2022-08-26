@@ -1,6 +1,4 @@
-import { decode, encode } from "@thi.ng/rle-pack";
 import Konva from "konva";
-import { LayerManager } from "../../Core/LayerManager";
 import { Point2D } from "../../Core/Point2D";
 import { RegionData } from "../../Core/RegionData";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
@@ -11,7 +9,6 @@ import {
     IDimension,
     IMask,
     IMaskManagerCallbacks,
-    IMergedMasks,
     IRegionEdge,
     MaskSelectorMode,
 } from "../../Interface/IMask";
@@ -62,17 +59,6 @@ export class MasksManager {
     private canvasLayer: Konva.Layer;
 
     /**
-     * Reference to the konva layer element that contains the masks and polygon drawn.
-     * shows expected preview at any point
-     */
-    private previewCanvasLayer: Konva.Layer;
-
-    /**
-     * If true, displays the preview layer
-     */
-    private previewLayerEnabled: boolean;
-
-    /**
      * The list of callbacks needed for mask manager
      */
     private callbacks: IMaskManagerCallbacks;
@@ -82,9 +68,12 @@ export class MasksManager {
      */
     private tagsList: TagsDescriptor[];
 
+    private imagesList: HTMLImageElement[];
+
     constructor(editorDiv: HTMLDivElement, konvaDivHostElement: HTMLDivElement, callbacks: IMaskManagerCallbacks) {
         this.callbacks = callbacks;
         this.tagsList = [];
+        this.imagesList = [];
         this.maskSelectionMode = SelectionMode.BRUSH;
         this.brushSize = {
             brush: 30,
@@ -94,7 +83,6 @@ export class MasksManager {
         this.konvaContainerHostElement = konvaDivHostElement;
         this.konvaContainerHostElement.style["z-index"] = DisabledMaskHostZIndex;
         this.buildUIElements();
-        this.previewLayerEnabled = false;
     }
 
     /**
@@ -168,83 +156,21 @@ export class MasksManager {
     }
 
     /**
-     * enables/disables preview canvas layer
+     * converts all polygons to mask
      */
-    public enablePreview(enable: boolean) {
-        if (this.previewLayerEnabled !== enable) {
-            this.callbacks.onToggleMaskPreview(enable);
-            if (enable) {
-                this.callbacks.onMaskGenerationBegin();
-                this.updateZIndex(true);
-                this.setKonvaCursorToDefault();
-                this.removeEventListeners();
-                this.getMaskPreview();
-                this.previewCanvasLayer.show();
-                this.canvasLayer.hide();
-                this.callbacks.onMaskGenerationEnd();
-            } else {
-                this.addListeners();
-                this.setKonvaCursor();
-                this.previewCanvasLayer.destroyChildren();
-                this.previewCanvasLayer.hide();
-                this.canvasLayer.show();
-            }
-            this.previewLayerEnabled = !this.previewLayerEnabled;
-        }
+    public polygonsToMask(): void {
+        this.convertRegionsToMask(this.canvasLayer);
     }
 
     /**
-     * gets all the masks drawn on the canvas including polygons converted to masks.
-     * Returns both masks and polygons as masks(merged masks)
+     * gets all the masks drawn on the canvas.
      */
-    public async getAllMergedMasks(): Promise<IMergedMasks> {
-        this.callbacks.onMaskGenerationBegin();
-        const drawPromise = () => {
-            return new Promise<IMergedMasks>(async (resolve, _reject) => {
-                const masks = this.getOnlyMasks();
-                const mergedMasks = await this.getAllMasks();
-                this.callbacks.onMaskGenerationEnd();
-                resolve({
-                    masks,
-                    mergedMasks
-                });
-            });
-        };
-        
-        return await drawPromise();
-    }
-
-    /**
-     * gets all the masks drawn on the canvas including polygons converted to masks. returns a binary mask with tags
-     */
-    public async getAllMasks(): Promise<IMask[]> {
-        const edgeArray = this.processCanvasToGetEdgeArray(this.canvasLayer);
-        const loadPromises = this.getMaskPreview(edgeArray);
-        await Promise.all(loadPromises);
-        const mergedMasks = this.getOnlyMasks(undefined, undefined, this.previewCanvasLayer, edgeArray);
-        this.previewCanvasLayer.destroyChildren();
-        return mergedMasks;
-    }
-
-    /**
-     * gets all the masks drawn on the canvas. returns a binary mask with tags
-     * @param tagsList optionally specify the tags list of which masks needs to be returned
-     * @param layerNumber optionally specify the layer number to fetch masks from only that layer
-     * @param selectedTargetLayer optionally specify the layer from which masks are returned
-     */
-    public getOnlyMasks(
-        tagsList?: TagsDescriptor[],
-        layerNumber?: number,
-        selectedTargetLayer?: Konva.Layer,
-        edgeArray?: number[]
-    ): IMask[] {
-        const allMasks: IMask[] = [];
+    public getAllMasks(): IMask {
         const currentDimensionsEditor = this.getCurrentDimension();
         const currentDimensions: IDimension = {
             width: this.sourceWidth,
             height: this.sourceHeight,
         };
-        let masksExist = false;
         const width = this.konvaStage.width();
         const height = this.konvaStage.height();
         const scaleX = this.konvaStage.scaleX();
@@ -252,114 +178,67 @@ export class MasksManager {
         const x = this.konvaStage.x();
         const y = this.konvaStage.y();
 
-        const targetlayer = selectedTargetLayer ?? this.konvaStage.getChildren()[0];
-        if (targetlayer) {
-            // The konva stage is scaled back to zoom = 1 before extracting image data out of canvas
-            // post that, the konvaStage is scaled back to its original dimensions
-            this.konvaStage
-                .width(currentDimensionsEditor.width)
-                .height(currentDimensionsEditor.height)
-                .scaleX(1)
-                .scaleY(1)
-                .x(0)
-                .y(0);
-            let canvas: HTMLCanvasElement;
-            let tempCanvasLayer: Konva.Layer;
-            if (layerNumber) {
-                const shapes = targetlayer.getChildren();
-                if (shapes.length) {
-                    const filteredLayerShapes = shapes.filter((shape) => {
-                        return shape.attrs.layerNumber === layerNumber;
-                    });
-                    const tempCanvas = document.createElement("canvas");
-                    tempCanvas.width = currentDimensions.width;
-                    tempCanvas.height = currentDimensions.height;
-                    tempCanvasLayer = new Konva.Layer({});
-                    this.konvaStage.add(tempCanvasLayer);
-                    filteredLayerShapes.forEach((shape) => {
-                        tempCanvasLayer.add(shape.clone());
-                    });
-                    canvas = tempCanvasLayer?.toCanvas({ pixelRatio: this.sourceWidth / width });
-                    masksExist = true;
+        // The konva stage is scaled back to zoom = 1 before extracting image data out of canvas
+        // post that, the konvaStage is scaled back to its original dimensions
+        this.konvaStage
+            .width(currentDimensionsEditor.width)
+            .height(currentDimensionsEditor.height)
+            .scaleX(1)
+            .scaleY(1)
+            .x(0)
+            .y(0);
+        let canvas: HTMLCanvasElement;
+
+        canvas = this.canvasLayer.toCanvas({ pixelRatio: this.sourceWidth / width });
+        const ctx = canvas?.getContext("2d");
+        const data: ImageData = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
+
+        this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY).x(x).y(y);
+
+        console.time("calculatingEdgePixelArray");
+        // create an edge pixel matrix
+        const edge = this.getEdgePixelArray(data.data);
+        console.timeEnd("calculatingEdgePixelArray");
+
+        console.time("unSmoothen");
+        // remove antialiasing/smoothening ?
+        const imgData = this.unSmoothenImageData(edge, currentDimensions, data.data);
+        console.timeEnd("unSmoothen");
+
+        console.time("binaryMasks");
+        console.time("create");
+        const newData: number[] = new Array(currentDimensions.width * currentDimensions.height);
+        newData.fill(0);
+        console.timeEnd("create");
+        this.tagsList.forEach((tags: TagsDescriptor) => {
+            console.time("perBinaryMasks");
+            const [r, g, b] = tags.primary.srgbColor.to255();
+            const tagId = tags.primary.sequenceNumber;
+            console.time("convert");
+            for (let i = 0; i <= data.data.length - 1; i = i + 4) {
+                if (imgData[i] === r && imgData[i + 1] === g && imgData[i + 2] === b && imgData[i + 3] === 255) {
+                    newData[i / 4] = tagId;
                 }
-            } else {
-                canvas = targetlayer.toCanvas({ pixelRatio: this.sourceWidth / width });
-                masksExist = true;
             }
+            console.timeEnd("convert");
+            ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
+            console.timeEnd("perBinaryMasks");
+        });
 
-            if (masksExist) {
-                const ctx = canvas?.getContext("2d");
-                const data: ImageData = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
-
-                this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY).x(x).y(y);
-
-                if (tempCanvasLayer) {
-                    tempCanvasLayer.destroy();
-                }
-
-                console.time("calculatingEdgePixelArray");
-                // create an edge pixel matrix
-                const edge = edgeArray ? edgeArray : this.getEdgePixelArray(data.data);
-                console.timeEnd("calculatingEdgePixelArray");
-
-                console.time("unSmoothen");
-                // remove antialiasing/smoothening ?
-                const imgData = this.unSmoothenImageData(edge, currentDimensions, data.data);
-                console.timeEnd("unSmoothen");
-
-                // create a list of binary masks with tag object
-                console.time("binaryMasks");
-                const listTags = tagsList ?? this.tagsList;
-                listTags.forEach((tags: TagsDescriptor) => {
-                    console.time("perBinaryMasks");
-                    console.time("create");
-                    const [r, g, b] = tags.primary.srgbColor.to255();
-                    const newData: ImageData = ctx.createImageData(currentDimensions.width, currentDimensions.height);
-                    console.timeEnd("create");
-
-                    console.time("convert");
-                    // converting the unit8clamped array to a binary matrix
-                    for (let i = 0; i <= data.data.length - 1; i = i + 4) {
-                        if (
-                            imgData[i] === r &&
-                            imgData[i + 1] === g &&
-                            imgData[i + 2] === b &&
-                            imgData[i + 3] === 255
-                        ) {
-                            newData.data[i] = 1;
-                            newData.data[i + 1] = 1;
-                            newData.data[i + 2] = 1;
-                            newData.data[i + 3] = 1;
-                        }
-                    }
-                    console.timeEnd("convert");
-
-                    // run length encoding is done here
-                    console.time("fromArrayConversion");
-                    const xyz = newData.data;
-                    allMasks.push({
-                        tags,
-                        imageData: xyz,
-                    });
-                    console.timeEnd("fromArrayConversion");
-
-                    console.time("clearRect");
-                    ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
-                    console.timeEnd("clearRect");
-                    console.timeEnd("perBinaryMasks");
-                });
-                console.timeEnd("binaryMasks");
-            }
-        }
-        return allMasks;
+        console.timeEnd("binaryMasks");
+        return {
+            imageData: newData,
+            tags: this.tagsList,
+        };
     }
 
     /**
      * Draws all the masks on the canvas
      * @param allMasks - all masks data to be drawn on canvas
      */
-    public loadAllMasks(allMasks: IMask[]): void {
-        this.loadMasksInternal(allMasks, this.canvasLayer);
+    public async loadAllMasks(allMasks: IMask): Promise<void> {
+        const image = await this.loadMasksInternal(allMasks, this.canvasLayer);
+        this.imagesList.push(image);
     }
 
     /**
@@ -438,34 +317,9 @@ export class MasksManager {
         return edgeArray;
     }
 
-    private getMaskPreview(edgeArray?: number[]): Array<Promise<void>> {
-        const loadPromises: Array<Promise<void>> = [];
-        const maxLayerCount = this.getCurrentLayerNumber();
-        const edge = edgeArray ?? this.processCanvasToGetEdgeArray(this.canvasLayer);
-        for (let i = 1; i <= maxLayerCount; i++) {
-            this.convertRegionsToMask(this.previewCanvasLayer, i);
-            const promise = this.getAndLoadMasks(this.previewCanvasLayer, i, edge);
-            loadPromises.push(promise);
-        }
-
-        return loadPromises;
-    }
-
-    private processCanvasToGetEdgeArray(layer: Konva.Layer): number[] {
-        // preprocessing - generateEdgePixelArray now so that we do not generate on every layer
-        const canvas = layer.toCanvas({ pixelRatio: this.sourceWidth / this.konvaStage.width() });
-        const ctx = canvas?.getContext("2d");
-        const data: ImageData = ctx.getImageData(0, 0, this.sourceWidth, this.sourceHeight);
-        const edgeArray = this.getEdgePixelArray(data.data);
-        return edgeArray;
-    }
-
-    private convertRegionsToMask(layer: Konva.Layer, layerNumber: number) {
+    private convertRegionsToMask(layer: Konva.Layer, layerNumber?: number) {
         const allRegions = this.callbacks.getAllRegionsWithLayer();
-        const regions = allRegions.filter((region) => {
-            return region.layerNumber === layerNumber;
-        });
-        regions.forEach((polygon: { id: string; tags: TagsDescriptor; regionData: RegionData }) => {
+        allRegions.forEach((polygon: { id: string; tags: TagsDescriptor; regionData: RegionData }) => {
             const tags: TagsDescriptor = polygon.tags;
             this.addTagsDescriptor(tags);
             const points = polygon.regionData.points;
@@ -494,6 +348,7 @@ export class MasksManager {
                 stroke: "black",
                 fill: "black",
                 strokeWidth: 1,
+                perfectDrawEnabled: false,
                 closed: true,
                 listening: false,
                 opacity: 1,
@@ -525,6 +380,7 @@ export class MasksManager {
                 fill: tags.primary.color,
                 stroke: tags.primary.color,
                 fillEnabled: true,
+                perfectDrawEnabled: false,
                 strokeWidth: 1,
                 closed: true,
                 listening: false,
@@ -559,24 +415,7 @@ export class MasksManager {
         });
     }
 
-    /**
-     * Gets the masks drawn on canvas layer and draws them on layer passed as parameter
-     */
-    private getAndLoadMasks(layer: Konva.Layer, layerNumber: number, edgeArray?: number[]): Promise<void> {
-        console.time("getAndLoadMasks");
-        console.time("getMasks");
-        const allMasks = this.getOnlyMasks(undefined, layerNumber, undefined, edgeArray);
-        console.log(layerNumber);
-        console.log(allMasks);
-        console.timeEnd("getMasks");
-        console.time("loadMasks");
-        const loadPromise = this.loadMasksInternal(allMasks, layer);
-        console.timeEnd("loadMasks");
-        console.timeEnd("getAndLoadMasks");
-        return loadPromise;
-    }
-
-    private async loadMasksInternal(allMasks: IMask[], layer: Konva.Layer): Promise<void> {
+    private async loadMasksInternal(allMask: IMask, layer: Konva.Layer): Promise<HTMLImageElement> {
         const currentDimensions: IDimension = {
             width: this.sourceWidth,
             height: this.sourceHeight,
@@ -588,52 +427,53 @@ export class MasksManager {
 
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
             canvas.width = currentDimensions.width;
             canvas.height = currentDimensions.height;
 
             const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
             const imageDataAll = newdata.data;
-            let imgData;
+            const imgData = allMask.imageData;
             // look through all the colored mask. each tag has its own binary mask
             // decode from rle to binary matrix and then convert it to a unit8clamped array of imageData
-            allMasks.forEach((mask: IMask) => {
-                imgData = mask.imageData;
-                const tags: TagsDescriptor = mask.tags;
-                const [r, g, b] = tags.primary.srgbColor.to255();
-                this.addTagsDescriptor(tags);
-                for (let i = 0; i <= imgData.length - 1; i = i + 4) {
-                    if (imgData[i] === 1) {
-                        imageDataAll[i] = r;
-                        imageDataAll[i + 1] = g;
-                        imageDataAll[i + 2] = b;
-                        imageDataAll[i + 3] = 255;
+            const tags: TagsDescriptor[] = allMask.tags;
+            tags.forEach((tag: TagsDescriptor) => {
+                // imgData = mask.imageData;
+
+                const [r, g, b] = tag.primary.srgbColor.to255();
+                this.addTagsDescriptor(tag);
+                for (let i = 0; i <= imgData.length - 1; i++) {
+                    if (imgData[i] === tag.primary.sequenceNumber) {
+                        imageDataAll[i * 4] = r;
+                        imageDataAll[i * 4 + 1] = g;
+                        imageDataAll[i * 4 + 2] = b;
+                        imageDataAll[i * 4 + 3] = 255;
                     }
                 }
             });
 
             newdata.data.set(imageDataAll);
             ctx.putImageData(newdata, 0, 0);
+
+            // reuse this image
             const new_image = new Image();
             new_image.src = canvas.toDataURL();
 
-            const loadPromise = new Promise<void>((resolve, _reject) => {
-                new_image.onload = () => {
-                    console.log("hi image loaded");
+            const loadPromise = new Promise<HTMLImageElement>((resolve, _reject) => {
+                new_image.onload = (e) => {
                     const newKonvaImg = new Konva.Image({
                         image: new_image,
-                        lineCap: "round",
-                        lineJoin: "round",
                         height,
                         width,
+                        perfectDrawEnabled: true,
                     });
-                    newKonvaImg.setAttr("layerNumber", this.getCurrentLayerNumber());
                     layer.add(newKonvaImg);
-                    resolve();
-                }
+                    resolve(new_image);
+                };
             });
 
-           return loadPromise;
+            return loadPromise;
         }
     }
 
@@ -664,10 +504,6 @@ export class MasksManager {
         ctx.stroke();
 
         return canvas.toDataURL();
-    }
-
-    private getCurrentLayerNumber(): number {
-        return LayerManager.getInstance().getCurrentLayerNumber();
     }
 
     private updateZIndex(enabled: boolean): void {
@@ -702,7 +538,6 @@ export class MasksManager {
                 name: "eraserLine",
                 ...this.getLineShapeAttributes(),
             });
-            previousLine.setAttr("layerNumber", this.getCurrentLayerNumber());
 
             this.canvasLayer.add(previousLine);
 
@@ -717,7 +552,6 @@ export class MasksManager {
                 name: tag.primary.name,
                 ...this.getLineShapeAttributes(),
             });
-            currentLine.setAttr("layerNumber", this.getCurrentLayerNumber());
 
             this.canvasLayer.add(currentLine);
         });
@@ -769,6 +603,14 @@ export class MasksManager {
         };
     }
 
+    private cleanUp(): void {
+        this.imagesList.forEach((img) => {
+            img.src =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+            img.onload = null;
+        });
+    }
+
     private removeEventListeners(): void {
         this.konvaStage.off("mousemove mousedown mouseup");
     }
@@ -783,7 +625,7 @@ export class MasksManager {
             if (width <= maxWidth || height <= maxHeight) {
                 this.konvaStage.width(width);
                 this.konvaStage.height(height);
-            } 
+            }
             if (width > maxWidth && height > maxHeight) {
                 this.konvaStage.width(maxWidth);
                 this.konvaStage.height(maxHeight);
@@ -819,12 +661,11 @@ export class MasksManager {
     }
 
     private resetKonvaLayer(): void {
+        this.canvasLayer.destroyChildren();
         this.canvasLayer.destroy();
-        this.previewCanvasLayer.destroy();
         this.canvasLayer = new Konva.Layer({});
-        this.previewCanvasLayer = new Konva.Layer({});
         this.konvaStage.add(this.canvasLayer);
-        this.konvaStage.add(this.previewCanvasLayer);
+        this.cleanUp();
     }
 
     private buildUIElements(): void {
@@ -839,9 +680,6 @@ export class MasksManager {
 
         this.canvasLayer = new Konva.Layer({});
         stage.add(this.canvasLayer);
-
-        this.previewCanvasLayer = new Konva.Layer({});
-        stage.add(this.previewCanvasLayer);
 
         this.konvaStage = stage;
         this.setKonvaCursor();

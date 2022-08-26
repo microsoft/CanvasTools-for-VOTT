@@ -1228,7 +1228,7 @@ exports.Selector = Selector;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LABColor = void 0;
-const XYZColor_1 = __webpack_require__(19);
+const XYZColor_1 = __webpack_require__(18);
 class LABColor {
     constructor(l, a, b) {
         this.values = [l, a, b];
@@ -1363,39 +1363,6 @@ ConfigurationManager.isMaskEnabled = false;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LayerManager = void 0;
-class LayerManager {
-    constructor() {
-        this.currentLayerNumber = 1;
-    }
-    static getInstance() {
-        if (!LayerManager.instance) {
-            LayerManager.instance = new LayerManager();
-        }
-        return LayerManager.instance;
-    }
-    getCurrentLayerNumber() {
-        return this.currentLayerNumber;
-    }
-    increaseCurrentLayerNumber() {
-        this.currentLayerNumber++;
-    }
-    deleteInstance() {
-        if (LayerManager.instance) {
-            delete LayerManager.instance;
-        }
-    }
-}
-exports.LayerManager = LayerManager;
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.SelectionMode = void 0;
 var SelectionMode;
 (function (SelectionMode) {
@@ -1411,7 +1378,7 @@ var SelectionMode;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1517,7 +1484,7 @@ exports.DragComponent = DragComponent;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1581,7 +1548,7 @@ exports.CrossElement = CrossElement;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1659,7 +1626,7 @@ exports.HSLColor = HSLColor;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1667,7 +1634,7 @@ exports.HSLColor = HSLColor;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RGBColor = void 0;
 const SRGBColor_1 = __webpack_require__(24);
-const XYZColor_1 = __webpack_require__(19);
+const XYZColor_1 = __webpack_require__(18);
 class RGBColor {
     constructor(r, g, b) {
         this.values = [r, g, b];
@@ -1710,7 +1677,7 @@ exports.RGBColor = RGBColor;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1718,7 +1685,7 @@ exports.RGBColor = RGBColor;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.XYZColor = void 0;
 const LABColor_1 = __webpack_require__(11);
-const RGBColor_1 = __webpack_require__(18);
+const RGBColor_1 = __webpack_require__(17);
 class XYZColor {
     constructor(x, y, z) {
         this.values = [x, y, z];
@@ -1763,6 +1730,39 @@ class XYZColor {
 exports.XYZColor = XYZColor;
 XYZColor.D65 = new XYZColor(0.95047, 1.000, 1.08883);
 XYZColor.D50 = new XYZColor(0.966797, 1.000, 0.825188);
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LayerManager = void 0;
+class LayerManager {
+    constructor() {
+        this.currentLayerNumber = 1;
+    }
+    static getInstance() {
+        if (!LayerManager.instance) {
+            LayerManager.instance = new LayerManager();
+        }
+        return LayerManager.instance;
+    }
+    getCurrentLayerNumber() {
+        return this.currentLayerNumber;
+    }
+    increaseCurrentLayerNumber() {
+        this.currentLayerNumber++;
+    }
+    deleteInstance() {
+        if (LayerManager.instance) {
+            delete LayerManager.instance;
+        }
+    }
+}
+exports.LayerManager = LayerManager;
 
 
 /***/ }),
@@ -1940,11 +1940,11 @@ exports.Element = Element;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Color = void 0;
-const HSLColor_1 = __webpack_require__(17);
+const HSLColor_1 = __webpack_require__(16);
 const LABColor_1 = __webpack_require__(11);
-const RGBColor_1 = __webpack_require__(18);
+const RGBColor_1 = __webpack_require__(17);
 const SRGBColor_1 = __webpack_require__(24);
-const XYZColor_1 = __webpack_require__(19);
+const XYZColor_1 = __webpack_require__(18);
 class Color {
     constructor(...args) {
         if (args.length === 1) {
@@ -2029,8 +2029,8 @@ exports.Color = Color;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SRGBColor = void 0;
-const HSLColor_1 = __webpack_require__(17);
-const RGBColor_1 = __webpack_require__(18);
+const HSLColor_1 = __webpack_require__(16);
+const RGBColor_1 = __webpack_require__(17);
 class SRGBColor {
     constructor(r, g, b) {
         this.values = [r, g, b];
@@ -2459,7 +2459,7 @@ exports.KonvaContainerId = "konvaContainer";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegionsManager = void 0;
-const LayerManager_1 = __webpack_require__(13);
+const LayerManager_1 = __webpack_require__(19);
 const Point2D_1 = __webpack_require__(1);
 const Rect_1 = __webpack_require__(2);
 const RegionData_1 = __webpack_require__(4);
@@ -3149,7 +3149,7 @@ var RegionDataType;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(15);
+const DragComponent_1 = __webpack_require__(14);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -3274,7 +3274,7 @@ exports.RectRegion = RectRegion;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AreaSelector = void 0;
 const Rect_1 = __webpack_require__(2);
-const ISelectorSettings_1 = __webpack_require__(14);
+const ISelectorSettings_1 = __webpack_require__(13);
 const MaskSelector_1 = __webpack_require__(63);
 const PointSelector_1 = __webpack_require__(64);
 const PolygonSelector_1 = __webpack_require__(65);
@@ -3478,7 +3478,7 @@ AreaSelector.DefaultTemplateSize = new Rect_1.Rect(20, 20);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlternatingCrossElement = void 0;
-const CrossElement_1 = __webpack_require__(16);
+const CrossElement_1 = __webpack_require__(15);
 class AlternatingCrossElement extends CrossElement_1.CrossElement {
     constructor(paper, boundRect) {
         super(paper, boundRect);
@@ -3725,10 +3725,10 @@ exports.Toolbar = Toolbar;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tag = void 0;
 const Color_1 = __webpack_require__(23);
-const HSLColor_1 = __webpack_require__(17);
+const HSLColor_1 = __webpack_require__(16);
 const LABColor_1 = __webpack_require__(11);
 class Tag {
-    constructor(name, color, id = "") {
+    constructor(name, color, id = "", sequenceNumber = 0) {
         this.tagColorPure = "";
         this.tagColorAccent = "";
         this.tagColorHighlight = "";
@@ -3746,6 +3746,7 @@ class Tag {
             this.colorObj = color;
         }
         this.tagID = id;
+        this.tagSequenceNumber = sequenceNumber;
     }
     static BuildFromJSON(data) {
         if (data.color !== undefined) {
@@ -3773,6 +3774,9 @@ class Tag {
     }
     get id() {
         return this.tagID;
+    }
+    get sequenceNumber() {
+        return this.tagSequenceNumber;
     }
     get colorPure() {
         if (this.tagColorPure === "") {
@@ -3817,7 +3821,7 @@ class Tag {
         return this.tagColorNoColor;
     }
     copy() {
-        return new Tag(this.tagName, this.colorObj, this.tagID);
+        return new Tag(this.tagName, this.colorObj, this.tagID, this.tagSequenceNumber);
     }
     toJSON() {
         return {
@@ -3842,17 +3846,17 @@ exports.CanvasTools = void 0;
 const CanvasTools_Editor_1 = __webpack_require__(38);
 const CanvasTools_Filter_1 = __webpack_require__(25);
 const Color_1 = __webpack_require__(23);
-const HSLColor_1 = __webpack_require__(17);
+const HSLColor_1 = __webpack_require__(16);
 const LABColor_1 = __webpack_require__(11);
 const Palette_1 = __webpack_require__(73);
-const RGBColor_1 = __webpack_require__(18);
-const XYZColor_1 = __webpack_require__(19);
+const RGBColor_1 = __webpack_require__(17);
+const XYZColor_1 = __webpack_require__(18);
 const Point2D_1 = __webpack_require__(1);
 const Rect_1 = __webpack_require__(2);
 const RegionData_1 = __webpack_require__(4);
 const Tag_1 = __webpack_require__(36);
 const TagsDescriptor_1 = __webpack_require__(74);
-const ISelectorSettings_1 = __webpack_require__(14);
+const ISelectorSettings_1 = __webpack_require__(13);
 const PointRegion_1 = __webpack_require__(30);
 const RectRegion_1 = __webpack_require__(31);
 const RegionsManager_1 = __webpack_require__(27);
@@ -3909,11 +3913,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Editor = void 0;
 const CanvasTools_Filter_1 = __webpack_require__(25);
 const ConfigurationManager_1 = __webpack_require__(12);
-const LayerManager_1 = __webpack_require__(13);
+const LayerManager_1 = __webpack_require__(19);
 const Rect_1 = __webpack_require__(2);
 const constants_1 = __webpack_require__(26);
 const ZoomManager_1 = __webpack_require__(20);
-const ISelectorSettings_1 = __webpack_require__(14);
+const ISelectorSettings_1 = __webpack_require__(13);
 const MaskManager_1 = __webpack_require__(39);
 const RegionsManager_1 = __webpack_require__(27);
 const AreaSelector_1 = __webpack_require__(32);
@@ -4748,14 +4752,15 @@ Editor.SVGDefsTemplate = `
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MasksManager = void 0;
 const konva_1 = __webpack_require__(82);
-const LayerManager_1 = __webpack_require__(13);
 const constants_1 = __webpack_require__(26);
 const ZoomManager_1 = __webpack_require__(20);
-const ISelectorSettings_1 = __webpack_require__(14);
+const ISelectorSettings_1 = __webpack_require__(13);
 class MasksManager {
     constructor(editorDiv, konvaDivHostElement, callbacks) {
         this.callbacks = callbacks;
         this.tagsList = [];
+        this.blobUrlList = [];
+        this.imagesList = [];
         this.maskSelectionMode = ISelectorSettings_1.SelectionMode.BRUSH;
         this.brushSize = {
             brush: 30,
@@ -4809,152 +4814,69 @@ class MasksManager {
             }
         }
     }
-    enablePreview(enable) {
-        if (this.previewLayerEnabled !== enable) {
-            this.callbacks.onToggleMaskPreview(enable);
-            if (enable) {
-                this.callbacks.onMaskGenerationBegin();
-                this.updateZIndex(true);
-                this.setKonvaCursorToDefault();
-                this.removeEventListeners();
-                this.getMaskPreview();
-                this.previewCanvasLayer.show();
-                this.canvasLayer.hide();
-                this.callbacks.onMaskGenerationEnd();
-            }
-            else {
-                this.addListeners();
-                this.setKonvaCursor();
-                this.previewCanvasLayer.destroyChildren();
-                this.previewCanvasLayer.hide();
-                this.canvasLayer.show();
-            }
-            this.previewLayerEnabled = !this.previewLayerEnabled;
-        }
+    async enablePreview(enable) {
+        this.callbacks.onToggleMaskPreview(enable);
+        this.updateZIndex(true);
+        this.getMaskPreview();
     }
-    async getAllMergedMasks() {
-        this.callbacks.onMaskGenerationBegin();
-        const drawPromise = () => {
-            return new Promise(async (resolve, _reject) => {
-                const masks = this.getOnlyMasks();
-                const mergedMasks = await this.getAllMasks();
-                this.callbacks.onMaskGenerationEnd();
-                resolve({
-                    masks,
-                    mergedMasks
-                });
-            });
-        };
-        return await drawPromise();
-    }
-    async getAllMasks() {
-        const edgeArray = this.processCanvasToGetEdgeArray(this.canvasLayer);
-        const loadPromises = this.getMaskPreview(edgeArray);
-        await Promise.all(loadPromises);
-        const mergedMasks = this.getOnlyMasks(undefined, undefined, this.previewCanvasLayer, edgeArray);
-        this.previewCanvasLayer.destroyChildren();
+    getAllMasks() {
+        const mergedMasks = this.getOnlyMasks(undefined);
         return mergedMasks;
     }
-    getOnlyMasks(tagsList, layerNumber, selectedTargetLayer, edgeArray) {
-        const allMasks = [];
+    getOnlyMasks(tagsList) {
         const currentDimensionsEditor = this.getCurrentDimension();
         const currentDimensions = {
             width: this.sourceWidth,
             height: this.sourceHeight,
         };
-        let masksExist = false;
         const width = this.konvaStage.width();
         const height = this.konvaStage.height();
         const scaleX = this.konvaStage.scaleX();
         const scaleY = this.konvaStage.scaleY();
         const x = this.konvaStage.x();
         const y = this.konvaStage.y();
-        const targetlayer = selectedTargetLayer !== null && selectedTargetLayer !== void 0 ? selectedTargetLayer : this.konvaStage.getChildren()[0];
-        if (targetlayer) {
-            this.konvaStage
-                .width(currentDimensionsEditor.width)
-                .height(currentDimensionsEditor.height)
-                .scaleX(1)
-                .scaleY(1)
-                .x(0)
-                .y(0);
-            let canvas;
-            let tempCanvasLayer;
-            if (layerNumber) {
-                const shapes = targetlayer.getChildren();
-                if (shapes.length) {
-                    const filteredLayerShapes = shapes.filter((shape) => {
-                        return shape.attrs.layerNumber === layerNumber;
-                    });
-                    const tempCanvas = document.createElement("canvas");
-                    tempCanvas.width = currentDimensions.width;
-                    tempCanvas.height = currentDimensions.height;
-                    tempCanvasLayer = new konva_1.default.Layer({});
-                    this.konvaStage.add(tempCanvasLayer);
-                    filteredLayerShapes.forEach((shape) => {
-                        tempCanvasLayer.add(shape.clone());
-                    });
-                    canvas = tempCanvasLayer === null || tempCanvasLayer === void 0 ? void 0 : tempCanvasLayer.toCanvas({ pixelRatio: this.sourceWidth / width });
-                    masksExist = true;
+        this.konvaStage
+            .width(currentDimensionsEditor.width)
+            .height(currentDimensionsEditor.height)
+            .scaleX(1)
+            .scaleY(1)
+            .x(0)
+            .y(0);
+        let canvas;
+        canvas = this.canvasLayer.toCanvas({ pixelRatio: this.sourceWidth / width });
+        const ctx = canvas === null || canvas === void 0 ? void 0 : canvas.getContext("2d");
+        const data = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
+        this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY).x(x).y(y);
+        const edge = this.getEdgePixelArray(data.data);
+        const imgData = this.unSmoothenImageData(edge, currentDimensions, data.data);
+        const listTags = tagsList !== null && tagsList !== void 0 ? tagsList : this.tagsList;
+        console.time("create");
+        const newData = new Array(currentDimensions.width * currentDimensions.height);
+        newData.fill(0);
+        console.timeEnd("create");
+        listTags.forEach((tags) => {
+            const [r, g, b] = tags.primary.srgbColor.to255();
+            const tagId = tags.primary.sequenceNumber;
+            console.time("convert");
+            for (let i = 0; i <= data.data.length - 1; i = i + 4) {
+                if (imgData[i] === r &&
+                    imgData[i + 1] === g &&
+                    imgData[i + 2] === b &&
+                    imgData[i + 3] === 255) {
+                    newData[i / 4] = tagId;
                 }
             }
-            else {
-                canvas = targetlayer.toCanvas({ pixelRatio: this.sourceWidth / width });
-                masksExist = true;
-            }
-            if (masksExist) {
-                const ctx = canvas === null || canvas === void 0 ? void 0 : canvas.getContext("2d");
-                const data = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
-                this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY).x(x).y(y);
-                if (tempCanvasLayer) {
-                    tempCanvasLayer.destroy();
-                }
-                console.time("calculatingEdgePixelArray");
-                const edge = edgeArray ? edgeArray : this.getEdgePixelArray(data.data);
-                console.timeEnd("calculatingEdgePixelArray");
-                console.time("unSmoothen");
-                const imgData = this.unSmoothenImageData(edge, currentDimensions, data.data);
-                console.timeEnd("unSmoothen");
-                console.time("binaryMasks");
-                const listTags = tagsList !== null && tagsList !== void 0 ? tagsList : this.tagsList;
-                listTags.forEach((tags) => {
-                    console.time("perBinaryMasks");
-                    console.time("create");
-                    const [r, g, b] = tags.primary.srgbColor.to255();
-                    const newData = ctx.createImageData(currentDimensions.width, currentDimensions.height);
-                    console.timeEnd("create");
-                    console.time("convert");
-                    for (let i = 0; i <= data.data.length - 1; i = i + 4) {
-                        if (imgData[i] === r &&
-                            imgData[i + 1] === g &&
-                            imgData[i + 2] === b &&
-                            imgData[i + 3] === 255) {
-                            newData.data[i] = 1;
-                            newData.data[i + 1] = 1;
-                            newData.data[i + 2] = 1;
-                            newData.data[i + 3] = 1;
-                        }
-                    }
-                    console.timeEnd("convert");
-                    console.time("fromArrayConversion");
-                    const xyz = newData.data;
-                    allMasks.push({
-                        tags,
-                        imageData: xyz,
-                    });
-                    console.timeEnd("fromArrayConversion");
-                    console.time("clearRect");
-                    ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
-                    console.timeEnd("clearRect");
-                    console.timeEnd("perBinaryMasks");
-                });
-                console.timeEnd("binaryMasks");
-            }
-        }
-        return allMasks;
+            console.timeEnd("convert");
+            ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
+        });
+        return {
+            imageData: newData,
+            tags: listTags
+        };
     }
-    loadAllMasks(allMasks) {
-        this.loadMasksInternal(allMasks, this.canvasLayer);
+    async loadAllMasks(allMasks) {
+        const image = await this.loadMasksInternal(allMasks, this.canvasLayer);
+        this.imagesList.push(image);
     }
     unSmoothenImageData(edgeArray, currentDimensions, imgData) {
         for (let i = 0; i <= edgeArray.length - 1; i++) {
@@ -5011,15 +4933,7 @@ class MasksManager {
         return edgeArray;
     }
     getMaskPreview(edgeArray) {
-        const loadPromises = [];
-        const maxLayerCount = this.getCurrentLayerNumber();
-        const edge = edgeArray !== null && edgeArray !== void 0 ? edgeArray : this.processCanvasToGetEdgeArray(this.canvasLayer);
-        for (let i = 1; i <= maxLayerCount; i++) {
-            this.convertRegionsToMask(this.previewCanvasLayer, i);
-            const promise = this.getAndLoadMasks(this.previewCanvasLayer, i, edge);
-            loadPromises.push(promise);
-        }
-        return loadPromises;
+        this.convertRegionsToMask(this.canvasLayer);
     }
     processCanvasToGetEdgeArray(layer) {
         const canvas = layer.toCanvas({ pixelRatio: this.sourceWidth / this.konvaStage.width() });
@@ -5030,10 +4944,7 @@ class MasksManager {
     }
     convertRegionsToMask(layer, layerNumber) {
         const allRegions = this.callbacks.getAllRegionsWithLayer();
-        const regions = allRegions.filter((region) => {
-            return region.layerNumber === layerNumber;
-        });
-        regions.forEach((polygon) => {
+        allRegions.forEach((polygon) => {
             const tags = polygon.tags;
             this.addTagsDescriptor(tags);
             const points = polygon.regionData.points;
@@ -5061,6 +4972,7 @@ class MasksManager {
                 stroke: "black",
                 fill: "black",
                 strokeWidth: 1,
+                perfectDrawEnabled: false,
                 closed: true,
                 listening: false,
                 opacity: 1,
@@ -5085,6 +4997,7 @@ class MasksManager {
                 fill: tags.primary.color,
                 stroke: tags.primary.color,
                 fillEnabled: true,
+                perfectDrawEnabled: false,
                 strokeWidth: 1,
                 closed: true,
                 listening: false,
@@ -5111,20 +5024,7 @@ class MasksManager {
             }
         });
     }
-    getAndLoadMasks(layer, layerNumber, edgeArray) {
-        console.time("getAndLoadMasks");
-        console.time("getMasks");
-        const allMasks = this.getOnlyMasks(undefined, layerNumber, undefined, edgeArray);
-        console.log(layerNumber);
-        console.log(allMasks);
-        console.timeEnd("getMasks");
-        console.time("loadMasks");
-        const loadPromise = this.loadMasksInternal(allMasks, layer);
-        console.timeEnd("loadMasks");
-        console.timeEnd("getAndLoadMasks");
-        return loadPromise;
-    }
-    async loadMasksInternal(allMasks, layer) {
+    async loadMasksInternal(allMask, layer) {
         const currentDimensions = {
             width: this.sourceWidth,
             height: this.sourceHeight,
@@ -5134,22 +5034,23 @@ class MasksManager {
             const height = this.konvaStage.height();
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
             canvas.width = currentDimensions.width;
             canvas.height = currentDimensions.height;
             const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
             const imageDataAll = newdata.data;
-            let imgData;
-            allMasks.forEach((mask) => {
-                imgData = mask.imageData;
-                const tags = mask.tags;
-                const [r, g, b] = tags.primary.srgbColor.to255();
-                this.addTagsDescriptor(tags);
-                for (let i = 0; i <= imgData.length - 1; i = i + 4) {
-                    if (imgData[i] === 1) {
-                        imageDataAll[i] = r;
-                        imageDataAll[i + 1] = g;
-                        imageDataAll[i + 2] = b;
-                        imageDataAll[i + 3] = 255;
+            const imgData = allMask.imageData;
+            const tags = allMask.tags;
+            tags.forEach((tag) => {
+                const [r, g, b] = tag.primary.srgbColor.to255();
+                this.addTagsDescriptor(tag);
+                for (let i = 0; i <= imgData.length - 1; i++) {
+                    if (imgData[i] === tag.primary.sequenceNumber) {
+                        imageDataAll[i * 4] = r;
+                        imageDataAll[i * 4 + 1] = g;
+                        imageDataAll[i * 4 + 2] = b;
+                        imageDataAll[i * 4 + 3] = 255;
                     }
                 }
             });
@@ -5158,18 +5059,15 @@ class MasksManager {
             const new_image = new Image();
             new_image.src = canvas.toDataURL();
             const loadPromise = new Promise((resolve, _reject) => {
-                new_image.onload = () => {
-                    console.log("hi image loaded");
+                new_image.onload = (e) => {
                     const newKonvaImg = new konva_1.default.Image({
                         image: new_image,
-                        lineCap: "round",
-                        lineJoin: "round",
                         height,
                         width,
+                        perfectDrawEnabled: true
                     });
-                    newKonvaImg.setAttr("layerNumber", this.getCurrentLayerNumber());
                     layer.add(newKonvaImg);
-                    resolve();
+                    resolve(new_image);
                 };
             });
             return loadPromise;
@@ -5196,9 +5094,6 @@ class MasksManager {
         ctx.stroke();
         return canvas.toDataURL();
     }
-    getCurrentLayerNumber() {
-        return LayerManager_1.LayerManager.getInstance().getCurrentLayerNumber();
-    }
     updateZIndex(enabled) {
         this.konvaContainerHostElement.style["z-index"] = enabled ? constants_1.EnabledMaskHostZIndex : constants_1.DisabledMaskHostZIndex;
     }
@@ -5219,10 +5114,8 @@ class MasksManager {
             isPaint = true;
             tag = this.getTagsDescriptor();
             previousLine = new konva_1.default.Line(Object.assign({ globalCompositeOperation: "destination-out", strokeWidth: this.maskSelectionMode === ISelectorSettings_1.SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase, points: [scaledPosition.x, scaledPosition.y], name: "eraserLine" }, this.getLineShapeAttributes()));
-            previousLine.setAttr("layerNumber", this.getCurrentLayerNumber());
             this.canvasLayer.add(previousLine);
             currentLine = new konva_1.default.Line(Object.assign({ stroke: tag.primary.color, strokeWidth: this.maskSelectionMode === ISelectorSettings_1.SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase, globalCompositeOperation: this.maskSelectionMode === ISelectorSettings_1.SelectionMode.BRUSH ? "source-over" : "destination-out", points: [scaledPosition.x, scaledPosition.y], name: tag.primary.name }, this.getLineShapeAttributes()));
-            currentLine.setAttr("layerNumber", this.getCurrentLayerNumber());
             this.canvasLayer.add(currentLine);
         });
         this.konvaStage.on("mouseup", (_e) => {
@@ -5262,6 +5155,12 @@ class MasksManager {
             perfectDrawEnabled: false,
             opacity: 1,
         };
+    }
+    cleanUp() {
+        this.imagesList.forEach((img) => {
+            img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+            img.onload = null;
+        });
     }
     removeEventListeners() {
         this.konvaStage.off("mousemove mousedown mouseup");
@@ -5309,12 +5208,17 @@ class MasksManager {
         }
     }
     resetKonvaLayer() {
+        this.canvasLayer.destroyChildren();
         this.canvasLayer.destroy();
+        this.previewCanvasLayer.destroyChildren();
         this.previewCanvasLayer.destroy();
-        this.canvasLayer = new konva_1.default.Layer({});
+        this.canvasLayer = new konva_1.default.Layer({
+            id: "mainThreadCanvasLayer"
+        });
         this.previewCanvasLayer = new konva_1.default.Layer({});
         this.konvaStage.add(this.canvasLayer);
         this.konvaStage.add(this.previewCanvasLayer);
+        this.cleanUp();
     }
     buildUIElements() {
         const currentDimensions = this.getCurrentDimension();
@@ -5325,7 +5229,9 @@ class MasksManager {
         });
         this.sourceHeight = currentDimensions.height;
         this.sourceWidth = currentDimensions.width;
-        this.canvasLayer = new konva_1.default.Layer({});
+        this.canvasLayer = new konva_1.default.Layer({
+            id: "mainThreadCanvasLayer"
+        });
         stage.add(this.canvasLayer);
         this.previewCanvasLayer = new konva_1.default.Layer({});
         stage.add(this.previewCanvasLayer);
@@ -6401,7 +6307,7 @@ TagsElement.DEFAULT_SECONDARY_TAG_DY = 6;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(15);
+const DragComponent_1 = __webpack_require__(14);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -7399,7 +7305,7 @@ AnchorsElement.ANCHOR_POINT_LINE_SWITCH_THRESHOLD = 5;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(15);
+const DragComponent_1 = __webpack_require__(14);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -7873,7 +7779,7 @@ exports.AnchorsElement = AnchorsElement;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DragElement = void 0;
-const DragComponent_1 = __webpack_require__(15);
+const DragComponent_1 = __webpack_require__(14);
 class DragElement extends DragComponent_1.DragComponent {
     constructor(paper, paperRect = null, regionData, callbacks) {
         super(paper, paperRect, regionData, callbacks);
@@ -8311,7 +8217,7 @@ MenuElement.PathCollection = {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MaskSelector = void 0;
-const LayerManager_1 = __webpack_require__(13);
+const LayerManager_1 = __webpack_require__(19);
 class MaskSelector {
     constructor(callbacks) {
         this.maskSelectorCallbacks = callbacks;
@@ -8344,7 +8250,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PointSelector = void 0;
 const Point2D_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(4);
-const CrossElement_1 = __webpack_require__(16);
+const CrossElement_1 = __webpack_require__(15);
 const Selector_1 = __webpack_require__(10);
 class PointSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
@@ -8441,7 +8347,7 @@ exports.PolygonSelector = void 0;
 const ConfigurationManager_1 = __webpack_require__(12);
 const Point2D_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(4);
-const CrossElement_1 = __webpack_require__(16);
+const CrossElement_1 = __webpack_require__(15);
 const Selector_1 = __webpack_require__(10);
 class PolygonSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {
@@ -8671,7 +8577,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolylineSelector = void 0;
 const Point2D_1 = __webpack_require__(1);
 const RegionData_1 = __webpack_require__(4);
-const CrossElement_1 = __webpack_require__(16);
+const CrossElement_1 = __webpack_require__(15);
 const Selector_1 = __webpack_require__(10);
 class PolylineSelector extends Selector_1.Selector {
     constructor(parent, paper, boundRect, callbacks) {

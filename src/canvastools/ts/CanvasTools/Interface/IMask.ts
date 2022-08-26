@@ -31,13 +31,8 @@ export interface IBrushSize {
 }
 
 export interface IMask {
-    imageData: Uint8ClampedArray;
-    tags: TagsDescriptor;
-}
-
-export interface IMergedMasks {
-    masks: IMask[];
-    mergedMasks: IMask[]
+    imageData: number[];
+    tags: TagsDescriptor[];
 }
 
 export interface IRegionEdge {

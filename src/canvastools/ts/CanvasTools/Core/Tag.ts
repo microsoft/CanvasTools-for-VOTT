@@ -39,6 +39,7 @@ export class Tag implements ITag {
 
     private tagName: string;
     private tagID: string;
+    private tagSequenceNumber: number;
 
     /**
      * The hue-value of the tag's color. *Readonly*
@@ -73,6 +74,13 @@ export class Tag implements ITag {
      */
     public get id(): string {
         return this.tagID;
+    }
+
+    /**
+     * The `sequenceNumber` of the tag. *Readonly*
+     */
+     public get sequenceNumber(): number {
+        return this.tagSequenceNumber;
     }
 
     private tagColorPure: string = "";
@@ -178,17 +186,19 @@ export class Tag implements ITag {
      * @param name - `name` of the new tag
      * @param cssColor - CSS color (e.g. #FF03A3) for the new tag, *only hue value of the color will be used*
      * @param id - `id` of the new tag (optional, by default is "")
+     * @param sequenceNumber - `sequenceNumber` of the new tag (optional, by default is 0)
      */
-    constructor(name: string, cssColor: string, id?: string);
+    constructor(name: string, cssColor: string, id?: string, sequenceNumber?: number);
     /**
      * Creates a new `Tag` object with specified `name`, hue value of `cssColor` and `id`
      * @param name - `name` of the new tag
      * @param color - The `Color` object.
      * @param id - `id` of the new tag (optional, by default is "")
+     * @param sequenceNumber - `sequenceNumber` of the new tag (optional, by default is 0)
      */
-    constructor(name: string, color: Color, id?: string);
+    constructor(name: string, color: Color, id?: string, sequenceNumber?: number);
 
-    constructor(name: string, color: number|string|Color, id: string = "") {
+    constructor(name: string, color: number|string|Color, id: string = "", sequenceNumber: number = 0) {
         this.tagName = name;
 
         if (typeof color === "number") {
@@ -199,6 +209,7 @@ export class Tag implements ITag {
             this.colorObj = color;
         }
         this.tagID = id;
+        this.tagSequenceNumber = sequenceNumber
     }
 
     /**
@@ -206,7 +217,7 @@ export class Tag implements ITag {
      * @returns A new `Tag` object with copied properties
      */
     public copy(): Tag {
-        return new Tag(this.tagName, this.colorObj, this.tagID);
+        return new Tag(this.tagName, this.colorObj, this.tagID, this.tagSequenceNumber);
     }
 
     /**

@@ -159,7 +159,7 @@
         };
 
         editor.onMaskDrawingEnd = (drawnMask) => {
-            console.log(drawnMask);
+            // console.log(drawnMask);
         };
 
         editor.onMaskGenerationBegin = () => {
@@ -176,9 +176,9 @@
         // Collection of primary tags. Use Color class to define color.
         const Color = CanvasTools.Core.Colors.Color;
         const primaryTags = [
-            new CanvasTools.Core.Tag("Awesome", new Color("#c48de7")),
-            new CanvasTools.Core.Tag("Amazing", new Color("#3b1fff")),
-            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48")),
+            new CanvasTools.Core.Tag("Awesome", new Color("#c48de7"), "", 1),
+            new CanvasTools.Core.Tag("Amazing", new Color("#3b1fff"), "", 2),
+            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48"), "", 3),
         ];
 
 
@@ -248,23 +248,25 @@
 
         var getAllMasksButton = document.getElementById("getAllMasks");
         getAllMasksButton.addEventListener("click", (e) => {
-            window["brushData"] = editor.MM.getOnlyMasks();
+            // editor.MM.getAllMergedMasks().then((a) => {
+            //     window["brushData"] = a.mergedMasks;
+            // });
+            var a = editor.MM.getAllMasks();
+            console.log(a);
+            window["brushData"] = a;
         });
 
         var loadAllMasksButton = document.getElementById("loadAllMasks");
         loadAllMasksButton.addEventListener("click", (e) => {
             editor.MM.eraseAllMasks();
             editor.MM.loadAllMasks(window["brushData"]);
+            //.then(() => {});
         });
         let previewEnabled = false;
         var previewButton = document.getElementById("preview");
         previewButton.addEventListener("click", (e) => {
-            // editor.MM.enablePreview(!previewEnabled);
-            // previewEnabled = !previewEnabled;
-            editor.MM.getAllMergedMasks().then((a) => {
-                console.log(a);
-                window["brushData"] = a.mergedMasks
-            });
+            editor.MM.enablePreview(!previewEnabled);
+            previewEnabled = !previewEnabled;
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");
