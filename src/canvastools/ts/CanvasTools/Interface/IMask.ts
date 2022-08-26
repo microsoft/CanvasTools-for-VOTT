@@ -12,11 +12,10 @@ export interface IMaskManagerCallbacks {
     onMaskGenerationBegin: () => void;
     onMaskGenerationEnd: () => void;
     onToggleMaskPreview: (enableMaskPreview: boolean) => void;
-    getAllRegionsWithLayer: () => Array<{
+    getAllRegions: () => Array<{
         id: string;
         tags: TagsDescriptor;
         regionData: RegionData;
-        layerNumber: number;
     }>;
 }
 

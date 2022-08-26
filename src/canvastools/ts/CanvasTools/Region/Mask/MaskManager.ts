@@ -317,8 +317,8 @@ export class MasksManager {
         return edgeArray;
     }
 
-    private convertRegionsToMask(layer: Konva.Layer, layerNumber?: number) {
-        const allRegions = this.callbacks.getAllRegionsWithLayer();
+    private convertRegionsToMask(layer: Konva.Layer) {
+        const allRegions = this.callbacks.getAllRegions();
         allRegions.forEach((polygon: { id: string; tags: TagsDescriptor; regionData: RegionData }) => {
             const tags: TagsDescriptor = polygon.tags;
             this.addTagsDescriptor(tags);

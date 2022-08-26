@@ -61,8 +61,7 @@ export class PathRegion extends Region {
         callbacks: IRegionCallbacks,
         id: string,
         tagsDescriptor: TagsDescriptor,
-        tagsUpdateOptions?: ITagsUpdateOptions,
-        layerNumber?: number
+        tagsUpdateOptions?: ITagsUpdateOptions
     ) {
         super(
             paper,
@@ -71,8 +70,7 @@ export class PathRegion extends Region {
             Object.assign({}, callbacks),
             id,
             tagsDescriptor,
-            tagsUpdateOptions,
-            layerNumber
+            tagsUpdateOptions
         );
 
         if (paperRect !== null) {

@@ -1,4 +1,3 @@
-import { LayerManager } from "../../Core/LayerManager";
 import { MaskSelectorMode } from "../../Interface/IMask";
 import { ISelectorCallbacks } from "../../Interface/ISelectorCallbacks";
 
@@ -22,9 +21,6 @@ export class MaskSelector {
      */
     public enableMode(mode: MaskSelectorMode): void {
         this.maskSelectorCallbacks.onMaskSelection(true, mode);
-        if (!this.enabled) {
-            LayerManager.getInstance().increaseCurrentLayerNumber();
-        }
         this.enabled = true;
     }
 
@@ -34,9 +30,6 @@ export class MaskSelector {
      */
     public disable(): void {
         this.maskSelectorCallbacks.onMaskSelection(false);
-        if (this.enabled) {
-            LayerManager.getInstance().increaseCurrentLayerNumber();
-        }
         this.enabled = false;
     }
 }

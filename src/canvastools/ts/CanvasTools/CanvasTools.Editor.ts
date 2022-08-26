@@ -1,6 +1,5 @@
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { ConfigurationManager } from "./Core/ConfigurationManager";
-import { LayerManager } from "./Core/LayerManager";
 import { Point2D } from "./Core/Point2D";
 import { Rect } from "./Core/Rect";
 import { RegionData } from "./Core/RegionData";
@@ -524,11 +523,6 @@ export class Editor {
     private masksManager?: MasksManager;
 
     /**
-     * Internal reference to the `LayerManager` component.
-     */
-    private layerManager?: LayerManager;
-
-    /**
      * Reference to the host SVG element.
      */
     private editorSVG: SVGSVGElement;
@@ -803,16 +797,14 @@ export class Editor {
                     }
                     this.regionsManager.toggleFreezeMode();
                 },
-                getAllRegionsWithLayer: () => {
-                    const regionsWithLayer = this.regionsManager.getAllRegionsWithLayer();
+                getAllRegions: () => {
+                    const regionsWithLayer = this.regionsManager.getAllRegions();
                     this.regionsManager.deleteAllRegions();
                     return regionsWithLayer;
                 },
             };
             this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
         }
-
-        this.initializeLayerManager();
 
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);
         this.zoomManager.deleteInstance();
@@ -970,7 +962,6 @@ export class Editor {
                 this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
                 this.handleZoomAfterContentUpdate(true);
                 this.handleMaskManagerAfterContentUpdate();
-                this.initializeLayerManager();
                 if (typeof onContentLoadCb === "function") {
                     onContentLoadCb();
                 }
@@ -1148,12 +1139,6 @@ export class Editor {
     private handleMaskManagerAfterContentUpdate(): void {
         this.masksManager?.setSourceDimensions(this.sourceWidth, this.sourceHeight);
         this.masksManager?.eraseAllMasks();
-    }
-
-    private initializeLayerManager(): void {
-        this.layerManager = LayerManager.getInstance();
-        this.layerManager.deleteInstance();
-        this.layerManager = LayerManager.getInstance();
     }
 
     /**
