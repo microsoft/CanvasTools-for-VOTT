@@ -53,7 +53,9 @@
             <button id="enableAS">Enable AS</button>
             <button id="getAllMasks">Get all masks</button>
             <button id="loadAllMasks">Load all masks</button>
-            <button id="preview">Preview</button>
+            <button id="convert">Convert</button>
+            <button id="toggleVisibility">Toggle visibility</button>
+            <button id="eraseAllMasks">Erase</button>
         </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
@@ -65,11 +67,11 @@
     // The list of images
     const images = [
             {
-                path: "./../shared/media/background-shapesTest1.jpg",
+                path: "./../shared/media/background-shapesTest.jpg",
                 title: "Shapes (1)"
             },
             {
-                path: "./../shared/media/background-shapesTest2.jpg",
+                path: "./../shared/media/background-shapesTest.jpg",
                 title: "Shapes (2)"
             },
             {
@@ -108,6 +110,12 @@
     var editor;
     // store
     var tagColor = "#c48de7";
+
+    var colorObject = {
+        "#c48de7": "Awesome",
+        "#3b1fff": "Amazing",
+        "#f94c48": "Brilliant"
+    };
     var maskSize = 20;
 
     document.addEventListener("DOMContentLoaded", (e) => {
@@ -119,10 +127,9 @@
         editor = new CanvasTools.Editor(editorContainer, undefined, undefined, undefined, {
             isZoomEnabled: true,
             zoomType: 3
-        }).api;
+        }, true).api;
         editor.addToolbar(toolbarContainer, CanvasTools.Editor.FullToolbarSet, "./../shared/media/icons/");
         editor.enablePathRegions(true);
-        editor.enableMaskRegions();
 
         let incrementalRegionID = 100;
 
@@ -142,7 +149,7 @@
             console.log(`Began moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
         };
         editor.onRegionMove = (id, regionData) => {
-            // console.log(`Moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
+            //
         };
         editor.onRegionMoveEnd = (id, regionData) => {
             console.log(`Ended moving ${id}: {${regionData.x}, ${regionData.y}} x {${regionData.width}, ${regionData.height}}`);
@@ -158,14 +165,26 @@
             return getTagsDescriptor();
         };
 
+        editor.onMaskDrawingEnd = (drawnMask) => {
+        };
+
+        editor.onMaskGenerationBegin = () => {
+            console.log((new Date()).getMilliseconds());
+        };
+
+        editor.onMaskGenerationEnd = () => {
+            console.log((new Date()).getMilliseconds());
+        };
+
         editor.ZM.setMaxZoomScale(10);
+        editor.ZM.resetZoomOnContentLoad = true;
 
         // Collection of primary tags. Use Color class to define color.
         const Color = CanvasTools.Core.Colors.Color;
         const primaryTags = [
-            new CanvasTools.Core.Tag("Awesome", new Color("#c48de7")),
-            new CanvasTools.Core.Tag("Amazing", new Color("#3b1fff")),
-            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48")),
+            new CanvasTools.Core.Tag("Awesome", new Color("#c48de7"), "", 1),
+            new CanvasTools.Core.Tag("Amazing", new Color("#3b1fff"), "", 2),
+            new CanvasTools.Core.Tag("Brilliant", new Color("#f94c48"), "", 3),
         ];
 
 
@@ -182,6 +201,11 @@
         let imageIndex = 0;
         // Init images selector
         initImageSelect(images, (index, path) => {
+            if (index == 1) {
+                editorContainer.classList.add("changeSize");
+            } else {
+                editorContainer.classList.remove("changeSize");
+            }
             imageIndex = index;
             loadImage(path, (image) => {
                 editor.addContentSource(image);
@@ -230,7 +254,13 @@
 
         var getAllMasksButton = document.getElementById("getAllMasks");
         getAllMasksButton.addEventListener("click", (e) => {
-            window["brushData"] = editor.MM.getAllMasks();
+            var a = editor.MM.getAllMasks();
+            window["brushData"] = a;
+        });
+
+        var eraseAllMasksButton = document.getElementById("eraseAllMasks");
+        eraseAllMasksButton.addEventListener("click", (e) => {
+            editor.MM.eraseAllMasks();
         });
 
         var loadAllMasksButton = document.getElementById("loadAllMasks");
@@ -238,10 +268,22 @@
             editor.MM.eraseAllMasks();
             editor.MM.loadAllMasks(window["brushData"]);
         });
+        var convertButton = document.getElementById("convert");
+        convertButton.addEventListener("click", (e) => {
+            editor.MM.polygonsToMask();
+        });
 
-        var previewButton = document.getElementById("preview");
-        previewButton.addEventListener("click", (e) => {
-            editor.MM.togglePreview();
+        var toggleVisibility = true;
+        var toggleVisibilityButton = document.getElementById("toggleVisibility");
+        toggleVisibilityButton.addEventListener("click", (e) => {
+            var tagName = "Awesome";
+            Object.keys(colorObject).forEach(function (o) {
+                if (o == tagColor) {
+                    tagName = colorObject[o];
+                }
+            });
+            editor.MM.updateMaskVisibility(!toggleVisibility, tagName);
+            toggleVisibility = !toggleVisibility;
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");

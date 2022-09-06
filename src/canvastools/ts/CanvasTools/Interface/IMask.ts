@@ -8,12 +8,11 @@ export type MaskSelectorMode = SelectionMode.BRUSH | SelectionMode.ERASER;
 
 export interface IMaskManagerCallbacks {
     onMaskDrawingBegin: () => TagsDescriptor;
-    onToggleMaskPreview: (enableMaskPreview: boolean) => void;
-    getAllRegionsWithLayer: () => Array<{
+    onMaskDrawingEnd: () => void;
+    getAllRegions: () => Array<{
         id: string;
         tags: TagsDescriptor;
         regionData: RegionData;
-        layerNumber: number;
     }>;
 }
 
@@ -28,8 +27,8 @@ export interface IBrushSize {
 }
 
 export interface IMask {
-    imageData: Uint8Array;
-    tags: TagsDescriptor;
+    imageData: number[];
+    tags: TagsDescriptor[];
 }
 
 export interface IRegionEdge {

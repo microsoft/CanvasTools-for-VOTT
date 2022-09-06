@@ -28,11 +28,6 @@ export abstract class Region extends RegionComponent {
     public regionID: string;
 
     /**
-     * Internal region layer number. Used to simplify debugging layers
-     */
-    public layerNumber: number;
-
-    /**
      * Building blocks of the region component.
      */
     protected UI: RegionComponent[];
@@ -69,14 +64,12 @@ export abstract class Region extends RegionComponent {
         callbacks: IRegionCallbacks,
         id: string,
         tagsDescriptor: TagsDescriptor,
-        tagsUpdateOptions?: ITagsUpdateOptions,
-        layerNumber?: number
+        tagsUpdateOptions?: ITagsUpdateOptions
     ) {
         super(paper, paperRect, regionData, Object.assign({}, callbacks));
 
         this.ID = id;
         this.tags = tagsDescriptor;
-        this.layerNumber = layerNumber;
         this.regionID = this.s8();
         this.styleID = `region_${this.regionID}_style`;
         this.styleSheet = this.insertStyleSheet();

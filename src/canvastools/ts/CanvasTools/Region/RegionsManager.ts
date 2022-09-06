@@ -1,4 +1,3 @@
-import { LayerManager } from "../Core/LayerManager";
 import { Point2D } from "../Core/Point2D";
 import { Rect } from "../Core/Rect";
 import { RegionData, RegionDataType } from "../Core/RegionData";
@@ -287,7 +286,6 @@ export class RegionsManager {
      */
     public addPathRegion(id: string, regionData: RegionData, tagsDescriptor: TagsDescriptor) {
         this.menu.hide();
-        const layerNumber = LayerManager.getInstance().getCurrentLayerNumber();
         const region = new PathRegion(
             this.paper,
             this.paperRect,
@@ -295,8 +293,7 @@ export class RegionsManager {
             this.callbacks,
             id,
             tagsDescriptor,
-            this.tagsUpdateOptions,
-            layerNumber
+            this.tagsUpdateOptions
         );
 
         this.registerRegion(region);
@@ -341,25 +338,6 @@ export class RegionsManager {
                 id: region.ID,
                 tags: region.tags,
                 regionData: this.scaleRegionToOriginalSize(region.regionData),
-            };
-        });
-    }
-
-    /**
-     * @experimentalFn Returns a collection of all the regions currently drawn on the canvas with layerNumber
-     */
-    public getAllRegionsWithLayer(): Array<{
-        id: string;
-        tags: TagsDescriptor;
-        regionData: RegionData;
-        layerNumber: number;
-    }> {
-        return this.regions.map((region) => {
-            return {
-                id: region.ID,
-                tags: region.tags,
-                regionData: this.scaleRegionToOriginalSize(region.regionData),
-                layerNumber: region.layerNumber,
             };
         });
     }
