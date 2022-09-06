@@ -468,19 +468,8 @@ export class Editor {
 
     /**
      * Callback for `MasksManager` called when the mask is drawn.
-     * @param mask RLE encoded mask drawn
      */
-    public onMaskDrawingEnd: (mask: Uint8ClampedArray) => void;
-
-    /**
-     * Callback for `MasksManager` called when the merged mask generation begins.
-     */
-    public onMaskGenerationBegin: () => void;
-
-    /**
-     * Callback for `MasksManager` called when the merged mask generation ends.
-     */
-    public onMaskGenerationEnd: () => void;
+    public onMaskDrawingEnd: () => void;
 
     /**
      * Callback when user ended zoom function.
@@ -774,33 +763,15 @@ export class Editor {
                         return this.onMaskDrawingBegin();
                     }
                 },
-                onMaskDrawingEnd: (mask: Uint8ClampedArray) => {
+                onMaskDrawingEnd: () => {
                     if (typeof this.onMaskDrawingEnd === "function") {
-                        this.onMaskDrawingEnd(mask);
+                        this.onMaskDrawingEnd();
                     }
-                },
-                onMaskGenerationBegin: () => {
-                    if (typeof this.onMaskDrawingEnd === "function") {
-                        this.onMaskGenerationBegin();
-                    }
-                },
-                onMaskGenerationEnd: () => {
-                    if (typeof this.onMaskDrawingEnd === "function") {
-                        this.onMaskGenerationEnd();
-                    }
-                },
-                onToggleMaskPreview: (enableMaskPreview: boolean) => {
-                    if (enableMaskPreview) {
-                        this.regionsManager.updateRegionVisibility(() => true, false);
-                    } else {
-                        this.regionsManager.updateRegionVisibility(() => true, true);
-                    }
-                    this.regionsManager.toggleFreezeMode();
                 },
                 getAllRegions: () => {
-                    const regionsWithLayer = this.regionsManager.getAllRegions();
+                    const regions = this.regionsManager.getAllRegions();
                     this.regionsManager.deleteAllRegions();
-                    return regionsWithLayer;
+                    return regions;
                 },
             };
             this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
@@ -926,6 +897,7 @@ export class Editor {
     /**
      * Updates the content source for the editor.
      * @param source - Content source.
+     * @param onContentLoadCb - optional. the callback that runs after image on load is fired
      * @returns A new `Promise` resolved when content is drawn and Editor is resized.
      */
     public async addContentSource(
@@ -959,7 +931,7 @@ export class Editor {
             })
             .then(() => {
                 // resize the container of editor size to adjust to the new content size
-                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight);
+                this.resize(this.editorContainerDiv.offsetWidth, this.editorContainerDiv.offsetHeight, true);
                 this.handleZoomAfterContentUpdate(true);
                 this.handleMaskManagerAfterContentUpdate();
                 if (typeof onContentLoadCb === "function") {
@@ -984,7 +956,7 @@ export class Editor {
      * @param containerWidth - The new container width.
      * @param containerHeight - The new container height.
      */
-    public resize(containerWidth: number, containerHeight: number) {
+    public resize(containerWidth: number, containerHeight: number, initialRender?: boolean) {
         this.frameWidth = containerWidth;
         this.frameHeight = containerHeight;
 
@@ -1011,7 +983,7 @@ export class Editor {
 
         this.areaSelector.resize(this.frameWidth, this.frameHeight);
         this.regionsManager.resize(this.frameWidth, this.frameHeight);
-        this.masksManager?.resize(this.frameWidth, this.frameHeight);
+        this.masksManager?.resize(this.frameWidth, this.frameHeight, initialRender);
     }
 
     /**
@@ -1138,7 +1110,6 @@ export class Editor {
 
     private handleMaskManagerAfterContentUpdate(): void {
         this.masksManager?.setSourceDimensions(this.sourceWidth, this.sourceHeight);
-        this.masksManager?.eraseAllMasks();
     }
 
     /**

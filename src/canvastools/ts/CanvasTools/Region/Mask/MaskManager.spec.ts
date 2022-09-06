@@ -33,13 +33,11 @@ describe("Mask manager tests", () => {
             onMaskDrawingBegin: () => {
                 return new TagsDescriptor([tag]);
             },
-            onMaskDrawingEnd: (mask) => {},
-            onToggleMaskPreview: (enableMaskPreview: boolean) => {},
-            getAllRegionsWithLayer: (): Array<{
+            onMaskDrawingEnd: () => {},
+            getAllRegions: (): Array<{
                 id: string;
                 tags: TagsDescriptor;
                 regionData: RegionData;
-                layerNumber: number;
             }> => {
                 return [];
             },

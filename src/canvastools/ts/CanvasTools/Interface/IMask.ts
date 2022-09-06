@@ -8,10 +8,7 @@ export type MaskSelectorMode = SelectionMode.BRUSH | SelectionMode.ERASER;
 
 export interface IMaskManagerCallbacks {
     onMaskDrawingBegin: () => TagsDescriptor;
-    onMaskDrawingEnd: (mask: Uint8ClampedArray) => void;
-    onMaskGenerationBegin: () => void;
-    onMaskGenerationEnd: () => void;
-    onToggleMaskPreview: (enableMaskPreview: boolean) => void;
+    onMaskDrawingEnd: () => void;
     getAllRegions: () => Array<{
         id: string;
         tags: TagsDescriptor;

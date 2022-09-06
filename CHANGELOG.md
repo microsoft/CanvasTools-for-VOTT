@@ -1,5 +1,77 @@
 ## Changelog
 
+### 2.4.0
+* Addition of semantic segmentation or brush/eraser control to annotate an image at pixel level.
+
+*CT Library Changes*
+* CanvasTools.Editor api is updated to include `enableMask`.
+```js
+    var editor = new CanvasTools.Editor(
+        container: HTMLDivElement,
+        areaSelector?: AreaSelector,
+        regionsManager?: RegionsManager,
+        filterPipeline?: FilterPipeline,
+        enableMask?: boolean).api
+```
+* When `enableMask = true`, the `masksManager` is initialized that helps in annotating an image at pixel level.
+* 2 callbacks - `onMaskDrawingBegin` & `onMaskDrawingEnd` are exposed on CanvasTools.Editor api. These needs to be defined.
+```js
+    // Callback for `MasksManager` called when the drawing mask begins. Returns a tagDescriptor
+    onMaskDrawingBegin: () => TagsDescriptor;
+
+    // Callback for `MasksManager` called when the mask is drawn.
+    onMaskDrawingEnd: () => void;
+```
+* `addContentSource` takes in a new callback `onContentLoadCb`. Callback is executed after the image onLoad is fired.
+```js
+addContentSource(source: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement, onContentLoadCb?: () => void): Promise<void>;
+```
+*CT Tags Changes*
+* `Tag` now accpets a new parameter `sequenceNumber` while initialization. This parameter is required for the purpose of semantic segmentation. The `sequenceNumber` can be number starting at 1 which indicates the order number of a tag w.r.t to its color. Each color/tag would havbe an unique `sequenceNumber`.
+```js
+new Tag(name: string, color: number|string|Color, id: string, sequenceNumber: number)
+```
+
+*CT Selector Changes*
+* 2 more `SelectionMode` named `Brush` & `Eraser` are added.
+
+*CT MaskManager Changes*
+* `setSelection` function is used the set the selection mode to brush or eraser and also disable mask mode.
+```js
+setSelection(enabled: boolean, mode?: MaskSelectorMode): void;
+```
+* `setBrushSize` function sets the brush and eraser size
+```js
+setBrushSize(size: IBrushSize): void;
+```
+* `eraseAllMasks` function removes all masks and resets mask layer
+```js
+eraseAllMasks(): void;
+```
+* `getAllMasks` function gets the mask layer for the entire image. If image is of `w` width and `h` height, it has wh pixels. Mask(imageData) is a `number[]` of size `wh` where each entry or pixel is denoted by the `sequenceNumber` of the corresponding tag color on it.
+`tags` represents all the tags present in the mask
+
+```js
+getAllMasks(): => IMask;
+export interface IMask {
+    imageData: number[];
+    tags: TagsDescriptor[];
+}
+```
+* `loadAllMasks` function loads the mask layer on the image
+```js
+loadAllMasks(allMasks: IMask): void;
+```
+* `polygonsToMask` function converts any polygon drawn to a mask
+```js
+polygonsToMask(): void;
+```
+*Samples*
+
+The samples folder has new example to showcase semantic segmentation.
+Eg. samples/editor-with-mask/index.html
+
+
 ### 2.3.3
 * Users of `RegionManager.updateRegionVisibility()` can now supply callbacks that can accept a region object in addition to tagsDescriptor for the `shouldHideThisRegion` parameter.
 * NOTE: The `tagsDescriptor` parameter will be removed in upcoming release and users are recommended to use `region.tag` in the callback body instead.

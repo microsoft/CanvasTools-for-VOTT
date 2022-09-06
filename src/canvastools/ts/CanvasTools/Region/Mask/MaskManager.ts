@@ -44,6 +44,16 @@ export class MasksManager {
     private editorDiv: HTMLDivElement;
 
     /**
+     * The current width of the editorDiv.
+     */
+    private currentEditorDivWidth: number;
+
+    /**
+     * The image mask holder
+     */
+    private maskImage?: HTMLImageElement;
+
+    /**
      * The width of the source content.
      */
     private sourceWidth: number;
@@ -68,12 +78,9 @@ export class MasksManager {
      */
     private tagsList: TagsDescriptor[];
 
-    private imagesList: HTMLImageElement[];
-
     constructor(editorDiv: HTMLDivElement, konvaDivHostElement: HTMLDivElement, callbacks: IMaskManagerCallbacks) {
         this.callbacks = callbacks;
         this.tagsList = [];
-        this.imagesList = [];
         this.maskSelectionMode = SelectionMode.BRUSH;
         this.brushSize = {
             brush: 30,
@@ -143,16 +150,29 @@ export class MasksManager {
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
             } else {
-                const newScale = ZoomManager.getInstance().getZoomData().currentZoomScale;
+                const oldWidth = this.currentEditorDivWidth ?? this.konvaStage.width();
+                const existingScale = this.konvaStage.scaleX();
+                const toBeScale = width / oldWidth;
+                const expectedScale = existingScale *  toBeScale;
                 this.konvaStage.scale({
-                    x: newScale,
-                    y: newScale,
+                    x: expectedScale,
+                    y: expectedScale,
                 });
                 this.reSizeStage(width, height);
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
             }
+            this.currentEditorDivWidth = width;
         }
+    }
+
+    /**
+     * hides or shows masks of particular tag name
+     * @param isVisible sets the visibility to true or false
+     * @param tagName name of the tag to update visibility
+     */
+    public updateMaskVisibility(isVisible: boolean, tagName: string): void {
+        this.updateMaskVisibilityInternal(isVisible, tagName);
     }
 
     /**
@@ -166,6 +186,14 @@ export class MasksManager {
      * gets all the masks drawn on the canvas.
      */
     public getAllMasks(): IMask {
+        // show all and then get all masks
+        const tagsVisibility = this.tagsList.map((tag) => {
+            return {
+                isVisible: true,
+                name: tag.primary.name
+            };
+        });
+        this.updateAllMaskVisibility(tagsVisibility);
         const currentDimensionsEditor = this.getCurrentDimension();
         const currentDimensions: IDimension = {
             width: this.sourceWidth,
@@ -188,44 +216,27 @@ export class MasksManager {
             .x(0)
             .y(0);
         let canvas: HTMLCanvasElement;
-
-        canvas = this.canvasLayer.toCanvas({ pixelRatio: this.sourceWidth / width });
+        canvas = this.canvasLayer.toCanvas({ pixelRatio: this.sourceWidth / currentDimensionsEditor.width });
         const ctx = canvas?.getContext("2d");
         const data: ImageData = ctx.getImageData(0, 0, currentDimensions.width, currentDimensions.height);
-
         this.konvaStage.width(width).height(height).scaleX(scaleX).scaleY(scaleY).x(x).y(y);
-
-        console.time("calculatingEdgePixelArray");
-        // create an edge pixel matrix
-        const edge = this.getEdgePixelArray(data.data);
-        console.timeEnd("calculatingEdgePixelArray");
-
-        console.time("unSmoothen");
-        // remove antialiasing/smoothening ?
-        const imgData = this.unSmoothenImageData(edge, currentDimensions, data.data);
-        console.timeEnd("unSmoothen");
-
-        console.time("binaryMasks");
-        console.time("create");
+        const imgData = data.data;
         const newData: number[] = new Array(currentDimensions.width * currentDimensions.height);
         newData.fill(0);
-        console.timeEnd("create");
         this.tagsList.forEach((tags: TagsDescriptor) => {
-            console.time("perBinaryMasks");
             const [r, g, b] = tags.primary.srgbColor.to255();
             const tagId = tags.primary.sequenceNumber;
-            console.time("convert");
             for (let i = 0; i <= data.data.length - 1; i = i + 4) {
-                if (imgData[i] === r && imgData[i + 1] === g && imgData[i + 2] === b && imgData[i + 3] === 255) {
+                    const ri = imgData[i];
+                    const gi = imgData[i + 1];
+                    const bi = imgData[i + 2];
+                    const t = 10;
+                if ((ri >= r-t && ri <= r+t) && (gi >= g-t && gi <= g+t) && (bi >= b-t && bi <= b+t)) {
                     newData[i / 4] = tagId;
                 }
             }
-            console.timeEnd("convert");
             ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
-            console.timeEnd("perBinaryMasks");
         });
-
-        console.timeEnd("binaryMasks");
         return {
             imageData: newData,
             tags: this.tagsList,
@@ -236,9 +247,9 @@ export class MasksManager {
      * Draws all the masks on the canvas
      * @param allMasks - all masks data to be drawn on canvas
      */
-    public async loadAllMasks(allMasks: IMask): Promise<void> {
-        const image = await this.loadMasksInternal(allMasks, this.canvasLayer);
-        this.imagesList.push(image);
+    public loadAllMasks(allMasks: IMask): void {
+        this.initializeImageMask();
+        this.loadMasksInternal(allMasks, this.canvasLayer);
     }
 
     /**
@@ -317,6 +328,25 @@ export class MasksManager {
         return edgeArray;
     }
 
+    private initializeImageMask(): void {
+        if (!this.maskImage) {
+            this.maskImage = new Image();
+        } 
+    }
+
+    private updateMaskVisibilityInternal(isVisible: boolean, tagName: string): void {
+        const shapes = this.canvasLayer.getChildren(node => {
+            return node.getAttr("name") === tagName;
+        });
+        shapes.forEach(shape => {
+            shape.visible(isVisible);
+        });
+    }
+
+    private updateAllMaskVisibility(tags: Array<{isVisible: boolean, name: string}>): void {
+        tags.forEach(tag => this.updateMaskVisibilityInternal(tag.isVisible, tag.name));
+    }
+
     private convertRegionsToMask(layer: Konva.Layer) {
         const allRegions = this.callbacks.getAllRegions();
         allRegions.forEach((polygon: { id: string; tags: TagsDescriptor; regionData: RegionData }) => {
@@ -385,7 +415,7 @@ export class MasksManager {
                 closed: true,
                 listening: false,
                 opacity: 1,
-                name: tags.primary.color,
+                name: tags.primary.name,
                 sceneFunc: (ctx, shape) => {
                     ctx.beginPath();
                     ctx.moveTo(polygonPoints[0].start.x, polygonPoints[0].start.y);
@@ -415,16 +445,18 @@ export class MasksManager {
         });
     }
 
-    private async loadMasksInternal(allMask: IMask, layer: Konva.Layer): Promise<HTMLImageElement> {
+    private loadMasksInternal(allMask: IMask, layer: Konva.Layer): void {
+        const currentDimensionsEditor = this.getCurrentDimension();
         const currentDimensions: IDimension = {
             width: this.sourceWidth,
             height: this.sourceHeight,
         };
 
-        if (currentDimensions && !isNaN(currentDimensions.width) && !isNaN(currentDimensions.height)) {
-            const width = this.konvaStage.width();
-            const height = this.konvaStage.height();
-
+        if (
+            currentDimensionsEditor &&
+            !isNaN(currentDimensionsEditor.width) &&
+            !isNaN(currentDimensionsEditor.height)
+        ) {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             ctx.imageSmoothingEnabled = true;
@@ -435,12 +467,8 @@ export class MasksManager {
             const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
             const imageDataAll = newdata.data;
             const imgData = allMask.imageData;
-            // look through all the colored mask. each tag has its own binary mask
-            // decode from rle to binary matrix and then convert it to a unit8clamped array of imageData
             const tags: TagsDescriptor[] = allMask.tags;
             tags.forEach((tag: TagsDescriptor) => {
-                // imgData = mask.imageData;
-
                 const [r, g, b] = tag.primary.srgbColor.to255();
                 this.addTagsDescriptor(tag);
                 for (let i = 0; i <= imgData.length - 1; i++) {
@@ -456,24 +484,16 @@ export class MasksManager {
             newdata.data.set(imageDataAll);
             ctx.putImageData(newdata, 0, 0);
 
-            // reuse this image
-            const new_image = new Image();
-            new_image.src = canvas.toDataURL();
-
-            const loadPromise = new Promise<HTMLImageElement>((resolve, _reject) => {
-                new_image.onload = (e) => {
-                    const newKonvaImg = new Konva.Image({
-                        image: new_image,
-                        height,
-                        width,
-                        perfectDrawEnabled: true,
-                    });
-                    layer.add(newKonvaImg);
-                    resolve(new_image);
-                };
-            });
-
-            return loadPromise;
+            this.maskImage.src = canvas.toDataURL();
+            this.maskImage.onload = (_e) => {
+                const newKonvaImg = new Konva.Image({
+                    image: this.maskImage,
+                    height: currentDimensionsEditor.height,
+                    width: currentDimensionsEditor.width,
+                    perfectDrawEnabled: true
+                });
+                layer.add(newKonvaImg);
+            };
         }
     }
 
@@ -483,10 +503,6 @@ export class MasksManager {
         const cursor = ["url('", base64, "')", " ", Math.floor(size / 2) + 4, " ", Math.floor(size / 2) + 4, ",auto"];
 
         this.konvaStage.container().style.cursor = cursor.join("");
-    }
-
-    private setKonvaCursorToDefault(): void {
-        this.konvaStage.container().style.cursor = "default";
     }
 
     private base64EncodedMaskCursor(size): string {
@@ -563,7 +579,7 @@ export class MasksManager {
             }
 
             if (typeof this.callbacks.onMaskDrawingEnd === "function") {
-                this.callbacks.onMaskDrawingEnd(new Uint8ClampedArray());
+                this.callbacks.onMaskDrawingEnd();
             }
         });
 
@@ -601,18 +617,6 @@ export class MasksManager {
             perfectDrawEnabled: false,
             opacity: 1,
         };
-    }
-
-    private cleanUp(): void {
-        this.imagesList.forEach((img) => {
-            img.src =
-                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
-            img.onload = null;
-        });
-    }
-
-    private removeEventListeners(): void {
-        this.konvaStage.off("mousemove mousedown mouseup");
     }
 
     private reSizeStage(width: number, height: number): void {
@@ -665,18 +669,17 @@ export class MasksManager {
         this.canvasLayer.destroy();
         this.canvasLayer = new Konva.Layer({});
         this.konvaStage.add(this.canvasLayer);
-        this.cleanUp();
     }
 
     private buildUIElements(): void {
-        const currentDimensions = this.getCurrentDimension();
+        const currentDimensionsEditor = this.getCurrentDimension();
         const stage = new Konva.Stage({
             container: KonvaContainerId,
-            width: currentDimensions.width,
-            height: currentDimensions.height,
+            width: currentDimensionsEditor.width,
+            height: currentDimensionsEditor.height,
         });
-        this.sourceHeight = currentDimensions.height;
-        this.sourceWidth = currentDimensions.width;
+        this.sourceHeight = currentDimensionsEditor.height;
+        this.sourceWidth = currentDimensionsEditor.width;
 
         this.canvasLayer = new Konva.Layer({});
         stage.add(this.canvasLayer);
@@ -686,6 +689,6 @@ export class MasksManager {
         this.addListeners();
 
         const scrollContainer = document.getElementsByClassName("CanvasToolsContainer")[0];
-        scrollContainer.addEventListener("scroll", () => this.rePositionStage());
+        scrollContainer?.addEventListener("scroll", () => this.rePositionStage());
     }
 }

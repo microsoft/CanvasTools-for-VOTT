@@ -22,8 +22,7 @@
         "no-shadowed-variable": false,
         "no-string-literal": false,
         "unified-signatures": false,
-        "jsdoc-format": true,
-        "no-console": false
+        "jsdoc-format": true
     },
     "rulesDirectory": []
 }
