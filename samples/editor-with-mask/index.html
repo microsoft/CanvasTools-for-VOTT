@@ -51,6 +51,9 @@
             <button id="getRegion">Get Region !</button>
             <button id="disableAS">Disable AS</button>
             <button id="enableAS">Enable AS</button>
+            <button id="getAllMasks">Get all masks</button>
+            <button id="loadAllMasks">Load all masks</button>
+            <button id="preview">Preview</button>
         </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
@@ -223,6 +226,22 @@
         var getRegionButton = document.getElementById("enableAS");
         getRegionButton.addEventListener("click", (e) => {
             editor.AS.show();
+        });
+
+        var getAllMasksButton = document.getElementById("getAllMasks");
+        getAllMasksButton.addEventListener("click", (e) => {
+            window["brushData"] = editor.MM.getAllMasks();
+        });
+
+        var loadAllMasksButton = document.getElementById("loadAllMasks");
+        loadAllMasksButton.addEventListener("click", (e) => {
+            editor.MM.eraseAllMasks();
+            editor.MM.loadAllMasks(window["brushData"]);
+        });
+
+        var previewButton = document.getElementById("preview");
+        previewButton.addEventListener("click", (e) => {
+            editor.MM.togglePreview();
         });
 
         var showZoomDiv = document.getElementById("showZoomFactor");
