@@ -9,13 +9,6 @@ import { IMaskManagerCallbacks } from "../../Interface/IMask";
 import { SelectionMode } from "../../Interface/ISelectorSettings";
 import { MasksManager } from "./MaskManager";
 
-jest.mock("@thi.ng/rle-pack", () => {
-    return {
-        encode: jest.fn(),
-        decode: jest.fn(),
-    };
-});
-
 describe("Mask manager tests", () => {
     let maskManager: MasksManager;
     let editorDiv;
@@ -87,7 +80,7 @@ describe("Mask manager tests", () => {
         ZoomManager.getInstance().updateZoomScale(ZoomDirection.In, 2);
         expect(maskManager.konvaStage.width()).toBe(100);
         expect(maskManager.konvaStage.height()).toBe(100);
-        maskManager.resize(200, 200);
+        maskManager.resize(200, 200, true);
         expect(maskManager.konvaStage.width()).toBe(200);
         expect(maskManager.konvaStage.height()).toBe(200);
         expect(maskManager.konvaStage.scale()).toEqual({
