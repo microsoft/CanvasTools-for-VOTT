@@ -132,15 +132,17 @@ export class MenuElement extends RegionComponent {
      */
     public attachTo(region: Region) {
         this.region = region;
-        this.regionData.initFrom(region.regionData);
-        this.rearrangeMenuPosition();
+        if (region) {
+            this.regionData.initFrom(region.regionData);
+            this.rearrangeMenuPosition();
 
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                x: this.mx,
-                y: this.my,
+            window.requestAnimationFrame(() => {
+                this.menuGroup.attr({
+                    x: this.mx,
+                    y: this.my,
+                });
             });
-        });
+        }
     }
 
     /**
