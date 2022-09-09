@@ -80,7 +80,7 @@ export abstract class AnchorsComponent extends RegionComponent {
      * Redraws the visual on the component.
      */
     public redraw() {
-        if (this.regionData.points !== null && this.regionData.points.length > 0) {
+        if (this.regionData.points !== null && this.regionData.points.length > 0 && this.anchors.length > 0) {
             window.requestAnimationFrame(() => {
                 this.regionData.points.forEach((p, index) => {
                     this.anchors[index].attr({
