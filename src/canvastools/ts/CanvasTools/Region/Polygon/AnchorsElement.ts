@@ -81,14 +81,16 @@ export class AnchorsElement extends AnchorsComponent {
 
                 this.anchorsLength = points.length;
             } else {
-                window.requestAnimationFrame(() => {
-                    this.regionData.points.forEach((p, index) => {
-                        this.anchors[index].attr({
-                            cx: p.x,
-                            cy: p.y,
+                if (this.anchors.length > 0) {
+                    window.requestAnimationFrame(() => {
+                        this.regionData.points.forEach((p, index) => {
+                            this.anchors[index].attr({
+                                cx: p.x,
+                                cy: p.y,
+                            });
                         });
                     });
-                });
+                }
             }
 
             const pointsData = [];
