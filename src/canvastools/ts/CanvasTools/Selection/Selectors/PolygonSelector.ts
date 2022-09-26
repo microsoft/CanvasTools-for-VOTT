@@ -311,7 +311,7 @@ export class PolygonSelector extends Selector {
                 event: "keyup",
                 base: window,
                 listener: (e: KeyboardEvent) => {
-                    if (e.code === "Escape") {
+                    if (e.code === "Escape" && this.isCapturing) {
                         this.submitPolygon();
                     }
                 },

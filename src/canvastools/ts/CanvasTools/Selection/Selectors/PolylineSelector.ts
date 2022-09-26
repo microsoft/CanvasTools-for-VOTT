@@ -336,7 +336,7 @@ export class PolylineSelector extends Selector {
      */
     private onKeyUp(e: KeyboardEvent) {
         // Holding shift key enable square drawing mode
-        if (e.code === "Escape") {
+        if (e.code === "Escape" && this.isCapturing) {
             this.submitPolyline();
         }
     }
