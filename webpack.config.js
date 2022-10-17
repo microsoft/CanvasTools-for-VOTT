@@ -98,7 +98,12 @@ module.exports = function (env) {
         },
         resolve: {
             extensions: ['.ts', '.js'],
-            plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })]
+            plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
+        },
+        node: {
+            fs: "empty",
+            path: "empty",
+            crypto: "empty"
         }
     };
     return config;

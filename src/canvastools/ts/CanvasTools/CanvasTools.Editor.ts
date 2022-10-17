@@ -1,3 +1,4 @@
+import * as cv from "@techstark/opencv-js";
 import { FilterPipeline } from "./CanvasTools.Filter";
 import { ConfigurationManager } from "./Core/ConfigurationManager";
 import { Point2D } from "./Core/Point2D";
@@ -774,7 +775,8 @@ export class Editor {
                     return regions;
                 },
             };
-            this.masksManager = new MasksManager(this.editorDiv, this.konvaContainerDivElement, mmCallbacks);
+            this.masksManager = 
+                new MasksManager(this.editorDiv, this.konvaContainerDivElement, this.contentCanvas, mmCallbacks);
         }
 
         this.zoomManager = ZoomManager.getInstance(false, initZoomCallbacks);

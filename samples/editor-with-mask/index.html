@@ -36,6 +36,8 @@
                 <option value="NONE">None</option>
                 <option value="6">Brush</option>
                 <option value="7">Eraser</option>
+                <option value="8">Pencil</option>
+                <option value="9">FloodFill</option>
             </select>
         </div>
         <div>
@@ -57,9 +59,16 @@
             <button id="toggleVisibility">Toggle visibility</button>
             <button id="eraseAllMasks">Erase</button>
         </div>
+        <div>
+            <div>Open CV related stuff </div>
+            <button id="grayScale">Grabcut</button>
+            <button id="floodFill">Floodfill</button>
+        </div>
         <div id="showZoomFactor"></div>
         <input id="resetZoomOnLoad" type="checkbox"></input>
         <label id="resetZoomOnLoadLabel">Reset Zoom On Content Load</label>
+        <canvas id="canvasOutput" ></canvas>
+        <canvas id="canvasOutputMask" ></canvas>
     </div>
 </body>
 <script src="./../shared/js/ct.js"></script>
@@ -261,6 +270,17 @@
         var eraseAllMasksButton = document.getElementById("eraseAllMasks");
         eraseAllMasksButton.addEventListener("click", (e) => {
             editor.MM.eraseAllMasks();
+        });
+        
+        // openCv related stuff
+        var grayScaleButton = document.getElementById("grayScale");
+        grayScaleButton.addEventListener("click", (e) => {
+            editor.MM.autoSegment();
+        });
+
+        var floodFillButton = document.getElementById("floodFill");
+        floodFillButton.addEventListener("click", (e) => {
+            editor.MM.floodFill(100, 100);
         });
 
         var loadAllMasksButton = document.getElementById("loadAllMasks");

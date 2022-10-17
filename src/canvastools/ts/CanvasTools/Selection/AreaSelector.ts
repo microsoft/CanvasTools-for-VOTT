@@ -259,6 +259,10 @@ export class AreaSelector {
                 this.maskSelector?.enableMode(SelectionMode.BRUSH);
             } else if (this.selectorSettings.mode === SelectionMode.ERASER) {
                 this.maskSelector?.enableMode(SelectionMode.ERASER);
+            } else if (this.selectorSettings.mode === SelectionMode.PENCIL) {
+                this.maskSelector?.enableMode(SelectionMode.PENCIL);
+            } else if (this.selectorSettings.mode === SelectionMode.FLOODFILL) {
+                this.maskSelector?.enableMode(SelectionMode.FLOODFILL);
             }
             // restore enabled status
             this.enable();
@@ -271,7 +275,9 @@ export class AreaSelector {
              // disable if its a non mask mode selection
              if (
                 this.selectorSettings.mode !== SelectionMode.BRUSH &&
-                this.selectorSettings.mode !== SelectionMode.ERASER
+                this.selectorSettings.mode !== SelectionMode.ERASER &&
+                this.selectorSettings.mode !== SelectionMode.PENCIL &&
+                this.selectorSettings.mode !== SelectionMode.FLOODFILL
             ) {
                 this.maskSelector?.disable();
             }

@@ -39,7 +39,8 @@
   ],
   "dependencies": {
     "snapsvg-cjs": "0.0.6",
-    "konva": "^8.3.9"
+    "konva": "^8.3.9",
+    "@techstark/opencv-js": "4.6.0-release.1"
   },
   "devDependencies": {
     "@types/jest": "^25.1.2",

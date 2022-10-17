@@ -1,6 +1,8 @@
+import * as cv from "@techstark/opencv-js";
 import Konva from "konva";
 import { Point2D } from "../../Core/Point2D";
 import { RegionData } from "../../Core/RegionData";
+import { Tag } from "../../Core/Tag";
 import { TagsDescriptor } from "../../Core/TagsDescriptor";
 import { DisabledMaskHostZIndex, EnabledMaskHostZIndex, KonvaContainerId } from "../../Core/Utils/constants";
 import { ZoomManager } from "../../Core/ZoomManager";
@@ -69,6 +71,12 @@ export class MasksManager {
     private canvasLayer: Konva.Layer;
 
     /**
+     * Reference to the host canvas element.
+     */
+    private contentCanvas: HTMLCanvasElement;
+
+
+    /**
      * The list of callbacks needed for mask manager
      */
     private callbacks: IMaskManagerCallbacks;
@@ -78,7 +86,8 @@ export class MasksManager {
      */
     private tagsList: TagsDescriptor[];
 
-    constructor(editorDiv: HTMLDivElement, konvaDivHostElement: HTMLDivElement, callbacks: IMaskManagerCallbacks) {
+    // tslint:disable-next-line: max-line-length
+    constructor(editorDiv: HTMLDivElement, konvaDivHostElement: HTMLDivElement, contentCanvas: HTMLCanvasElement, callbacks: IMaskManagerCallbacks) {
         this.callbacks = callbacks;
         this.tagsList = [];
         this.maskSelectionMode = SelectionMode.BRUSH;
@@ -89,6 +98,7 @@ export class MasksManager {
         this.editorDiv = editorDiv;
         this.konvaContainerHostElement = konvaDivHostElement;
         this.konvaContainerHostElement.style["z-index"] = DisabledMaskHostZIndex;
+        this.contentCanvas = contentCanvas;
         this.buildUIElements();
     }
 
@@ -110,6 +120,15 @@ export class MasksManager {
     public setSelection(enabled: boolean, mode?: MaskSelectorMode) {
         if (enabled) {
             this.maskSelectionMode = mode;
+            if (mode === SelectionMode.PENCIL) {
+                this.setBrushSize({
+                    brush: 1,
+                    erase: 10
+                });
+            }
+            if (mode === SelectionMode.FLOODFILL) {
+                this.resetKonvaCursor();
+            }
         }
 
         this.updateZIndex(enabled);
@@ -173,6 +192,17 @@ export class MasksManager {
      */
     public updateMaskVisibility(isVisible: boolean, tagName: string): void {
         this.updateMaskVisibilityInternal(isVisible, tagName);
+    }
+
+    /**
+     * AutoSegment all bounding boxes
+     */
+     public autoSegment(): void {
+        this.convertBoundingBoxesToMask(this.canvasLayer);
+    }
+
+    public floodFill(x: number, y: number, tag: TagsDescriptor): void {
+        this.floodFillInternal(x, y, tag);
     }
 
     /**
@@ -347,6 +377,136 @@ export class MasksManager {
         tags.forEach(tag => this.updateMaskVisibilityInternal(tag.isVisible, tag.name));
     }
 
+    private convertBoundingBoxesToMask(_layer: Konva.Layer) {
+        const allRegions = this.callbacks.getAllRegions();
+        if (allRegions.length) {
+            const img = cv.imread(this.contentCanvas);
+            // change channel
+            cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+            // resize
+            const resizedImg = new cv.Mat();
+            const currentDimensionsEditor = this.getCurrentDimension();
+            const editorWidth = currentDimensionsEditor.width;
+            const editorHeight = currentDimensionsEditor.height;
+            const dSize = new cv.Size(editorWidth, editorHeight);
+            cv.resize(img, resizedImg, dSize);
+            const allMasks = [];
+            const tags: TagsDescriptor[] = [];
+            allRegions.forEach((region) => {
+                const rectData = region.regionData;
+                const mask = new cv.Mat();
+                const { x, y, width, height} = rectData;
+                const rect = new cv.Rect(x, y, width, height);
+                const bgdModel = new cv.Mat();
+                const fgdModel = new cv.Mat();
+                cv.grabCut(resizedImg, mask, rect, bgdModel, fgdModel, 1, cv.GC_INIT_WITH_RECT);
+                allMasks.push(mask);
+                tags.push(region.tags);
+            });
+            // create a merged Mask
+            const mergedMask: cv.MatExpr = cv.Mat.zeros(resizedImg.rows, resizedImg.cols, 0);
+            allMasks.forEach((mask, index) => {
+                const seqNumber = allRegions[index].tags.primary.sequenceNumber;
+                for (let i = 0; i < resizedImg.rows; i++) {
+                    for (let j = 0; j < resizedImg.cols; j++) {
+                        if (mask.ucharPtr(i, j)[0] === 0 || mask.ucharPtr(i, j)[0] === 2) {
+                            //
+                        } else {
+                            mergedMask.ucharPtr(i, j)[0] = seqNumber;
+                        }
+
+                    }
+                }
+            });
+
+            const latestMaskDataToBeFedToKonva: number[] = [];
+            for (let i = 0; i < mergedMask.rows; i++) {
+                for (let j = 0; j < mergedMask.cols; j++) {
+                    latestMaskDataToBeFedToKonva[i * mergedMask.cols +  j] = mergedMask.ucharPtr(i, j)[0];
+                }
+            }
+
+            // loading all masks at once
+            const maskImage: IMask = {
+                imageData: latestMaskDataToBeFedToKonva,
+                tags
+            };
+            this.initializeImageMask();
+            this.loadMasksInternal(maskImage, this.canvasLayer);
+            
+            // draw foreground
+            // cv.cvtColor(resizedImg, resizedImg, cv.COLOR_RGB2RGBA);
+            // for (let i = 0; i < resizedImg.rows; i++) {
+            //     for (let j = 0; j < resizedImg.cols; j++) {
+            //         if (mergedMask.ucharPtr(i, j)[0] === 0) {
+            //             resizedImg.ucharPtr(i, j)[0] = 0;
+            //             resizedImg.ucharPtr(i, j)[1] = 0;
+            //             resizedImg.ucharPtr(i, j)[2] = 0;
+            //             resizedImg.ucharPtr(i, j)[3] = 0;
+            //         }
+            //     }
+            // }
+
+            // change channel
+            // const imgData = new ImageData(
+            //         new Uint8ClampedArray(resizedImg.data, resizedImg.cols, resizedImg.rows)
+            //     , resizedImg.cols, resizedImg.rows);
+            // const canvas = document.getElementById("canvasOutput") as HTMLCanvasElement;
+            // canvas.width = resizedImg.cols;
+            // canvas.height = resizedImg.rows;
+            // const ctx = canvas.getContext('2d');
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // ctx.putImageData(imgData, 0, 0); 
+        }
+
+        // mask.delete();
+        // fgdModel.delete();
+        // bgdModel.delete();
+        // bgMask.delete();
+        // fgMask.delete();
+    }
+
+    private floodFillInternal(x: number, y: number, tag: TagsDescriptor) : void {
+        const canvas = this.canvasLayer.toCanvas();
+        const img = cv.imread(canvas);
+        cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+        const mask = new cv.Mat(); 
+        const resizedImg = new cv.Mat();
+        const currentDimensionsEditor = this.getCurrentDimension();
+        const editorWidth = currentDimensionsEditor.width;
+        const editorHeight = currentDimensionsEditor.height;
+        const dSize = new cv.Size(editorWidth, editorHeight);
+        cv.resize(img, resizedImg, dSize);
+
+        // seed point
+        const seed = new cv.Point(x, y);
+        const [r, g, b] = tag.primary.srgbColor.to255();
+        const color = new cv.Scalar(r, g, b);
+        const rect = new cv.Rect();
+        const loDiff = new cv.Scalar(0, 0, 0);
+        const upDiff = new cv.Scalar(0, 0, 0);
+        const direction = 8;
+        cv.floodFill(resizedImg, mask, seed, color, rect, loDiff, upDiff, direction);
+
+        const latestMaskDataToBeFedToKonva: number[] = [];
+        for (let i = 0; i < resizedImg.rows; i++) {
+            for (let j = 0; j < resizedImg.cols; j++) {
+                latestMaskDataToBeFedToKonva[i * resizedImg.cols +  j] =
+                    resizedImg.ucharPtr(i, j)[0] !== 0 ? tag.primary.sequenceNumber : 0;
+            }
+        }
+
+        // loading all masks at once
+        const maskImage: IMask = {
+            imageData: latestMaskDataToBeFedToKonva,
+            tags: [tag]
+        };
+        this.initializeImageMask();
+        this.loadMasksInternal(maskImage, this.canvasLayer);
+
+        cv.imshow("canvasOutput", resizedImg);
+    }
+
     private convertRegionsToMask(layer: Konva.Layer) {
         const allRegions = this.callbacks.getAllRegions();
         allRegions.forEach((polygon: { id: string; tags: TagsDescriptor; regionData: RegionData }) => {
@@ -461,10 +621,10 @@ export class MasksManager {
             const ctx = canvas.getContext("2d");
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
-            canvas.width = currentDimensions.width;
-            canvas.height = currentDimensions.height;
+            canvas.width = currentDimensionsEditor.width;
+            canvas.height = currentDimensionsEditor.height;
 
-            const newdata = ctx.createImageData(currentDimensions.width, currentDimensions.height);
+            const newdata = ctx.createImageData(currentDimensionsEditor.width, currentDimensionsEditor.height);
             const imageDataAll = newdata.data;
             const imgData = allMask.imageData;
             const tags: TagsDescriptor[] = allMask.tags;
@@ -495,6 +655,10 @@ export class MasksManager {
                 layer.add(newKonvaImg);
             };
         }
+    }
+
+    private resetKonvaCursor(): void {
+        this.konvaStage.container().style.cursor = "default";
     }
 
     private setKonvaCursor(): void {
@@ -541,6 +705,9 @@ export class MasksManager {
         let previousLine: Konva.Line;
 
         this.konvaStage.on("mousedown", (e: Konva.KonvaEventObject<MouseEvent>) => {
+            if (this.maskSelectionMode === SelectionMode.FLOODFILL) {
+                return;
+            }
             const scaledPosition = this.getScaledPointerPosition();
             isPaint = true;
             tag = this.getTagsDescriptor();
@@ -549,7 +716,9 @@ export class MasksManager {
             previousLine = new Konva.Line({
                 globalCompositeOperation: "destination-out",
                 strokeWidth:
-                    this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase,
+                    (this.maskSelectionMode === SelectionMode.BRUSH ||
+                        this.maskSelectionMode === SelectionMode.PENCIL) ?
+                    this.brushSize.brush : this.brushSize.erase,
                 points: [scaledPosition.x, scaledPosition.y],
                 name: "eraserLine",
                 ...this.getLineShapeAttributes(),
@@ -561,9 +730,11 @@ export class MasksManager {
             currentLine = new Konva.Line({
                 stroke: tag.primary.color,
                 strokeWidth:
-                    this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase,
+                    (this.maskSelectionMode === SelectionMode.BRUSH ||
+                        this.maskSelectionMode === SelectionMode.PENCIL) ? this.brushSize.brush : this.brushSize.erase,
                 globalCompositeOperation:
-                    this.maskSelectionMode === SelectionMode.BRUSH ? "source-over" : "destination-out",
+                    (this.maskSelectionMode === SelectionMode.BRUSH ||
+                        this.maskSelectionMode === SelectionMode.PENCIL) ? "source-over" : "destination-out",
                 points: [scaledPosition.x, scaledPosition.y],
                 name: tag.primary.name,
                 ...this.getLineShapeAttributes(),
@@ -572,7 +743,12 @@ export class MasksManager {
             this.canvasLayer.add(currentLine);
         });
 
-        this.konvaStage.on("mouseup", (_e: Konva.KonvaEventObject<MouseEvent>) => {
+        this.konvaStage.on("mouseup", (e: Konva.KonvaEventObject<MouseEvent>) => {
+            if (this.maskSelectionMode === SelectionMode.FLOODFILL) {
+                tag = this.getTagsDescriptor();
+                this.floodFill(e.evt.offsetX, e.evt.offsetY, tag);
+                console.log(e);
+            }
             isPaint = false;
             if (currentLine && currentLine.points().length < 3) {
                 currentLine.destroy();
@@ -585,6 +761,10 @@ export class MasksManager {
 
         this.konvaStage.on("mousemove", (_e: Konva.KonvaEventObject<MouseEvent>) => {
             if (!isPaint) {
+                return;
+            }
+
+            if (this.maskSelectionMode === SelectionMode.FLOODFILL) {
                 return;
             }
 

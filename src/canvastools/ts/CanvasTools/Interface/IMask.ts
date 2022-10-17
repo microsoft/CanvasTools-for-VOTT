@@ -4,7 +4,11 @@ import { ICubicBezierControl } from "./ICubicBezierControl";
 import { IPoint2D } from "./IPoint2D";
 import { SelectionMode } from "./ISelectorSettings";
 
-export type MaskSelectorMode = SelectionMode.BRUSH | SelectionMode.ERASER;
+export type MaskSelectorMode = 
+    SelectionMode.BRUSH |
+    SelectionMode.ERASER |
+    SelectionMode.PENCIL |
+    SelectionMode.FLOODFILL;
 
 export interface IMaskManagerCallbacks {
     onMaskDrawingBegin: () => TagsDescriptor;
