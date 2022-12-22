@@ -669,6 +669,7 @@ export class MasksManager {
         this.canvasLayer.destroy();
         this.canvasLayer = new Konva.Layer({});
         this.konvaStage.add(this.canvasLayer);
+        this.tagsList = [];
     }
 
     private buildUIElements(): void {
