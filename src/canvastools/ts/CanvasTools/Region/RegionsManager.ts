@@ -184,7 +184,6 @@ export class RegionsManager {
         } else if (regionData.type === RegionDataType.Path) {
             this.addPathRegion(id, regionData, tagsDescriptor);
         }
-        this.sortRegionsByArea();
         if (this.regionAnnouncer) {
             this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
         }
@@ -332,12 +331,15 @@ export class RegionsManager {
     /**
      * Returns a collection of all the regions currently drawn on the canvas
      */
-    public getAllRegions(): Array<{ id: string; tags: TagsDescriptor; regionData: RegionData }> {
+    public getAllRegions(
+        doNotScaleToOriginalSize?: boolean
+    ): Array<{ id: string; tags: TagsDescriptor; regionData: RegionData }> {
         return this.regions.map((region) => {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: this.scaleRegionToOriginalSize(region.regionData),
+                regionData: !!doNotScaleToOriginalSize ?
+                    region.regionData : this.scaleRegionToOriginalSize(region.regionData)
             };
         });
     }
@@ -607,51 +609,6 @@ export class RegionsManager {
     }
 
     /**
-     * Internal helper function to sort regions by their area.
-     */
-    private sortRegionsByArea() {
-        function quickSort(arr: Region[], left: number, right: number) {
-            let pivot: number;
-            let partitionIndex: number;
-
-            if (left < right) {
-                pivot = right;
-                partitionIndex = partition(arr, pivot, left, right);
-
-                // sort left and right
-                quickSort(arr, left, partitionIndex - 1);
-                quickSort(arr, partitionIndex + 1, right);
-            }
-            return arr;
-        }
-
-        function partition(arr: Region[], pivot: number, left: number, right: number) {
-            const pivotValue = arr[pivot].area;
-            let partitionIndex = left;
-
-            for (let i = left; i < right; i++) {
-                if (arr[i].area > pivotValue) {
-                    swap(arr, i, partitionIndex);
-                    partitionIndex++;
-                }
-            }
-            swap(arr, right, partitionIndex);
-            return partitionIndex;
-        }
-
-        function swap(arr: Region[], i: number, j: number) {
-            const temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        }
-
-        const length = this.regions.length;
-        if (length > 1) {
-            quickSort(this.regions, 0, this.regions.length - 1);
-        }
-    }
-
-    /**
      * Finds all selected regions.
      */
     private lookupSelectedRegions(): Region[] {
@@ -850,7 +807,6 @@ export class RegionsManager {
             if (this.justManipulated) {
                 region.select();
                 this.menu.showOnRegion(region);
-                this.sortRegionsByArea();
             }
             this.callbacks.onRegionMoveEnd(region.ID, regionData);
         } else if (state === ChangeEventType.SELECTIONTOGGLE && !this.justManipulated) {

@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.2.19
+* Small bug fix with getAllMasks not cleaning erased maks/tags
+* Remove sorting of regions by area. So that user can navigate regions in the order of they were created
+
 ### 2.4.0
 * Addition of semantic segmentation or brush/eraser control to annotate an image at pixel level.
 

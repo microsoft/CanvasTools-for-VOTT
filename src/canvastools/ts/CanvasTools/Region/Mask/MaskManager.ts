@@ -138,6 +138,7 @@ export class MasksManager {
      * @param initialRender - Optional param if true, konvaStage scale is set at 1
      */
     public resize(width: number, height: number, initialRender?: boolean) {
+        let zoomScale = 1;
         if (this.konvaStage) {
             if (initialRender) {
                 const zoom = ZoomManager.getInstance().getZoomData().currentZoomScale;
@@ -149,6 +150,7 @@ export class MasksManager {
                 this.konvaStage.height(height);
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
+                zoomScale = zoom;
             } else {
                 const oldWidth = this.currentEditorDivWidth ?? this.konvaStage.width();
                 const existingScale = this.konvaStage.scaleX();
@@ -161,8 +163,10 @@ export class MasksManager {
                 this.reSizeStage(width, height);
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
+                zoomScale = expectedScale;
             }
             this.currentEditorDivWidth = width;
+            this.setKonvaCursor(zoomScale);
         }
     }
 
@@ -223,9 +227,11 @@ export class MasksManager {
         const imgData = data.data;
         const newData: number[] = new Array(currentDimensions.width * currentDimensions.height);
         newData.fill(0);
+        const tagsListExist = [];
         this.tagsList.forEach((tags: TagsDescriptor) => {
             const [r, g, b] = tags.primary.srgbColor.to255();
             const tagId = tags.primary.sequenceNumber;
+            let tagExists = false;
             for (let i = 0; i <= data.data.length - 1; i = i + 4) {
                     const ri = imgData[i];
                     const gi = imgData[i + 1];
@@ -233,9 +239,14 @@ export class MasksManager {
                     const t = 10;
                 if ((ri >= r-t && ri <= r+t) && (gi >= g-t && gi <= g+t) && (bi >= b-t && bi <= b+t)) {
                     newData[i / 4] = tagId;
+                    tagExists = true;
                 }
             }
+            tagsListExist.push(tagExists);
             ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
+        });
+        this.tagsList = this.tagsList.filter((tags, idx) => {
+            return tagsListExist[idx];
         });
         return {
             imageData: newData,
@@ -441,6 +452,7 @@ export class MasksManager {
             if (layer) {
                 layer.add(bezierLineDestinationOut);
                 layer.add(bezierLineSourceOver);
+                layer.draw();
             }
         });
     }
@@ -497,11 +509,11 @@ export class MasksManager {
         }
     }
 
-    private setKonvaCursor(): void {
-        const size = this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase;
+    private setKonvaCursor(zoomScale?: number): void {
+        let size = this.maskSelectionMode === SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase;
+        size = Math.floor(size * (zoomScale ?? 1));
         const base64 = this.base64EncodedMaskCursor(size);
         const cursor = ["url('", base64, "')", " ", Math.floor(size / 2) + 4, " ", Math.floor(size / 2) + 4, ",auto"];
-
         this.konvaStage.container().style.cursor = cursor.join("");
     }
 
@@ -509,8 +521,8 @@ export class MasksManager {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
-        canvas.width = size * 4 + 8;
-        canvas.height = size * 4 + 8;
+        canvas.width = size + 8;
+        canvas.height = size + 8;
 
         ctx.beginPath();
         ctx.arc(size / 2 + 4, size / 2 + 4, size / 2, 0, 2 * Math.PI, false);
