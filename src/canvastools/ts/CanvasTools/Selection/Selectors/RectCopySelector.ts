@@ -208,7 +208,7 @@ export class RectCopySelector extends Selector {
         window.requestAnimationFrame(() => {
             this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            const p = new Point2D(e.clientX - rect[0]?.left, e.clientY - rect[0]?.top);
             this.moveCross(this.crossA, p);
             this.moveCopyRect(this.copyRectEl, this.crossA);
         });
