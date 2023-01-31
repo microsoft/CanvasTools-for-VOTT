@@ -117,7 +117,7 @@ const glob = typeof global !== 'undefined'
             : {};
 const Konva = {
     _global: glob,
-    version: '8.3.10',
+    version: '8.4.0',
     isBrowser: detectBrowser(),
     isUnminified: /param/.test(function (param) { }.toString()),
     dblClickWindow: 400,
@@ -149,6 +149,7 @@ const Konva = {
     isDragReady() {
         return !!Konva['DD'].node;
     },
+    releaseCanvasOnDestroy: true,
     document: glob.document,
     _injectGlobal(Konva) {
         glob.Konva = Konva;
@@ -843,7 +844,7 @@ class AnchorsComponent extends RegionComponent_1.RegionComponent {
         this.buildAnchors();
     }
     redraw() {
-        if (this.regionData.points !== null && this.regionData.points.length > 0) {
+        if (this.regionData.points !== null && this.regionData.points.length > 0 && this.anchors.length > 0) {
             window.requestAnimationFrame(() => {
                 this.regionData.points.forEach((p, index) => {
                     this.anchors[index].attr({
@@ -2507,7 +2508,6 @@ class RegionsManager {
         else if (regionData.type === RegionData_1.RegionDataType.Path) {
             this.addPathRegion(id, regionData, tagsDescriptor);
         }
-        this.sortRegionsByArea();
         if (this.regionAnnouncer) {
             this.regionAnnouncer.innerHTML = tagsDescriptor.toString();
         }
@@ -2557,12 +2557,14 @@ class RegionsManager {
         });
         return regions;
     }
-    getAllRegions() {
+    getAllRegions(doNotScaleToOriginalSize) {
         return this.regions.map((region) => {
             return {
                 id: region.ID,
                 tags: region.tags,
-                regionData: this.scaleRegionToOriginalSize(region.regionData),
+                regionData: !!doNotScaleToOriginalSize
+                    ? region.regionData
+                    : this.scaleRegionToOriginalSize(region.regionData),
             };
         });
     }
@@ -2696,30 +2698,6 @@ class RegionsManager {
             r.updateTags(r.tags, this.tagsUpdateOptions);
         });
     }
-    scaleRegion(regionData, sf) {
-        const rd = regionData.copy();
-        rd.scale(sf, sf);
-        return rd;
-    }
-    scaleRegionToOriginalSize(regionData) {
-        const zm = ZoomManager_1.ZoomManager.getInstance();
-        if (zm && zm.isZoomEnabled) {
-            const sf = 1 / zm.getZoomData().currentZoomScale;
-            return this.scaleRegion(regionData, sf);
-        }
-        return regionData;
-    }
-    lookupRegionByID(id) {
-        let region = null;
-        let i = 0;
-        while (i < this.regions.length && region == null) {
-            if (this.regions[i].ID === id) {
-                region = this.regions[i];
-            }
-            i++;
-        }
-        return region;
-    }
     sortRegionsByArea() {
         function quickSort(arr, left, right) {
             let pivot;
@@ -2753,6 +2731,30 @@ class RegionsManager {
         if (length > 1) {
             quickSort(this.regions, 0, this.regions.length - 1);
         }
+    }
+    scaleRegion(regionData, sf) {
+        const rd = regionData.copy();
+        rd.scale(sf, sf);
+        return rd;
+    }
+    scaleRegionToOriginalSize(regionData) {
+        const zm = ZoomManager_1.ZoomManager.getInstance();
+        if (zm && zm.isZoomEnabled) {
+            const sf = 1 / zm.getZoomData().currentZoomScale;
+            return this.scaleRegion(regionData, sf);
+        }
+        return regionData;
+    }
+    lookupRegionByID(id) {
+        let region = null;
+        let i = 0;
+        while (i < this.regions.length && region == null) {
+            if (this.regions[i].ID === id) {
+                region = this.regions[i];
+            }
+            i++;
+        }
+        return region;
     }
     lookupSelectedRegions() {
         const collection = Array();
@@ -2875,7 +2877,6 @@ class RegionsManager {
             if (this.justManipulated) {
                 region.select();
                 this.menu.showOnRegion(region);
-                this.sortRegionsByArea();
             }
             this.callbacks.onRegionMoveEnd(region.ID, regionData);
         }
@@ -4716,6 +4717,7 @@ class MasksManager {
     }
     resize(width, height, initialRender) {
         var _a;
+        let zoomScale = 1;
         if (this.konvaStage) {
             if (initialRender) {
                 const zoom = ZoomManager_1.ZoomManager.getInstance().getZoomData().currentZoomScale;
@@ -4727,6 +4729,7 @@ class MasksManager {
                 this.konvaStage.height(height);
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
+                zoomScale = zoom;
             }
             else {
                 const oldWidth = (_a = this.currentEditorDivWidth) !== null && _a !== void 0 ? _a : this.konvaStage.width();
@@ -4740,8 +4743,10 @@ class MasksManager {
                 this.reSizeStage(width, height);
                 this.rePositionStage();
                 this.konvaStage.batchDraw();
+                zoomScale = expectedScale;
             }
             this.currentEditorDivWidth = width;
+            this.setKonvaCursor(zoomScale);
         }
     }
     updateMaskVisibility(isVisible, tagName) {
@@ -4784,9 +4789,11 @@ class MasksManager {
         const imgData = data.data;
         const newData = new Array(currentDimensions.width * currentDimensions.height);
         newData.fill(0);
+        const tagsListExist = [];
         this.tagsList.forEach((tags) => {
             const [r, g, b] = tags.primary.srgbColor.to255();
             const tagId = tags.primary.sequenceNumber;
+            let tagExists = false;
             for (let i = 0; i <= data.data.length - 1; i = i + 4) {
                 const ri = imgData[i];
                 const gi = imgData[i + 1];
@@ -4794,9 +4801,14 @@ class MasksManager {
                 const t = 10;
                 if ((ri >= r - t && ri <= r + t) && (gi >= g - t && gi <= g + t) && (bi >= b - t && bi <= b + t)) {
                     newData[i / 4] = tagId;
+                    tagExists = true;
                 }
             }
+            tagsListExist.push(tagExists);
             ctx.clearRect(0, 0, currentDimensions.width, currentDimensions.height);
+        });
+        this.tagsList = this.tagsList.filter((tags, idx) => {
+            return tagsListExist[idx];
         });
         return {
             imageData: newData,
@@ -4956,6 +4968,7 @@ class MasksManager {
             if (layer) {
                 layer.add(bezierLineDestinationOut);
                 layer.add(bezierLineSourceOver);
+                layer.draw();
             }
         });
     }
@@ -5004,8 +5017,9 @@ class MasksManager {
             };
         }
     }
-    setKonvaCursor() {
-        const size = this.maskSelectionMode === ISelectorSettings_1.SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase;
+    setKonvaCursor(zoomScale) {
+        let size = this.maskSelectionMode === ISelectorSettings_1.SelectionMode.BRUSH ? this.brushSize.brush : this.brushSize.erase;
+        size = Math.floor(size * (zoomScale !== null && zoomScale !== void 0 ? zoomScale : 1));
         const base64 = this.base64EncodedMaskCursor(size);
         const cursor = ["url('", base64, "')", " ", Math.floor(size / 2) + 4, " ", Math.floor(size / 2) + 4, ",auto"];
         this.konvaStage.container().style.cursor = cursor.join("");
@@ -5013,8 +5027,8 @@ class MasksManager {
     base64EncodedMaskCursor(size) {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = size * 4 + 8;
-        canvas.height = size * 4 + 8;
+        canvas.width = size + 8;
+        canvas.height = size + 8;
         ctx.beginPath();
         ctx.arc(size / 2 + 4, size / 2 + 4, size / 2, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
@@ -5131,6 +5145,7 @@ class MasksManager {
         this.canvasLayer.destroy();
         this.canvasLayer = new konva_1.default.Layer({});
         this.konvaStage.add(this.canvasLayer);
+        this.tagsList = [];
     }
     buildUIElements() {
         const currentDimensionsEditor = this.getCurrentDimension();
@@ -5430,14 +5445,16 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 this.anchorsLength = points.length;
             }
             else {
-                window.requestAnimationFrame(() => {
-                    this.regionData.points.forEach((p, index) => {
-                        this.anchors[index].attr({
-                            cx: p.x,
-                            cy: p.y,
+                if (this.anchors.length > 0) {
+                    window.requestAnimationFrame(() => {
+                        this.regionData.points.forEach((p, index) => {
+                            this.anchors[index].attr({
+                                cx: p.x,
+                                cy: p.y,
+                            });
                         });
                     });
-                });
+                }
             }
             this.updateAnchorLines();
         }
@@ -6500,14 +6517,16 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 this.anchorsLength = points.length;
             }
             else {
-                window.requestAnimationFrame(() => {
-                    this.regionData.points.forEach((p, index) => {
-                        this.anchors[index].attr({
-                            cx: p.x,
-                            cy: p.y,
+                if (this.anchors.length > 0) {
+                    window.requestAnimationFrame(() => {
+                        this.regionData.points.forEach((p, index) => {
+                            this.anchors[index].attr({
+                                cx: p.x,
+                                cy: p.y,
+                            });
                         });
                     });
-                });
+                }
             }
             const pointsData = [];
             this.regionData.points.forEach((p) => {
@@ -7033,14 +7052,16 @@ class AnchorsElement extends AnchorsComponent_1.AnchorsComponent {
                 this.anchorsLength = points.length;
             }
             else {
-                window.requestAnimationFrame(() => {
-                    this.regionData.points.forEach((p, index) => {
-                        this.anchors[index].attr({
-                            cx: p.x,
-                            cy: p.y,
+                if (this.anchors.length > 0) {
+                    window.requestAnimationFrame(() => {
+                        this.regionData.points.forEach((p, index) => {
+                            this.anchors[index].attr({
+                                cx: p.x,
+                                cy: p.y,
+                            });
                         });
                     });
-                });
+                }
             }
             const pointsData = [];
             this.regionData.points.forEach((p) => {
@@ -8021,14 +8042,16 @@ class MenuElement extends RegionComponent_1.RegionComponent {
     }
     attachTo(region) {
         this.region = region;
-        this.regionData.initFrom(region.regionData);
-        this.rearrangeMenuPosition();
-        window.requestAnimationFrame(() => {
-            this.menuGroup.attr({
-                x: this.mx,
-                y: this.my,
+        if (region) {
+            this.regionData.initFrom(region.regionData);
+            this.rearrangeMenuPosition();
+            window.requestAnimationFrame(() => {
+                this.menuGroup.attr({
+                    x: this.mx,
+                    y: this.my,
+                });
             });
-        });
+        }
     }
     move(arg1, arg2) {
         super.move(arg1, arg2);
@@ -19327,7 +19350,9 @@ const Util = {
         str = str || 'black';
         return (Util._namedColorToRBA(str) ||
             Util._hex3ColorToRGBA(str) ||
+            Util._hex4ColorToRGBA(str) ||
             Util._hex6ColorToRGBA(str) ||
+            Util._hex8ColorToRGBA(str) ||
             Util._rgbColorToRGBA(str) ||
             Util._rgbaColorToRGBA(str) ||
             Util._hslColorToRGBA(str));
@@ -19373,6 +19398,16 @@ const Util = {
             };
         }
     },
+    _hex8ColorToRGBA(str) {
+        if (str[0] === '#' && str.length === 9) {
+            return {
+                r: parseInt(str.slice(1, 3), 16),
+                g: parseInt(str.slice(3, 5), 16),
+                b: parseInt(str.slice(5, 7), 16),
+                a: parseInt(str.slice(7, 9), 16) / 0xff,
+            };
+        }
+    },
     _hex6ColorToRGBA(str) {
         if (str[0] === '#' && str.length === 7) {
             return {
@@ -19380,6 +19415,16 @@ const Util = {
                 g: parseInt(str.slice(3, 5), 16),
                 b: parseInt(str.slice(5, 7), 16),
                 a: 1,
+            };
+        }
+    },
+    _hex4ColorToRGBA(str) {
+        if (str[0] === '#' && str.length === 5) {
+            return {
+                r: parseInt(str[1] + str[1], 16),
+                g: parseInt(str[2] + str[2], 16),
+                b: parseInt(str[3] + str[3], 16),
+                a: parseInt(str[4] + str[4], 16) / 0xff,
             };
         }
     },
@@ -19629,6 +19674,38 @@ const Util = {
             return evt.changedTouches[0].identifier;
         }
     },
+    releaseCanvas(...canvases) {
+        if (!Global["a" /* Konva */].releaseCanvasOnDestroy)
+            return;
+        canvases.forEach(c => {
+            c.width = 0;
+            c.height = 0;
+        });
+    },
+    drawRoundedRectPath(context, width, height, cornerRadius) {
+        let topLeft = 0;
+        let topRight = 0;
+        let bottomLeft = 0;
+        let bottomRight = 0;
+        if (typeof cornerRadius === 'number') {
+            topLeft = topRight = bottomLeft = bottomRight = Math.min(cornerRadius, width / 2, height / 2);
+        }
+        else {
+            topLeft = Math.min(cornerRadius[0] || 0, width / 2, height / 2);
+            topRight = Math.min(cornerRadius[1] || 0, width / 2, height / 2);
+            bottomRight = Math.min(cornerRadius[2] || 0, width / 2, height / 2);
+            bottomLeft = Math.min(cornerRadius[3] || 0, width / 2, height / 2);
+        }
+        context.moveTo(topLeft, 0);
+        context.lineTo(width - topRight, 0);
+        context.arc(width - topRight, topRight, topRight, (Math.PI * 3) / 2, 0, false);
+        context.lineTo(width, height - bottomRight);
+        context.arc(width - bottomRight, height - bottomRight, bottomRight, 0, Math.PI / 2, false);
+        context.lineTo(bottomLeft, height);
+        context.arc(bottomLeft, height - bottomLeft, bottomLeft, Math.PI / 2, Math.PI, false);
+        context.lineTo(0, topLeft);
+        context.arc(topLeft, topLeft, topLeft, Math.PI, (Math.PI * 3) / 2, false);
+    }
 };
 
 // CONCATENATED MODULE: ./node_modules/konva/lib/Validators.js
@@ -19754,6 +19831,10 @@ function getFunctionValidator() {
 function getNumberArrayValidator() {
     if (Global["a" /* Konva */].isUnminified) {
         return function (val, attr) {
+            const TypedArray = Int8Array ? Object.getPrototypeOf(Int8Array) : null;
+            if (TypedArray && val instanceof TypedArray) {
+                return val;
+            }
             if (!Util._isArray(val)) {
                 Util.warn(_formatValue(val) +
                     ' is a not valid value for "' +
@@ -19792,6 +19873,9 @@ function getBooleanValidator() {
 function getComponentValidator(components) {
     if (Global["a" /* Konva */].isUnminified) {
         return function (val, attr) {
+            if (val === undefined || val === null) {
+                return val;
+            }
             if (!Util.isObject(val)) {
                 Util.warn(_formatValue(val) +
                     ' is a not valid value for "' +
@@ -19866,6 +19950,11 @@ const Factory = {
                     continue;
                 }
                 this._setAttr(attr + capitalize(key), val[key]);
+            }
+            if (!val) {
+                components.forEach((component) => {
+                    this._setAttr(attr + capitalize(component), undefined);
+                });
             }
             this._fireChangeEvent(attr, oldVal, val);
             if (after) {
@@ -19996,7 +20085,6 @@ const traceArrMax = 100;
 class Context_Context {
     constructor(canvas) {
         this.canvas = canvas;
-        this._context = canvas._canvas.getContext('2d');
         if (Global["a" /* Konva */].enableTrace) {
             this.traceArr = [];
             this._enableTrace();
@@ -20161,8 +20249,11 @@ class Context_Context {
     ellipse(a0, a1, a2, a3, a4, a5, a6, a7) {
         this._context.ellipse(a0, a1, a2, a3, a4, a5, a6, a7);
     }
-    isPointInPath(x, y) {
-        return this._context.isPointInPath(x, y);
+    isPointInPath(x, y, path, fillRule) {
+        if (path) {
+            return this._context.isPointInPath(path, x, y, fillRule);
+        }
+        return this._context.isPointInPath(x, y, fillRule);
     }
     fill(path2d) {
         if (path2d) {
@@ -20293,6 +20384,7 @@ class Context_Context {
         }
     }
 }
+;
 CONTEXT_PROPERTIES.forEach(function (prop) {
     Object.defineProperty(Context_Context.prototype, prop, {
         get() {
@@ -20304,6 +20396,10 @@ CONTEXT_PROPERTIES.forEach(function (prop) {
     });
 });
 class SceneContext extends Context_Context {
+    constructor(canvas) {
+        super(canvas);
+        this._context = canvas._canvas.getContext('2d');
+    }
     _fillColor(shape) {
         var fill = shape.fill();
         this.setAttr('fillStyle', fill);
@@ -20413,6 +20509,12 @@ class SceneContext extends Context_Context {
     }
 }
 class HitContext extends Context_Context {
+    constructor(canvas) {
+        super(canvas);
+        this._context = canvas._canvas.getContext('2d', {
+            willReadFrequently: true,
+        });
+    }
     _fill(shape) {
         this.save();
         this.setAttr('fillStyle', shape.colorKey);
@@ -20467,6 +20569,7 @@ function getDevicePixelRatio() {
             1;
         return devicePixelRatio / backingStoreRatio;
     })();
+    Util.releaseCanvas(canvas);
     return _pixelRatio;
 }
 class Canvas_Canvas {
@@ -20612,6 +20715,7 @@ const DD = {
         });
     },
     _endDragBefore(evt) {
+        const drawNodes = [];
         DD._dragElements.forEach((elem) => {
             const { node } = elem;
             const stage = node.getStage();
@@ -20631,9 +20735,12 @@ const DD = {
             }
             const drawNode = elem.node.getLayer() ||
                 (elem.node instanceof Global["a" /* Konva */]['Stage'] && elem.node);
-            if (drawNode) {
-                drawNode.batchDraw();
+            if (drawNode && drawNodes.indexOf(drawNode) === -1) {
+                drawNodes.push(drawNode);
             }
+        });
+        drawNodes.forEach((drawNode) => {
+            drawNode.draw();
         });
     },
     _endDragAfter(evt) {
@@ -20745,7 +20852,11 @@ class Node_Node {
         }
     }
     clearCache() {
-        this._cache.delete(CANVAS);
+        if (this._cache.has(CANVAS)) {
+            const { scene, filter, hit } = this._cache.get(CANVAS);
+            Util.releaseCanvas(scene, filter, hit);
+            this._cache.delete(CANVAS);
+        }
         this._clearSelfAndDescendantCache();
         this._requestDraw();
         return this;
@@ -21013,6 +21124,7 @@ class Node_Node {
     }
     destroy() {
         this.remove();
+        this.clearCache();
         return this;
     }
     getAttr(attr) {
@@ -21627,13 +21739,35 @@ class Node_Node {
         return url;
     }
     toImage(config) {
-        if (!config || !config.callback) {
-            throw 'callback required for toImage method config argument';
-        }
-        var callback = config.callback;
-        delete config.callback;
-        Util._urlToImage(this.toDataURL(config), function (img) {
-            callback(img);
+        return new Promise((resolve, reject) => {
+            try {
+                const callback = config === null || config === void 0 ? void 0 : config.callback;
+                if (callback)
+                    delete config.callback;
+                Util._urlToImage(this.toDataURL(config), function (img) {
+                    resolve(img);
+                    callback === null || callback === void 0 ? void 0 : callback(img);
+                });
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+    toBlob(config) {
+        return new Promise((resolve, reject) => {
+            try {
+                const callback = config === null || config === void 0 ? void 0 : config.callback;
+                if (callback)
+                    delete config.callback;
+                this.toCanvas(config).toBlob((blob) => {
+                    resolve(blob);
+                    callback === null || callback === void 0 ? void 0 : callback(blob);
+                });
+            }
+            catch (err) {
+                reject(err);
+            }
         });
     }
     setSize(size) {
@@ -22592,6 +22726,7 @@ class Stage_Stage extends Container_Container {
         if (index > -1) {
             stages.splice(index, 1);
         }
+        Util.releaseCanvas(this.bufferCanvas._canvas, this.bufferHitCanvas._canvas);
         return this;
     }
     getPointerPosition() {
@@ -22715,7 +22850,7 @@ class Stage_Stage extends Container_Container {
         EVENTS.forEach(([event, methodName]) => {
             this.content.addEventListener(event, (evt) => {
                 this[methodName](evt);
-            });
+            }, { passive: false });
         });
     }
     _pointerenter(evt) {
@@ -22956,7 +23091,7 @@ class Stage_Stage extends Container_Container {
             });
         }
         Global["a" /* Konva */]['_' + eventType + 'ListenClick'] = false;
-        if (evt.cancelable) {
+        if (evt.cancelable && eventType !== 'touch') {
             evt.preventDefault();
         }
     }
@@ -23251,8 +23386,11 @@ class Shape_Shape extends Node_Node {
         return this._getCache(SHADOW_RGBA, this._getShadowRGBA);
     }
     _getShadowRGBA() {
-        if (this.hasShadow()) {
-            var rgba = Util.colorToRGBA(this.shadowColor());
+        if (!this.hasShadow()) {
+            return;
+        }
+        var rgba = Util.colorToRGBA(this.shadowColor());
+        if (rgba) {
             return ('rgba(' +
                 rgba.r +
                 ',' +
@@ -23910,6 +24048,10 @@ class Layer_Layer extends Container_Container {
         else {
             parent.content.appendChild(this.hitCanvas._canvas);
         }
+    }
+    destroy() {
+        Util.releaseCanvas(this.getNativeCanvasElement(), this.getHitCanvas()._canvas);
+        return super.destroy();
     }
 }
 Layer_Layer.prototype.nodeType = 'Layer';
@@ -25696,6 +25838,7 @@ class Image_Image extends Shape_Shape {
     _sceneFunc(context) {
         const width = this.getWidth();
         const height = this.getHeight();
+        const cornerRadius = this.cornerRadius();
         const image = this.attrs.image;
         let params;
         if (image) {
@@ -25718,20 +25861,30 @@ class Image_Image extends Shape_Shape {
                 params = [image, 0, 0, width, height];
             }
         }
-        if (this.hasFill() || this.hasStroke()) {
+        if (this.hasFill() || this.hasStroke() || cornerRadius) {
             context.beginPath();
-            context.rect(0, 0, width, height);
+            cornerRadius
+                ? Util.drawRoundedRectPath(context, width, height, cornerRadius)
+                : context.rect(0, 0, width, height);
             context.closePath();
             context.fillStrokeShape(this);
         }
         if (image) {
+            if (cornerRadius) {
+                context.clip();
+            }
             context.drawImage.apply(context, params);
         }
     }
     _hitFunc(context) {
-        var width = this.width(), height = this.height();
+        var width = this.width(), height = this.height(), cornerRadius = this.cornerRadius();
         context.beginPath();
-        context.rect(0, 0, width, height);
+        if (!cornerRadius) {
+            context.rect(0, 0, width, height);
+        }
+        else {
+            Util.drawRoundedRectPath(context, width, height, cornerRadius);
+        }
         context.closePath();
         context.fillStrokeShape(this);
     }
@@ -25758,6 +25911,7 @@ class Image_Image extends Shape_Shape {
 }
 Image_Image.prototype.className = 'Image';
 Object(Global["b" /* _registerNode */])(Image_Image);
+Factory.addGetterSetter(Image_Image, 'cornerRadius', 0, getNumberOrArrayOfNumbersValidator(4));
 Factory.addGetterSetter(Image_Image, 'image');
 Factory.addComponentsGetterSetter(Image_Image, 'crop', ['x', 'y', 'width', 'height']);
 Factory.addGetterSetter(Image_Image, 'cropX', 0, getNumberValidator());
@@ -25780,6 +25934,9 @@ var ATTR_CHANGE_LIST = [
     'text',
     'width',
     'height',
+    'pointerDirection',
+    'pointerWidth',
+    'pointerHeight',
 ], CHANGE_KONVA = 'Change.konva', NONE = 'none', UP = 'up', RIGHT = 'right', DOWN = 'down', LEFT = 'left', attrChangeListLen = ATTR_CHANGE_LIST.length;
 class Label_Label extends Group_Group {
     constructor(config) {
@@ -25861,7 +26018,11 @@ class Label_Tag extends Shape_Shape {
         let bottomLeft = 0;
         let bottomRight = 0;
         if (typeof cornerRadius === 'number') {
-            topLeft = topRight = bottomLeft = bottomRight = Math.min(cornerRadius, width / 2, height / 2);
+            topLeft =
+                topRight =
+                    bottomLeft =
+                        bottomRight =
+                            Math.min(cornerRadius, width / 2, height / 2);
         }
         else {
             topLeft = Math.min(cornerRadius[0] || 0, width / 2, height / 2);
@@ -25938,6 +26099,7 @@ Factory.addGetterSetter(Label_Tag, 'cornerRadius', 0, getNumberOrArrayOfNumbersV
 
 
 
+
 class Rect_Rect extends Shape_Shape {
     _sceneFunc(context) {
         var cornerRadius = this.cornerRadius(), width = this.width(), height = this.height();
@@ -25946,28 +26108,7 @@ class Rect_Rect extends Shape_Shape {
             context.rect(0, 0, width, height);
         }
         else {
-            let topLeft = 0;
-            let topRight = 0;
-            let bottomLeft = 0;
-            let bottomRight = 0;
-            if (typeof cornerRadius === 'number') {
-                topLeft = topRight = bottomLeft = bottomRight = Math.min(cornerRadius, width / 2, height / 2);
-            }
-            else {
-                topLeft = Math.min(cornerRadius[0] || 0, width / 2, height / 2);
-                topRight = Math.min(cornerRadius[1] || 0, width / 2, height / 2);
-                bottomRight = Math.min(cornerRadius[2] || 0, width / 2, height / 2);
-                bottomLeft = Math.min(cornerRadius[3] || 0, width / 2, height / 2);
-            }
-            context.moveTo(topLeft, 0);
-            context.lineTo(width - topRight, 0);
-            context.arc(width - topRight, topRight, topRight, (Math.PI * 3) / 2, 0, false);
-            context.lineTo(width, height - bottomRight);
-            context.arc(width - bottomRight, height - bottomRight, bottomRight, 0, Math.PI / 2, false);
-            context.lineTo(bottomLeft, height);
-            context.arc(bottomLeft, height - bottomLeft, bottomLeft, Math.PI / 2, Math.PI, false);
-            context.lineTo(0, topLeft);
-            context.arc(topLeft, topLeft, topLeft, Math.PI, (Math.PI * 3) / 2, false);
+            Util.drawRoundedRectPath(context, width, height, cornerRadius);
         }
         context.closePath();
         context.fillStrokeShape(this);
@@ -26506,19 +26647,9 @@ class Text_Text extends Shape_Shape {
                         this._addTextLine(match);
                         textWidth = Math.max(textWidth, matchWidth);
                         currentHeightPx += lineHeightPx;
-                        if (!shouldWrap ||
-                            (fixedHeight && currentHeightPx + lineHeightPx > maxHeightPx)) {
-                            var lastLine = this.textArr[this.textArr.length - 1];
-                            if (lastLine) {
-                                if (shouldAddEllipsis) {
-                                    var haveSpace = this._getTextWidth(lastLine.text + ELLIPSIS) < maxWidth;
-                                    if (!haveSpace) {
-                                        lastLine.text = lastLine.text.slice(0, lastLine.text.length - 3);
-                                    }
-                                    this.textArr.splice(this.textArr.length - 1, 1);
-                                    this._addTextLine(lastLine.text + ELLIPSIS);
-                                }
-                            }
+                        var shouldHandleEllipsis = this._shouldHandleEllipsis(currentHeightPx);
+                        if (shouldHandleEllipsis) {
+                            this._tryToAddEllipsisToLastLine();
                             break;
                         }
                         line = line.slice(low);
@@ -26542,6 +26673,9 @@ class Text_Text extends Shape_Shape {
                 this._addTextLine(line);
                 currentHeightPx += lineHeightPx;
                 textWidth = Math.max(textWidth, lineWidth);
+                if (this._shouldHandleEllipsis(currentHeightPx) && i < max - 1) {
+                    this._tryToAddEllipsisToLastLine();
+                }
             }
             if (fixedHeight && currentHeightPx + lineHeightPx > maxHeightPx) {
                 break;
@@ -26552,6 +26686,26 @@ class Text_Text extends Shape_Shape {
         }
         this.textHeight = fontSize;
         this.textWidth = textWidth;
+    }
+    _shouldHandleEllipsis(currentHeightPx) {
+        var fontSize = +this.fontSize(), lineHeightPx = this.lineHeight() * fontSize, height = this.attrs.height, fixedHeight = height !== AUTO && height !== undefined, padding = this.padding(), maxHeightPx = height - padding * 2, wrap = this.wrap(), shouldWrap = wrap !== Text_NONE;
+        return (!shouldWrap ||
+            (fixedHeight && currentHeightPx + lineHeightPx > maxHeightPx));
+    }
+    _tryToAddEllipsisToLastLine() {
+        var width = this.attrs.width, fixedWidth = width !== AUTO && width !== undefined, padding = this.padding(), maxWidth = width - padding * 2, shouldAddEllipsis = this.ellipsis();
+        var lastLine = this.textArr[this.textArr.length - 1];
+        if (!lastLine || !shouldAddEllipsis) {
+            return;
+        }
+        if (fixedWidth) {
+            var haveSpace = this._getTextWidth(lastLine.text + ELLIPSIS) < maxWidth;
+            if (!haveSpace) {
+                lastLine.text = lastLine.text.slice(0, lastLine.text.length - 3);
+            }
+        }
+        this.textArr.splice(this.textArr.length - 1, 1);
+        this._addTextLine(lastLine.text + ELLIPSIS);
     }
     getStrokeScaleEnabled() {
         return true;
@@ -26752,7 +26906,7 @@ class TextPath_TextPath extends Shape_Shape {
                         pathCmd = undefined;
                     }
                 }
-                if (pathCmd === {} || p0 === undefined) {
+                if (Object.keys(pathCmd).length === 0 || p0 === undefined) {
                     return undefined;
                 }
                 var needNewSegment = false;
@@ -26909,6 +27063,10 @@ class TextPath_TextPath extends Shape_Shape {
             width: maxX - minX + fontSize,
             height: maxY - minY + fontSize,
         };
+    }
+    destroy() {
+        Util.releaseCanvas(this.dummyCanvas);
+        return super.destroy();
     }
 }
 TextPath_TextPath.prototype._fillFunc = TextPath_fillFunc;
@@ -27829,8 +27987,17 @@ class Transformer_Transformer extends Group_Group {
     toObject() {
         return Node_Node.prototype.toObject.call(this);
     }
+    clone(obj) {
+        var node = Node_Node.prototype.clone.call(this, obj);
+        return node;
+    }
     getClientRect() {
-        return { x: 0, y: 0, width: 0, height: 0 };
+        if (this.nodes().length > 0) {
+            return super.getClientRect();
+        }
+        else {
+            return { x: 0, y: 0, width: 0, height: 0 };
+        }
     }
 }
 function validateAnchors(val) {
@@ -29013,6 +29180,7 @@ const Kaleidoscope = function (imageData) {
     var scratchData = tempCanvas
         .getContext('2d')
         .getImageData(0, 0, xSize, ySize);
+    Util.releaseCanvas(tempCanvas);
     ToPolar(imageData, scratchData, {
         polarCenterX: xSize / 2,
         polarCenterY: ySize / 2,
