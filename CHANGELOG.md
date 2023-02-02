@@ -1,6 +1,9 @@
 ## Changelog
 
-### 2.2.19
+### 2.4.2
+* Restore function for sorting of regions by area, update scope to public so it may be invoked on demand.
+
+### 2.4.1
 * Small bug fix with getAllMasks not cleaning erased maks/tags
 * Remove sorting of regions by area. So that user can navigate regions in the order of they were created
 
