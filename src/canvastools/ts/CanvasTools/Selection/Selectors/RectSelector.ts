@@ -203,7 +203,7 @@ export class RectSelector extends Selector {
     private onPointerLeave(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            const p = new Point2D(e.clientX - rect[0]?.left, e.clientY - rect[0]?.top);
 
             if (!this.capturingState) {
                 this.hideAll([this.crossA, this.crossB, this.selectionBox]);
@@ -246,7 +246,7 @@ export class RectSelector extends Selector {
     private onPointerUp(e: PointerEvent) {
         window.requestAnimationFrame(() => {
             const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            const p = new Point2D(e.clientX - rect[0]?.left, e.clientY - rect[0]?.top);
 
             if (!this.isTwoPoints) {
                 this.capturingState = false;
@@ -282,7 +282,7 @@ export class RectSelector extends Selector {
         window.requestAnimationFrame(() => {
             this.deactivateKeyboardCursor();
             const rect = this.parentNode.getClientRects();
-            const p = new Point2D(e.clientX - rect[0].left, e.clientY - rect[0].top);
+            const p = new Point2D(e.clientX - rect[0]?.left, e.clientY - rect[0]?.top);
 
             if (!this.isTwoPoints) {
                 if (this.capturingState) {
