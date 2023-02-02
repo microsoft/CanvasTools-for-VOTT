@@ -609,6 +609,7 @@ export class RegionsManager {
         const length = this.regions.length;
         if (length > 1) {
             quickSort(this.regions, 0, this.regions.length - 1);
+            this.redrawAllRegions();
         }
     }
 
