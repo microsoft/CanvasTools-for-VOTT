@@ -4062,7 +4062,7 @@ class Editor {
                 }
                 if (typeof p === "function") {
                     return (...args) => {
-                        p.apply(t, args);
+                        return p.apply(t, args);
                     };
                 }
                 else {
