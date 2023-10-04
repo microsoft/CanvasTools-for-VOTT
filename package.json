@@ -47,7 +47,7 @@
     "canvas": "^2.9.3",
     "copyfiles": "^2.3.0",
     "cpx": "^1.5.0",
-    "css-loader": "^1.0.1",
+    "css-loader": "^6.8.1",
     "del-cli": "^1.1.0",
     "dot-prop": ">=4.2.1",
     "dts-bundle": "^0.7.3",
